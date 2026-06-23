@@ -6,13 +6,13 @@ export default function AdminDashboardLoading() {
     <div className="space-y-8 animate-fade-in">
       {/* Header Skeleton */}
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-        <div className="space-y-2">
+        <div className="space-y-2 w-full">
           <div className="flex items-center gap-2">
             <Skeleton className="h-5 w-5 rounded" />
             <Skeleton className="h-4 w-32 rounded" />
           </div>
-          <Skeleton className="h-9 w-72 rounded-xl" />
-          <Skeleton className="h-4 w-96 rounded" />
+          <Skeleton className="h-9 w-full max-w-xs rounded-xl" />
+          <Skeleton className="h-4 w-full max-w-sm rounded" />
         </div>
       </div>
 
@@ -38,20 +38,22 @@ export default function AdminDashboardLoading() {
         <div className="bg-zinc-900/20 border border-zinc-900/60 p-6 rounded-2xl flex flex-col justify-between h-[350px]">
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <div className="space-y-1.5">
-                <Skeleton className="h-5 w-36" />
-                <Skeleton className="h-3 w-56" />
+              <div className="space-y-1.5 flex-1 min-w-0">
+                <Skeleton className="h-5 w-36 max-w-full" />
+                <Skeleton className="h-3 w-full max-w-[224px]" />
               </div>
-              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-4 w-24 shrink-0" />
             </div>
-            <div className="space-y-3">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="flex justify-between items-center py-2 border-b border-zinc-900/20 last:border-b-0">
-                  <Skeleton className="h-4 w-40" />
-                  <Skeleton className="h-4 w-16" />
-                  <Skeleton className="h-4 w-16" />
-                </div>
-              ))}
+            <div className="overflow-x-auto w-full">
+              <div className="space-y-3 min-w-[300px]">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="flex justify-between items-center py-2 border-b border-zinc-900/20 last:border-b-0">
+                    <Skeleton className="h-4 w-40" />
+                    <Skeleton className="h-4 w-16" />
+                    <Skeleton className="h-4 w-16" />
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -60,17 +62,17 @@ export default function AdminDashboardLoading() {
         <div className="bg-zinc-900/20 border border-zinc-900/60 p-6 rounded-2xl flex flex-col justify-between h-[350px]">
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <Skeleton className="h-5 w-44" />
-              <Skeleton className="h-3 w-60" />
+              <Skeleton className="h-5 w-44 max-w-full" />
+              <Skeleton className="h-3 w-full max-w-[240px]" />
             </div>
             <div className="space-y-2.5 max-h-[220px] overflow-hidden">
               {[...Array(3)].map((_, i) => (
                 <div key={i} className="flex items-center justify-between p-2.5 bg-zinc-900/30 border border-zinc-900 rounded-xl">
-                  <div className="space-y-1.5 flex-1">
-                    <Skeleton className="h-3.5 w-32" />
-                    <Skeleton className="h-2.5 w-44" />
+                  <div className="space-y-1.5 flex-1 min-w-0">
+                    <Skeleton className="h-3.5 w-full max-w-[128px]" />
+                    <Skeleton className="h-2.5 w-full max-w-[176px]" />
                   </div>
-                  <Skeleton className="h-5 w-16 rounded-md" />
+                  <Skeleton className="h-5 w-16 rounded-md shrink-0 ml-2" />
                 </div>
               ))}
             </div>
@@ -81,24 +83,28 @@ export default function AdminDashboardLoading() {
       {/* Detail Guru */}
       <div className="bg-zinc-900/20 border border-zinc-900/60 p-6 rounded-2xl space-y-4">
         <div className="flex justify-between items-center pb-2">
-          <div className="space-y-1.5">
-            <Skeleton className="h-5 w-48" />
-            <Skeleton className="h-3.5 w-80" />
+          <div className="space-y-1.5 flex-1 min-w-0">
+            <Skeleton className="h-5 w-48 max-w-full" />
+            <Skeleton className="h-3.5 w-full max-w-xs" />
           </div>
-          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-4 w-20 shrink-0" />
         </div>
-        <div className="space-y-3">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="flex justify-between items-center py-3 border-t border-zinc-900/40">
-              <div className="space-y-1.5 flex-1">
-                <Skeleton className="h-4.5 w-36" />
-                <Skeleton className="h-3 w-28" />
+        <div className="overflow-x-auto w-full">
+          <div className="space-y-3 min-w-[600px]">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="flex justify-between items-center py-3 border-t border-zinc-900/40">
+                <div className="space-y-1.5 flex-1">
+                  <Skeleton className="h-4.5 w-36 rounded-md" />
+                  <div className="flex gap-2 items-center">
+                    <Skeleton className="h-3 w-28 rounded-md" />
+                  </div>
+                </div>
+                <Skeleton className="h-4 w-40 flex-1" />
+                <Skeleton className="h-6 w-16 rounded-md flex-1 justify-self-center max-w-[80px]" />
+                <Skeleton className="h-4.5 w-16 flex-1 text-right max-w-[80px]" />
               </div>
-              <Skeleton className="h-4 w-40 flex-1" />
-              <Skeleton className="h-6 w-16 rounded-md flex-1 justify-self-center max-w-[80px]" />
-              <Skeleton className="h-4.5 w-16 flex-1 text-right max-w-[80px]" />
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>

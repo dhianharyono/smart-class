@@ -203,7 +203,7 @@ export default function NilaiClient({ initialSubjects, initialKkm }: NilaiClient
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <Dialog open={editKkmOpen} onOpenChange={setEditKkmOpen}>
             <DialogTrigger
               render={
@@ -289,9 +289,9 @@ export default function NilaiClient({ initialSubjects, initialKkm }: NilaiClient
 
       {/* Subject and Category Filters */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-zinc-900/30 border border-zinc-900/80 rounded-2xl p-4">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1 w-full">
           {/* Subject Dropdown */}
-          <div className="flex-1 max-w-xs">
+          <div className="w-full sm:max-w-xs sm:flex-1">
             <Select value={selectedSubject} onValueChange={(val) => val && setSelectedSubject(val)}>
               <SelectTrigger className="bg-zinc-950 border-zinc-800 text-white rounded-xl h-10">
                 <SelectValue placeholder="Pilih Mata Pelajaran" />
@@ -308,7 +308,7 @@ export default function NilaiClient({ initialSubjects, initialKkm }: NilaiClient
 
           {/* Add Subject Dialog */}
           <Dialog open={addSubjectOpen} onOpenChange={setAddSubjectOpen}>
-            <DialogTrigger className="border border-zinc-800 bg-zinc-900/50 hover:bg-zinc-900 text-zinc-300 rounded-xl h-10 px-4 gap-2 flex items-center cursor-pointer">
+            <DialogTrigger className="border border-zinc-800 bg-zinc-900/50 hover:bg-zinc-900 text-zinc-300 rounded-xl h-10 px-4 gap-2 flex items-center justify-center cursor-pointer">
               <Plus className="h-4 w-4" />
               Mata Pelajaran Baru
             </DialogTrigger>
@@ -360,7 +360,7 @@ export default function NilaiClient({ initialSubjects, initialKkm }: NilaiClient
           <span className="hidden sm:inline text-zinc-700">|</span>
 
           {/* Test Category Dropdown */}
-          <div className="w-48">
+          <div className="w-full sm:w-48">
             <Select
               value={selectedCategory}
               onValueChange={(val) => val && setSelectedCategory(val as any)}
@@ -414,26 +414,28 @@ export default function NilaiClient({ initialSubjects, initialKkm }: NilaiClient
                     <TableCell className="font-mono">{row.nis}</TableCell>
                     <TableCell className="font-semibold text-zinc-200">{row.name}</TableCell>
                     <TableCell>{row.className}</TableCell>
-                    <TableCell className="flex justify-center">
-                      <div className="relative w-28">
-                        <Input
-                          type="number"
-                          placeholder="Kosong"
-                          min={0}
-                          max={100}
-                          value={row.score}
-                          onChange={(e) => handleScoreChange(row.studentId, e.target.value)}
-                          className={`text-center font-bold bg-zinc-950 border text-white rounded-xl focus:ring-1 focus:ring-emerald-500 h-9 pr-2 ${
-                            row.score !== '' && row.score < kkm
-                              ? 'border-rose-900/60 text-rose-400 focus:border-rose-500 bg-rose-950/10'
-                              : 'border-zinc-800 focus:border-emerald-500'
-                          }`}
-                        />
-                        {row.score !== '' && row.score < kkm && (
-                          <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] font-bold text-rose-500 uppercase tracking-wider">
-                            &lt; KKM
-                          </span>
-                        )}
+                    <TableCell>
+                      <div className="flex justify-center">
+                        <div className="relative w-28">
+                          <Input
+                            type="number"
+                            placeholder="Kosong"
+                            min={0}
+                            max={100}
+                            value={row.score}
+                            onChange={(e) => handleScoreChange(row.studentId, e.target.value)}
+                            className={`text-center font-bold bg-zinc-950 border text-white rounded-xl focus:ring-1 focus:ring-emerald-500 h-9 pr-2 ${
+                              row.score !== '' && row.score < kkm
+                                ? 'border-rose-900/60 text-rose-400 focus:border-rose-500 bg-rose-950/10'
+                                : 'border-zinc-800 focus:border-emerald-500'
+                            }`}
+                          />
+                          {row.score !== '' && row.score < kkm && (
+                            <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] font-bold text-rose-500 uppercase tracking-wider">
+                              &lt; KKM
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </TableCell>
                   </TableRow>

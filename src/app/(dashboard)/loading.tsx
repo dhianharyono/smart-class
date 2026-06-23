@@ -7,8 +7,8 @@ export default function DashboardLoading() {
       {/* Header Skeleton */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-zinc-900/50 pb-5">
         <div className="space-y-2">
-          <Skeleton className="h-9 w-64 rounded-xl" />
-          <Skeleton className="h-4 w-96 rounded-lg" />
+          <Skeleton className="h-9 w-64 max-w-full rounded-xl" />
+          <Skeleton className="h-4 w-full max-w-sm rounded-lg" />
         </div>
         <Skeleton className="h-10 w-36 rounded-xl" />
       </div>
@@ -59,9 +59,9 @@ export default function DashboardLoading() {
       <div className="bg-zinc-900/20 border border-zinc-900/60 p-6 rounded-2xl space-y-4">
         <div className="flex items-center gap-3">
           <Skeleton className="h-10 w-10 rounded-xl" />
-          <div className="space-y-1.5">
-            <Skeleton className="h-5 w-80" />
-            <Skeleton className="h-3.5 w-96" />
+          <div className="space-y-1.5 flex-1 min-w-0">
+            <Skeleton className="h-5 w-full max-w-xs" />
+            <Skeleton className="h-3.5 w-full max-w-sm" />
           </div>
         </div>
         <div className="space-y-3 pt-2">

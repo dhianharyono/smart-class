@@ -12,8 +12,6 @@ import {
   LogOut,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useRouter } from 'next/navigation';
-import { logoutTeacher } from '@/actions/authActions';
 import {
   AreaChart,
   Area,
@@ -24,23 +22,7 @@ import {
   PieChart,
   Pie,
   Cell,
-  Legend,
 } from 'recharts';
-import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
-import { Settings, Loader2 } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { updateTeacherKkm } from '@/actions/dashboardActions';
 
 interface DashboardClientProps {
   stats: {
@@ -65,48 +47,8 @@ interface DashboardClientProps {
 }
 
 export default function DashboardClient({ stats }: DashboardClientProps) {
-  const router = useRouter();
   const [mounted, setMounted] = useState(false);
-  const [kkm, setKkm] = useState<number>(stats.kkm);
-  const [kkmInput, setKkmInput] = useState<string>(String(stats.kkm));
-  const [editKkmOpen, setEditKkmOpen] = useState(false);
-  const [isUpdatingKkm, setIsUpdatingKkm] = useState(false);
-
-  const handleSaveKkm = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const val = Number(kkmInput);
-    if (isNaN(val) || val < 0 || val > 100) {
-      toast.error('KKM harus berupa angka antara 0 dan 100.');
-      return;
-    }
-    setIsUpdatingKkm(true);
-    try {
-      const res = await updateTeacherKkm(val);
-      if (res.success) {
-        setKkm(val);
-        setEditKkmOpen(false);
-        toast.success(`Batas KKM berhasil diperbarui menjadi ${val}`);
-        router.refresh();
-      } else {
-        toast.error(res.error || 'Gagal memperbarui KKM.');
-      }
-    } catch (err: any) {
-      toast.error(err.message || 'Terjadi kesalahan saat memperbarui KKM.');
-    } finally {
-      setIsUpdatingKkm(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    const res = await logoutTeacher();
-    if (res.success) {
-      toast.success('Berhasil keluar aplikasi');
-      router.push('/sign-in');
-      router.refresh();
-    } else {
-      toast.error(res.error || 'Gagal keluar aplikasi.');
-    }
-  };
+  const [kkm] = useState<number>(stats.kkm);
 
   useEffect(() => {
     setMounted(true);
@@ -181,76 +123,6 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
             Ringkasan performa akademik, kehadiran, dan tabungan kelas Anda.
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <Dialog open={editKkmOpen} onOpenChange={setEditKkmOpen}>
-            <DialogTrigger
-              render={
-                <Button
-                  variant="outline"
-                  className="border-zinc-800 bg-zinc-900/50 hover:bg-zinc-900 text-zinc-300 font-medium rounded-xl h-10 px-4 gap-2 text-xs flex items-center"
-                />
-              }
-            >
-              <Settings className="h-4 w-4 text-emerald-400" />
-              <span>KKM: {kkm}</span>
-            </DialogTrigger>
-            <DialogContent className="bg-zinc-900 border border-zinc-800 text-white rounded-2xl max-w-sm">
-              <form onSubmit={handleSaveKkm}>
-                <DialogHeader>
-                  <DialogTitle className="text-lg font-bold text-zinc-100">
-                    Pengaturan Batas KKM
-                  </DialogTitle>
-                  <DialogDescription className="text-xs text-zinc-400">
-                    Tentukan batas Kriteria Ketuntasan Minimal (KKM) untuk evaluasi akademik kelas Anda.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="kkm-input-db" className="text-zinc-300 text-sm font-semibold">
-                      Batas Nilai KKM
-                    </Label>
-                    <Input
-                      id="kkm-input-db"
-                      type="number"
-                      required
-                      min={0}
-                      max={100}
-                      value={kkmInput}
-                      onChange={(e) => setKkmInput(e.target.value)}
-                      className="bg-zinc-950 border-zinc-800 focus:border-emerald-500 text-white rounded-xl font-bold text-center text-lg"
-                    />
-                  </div>
-                </div>
-                <DialogFooter className="gap-2 sm:gap-0">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => setEditKkmOpen(false)}
-                    className="text-zinc-400 hover:text-zinc-200"
-                  >
-                    Batal
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={isUpdatingKkm}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl px-4"
-                  >
-                    {isUpdatingKkm ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Simpan'}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
-
-          <Button
-            variant="ghost"
-            onClick={handleLogout}
-            className="border border-zinc-800 text-zinc-400 hover:text-rose-400 hover:bg-rose-950/20 hover:border-rose-950/30 rounded-xl px-4 py-2 h-10 text-xs flex items-center gap-2 cursor-pointer transition-all"
-          >
-            <LogOut className="h-4 w-4" />
-            <span>Keluar Aplikasi</span>
-          </Button>
-        </div>
       </div>
 
       {/* Grid Stats */}
@@ -295,13 +167,13 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
                 <AreaChart data={stats.savingsTrend} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorSaldo" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.2}/>
-                      <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.2} />
+                      <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <XAxis dataKey="date" stroke="#52525b" fontSize={10} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#52525b" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(val) => `Rp ${val / 1000}k`} />
-                  <Tooltip 
+                  <YAxis stroke="#52525b" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(val: number) => `Rp ${val / 1000}k`} />
+                  <Tooltip
                     contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '12px' }}
                     labelStyle={{ color: '#a1a1aa', fontWeight: 'bold' }}
                     itemStyle={{ color: '#10b981' }}
