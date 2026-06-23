@@ -6,7 +6,7 @@ const isPublicRoute = (path: string) => {
   return path.startsWith('/sign-in') || path.startsWith('/sign-up');
 };
 
-export default async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const path = req.nextUrl.pathname;
   
   // Read session cookie
