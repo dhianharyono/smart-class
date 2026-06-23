@@ -3,15 +3,21 @@
 import dbConnect from '@/lib/db';
 import Student from '@/models/Student';
 import Saving from '@/models/Saving';
-import { auth } from '@clerk/nextjs/server';
+import { cookies } from 'next/headers';
+import { verifySession } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 
 async function requireAuth() {
-  const { userId } = await auth();
-  if (!userId) {
+  const cookieStore = await cookies();
+  const sessionToken = cookieStore.get('session')?.value;
+  if (!sessionToken) {
     throw new Error('Unauthorized');
   }
-  return userId;
+  const session = await verifySession(sessionToken);
+  if (!session || !session.userId) {
+    throw new Error('Unauthorized');
+  }
+  return session.userId;
 }
 
 export async function getSavingsSummary() {

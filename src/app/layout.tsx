@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
-import { ClerkProvider } from "@clerk/nextjs";
 import QueryProvider from "@/providers/QueryProvider";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -22,16 +21,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="en" className={`${outfit.variable} h-full antialiased dark`}>
-        <body className="font-sans min-h-full flex flex-col bg-zinc-950 text-zinc-100">
-          <QueryProvider>
-            {children}
-            <Toaster richColors closeButton theme="dark" position="top-right" />
-          </QueryProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="en" className={`${outfit.variable} h-full antialiased dark`}>
+      <body className="font-sans min-h-full flex flex-col bg-zinc-950 text-zinc-100">
+        <QueryProvider>
+          {children}
+          <Toaster richColors closeButton theme="dark" position="top-right" />
+        </QueryProvider>
+      </body>
+    </html>
   );
 }
 

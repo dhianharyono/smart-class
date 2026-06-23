@@ -1,13 +1,32 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { verifySession } from '@/lib/auth';
 
-// Declare public routes that do not require authentication
-const isPublicRoute = createRouteMatcher(['/sign-in(.*)', '/sign-up(.*)', '/api/webhook(.*)']);
+const isPublicRoute = (path: string) => {
+  return path.startsWith('/sign-in') || path.startsWith('/sign-up');
+};
 
-export default clerkMiddleware(async (auth, req) => {
-  if (!isPublicRoute(req)) {
-    await auth.protect();
+export default async function middleware(req: NextRequest) {
+  const path = req.nextUrl.pathname;
+  
+  // Read session cookie
+  const sessionToken = req.cookies.get('session')?.value;
+  const session = sessionToken ? await verifySession(sessionToken) : null;
+  const isAuthenticated = !!session;
+
+  if (isPublicRoute(path)) {
+    if (isAuthenticated) {
+      return NextResponse.redirect(new URL('/', req.nextUrl));
+    }
+    return NextResponse.next();
   }
-});
+
+  if (!isAuthenticated) {
+    return NextResponse.redirect(new URL('/sign-in', req.nextUrl));
+  }
+
+  return NextResponse.next();
+}
 
 export const config = {
   matcher: [

@@ -1,8 +1,8 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface ITeacher extends Document {
-  clerkId: string;
   email: string;
+  password: string;
   name: string;
   schoolName?: string;
   className?: string;
@@ -10,8 +10,8 @@ export interface ITeacher extends Document {
 }
 
 const TeacherSchema = new Schema<ITeacher>({
-  clerkId: { type: String, required: true, unique: true, index: true },
-  email: { type: String, required: true },
+  email: { type: String, required: true, unique: true, index: true },
+  password: { type: String, required: true },
   name: { type: String, required: true },
   schoolName: { type: String },
   className: { type: String },

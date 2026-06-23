@@ -5,16 +5,22 @@ import Student, { IStudent } from '@/models/Student';
 import Attendance from '@/models/Attendance';
 import Grade from '@/models/Grade';
 import Saving from '@/models/Saving';
-import { auth } from '@clerk/nextjs/server';
+import { cookies } from 'next/headers';
+import { verifySession } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 
 // Helper to authenticate teacher and return teacherId
 async function requireAuth() {
-  const { userId } = await auth();
-  if (!userId) {
+  const cookieStore = await cookies();
+  const sessionToken = cookieStore.get('session')?.value;
+  if (!sessionToken) {
     throw new Error('Unauthorized access. Please login first.');
   }
-  return userId;
+  const session = await verifySession(sessionToken);
+  if (!session || !session.userId) {
+    throw new Error('Unauthorized access. Please login first.');
+  }
+  return session.userId;
 }
 
 export async function getStudents() {
