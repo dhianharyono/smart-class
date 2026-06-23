@@ -6,19 +6,22 @@ import Grade from '@/models/Grade';
 import { cookies } from 'next/headers';
 import { verifySession } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
+import { isRedirectError } from '@/lib/utils';
 
 async function requireAuth() {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get('session')?.value;
   if (!sessionToken) {
-    throw new Error('Unauthorized');
+    redirect('/sign-in');
   }
   const session = await verifySession(sessionToken);
   if (!session || !session.userId) {
-    throw new Error('Unauthorized');
+    redirect('/sign-in');
   }
   return session.userId;
 }
+
 
 export async function getSubjects() {
   try {
@@ -31,6 +34,9 @@ export async function getSubjects() {
     }
     return subjects.sort();
   } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
     console.error('Error fetching subjects:', error);
     throw new Error(error.message || 'Failed to fetch subjects.');
   }
@@ -65,6 +71,9 @@ export async function getGradesByFilter(subject: string, category: 'Tugas' | 'UH
 
     return JSON.parse(JSON.stringify(result));
   } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
     console.error('Error fetching grades:', error);
     throw new Error(error.message || 'Failed to fetch grades.');
   }
@@ -124,6 +133,9 @@ export async function saveBulkGrades(
     revalidatePath('/');
     return { success: true };
   } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
     console.error('Error saving grades:', error);
     throw new Error(error.message || 'Failed to save grades.');
   }

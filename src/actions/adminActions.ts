@@ -12,6 +12,7 @@ import { cookies } from 'next/headers';
 import { verifySession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { hashPassword } from '@/lib/password';
+import { isRedirectError } from '@/lib/utils';
 
 /**
  * Memverifikasi halaman admin secara sinkronus sebelum render halaman berlanjut.
@@ -35,11 +36,11 @@ async function requireAdminAuth() {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get('session')?.value;
   if (!sessionToken) {
-    throw new Error('Unauthorized: Sesi tidak ditemukan.');
+    redirect('/sign-in?clear=1');
   }
   const session = await verifySession(sessionToken);
   if (!session || !session.userId || !session.isAdmin) {
-    throw new Error('Unauthorized: Akses ditolak. Halaman khusus Administrator.');
+    redirect('/');
   }
   return session.userId;
 }
@@ -122,6 +123,9 @@ export async function getAdminStats() {
       onlineUsers,
     };
   } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
     console.error('Error generating admin stats:', error);
     throw new Error(error.message || 'Gagal menghasilkan statistik admin.');
   }
@@ -143,6 +147,9 @@ export async function getTeachers() {
     const teachers = await Teacher.find({ email: { $nin: adminEmails } }).sort({ name: 1 }).lean();
     return JSON.parse(JSON.stringify(teachers));
   } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
     console.error('Error fetching teachers:', error);
     throw new Error(error.message || 'Gagal mengambil data guru.');
   }
@@ -184,6 +191,9 @@ export async function updateTeacher(id: string, data: {
 
     return { success: true };
   } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
     console.error('Error updating teacher:', error);
     return { success: false, error: error.message || 'Gagal mengubah data guru.' };
   }
@@ -216,6 +226,9 @@ export async function deleteTeacher(id: string) {
 
     return { success: true };
   } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
     console.error('Error deleting teacher:', error);
     return { success: false, error: error.message || 'Gagal menghapus data guru.' };
   }
@@ -318,6 +331,9 @@ export async function createTeacher(data: {
       } 
     };
   } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
     console.error('Error creating teacher:', error);
     return { success: false, error: error.message || 'Gagal menambahkan wali kelas.' };
   }
@@ -345,6 +361,9 @@ export async function addSchool(name: string) {
     const newSchool = await School.create({ name: trimmed });
     return { success: true, school: JSON.parse(JSON.stringify(newSchool)) };
   } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
     console.error('Error adding school:', error);
     return { success: false, error: error.message || 'Gagal menambahkan sekolah.' };
   }
@@ -379,6 +398,9 @@ export async function deleteSchool(id: string) {
     await School.findByIdAndDelete(id);
     return { success: true };
   } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
     console.error('Error deleting school:', error);
     return { success: false, error: error.message || 'Gagal menghapus sekolah.' };
   }

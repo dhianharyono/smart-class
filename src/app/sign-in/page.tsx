@@ -7,6 +7,7 @@ import { loginTeacher, logoutTeacher } from '@/actions/authActions';
 import { toast } from 'sonner';
 import { Mail, Lock, BookOpen, Loader2, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import LoadingScreen from '@/components/LoadingScreen';
 
 export default function SignInPage() {
   const router = useRouter();
@@ -14,6 +15,8 @@ export default function SignInPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [redirectVariant, setRedirectVariant] = useState<'teacher' | 'admin'>('teacher');
 
   useEffect(() => {
     // Clear stale session cookie to prevent redirect loops
@@ -32,6 +35,8 @@ export default function SignInPage() {
       const res = await loginTeacher({ email, password });
       if (res.success) {
         toast.success('Selamat datang kembali!');
+        setRedirectVariant(res.isAdmin ? 'admin' : 'teacher');
+        setIsRedirecting(true);
         if (res.isAdmin) {
           router.push('/admin');
         } else {
@@ -40,13 +45,18 @@ export default function SignInPage() {
         router.refresh();
       } else {
         toast.error(res.error || 'Email/username atau password salah.');
+        setLoading(false);
       }
     } catch (err) {
       toast.error('Terjadi kesalahan. Silakan coba lagi.');
-    } finally {
       setLoading(false);
     }
   };
+
+  if (isRedirecting) {
+    return <LoadingScreen variant={redirectVariant} />;
+  }
+
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-4 py-12 sm:px-6 lg:px-8 relative overflow-hidden">

@@ -6,19 +6,22 @@ import Saving from '@/models/Saving';
 import { cookies } from 'next/headers';
 import { verifySession } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
+import { isRedirectError } from '@/lib/utils';
 
 async function requireAuth() {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get('session')?.value;
   if (!sessionToken) {
-    throw new Error('Unauthorized');
+    redirect('/sign-in');
   }
   const session = await verifySession(sessionToken);
   if (!session || !session.userId) {
-    throw new Error('Unauthorized');
+    redirect('/sign-in');
   }
   return session.userId;
 }
+
 
 export async function getSavingsSummary() {
   try {
@@ -66,6 +69,9 @@ export async function getSavingsSummary() {
 
     return JSON.parse(JSON.stringify(result));
   } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
     console.error('Error fetching savings summary:', error);
     throw new Error(error.message || 'Failed to fetch savings summary.');
   }
@@ -92,6 +98,9 @@ export async function getStudentLedger(studentId: string) {
       ledger,
     }));
   } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
     console.error('Error fetching student ledger:', error);
     throw new Error(error.message || 'Failed to fetch student ledger.');
   }
@@ -141,6 +150,9 @@ export async function addTransaction(data: {
     revalidatePath('/');
     return { success: true };
   } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
     console.error('Error adding savings transaction:', error);
     throw new Error(error.message || 'Failed to save transaction.');
   }

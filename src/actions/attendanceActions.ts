@@ -6,19 +6,22 @@ import Attendance from '@/models/Attendance';
 import { cookies } from 'next/headers';
 import { verifySession } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
+import { isRedirectError } from '@/lib/utils';
 
 async function requireAuth() {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get('session')?.value;
   if (!sessionToken) {
-    throw new Error('Unauthorized');
+    redirect('/sign-in');
   }
   const session = await verifySession(sessionToken);
   if (!session || !session.userId) {
-    throw new Error('Unauthorized');
+    redirect('/sign-in');
   }
   return session.userId;
 }
+
 
 function parseLocalDate(dateStr: string): Date {
   const [year, month, day] = dateStr.split('-').map(Number);
@@ -57,6 +60,9 @@ export async function getAttendanceByDate(dateStr: string) {
 
     return JSON.parse(JSON.stringify(result));
   } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
     console.error('Error fetching attendance:', error);
     throw new Error(error.message || 'Failed to fetch attendance.');
   }
@@ -92,6 +98,9 @@ export async function saveBulkAttendance(
     revalidatePath('/');
     return { success: true, count: records.length };
   } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
     console.error('Error saving bulk attendance:', error);
     throw new Error(error.message || 'Failed to save attendance records.');
   }

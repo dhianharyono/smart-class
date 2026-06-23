@@ -7,19 +7,22 @@ import Grade from '@/models/Grade';
 import Saving from '@/models/Saving';
 import { cookies } from 'next/headers';
 import { verifySession } from '@/lib/auth';
+import { redirect } from 'next/navigation';
+import { isRedirectError } from '@/lib/utils';
 
 async function requireAuth() {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get('session')?.value;
   if (!sessionToken) {
-    throw new Error('Unauthorized');
+    redirect('/sign-in');
   }
   const session = await verifySession(sessionToken);
   if (!session || !session.userId) {
-    throw new Error('Unauthorized');
+    redirect('/sign-in');
   }
   return session.userId;
 }
+
 
 export async function getDashboardStats() {
   try {
@@ -131,6 +134,9 @@ export async function getDashboardStats() {
       attendanceChartData,
     }));
   } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
     console.error('Error generating dashboard stats:', error);
     throw new Error(error.message || 'Failed to generate dashboard statistics.');
   }

@@ -8,6 +8,7 @@ import { getSchools } from '@/actions/adminActions';
 import { toast } from 'sonner';
 import { Mail, Lock, User, School, GraduationCap, BookOpen, Loader2, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import LoadingScreen from '@/components/LoadingScreen';
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -20,6 +21,8 @@ export default function SignUpPage() {
   const [schools, setSchools] = useState<any[]>([]);
   const [loadingSchools, setLoadingSchools] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [redirectVariant, setRedirectVariant] = useState<'teacher' | 'admin'>('teacher');
 
   useEffect(() => {
     async function loadSchools() {
@@ -62,6 +65,8 @@ export default function SignUpPage() {
 
       if (res.success) {
         toast.success('Pendaftaran berhasil! Selamat datang.');
+        setRedirectVariant(res.isAdmin ? 'admin' : 'teacher');
+        setIsRedirecting(true);
         if (res.isAdmin) {
           router.push('/admin');
         } else {
@@ -70,13 +75,18 @@ export default function SignUpPage() {
         router.refresh();
       } else {
         toast.error(res.error || 'Gagal mendaftar.');
+        setLoading(false);
       }
     } catch (err) {
       toast.error('Terjadi kesalahan. Silakan coba lagi.');
-    } finally {
       setLoading(false);
     }
   };
+
+  if (isRedirecting) {
+    return <LoadingScreen variant={redirectVariant} message="Mendaftar & mempersiapkan akun..." />;
+  }
+
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-4 py-12 sm:px-6 lg:px-8 relative overflow-hidden">

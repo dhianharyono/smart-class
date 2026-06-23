@@ -8,20 +8,23 @@ import Saving from '@/models/Saving';
 import { cookies } from 'next/headers';
 import { verifySession } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
+import { isRedirectError } from '@/lib/utils';
 
 // Helper to authenticate teacher and return teacherId
 async function requireAuth() {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get('session')?.value;
   if (!sessionToken) {
-    throw new Error('Unauthorized access. Please login first.');
+    redirect('/sign-in');
   }
   const session = await verifySession(sessionToken);
   if (!session || !session.userId) {
-    throw new Error('Unauthorized access. Please login first.');
+    redirect('/sign-in');
   }
   return session.userId;
 }
+
 
 export async function getStudents() {
   try {
@@ -30,6 +33,9 @@ export async function getStudents() {
     const students = await Student.find({ teacherId }).sort({ name: 1 }).lean();
     return JSON.parse(JSON.stringify(students));
   } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
     console.error('Error fetching students:', error);
     throw new Error(error.message || 'Failed to fetch students.');
   }
@@ -56,6 +62,9 @@ export async function createStudent(data: { nis: string; name: string; className
     revalidatePath('/');
     return { success: true };
   } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
     console.error('Error creating student:', error);
     throw new Error(error.message || 'Failed to create student.');
   }
@@ -88,6 +97,9 @@ export async function updateStudent(id: string, data: { nis: string; name: strin
     revalidatePath('/');
     return { success: true };
   } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
     console.error('Error updating student:', error);
     throw new Error(error.message || 'Failed to update student.');
   }
@@ -116,6 +128,9 @@ export async function deleteStudent(id: string) {
     revalidatePath('/');
     return { success: true };
   } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
     console.error('Error deleting student:', error);
     throw new Error(error.message || 'Failed to delete student.');
   }
