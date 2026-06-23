@@ -9,6 +9,7 @@ import {
   Plus,
   BookOpen,
   GraduationCap,
+  Settings,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,6 +41,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { getGradesByFilter, saveBulkGrades } from '@/actions/gradeActions';
+import { updateTeacherKkm } from '@/actions/dashboardActions';
 import { exportGradesToExcel } from '@/lib/excelExport';
 
 interface GradeRow {
@@ -52,11 +54,41 @@ interface GradeRow {
 
 interface NilaiClientProps {
   initialSubjects: string[];
+  initialKkm: number;
 }
 
-export default function NilaiClient({ initialSubjects }: NilaiClientProps) {
+export default function NilaiClient({ initialSubjects, initialKkm }: NilaiClientProps) {
   const queryClient = useQueryClient();
   const [subjects, setSubjects] = useState<string[]>(initialSubjects);
+  const [kkm, setKkm] = useState<number>(initialKkm);
+  const [kkmInput, setKkmInput] = useState<string>(String(initialKkm));
+  const [editKkmOpen, setEditKkmOpen] = useState(false);
+  const [isUpdatingKkm, setIsUpdatingKkm] = useState(false);
+
+  const handleSaveKkm = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const val = Number(kkmInput);
+    if (isNaN(val) || val < 0 || val > 100) {
+      toast.error('KKM harus berupa angka antara 0 dan 100.');
+      return;
+    }
+    setIsUpdatingKkm(true);
+    try {
+      const res = await updateTeacherKkm(val);
+      if (res.success) {
+        setKkm(val);
+        setEditKkmOpen(false);
+        toast.success(`Batas KKM berhasil diperbarui menjadi ${val}`);
+        queryClient.invalidateQueries({ queryKey: ['grades'] });
+      } else {
+        toast.error(res.error || 'Gagal memperbarui KKM.');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Terjadi kesalahan saat memperbarui KKM.');
+    } finally {
+      setIsUpdatingKkm(false);
+    }
+  };
   
   // Active filter states
   const [selectedSubject, setSelectedSubject] = useState<string>(subjects[0] || 'Matematika');
@@ -172,6 +204,66 @@ export default function NilaiClient({ initialSubjects }: NilaiClientProps) {
         </div>
 
         <div className="flex items-center gap-3">
+          <Dialog open={editKkmOpen} onOpenChange={setEditKkmOpen}>
+            <DialogTrigger
+              render={
+                <Button
+                  variant="outline"
+                  className="border-zinc-800 bg-zinc-900/50 hover:bg-zinc-900 text-zinc-300 font-medium rounded-xl h-10 px-4 gap-2"
+                />
+              }
+            >
+              <Settings className="h-4 w-4 text-emerald-400" />
+              <span>KKM: {kkm}</span>
+            </DialogTrigger>
+            <DialogContent className="bg-zinc-900 border border-zinc-800 text-white rounded-2xl max-w-sm">
+              <form onSubmit={handleSaveKkm}>
+                <DialogHeader>
+                  <DialogTitle className="text-lg font-bold text-zinc-100">
+                    Pengaturan Batas KKM
+                  </DialogTitle>
+                  <DialogDescription className="text-xs text-zinc-400">
+                    Tentukan batas Kriteria Ketuntasan Minimal (KKM) untuk evaluasi akademik kelas Anda.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="kkm-input" className="text-zinc-300 text-sm font-semibold">
+                      Batas Nilai KKM
+                    </Label>
+                    <Input
+                      id="kkm-input"
+                      type="number"
+                      required
+                      min={0}
+                      max={100}
+                      value={kkmInput}
+                      onChange={(e) => setKkmInput(e.target.value)}
+                      className="bg-zinc-950 border-zinc-800 focus:border-emerald-500 text-white rounded-xl font-bold text-center text-lg"
+                    />
+                  </div>
+                </div>
+                <DialogFooter className="gap-2 sm:gap-0">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => setEditKkmOpen(false)}
+                    className="text-zinc-400 hover:text-zinc-200"
+                  >
+                    Batal
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={isUpdatingKkm}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl px-4"
+                  >
+                    {isUpdatingKkm ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Simpan'}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+
           <Button
             onClick={handleExcelExport}
             variant="outline"
@@ -332,12 +424,12 @@ export default function NilaiClient({ initialSubjects }: NilaiClientProps) {
                           value={row.score}
                           onChange={(e) => handleScoreChange(row.studentId, e.target.value)}
                           className={`text-center font-bold bg-zinc-950 border text-white rounded-xl focus:ring-1 focus:ring-emerald-500 h-9 pr-2 ${
-                            row.score !== '' && row.score < 70
+                            row.score !== '' && row.score < kkm
                               ? 'border-rose-900/60 text-rose-400 focus:border-rose-500 bg-rose-950/10'
                               : 'border-zinc-800 focus:border-emerald-500'
                           }`}
                         />
-                        {row.score !== '' && row.score < 70 && (
+                        {row.score !== '' && row.score < kkm && (
                           <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] font-bold text-rose-500 uppercase tracking-wider">
                             &lt; KKM
                           </span>

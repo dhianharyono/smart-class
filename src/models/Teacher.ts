@@ -7,6 +7,7 @@ export interface ITeacher extends Document {
   schoolName?: string;
   className?: string;
   role: 'Wali Kelas' | 'Kepala Sekolah';
+  kkm: number;
   lastActiveAt?: Date;
   createdAt: Date;
 }
@@ -18,6 +19,7 @@ const TeacherSchema = new Schema<ITeacher>({
   schoolName: { type: String },
   className: { type: String },
   role: { type: String, enum: ['Wali Kelas', 'Kepala Sekolah'], default: 'Wali Kelas' },
+  kkm: { type: Number, default: 70, min: 0, max: 100 },
   lastActiveAt: { type: Date, default: Date.now },
   createdAt: { type: Date, default: Date.now },
 });

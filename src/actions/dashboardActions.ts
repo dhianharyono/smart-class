@@ -5,7 +5,9 @@ import Student from '@/models/Student';
 import Attendance from '@/models/Attendance';
 import Grade from '@/models/Grade';
 import Saving from '@/models/Saving';
+import Teacher from '@/models/Teacher';
 import { cookies } from 'next/headers';
+import { revalidatePath } from 'next/cache';
 import { verifySession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { isRedirectError } from '@/lib/utils';
@@ -28,6 +30,10 @@ export async function getDashboardStats() {
   try {
     await dbConnect();
     const teacherId = await requireAuth();
+
+    // Get teacher's KKM
+    const teacher = await Teacher.findById(teacherId).select('kkm').lean();
+    const kkm = teacher?.kkm ?? 70;
 
     // 1. Total Students count
     const studentCount = await Student.countDocuments({ teacherId });
@@ -84,11 +90,11 @@ export async function getDashboardStats() {
       }))
       .slice(-10); // get last 10 points
 
-    // 4. Low grade alerts (score < 70)
-    // Find all grades < 70, populate student name
+    // 4. Low grade alerts (score < KKM)
+    // Find all grades < KKM, populate student name
     const lowGrades = await Grade.find({
       teacherId,
-      score: { $lt: 70 },
+      score: { $lt: kkm },
     })
       .sort({ score: 1 })
       .populate({
@@ -132,6 +138,7 @@ export async function getDashboardStats() {
       savingsTrend,
       attendanceBreakdown,
       attendanceChartData,
+      kkm,
     }));
   } catch (error: any) {
     if (isRedirectError(error)) {
@@ -139,5 +146,40 @@ export async function getDashboardStats() {
     }
     console.error('Error generating dashboard stats:', error);
     throw new Error(error.message || 'Failed to generate dashboard statistics.');
+  }
+}
+
+export async function getTeacherKkm() {
+  try {
+    await dbConnect();
+    const teacherId = await requireAuth();
+    const teacher = await Teacher.findById(teacherId).select('kkm').lean();
+    return teacher?.kkm ?? 70;
+  } catch (error) {
+    console.error('Error fetching teacher KKM:', error);
+    return 70;
+  }
+}
+
+export async function updateTeacherKkm(newKkm: number) {
+  try {
+    await dbConnect();
+    const teacherId = await requireAuth();
+    
+    if (typeof newKkm !== 'number' || newKkm < 0 || newKkm > 100 || isNaN(newKkm)) {
+      return { success: false, error: 'KKM harus berupa angka antara 0 dan 100.' };
+    }
+
+    await Teacher.findByIdAndUpdate(teacherId, { kkm: newKkm });
+    
+    revalidatePath('/');
+    revalidatePath('/nilai');
+    return { success: true };
+  } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+    console.error('Error updating KKM:', error);
+    return { success: false, error: error.message || 'Gagal memperbarui KKM.' };
   }
 }
