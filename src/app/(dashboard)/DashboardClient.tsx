@@ -9,8 +9,11 @@ import {
   TrendingUp,
   Download,
   AlertCircle,
+  LogOut,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useRouter } from 'next/navigation';
+import { logoutTeacher } from '@/actions/authActions';
 import {
   AreaChart,
   Area,
@@ -48,7 +51,19 @@ interface DashboardClientProps {
 }
 
 export default function DashboardClient({ stats }: DashboardClientProps) {
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
+
+  const handleLogout = async () => {
+    const res = await logoutTeacher();
+    if (res.success) {
+      toast.success('Berhasil keluar aplikasi');
+      router.push('/sign-in');
+      router.refresh();
+    } else {
+      toast.error(res.error || 'Gagal keluar aplikasi.');
+    }
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -114,14 +129,24 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-zinc-900/50 pb-5">
         <div>
           <h2 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-zinc-50 to-zinc-400 bg-clip-text text-transparent">
             Dashboard Utama
           </h2>
-          <p className="text-zinc-400 text-sm">
+          <p className="text-zinc-400 text-sm mt-1">
             Ringkasan performa akademik, kehadiran, dan tabungan kelas Anda.
           </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            onClick={handleLogout}
+            className="border border-zinc-800 text-zinc-400 hover:text-rose-400 hover:bg-rose-950/20 hover:border-rose-950/30 rounded-xl px-4 py-2 h-10 text-xs flex items-center gap-2 cursor-pointer transition-all"
+          >
+            <LogOut className="h-4 w-4" />
+            <span>Keluar Aplikasi</span>
+          </Button>
         </div>
       </div>
 

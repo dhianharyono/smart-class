@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { registerTeacher } from '@/actions/authActions';
+import { getSchools } from '@/actions/adminActions';
 import { toast } from 'sonner';
-import { Mail, Lock, User, School, GraduationCap, BookOpen, Loader2, ArrowRight } from 'lucide-react';
+import { Mail, Lock, User, School, GraduationCap, BookOpen, Loader2, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function SignUpPage() {
@@ -16,11 +17,31 @@ export default function SignUpPage() {
   const [schoolName, setSchoolName] = useState('');
   const [className, setClassName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [schools, setSchools] = useState<any[]>([]);
+  const [loadingSchools, setLoadingSchools] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    async function loadSchools() {
+      try {
+        const schoolList = await getSchools();
+        setSchools(schoolList);
+        if (schoolList.length > 0) {
+          setSchoolName(schoolList[0].name);
+        }
+      } catch (err) {
+        console.error('Gagal memuat daftar sekolah:', err);
+      } finally {
+        setLoadingSchools(false);
+      }
+    }
+    loadSchools();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !email || !password) {
-      toast.error('Nama, email, dan password wajib diisi.');
+    if (!name || !email || !password || !schoolName) {
+      toast.error('Nama, email, password, dan sekolah wajib diisi.');
       return;
     }
 
@@ -41,7 +62,11 @@ export default function SignUpPage() {
 
       if (res.success) {
         toast.success('Pendaftaran berhasil! Selamat datang.');
-        router.push('/');
+        if (res.isAdmin) {
+          router.push('/admin');
+        } else {
+          router.push('/');
+        }
         router.refresh();
       } else {
         toast.error(res.error || 'Gagal mendaftar.');
@@ -101,7 +126,7 @@ export default function SignUpPage() {
             {/* Email */}
             <div className="space-y-1.5">
               <label htmlFor="email" className="text-xs font-semibold text-zinc-400 tracking-wider uppercase block">
-                Alamat Email
+                Alamat Email / Username
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
@@ -110,9 +135,9 @@ export default function SignUpPage() {
                 <input
                   id="email"
                   name="email"
-                  type="email"
+                  type="text"
                   required
-                  placeholder="nama@sekolah.sch.id"
+                  placeholder="Email atau Username"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={loading}
@@ -131,16 +156,34 @@ export default function SignUpPage() {
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
                     <School className="h-4.5 w-4.5" />
                   </div>
-                  <input
+                  <select
                     id="schoolName"
                     name="schoolName"
-                    type="text"
-                    placeholder="SDN 01 Jaya"
                     value={schoolName}
                     onChange={(e) => setSchoolName(e.target.value)}
-                    disabled={loading}
-                    className="w-full pl-10 pr-4 py-2.5 bg-zinc-950/60 border border-zinc-800 text-zinc-100 placeholder-zinc-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-sm transition-all duration-200 disabled:opacity-50"
-                  />
+                    disabled={loading || loadingSchools}
+                    className="w-full pl-10 pr-10 py-2.5 bg-zinc-950/60 border border-zinc-800 text-zinc-100 placeholder-zinc-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-sm transition-all duration-200 disabled:opacity-50 appearance-none cursor-pointer"
+                  >
+                    {loadingSchools ? (
+                      <option value="" className="bg-zinc-950 text-zinc-400">Memuat...</option>
+                    ) : schools.length === 0 ? (
+                      <option value="" className="bg-zinc-950 text-zinc-400">Hubungi Admin</option>
+                    ) : (
+                      <>
+                        <option value="" disabled className="bg-zinc-950 text-zinc-400">Pilih Sekolah</option>
+                        {schools.map((school) => (
+                          <option key={school._id} value={school.name} className="bg-zinc-950 text-zinc-100">
+                            {school.name}
+                          </option>
+                        ))}
+                      </>
+                    )}
+                  </select>
+                  <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-zinc-500">
+                    <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
+                      <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                    </svg>
+                  </div>
                 </div>
               </div>
 
@@ -178,14 +221,25 @@ export default function SignUpPage() {
                 <input
                   id="password"
                   name="password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   required
                   placeholder="Min. 6 karakter"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={loading}
-                  className="w-full pl-10 pr-4 py-2.5 bg-zinc-950/60 border border-zinc-800 text-zinc-100 placeholder-zinc-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-sm transition-all duration-200 disabled:opacity-50"
+                  className="w-full pl-10 pr-10 py-2.5 bg-zinc-950/60 border border-zinc-800 text-zinc-100 placeholder-zinc-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-sm transition-all duration-200 disabled:opacity-50"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-zinc-500 hover:text-zinc-300 focus:outline-none cursor-pointer"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4.5 w-4.5" />
+                  ) : (
+                    <Eye className="h-4.5 w-4.5" />
+                  )}
+                </button>
               </div>
             </div>
 

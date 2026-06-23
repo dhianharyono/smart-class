@@ -8,12 +8,10 @@ import { toast } from 'sonner';
 import {
   LayoutDashboard,
   Users,
-  CalendarCheck2,
-  GraduationCap,
-  Wallet,
+  School,
   Menu,
   X,
-  BookOpen,
+  ShieldCheck,
   LogOut,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -24,24 +22,21 @@ interface SidebarItem {
   icon: React.ComponentType<any>;
 }
 
-const sidebarItems: SidebarItem[] = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { name: 'Data Siswa', href: '/siswa', icon: Users },
-  { name: 'Absensi Kelas', href: '/absensi', icon: CalendarCheck2 },
-  { name: 'Nilai Akademik', href: '/nilai', icon: GraduationCap },
-  { name: 'Tabungan Siswa', href: '/tabungan', icon: Wallet },
+const adminSidebarItems: SidebarItem[] = [
+  { name: 'Ringkasan', href: '/admin', icon: LayoutDashboard },
+  { name: 'Kelola Wali Kelas', href: '/admin/guru', icon: Users },
+  { name: 'Kelola Sekolah', href: '/admin/sekolah', icon: School },
 ];
 
-interface DashboardLayoutClientProps {
+interface AdminLayoutClientProps {
   children: React.ReactNode;
-  teacher: {
+  admin: {
     name: string;
     email: string;
-    isAdmin?: boolean;
   };
 }
 
-export default function DashboardLayoutClient({ children, teacher }: DashboardLayoutClientProps) {
+export default function AdminLayoutClient({ children, admin }: AdminLayoutClientProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -59,27 +54,27 @@ export default function DashboardLayoutClient({ children, teacher }: DashboardLa
     }
   };
 
-  const initialName = teacher.name ? teacher.name.charAt(0).toUpperCase() : 'G';
+  const initialName = admin.name ? admin.name.charAt(0).toUpperCase() : 'A';
 
   const sidebarContent = (
-    <div className="flex h-full flex-col justify-between p-4">
+    <div className="flex h-full flex-col justify-between p-4 bg-zinc-950">
       <div>
         {/* Brand Header */}
         <div className="flex items-center gap-3 px-2 py-4 mb-6 border-b border-zinc-900">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-lg shadow-emerald-500/20">
-            <BookOpen className="h-5 w-5" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 text-white shadow-lg shadow-indigo-500/20">
+            <ShieldCheck className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-lg font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
-              Smart Class
+            <h1 className="text-lg font-bold bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
+              Smart Admin
             </h1>
-            <p className="text-xs text-zinc-500">Command Center</p>
+            <p className="text-[10px] text-zinc-500 tracking-widest uppercase">System Admin</p>
           </div>
         </div>
 
         {/* Navigation Items */}
         <nav className="space-y-1.5">
-          {sidebarItems.map((item) => {
+          {adminSidebarItems.map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;
             return (
@@ -89,18 +84,18 @@ export default function DashboardLayoutClient({ children, teacher }: DashboardLa
                 onClick={() => setMobileOpen(false)}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group ${
                   isActive
-                    ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-900/50 shadow-md shadow-emerald-950/20'
+                    ? 'bg-indigo-950/60 text-indigo-400 border border-indigo-900/50 shadow-md shadow-indigo-950/20'
                     : 'text-zinc-400 hover:bg-zinc-900/60 hover:text-zinc-200 border border-transparent'
                 }`}
               >
                 <Icon
                   className={`h-5 w-5 transition-transform duration-200 group-hover:scale-110 ${
-                    isActive ? 'text-emerald-400' : 'text-zinc-500 group-hover:text-zinc-300'
+                    isActive ? 'text-indigo-400' : 'text-zinc-500 group-hover:text-zinc-300'
                   }`}
                 />
                 <span>{item.name}</span>
                 {isActive && (
-                  <span className="ml-auto h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                  <span className="ml-auto h-1.5 w-1.5 rounded-full bg-indigo-400" />
                 )}
               </Link>
             );
@@ -111,16 +106,15 @@ export default function DashboardLayoutClient({ children, teacher }: DashboardLa
       {/* Footer / User Profile section */}
       <div className="border-t border-zinc-900 pt-4 flex flex-col gap-3 px-2">
         <div className="flex items-center gap-3">
-          {/* Custom Avatar with Emerald gradient */}
-          <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-emerald-500/20 border border-emerald-500/30">
+          <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-indigo-500/20 border border-indigo-500/30">
             {initialName}
           </div>
           <div className="flex flex-col max-w-[130px] flex-1">
             <span className="text-xs font-semibold text-zinc-300 truncate">
-              {teacher.name || 'Guru Smart Class'}
+              {admin.name || 'Administrator'}
             </span>
             <span className="text-[10px] text-zinc-500 truncate">
-              {teacher.email || ''}
+              {admin.email || ''}
             </span>
           </div>
         </div>
@@ -148,8 +142,8 @@ export default function DashboardLayoutClient({ children, teacher }: DashboardLa
         {/* Mobile Top Header */}
         <header className="flex h-16 items-center justify-between border-b border-zinc-900 px-4 md:hidden bg-zinc-950/80 backdrop-blur-md sticky top-0 z-40">
           <div className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5 text-emerald-500" />
-            <span className="font-bold text-emerald-400 text-sm">Smart Class</span>
+            <ShieldCheck className="h-5 w-5 text-indigo-500" />
+            <span className="font-bold text-indigo-400 text-sm">Smart Admin</span>
           </div>
           <Button
             variant="ghost"
@@ -177,7 +171,7 @@ export default function DashboardLayoutClient({ children, teacher }: DashboardLa
         )}
 
         {/* Workspace content */}
-        <main className="flex-1 p-4 md:p-8 max-w-7xl w-full mx-auto animate-fade-in">
+        <main className="flex-1 p-4 md:p-8 max-w-7xl w-full mx-auto">
           {children}
         </main>
       </div>

@@ -4,9 +4,11 @@ import { redirect } from 'next/navigation';
 import { verifySession } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import Teacher from '@/models/Teacher';
-import DashboardLayoutClient from './DashboardLayoutClient';
+import AdminLayoutClient from './AdminLayoutClient';
 
-export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+export const dynamic = 'force-dynamic';
+
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   // Read session cookie
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get('session')?.value;
@@ -16,31 +18,26 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   const session = await verifySession(sessionToken);
-  if (!session || !session.userId) {
-    redirect('/sign-in');
-  }
-
-  if (session.isAdmin) {
-    redirect('/admin');
+  if (!session || !session.userId || !session.isAdmin) {
+    redirect('/');
   }
 
   await dbConnect();
   await Teacher.findByIdAndUpdate(session.userId, { lastActiveAt: new Date() });
-  const teacher = await Teacher.findById(session.userId).lean();
+  const adminUser = await Teacher.findById(session.userId).lean();
 
-  if (!teacher) {
+  if (!adminUser) {
     redirect('/sign-in?clear=1');
   }
 
   return (
-    <DashboardLayoutClient 
-      teacher={{ 
-        name: teacher.name || 'Guru Smart Class', 
-        email: teacher.email,
-        isAdmin: !!session.isAdmin
+    <AdminLayoutClient 
+      admin={{ 
+        name: adminUser.name || 'Admin Smart Class', 
+        email: adminUser.email 
       }}
     >
       {children}
-    </DashboardLayoutClient>
+    </AdminLayoutClient>
   );
 }

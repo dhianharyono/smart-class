@@ -2,6 +2,7 @@
 
 import dbConnect from '@/lib/db';
 import Teacher from '@/models/Teacher';
+import AdminUser from '@/models/AdminUser';
 import { hashPassword, verifyPassword } from '@/lib/password';
 import { signSession } from '@/lib/auth';
 import { cookies } from 'next/headers';
@@ -15,7 +16,8 @@ export async function loginTeacher(data: { email: string; password: string }) {
       throw new Error('Email dan password wajib diisi.');
     }
 
-    const teacher = await Teacher.findOne({ email: email.toLowerCase().trim() });
+    const normalizedEmail = email.toLowerCase().trim();
+    const teacher = await Teacher.findOne({ email: normalizedEmail });
     if (!teacher) {
       throw new Error('Email atau password salah.');
     }
@@ -25,11 +27,15 @@ export async function loginTeacher(data: { email: string; password: string }) {
       throw new Error('Email atau password salah.');
     }
 
+    // Check if user is an admin
+    const isAdminUser = await AdminUser.exists({ username: normalizedEmail });
+
     // Sign session token
     const token = await signSession({
       userId: teacher._id.toString(),
       email: teacher.email,
       name: teacher.name,
+      isAdmin: !!isAdminUser,
     });
 
     // Set HTTP-only cookie
@@ -42,7 +48,7 @@ export async function loginTeacher(data: { email: string; password: string }) {
       maxAge: 7 * 24 * 60 * 60, // 7 days
     });
 
-    return { success: true };
+    return { success: true, isAdmin: !!isAdminUser };
   } catch (error: any) {
     return { success: false, error: error.message || 'Gagal login.' };
   }
@@ -85,11 +91,15 @@ export async function registerTeacher(data: {
 
     await newTeacher.save();
 
+    // Check if user is an admin
+    const isAdminUser = await AdminUser.exists({ username: normalizedEmail });
+
     // Sign session token
     const token = await signSession({
       userId: newTeacher._id.toString(),
       email: newTeacher.email,
       name: newTeacher.name,
+      isAdmin: !!isAdminUser,
     });
 
     // Set cookie
@@ -102,7 +112,7 @@ export async function registerTeacher(data: {
       maxAge: 7 * 24 * 60 * 60, // 7 days
     });
 
-    return { success: true };
+    return { success: true, isAdmin: !!isAdminUser };
   } catch (error: any) {
     return { success: false, error: error.message || 'Gagal mendaftar.' };
   }

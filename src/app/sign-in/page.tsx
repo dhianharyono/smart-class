@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { loginTeacher } from '@/actions/authActions';
+import { loginTeacher, logoutTeacher } from '@/actions/authActions';
 import { toast } from 'sonner';
-import { Mail, Lock, BookOpen, Loader2, ArrowRight } from 'lucide-react';
+import { Mail, Lock, BookOpen, Loader2, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function SignInPage() {
@@ -13,11 +13,17 @@ export default function SignInPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    // Clear stale session cookie to prevent redirect loops
+    logoutTeacher();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      toast.error('Email dan password wajib diisi.');
+      toast.error('Email atau username dan password wajib diisi.');
       return;
     }
 
@@ -26,10 +32,14 @@ export default function SignInPage() {
       const res = await loginTeacher({ email, password });
       if (res.success) {
         toast.success('Selamat datang kembali!');
-        router.push('/');
+        if (res.isAdmin) {
+          router.push('/admin');
+        } else {
+          router.push('/');
+        }
         router.refresh();
       } else {
-        toast.error(res.error || 'Email atau password salah.');
+        toast.error(res.error || 'Email/username atau password salah.');
       }
     } catch (err) {
       toast.error('Terjadi kesalahan. Silakan coba lagi.');
@@ -63,7 +73,7 @@ export default function SignInPage() {
             {/* Email Field */}
             <div className="space-y-2">
               <label htmlFor="email" className="text-xs font-semibold text-zinc-400 tracking-wider uppercase block">
-                Email Wali Kelas
+                Email / Username Wali Kelas
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
@@ -72,9 +82,9 @@ export default function SignInPage() {
                 <input
                   id="email"
                   name="email"
-                  type="email"
+                  type="text"
                   required
-                  placeholder="nama@sekolah.sch.id"
+                  placeholder="Email atau Username"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={loading}
@@ -95,14 +105,25 @@ export default function SignInPage() {
                 <input
                   id="password"
                   name="password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   required
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={loading}
-                  className="w-full pl-10 pr-4 py-3 bg-zinc-950/60 border border-zinc-800 text-zinc-100 placeholder-zinc-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-sm transition-all duration-200 disabled:opacity-50"
+                  className="w-full pl-10 pr-10 py-3 bg-zinc-950/60 border border-zinc-800 text-zinc-100 placeholder-zinc-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-sm transition-all duration-200 disabled:opacity-50"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-zinc-500 hover:text-zinc-300 focus:outline-none cursor-pointer"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4.5 w-4.5" />
+                  ) : (
+                    <Eye className="h-4.5 w-4.5" />
+                  )}
+                </button>
               </div>
             </div>
 
