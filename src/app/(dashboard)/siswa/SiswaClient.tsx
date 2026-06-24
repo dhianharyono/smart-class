@@ -185,7 +185,7 @@ export default function SiswaClient({ initialStudents }: SiswaClientProps) {
       <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
         <div>
           <h2 className='text-3xl font-extrabold tracking-tight bg-gradient-to-r from-zinc-50 to-zinc-400 bg-clip-text text-transparent'>
-            Data Master Siswa
+            Data Siswa
           </h2>
           <p className='text-zinc-400 text-sm'>
             Kelola profil lengkap seluruh siswa di kelas bimbingan Anda.
