@@ -16,6 +16,7 @@ export default function SignUpPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [schoolName, setSchoolName] = useState('');
+  const [customSchoolName, setCustomSchoolName] = useState('');
   const [className, setClassName] = useState('');
   const [loading, setLoading] = useState(false);
   const [schools, setSchools] = useState<any[]>([]);
@@ -31,9 +32,12 @@ export default function SignUpPage() {
         setSchools(schoolList);
         if (schoolList.length > 0) {
           setSchoolName(schoolList[0].name);
+        } else {
+          setSchoolName('__NEW_SCHOOL__');
         }
       } catch (err) {
         console.error('Gagal memuat daftar sekolah:', err);
+        setSchoolName('__NEW_SCHOOL__');
       } finally {
         setLoadingSchools(false);
       }
@@ -43,7 +47,9 @@ export default function SignUpPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !email || !password || !schoolName) {
+    const finalSchoolName = schoolName === '__NEW_SCHOOL__' ? customSchoolName.trim() : schoolName;
+
+    if (!name || !email || !password || !finalSchoolName) {
       toast.error('Nama, email, password, dan sekolah wajib diisi.');
       return;
     }
@@ -59,7 +65,7 @@ export default function SignUpPage() {
         name,
         email,
         password,
-        schoolName: schoolName || undefined,
+        schoolName: finalSchoolName || undefined,
         className: className || undefined,
       });
 
@@ -157,65 +163,89 @@ export default function SignUpPage() {
             </div>
 
             {/* School Name */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label htmlFor="schoolName" className="text-xs font-semibold text-zinc-400 tracking-wider uppercase block">
-                  Nama Sekolah
+            <div className="space-y-1.5">
+              <label htmlFor="schoolName" className="text-xs font-semibold text-zinc-400 tracking-wider uppercase block">
+                Nama Sekolah
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
+                  <School className="h-4.5 w-4.5" />
+                </div>
+                <select
+                  id="schoolName"
+                  name="schoolName"
+                  value={schoolName}
+                  onChange={(e) => setSchoolName(e.target.value)}
+                  disabled={loading || loadingSchools}
+                  className="w-full pl-10 pr-10 py-2.5 bg-zinc-950/60 border border-zinc-800 text-zinc-100 placeholder-zinc-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-sm transition-all duration-200 disabled:opacity-50 appearance-none cursor-pointer"
+                >
+                  {loadingSchools ? (
+                    <option value="" className="bg-zinc-950 text-zinc-400">Memuat...</option>
+                  ) : (
+                    <>
+                      <option value="" disabled className="bg-zinc-950 text-zinc-400">Pilih Sekolah</option>
+                      {schools.map((school) => (
+                        <option key={school._id} value={school.name} className="bg-zinc-950 text-zinc-100">
+                          {school.name}
+                        </option>
+                      ))}
+                      <option value="__NEW_SCHOOL__" className="bg-zinc-950 text-emerald-400 font-semibold">
+                        + Tambah Sekolah Baru...
+                      </option>
+                    </>
+                  )}
+                </select>
+                <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-zinc-500">
+                  <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
+                    <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            {/* Custom School Name Input */}
+            {schoolName === '__NEW_SCHOOL__' && (
+              <div className="space-y-1.5 transition-all duration-200">
+                <label htmlFor="customSchoolName" className="text-xs font-semibold text-zinc-400 tracking-wider uppercase block">
+                  Nama Sekolah Baru
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
                     <School className="h-4.5 w-4.5" />
                   </div>
-                  <select
-                    id="schoolName"
-                    name="schoolName"
-                    value={schoolName}
-                    onChange={(e) => setSchoolName(e.target.value)}
-                    disabled={loading || loadingSchools}
-                    className="w-full pl-10 pr-10 py-2.5 bg-zinc-950/60 border border-zinc-800 text-zinc-100 placeholder-zinc-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-sm transition-all duration-200 disabled:opacity-50 appearance-none cursor-pointer"
-                  >
-                    {loadingSchools ? (
-                      <option value="" className="bg-zinc-950 text-zinc-400">Memuat...</option>
-                    ) : schools.length === 0 ? (
-                      <option value="" className="bg-zinc-950 text-zinc-400">Hubungi Admin</option>
-                    ) : (
-                      <>
-                        <option value="" disabled className="bg-zinc-950 text-zinc-400">Pilih Sekolah</option>
-                        {schools.map((school) => (
-                          <option key={school._id} value={school.name} className="bg-zinc-950 text-zinc-100">
-                            {school.name}
-                          </option>
-                        ))}
-                      </>
-                    )}
-                  </select>
-                  <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-zinc-500">
-                    <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
-                      <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label htmlFor="className" className="text-xs font-semibold text-zinc-400 tracking-wider uppercase block">
-                  Kelas Diajar
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
-                    <GraduationCap className="h-4.5 w-4.5" />
-                  </div>
                   <input
-                    id="className"
-                    name="className"
+                    id="customSchoolName"
+                    name="customSchoolName"
                     type="text"
-                    placeholder="Kelas 5A"
-                    value={className}
-                    onChange={(e) => setClassName(e.target.value)}
+                    required
+                    placeholder="Nama Sekolah Baru (contoh: SDN 1 Jakarta)"
+                    value={customSchoolName}
+                    onChange={(e) => setCustomSchoolName(e.target.value)}
                     disabled={loading}
                     className="w-full pl-10 pr-4 py-2.5 bg-zinc-950/60 border border-zinc-800 text-zinc-100 placeholder-zinc-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-sm transition-all duration-200 disabled:opacity-50"
                   />
                 </div>
+              </div>
+            )}
+
+            <div className="space-y-1.5">
+              <label htmlFor="className" className="text-xs font-semibold text-zinc-400 tracking-wider uppercase block">
+                Kelas Diajar
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
+                  <GraduationCap className="h-4.5 w-4.5" />
+                </div>
+                <input
+                  id="className"
+                  name="className"
+                  type="text"
+                  placeholder="Kelas 5A"
+                  value={className}
+                  onChange={(e) => setClassName(e.target.value)}
+                  disabled={loading}
+                  className="w-full pl-10 pr-4 py-2.5 bg-zinc-950/60 border border-zinc-800 text-zinc-100 placeholder-zinc-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-sm transition-all duration-200 disabled:opacity-50"
+                />
               </div>
             </div>
 

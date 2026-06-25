@@ -17,6 +17,7 @@ import {
   LogOut,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import ConfirmDialog from '@/components/ConfirmDialog';
 
 interface SidebarItem {
   name: string;
@@ -51,8 +52,14 @@ export default function DashboardLayoutClient({
 
   const toggleSidebar = () => setMobileOpen(!mobileOpen);
 
-  const handleLogout = async () => {
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogoutSubmit = async () => {
+    setIsLoggingOut(true);
     const res = await logoutTeacher();
+    setIsLoggingOut(false);
+    setShowLogoutConfirm(false);
     if (res.success) {
       toast.success('Berhasil keluar aplikasi');
       router.push('/sign-in');
@@ -131,7 +138,7 @@ export default function DashboardLayoutClient({
         </div>
         <Button
           variant='ghost'
-          onClick={handleLogout}
+          onClick={() => setShowLogoutConfirm(true)}
           className='w-full text-zinc-400 hover:text-rose-400 hover:bg-rose-950/20 rounded-xl h-9 text-xs justify-start gap-2 px-3 border border-transparent hover:border-rose-950/30 cursor-pointer'
         >
           <LogOut className='h-4 w-4' />
@@ -192,6 +199,18 @@ export default function DashboardLayoutClient({
           {children}
         </main>
       </div>
+
+      <ConfirmDialog
+        open={showLogoutConfirm}
+        onOpenChange={setShowLogoutConfirm}
+        title="Konfirmasi Keluar"
+        description="Apakah Anda yakin ingin keluar dari aplikasi Smart Class?"
+        confirmText="Ya, Keluar"
+        cancelText="Batal"
+        variant="danger"
+        isLoading={isLoggingOut}
+        onConfirm={handleLogoutSubmit}
+      />
     </div>
   );
 }

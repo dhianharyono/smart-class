@@ -3,6 +3,7 @@
 import dbConnect from '@/lib/db';
 import Teacher from '@/models/Teacher';
 import AdminUser from '@/models/AdminUser';
+import School from '@/models/School';
 import { hashPassword, verifyPassword } from '@/lib/password';
 import { signSession } from '@/lib/auth';
 import { cookies } from 'next/headers';
@@ -81,11 +82,22 @@ export async function registerTeacher(data: {
 
     const hashedPassword = hashPassword(password);
 
+    let trimmedSchoolName = schoolName?.trim();
+    if (trimmedSchoolName) {
+      // Check if school already exists (case-insensitive)
+      const schoolExists = await School.findOne({ name: { $regex: new RegExp(`^${trimmedSchoolName}$`, 'i') } });
+      if (!schoolExists) {
+        await School.create({ name: trimmedSchoolName });
+      } else {
+        trimmedSchoolName = schoolExists.name;
+      }
+    }
+
     const newTeacher = new Teacher({
       name: name.trim(),
       email: normalizedEmail,
       password: hashedPassword,
-      schoolName: schoolName?.trim(),
+      schoolName: trimmedSchoolName,
       className: className?.trim(),
     });
 

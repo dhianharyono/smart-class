@@ -296,28 +296,28 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
             {/* Attendance Legends */}
             <div className='grid grid-cols-4 gap-1 text-center border-t border-zinc-900 pt-4'>
               <div>
-                <p className='text-xs font-bold text-emerald-400'>
+                <p className='text-sm sm:text-base font-bold text-emerald-400'>
                   {stats.attendanceBreakdown.Hadir}
                 </p>
-                <p className='text-[9px] text-zinc-500'>Hadir</p>
+                <p className='text-xs text-zinc-400'>Hadir</p>
               </div>
               <div>
-                <p className='text-xs font-bold text-blue-400'>
+                <p className='text-sm sm:text-base font-bold text-blue-400'>
                   {stats.attendanceBreakdown.Sakit}
                 </p>
-                <p className='text-[9px] text-zinc-500'>Sakit</p>
+                <p className='text-xs text-zinc-400'>Sakit</p>
               </div>
               <div>
-                <p className='text-xs font-bold text-amber-400'>
+                <p className='text-sm sm:text-base font-bold text-amber-400'>
                   {stats.attendanceBreakdown.Izin}
                 </p>
-                <p className='text-[9px] text-zinc-500'>Izin</p>
+                <p className='text-xs text-zinc-400'>Izin</p>
               </div>
               <div>
-                <p className='text-xs font-bold text-red-400'>
+                <p className='text-sm sm:text-base font-bold text-red-400'>
                   {stats.attendanceBreakdown.Alfa}
                 </p>
-                <p className='text-[9px] text-zinc-500'>Alfa</p>
+                <p className='text-xs text-zinc-400'>Alfa</p>
               </div>
             </div>
           </CardContent>
