@@ -13,7 +13,7 @@ const outfit = Outfit({
 export const metadata: Metadata = {
   title: 'Smart Class - Command Center Wali Kelas',
   description:
-    'Aplikasi produktivitas mandiri wali kelas (Smart Class) untuk pengelolaan siswa, absensi, nilai, dan jurnal.',
+    'Aplikasi produktivitas mandiri wali kelas (Smart Class) untuk pengelolaan siswa, absensi, nilai, tabungan, dan jurnal wali kelas.',
 };
 
 export default function RootLayout({

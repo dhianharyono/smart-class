@@ -89,11 +89,11 @@ export default function NilaiClient({ initialSubjects, initialKkm }: NilaiClient
       setIsUpdatingKkm(false);
     }
   };
-  
+
   // Active filter states
   const [selectedSubject, setSelectedSubject] = useState<string>(subjects[0] || 'Matematika');
   const [selectedCategory, setSelectedCategory] = useState<'Tugas' | 'UH' | 'UTS' | 'UAS'>('Tugas');
-  
+
   // Local list states
   const [localGrades, setLocalGrades] = useState<GradeRow[]>([]);
   const [newSubjectName, setNewSubjectName] = useState('');
@@ -162,12 +162,12 @@ export default function NilaiClient({ initialSubjects, initialKkm }: NilaiClient
     startTransition(async () => {
       try {
         await saveBulkGrades(selectedSubject, selectedCategory, localGrades);
-        
+
         // Refresh TanStack Query cache
         queryClient.invalidateQueries({
           queryKey: ['grades', selectedSubject, selectedCategory],
         });
-        
+
         toast.success(`Nilai ${selectedSubject} (${selectedCategory}) berhasil disimpan!`);
       } catch (err: any) {
         toast.error(err.message || 'Gagal menyimpan nilai.');
@@ -191,7 +191,7 @@ export default function NilaiClient({ initialSubjects, initialKkm }: NilaiClient
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -424,11 +424,10 @@ export default function NilaiClient({ initialSubjects, initialKkm }: NilaiClient
                             max={100}
                             value={row.score}
                             onChange={(e) => handleScoreChange(row.studentId, e.target.value)}
-                            className={`text-center font-bold bg-zinc-950 border text-white rounded-xl focus:ring-1 focus:ring-emerald-500 h-9 pr-2 ${
-                              row.score !== '' && row.score < kkm
+                            className={`text-center font-bold bg-zinc-950 border text-white rounded-xl focus:ring-1 focus:ring-emerald-500 h-9 pr-2 ${row.score !== '' && row.score < kkm
                                 ? 'border-rose-900/60 text-rose-400 focus:border-rose-500 bg-rose-950/10'
                                 : 'border-zinc-800 focus:border-emerald-500'
-                            }`}
+                              }`}
                           />
                           {row.score !== '' && row.score < kkm && (
                             <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] font-bold text-rose-500 uppercase tracking-wider">

@@ -95,6 +95,7 @@ export async function saveBulkAttendance(
     }
 
     revalidatePath('/absensi');
+    revalidatePath('/jurnal');
     revalidatePath('/');
     return { success: true, count: records.length };
   } catch (error: any) {

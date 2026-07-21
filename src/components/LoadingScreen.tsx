@@ -20,7 +20,7 @@ export default function LoadingScreen({ message, variant = 'teacher' }: LoadingS
 
   useEffect(() => {
     if (message) return; // if custom static message is provided, don't cycle
-    
+
     const interval = setInterval(() => {
       setMsgIdx((prev) => {
         const next = (prev + 1) % defaultMessages.length;
@@ -53,7 +53,7 @@ export default function LoadingScreen({ message, variant = 'teacher' }: LoadingS
             Smart Class
           </h2>
           <p className="text-zinc-500 text-xs tracking-wider uppercase font-semibold">
-            {variant === 'admin' ? 'Admin Portal' : 'Command Center'}
+            {variant === 'admin' ? 'Admin Portal' : 'Wali Kelas'}
           </p>
         </div>
 

@@ -6,6 +6,7 @@ import Attendance from '@/models/Attendance';
 import Grade from '@/models/Grade';
 import Saving from '@/models/Saving';
 import Teacher from '@/models/Teacher';
+import Journal from '@/models/Journal';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { verifySession } from '@/lib/auth';
@@ -31,9 +32,12 @@ export async function getDashboardStats() {
     await dbConnect();
     const teacherId = await requireAuth();
 
-    // Get teacher's KKM
-    const teacher = await Teacher.findById(teacherId).select('kkm').lean();
+    // Get teacher's KKM & enabled menus
+    const teacher = await Teacher.findById(teacherId).select('kkm enabledMenus').lean();
     const kkm = teacher?.kkm ?? 70;
+    const enabledMenus = teacher?.enabledMenus && teacher.enabledMenus.length > 0
+      ? teacher.enabledMenus
+      : ['/', '/siswa', '/absensi', '/nilai', '/tabungan', '/jurnal'];
 
     // 1. Total Students count
     const studentCount = await Student.countDocuments({ teacherId });
@@ -129,6 +133,32 @@ export async function getDashboardStats() {
       attendanceChartData.push({ name: 'Belum Ada Data', value: 1, color: '#71717a' });
     }
 
+    // 6. Journal monthly meeting and attendance stats
+    const journals = await Journal.find({ teacherId }).sort({ date: 1 }).lean();
+    const journalMap = new Map<
+      string,
+      { month: string; Pertemuan: number; Sakit: number; Izin: number; Alpha: number }
+    >();
+
+    journals.forEach((j) => {
+      const d = new Date(j.date);
+      const key = d.toLocaleDateString('id-ID', { month: 'short', year: '2-digit' });
+      const current = journalMap.get(key) || {
+        month: key,
+        Pertemuan: 0,
+        Sakit: 0,
+        Izin: 0,
+        Alpha: 0,
+      };
+      current.Pertemuan += 1;
+      current.Sakit += j.absentS || 0;
+      current.Izin += j.absentI || 0;
+      current.Alpha += j.absentA || 0;
+      journalMap.set(key, current);
+    });
+
+    const journalMonthlyStats = Array.from(journalMap.values());
+
     return JSON.parse(JSON.stringify({
       studentCount,
       monthlyAttendanceRate,
@@ -138,6 +168,9 @@ export async function getDashboardStats() {
       savingsTrend,
       attendanceBreakdown,
       attendanceChartData,
+      journalMonthlyStats,
+      totalJournalEntries: journals.length,
+      enabledMenus,
       kkm,
     }));
   } catch (error: any) {

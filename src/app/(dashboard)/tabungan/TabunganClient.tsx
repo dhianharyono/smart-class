@@ -161,12 +161,12 @@ export default function TabunganClient() {
 
   const handleExcelExport = async () => {
     if (!summaries || summaries.length === 0) {
-      toast.error('Tidak ada data jurnal untuk diekspor!');
+      toast.error('Tidak ada data tabungan untuk diekspor!');
       return;
     }
     toast.promise(exportSavingsToExcel(summaries), {
-      loading: 'Menyusun laporan Excel jurnal...',
-      success: 'Excel jurnal berhasil diunduh!',
+      loading: 'Menyusun laporan Excel tabungan...',
+      success: 'Excel tabungan berhasil diunduh!',
       error: 'Gagal mengunduh Excel.',
     });
   };
@@ -176,15 +176,15 @@ export default function TabunganClient() {
     summaries?.find((s) => s.studentId === txForm.studentId)?.name || '';
 
   return (
-    <div className='space-y-6'>
+    <div className='space-y-6 animate-fade-in'>
       {/* Header */}
       <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
         <div>
           <h2 className='text-3xl font-extrabold tracking-tight bg-gradient-to-r from-zinc-50 to-zinc-400 bg-clip-text text-transparent'>
-            Jurnal Siswa
+            Tabungan Siswa
           </h2>
           <p className='text-zinc-400 text-sm'>
-            Pantau jurnal siswa, catat setoran (Kredit), penarikan (Debit), dan
+            Pantau tabungan siswa, catat setoran (Kredit), penarikan (Debit), dan
             riwayat mutasi dana.
           </p>
         </div>
@@ -220,11 +220,11 @@ export default function TabunganClient() {
           {isSummaryLoading ? (
             <div className='flex flex-col items-center justify-center py-20 text-zinc-500 text-sm'>
               <Loader2 className='h-8 w-8 animate-spin text-emerald-500 mb-3' />
-              <span>Memuat ringkasan jurnal...</span>
+              <span>Memuat ringkasan tabungan...</span>
             </div>
           ) : isError ? (
             <div className='text-center py-20 text-red-400 text-sm'>
-              Gagal memuat ringkasan jurnal kelas.
+              Gagal memuat ringkasan tabungan kelas.
             </div>
           ) : summaries && summaries.length > 0 ? (
             <Table>
@@ -274,9 +274,8 @@ export default function TabunganClient() {
                     </TableCell>
                     <TableCell>
                       <span
-                        className={`font-bold ${
-                          row.balance > 0 ? 'text-emerald-400' : 'text-zinc-500'
-                        }`}
+                        className={`font-bold ${row.balance > 0 ? 'text-emerald-400' : 'text-zinc-500'
+                          }`}
                       >
                         {formatIDR(row.balance)}
                       </span>
@@ -330,7 +329,7 @@ export default function TabunganClient() {
                 Catat Transaksi Baru
               </DialogTitle>
               <DialogDescription className='text-xs text-zinc-400'>
-                Log pencatatanjurnal siswa.
+                Log pencatatan tabungan siswa.
               </DialogDescription>
             </DialogHeader>
 
@@ -443,7 +442,7 @@ export default function TabunganClient() {
           <DialogHeader className='pb-4 border-b border-zinc-800'>
             <DialogTitle className='text-lg font-bold text-zinc-100 flex items-center gap-2'>
               <History className='h-5 w-5 text-emerald-500' />
-              Riwayat Jurnal Siswa
+              Riwayat Tabungan Siswa
             </DialogTitle>
             <DialogDescription className='text-xs text-zinc-400'>
               {ledgerData
@@ -470,11 +469,10 @@ export default function TabunganClient() {
                     >
                       <div className='flex items-center gap-3'>
                         <div
-                          className={`p-2 rounded-xl border ${
-                            isKredit
+                          className={`p-2 rounded-xl border ${isKredit
                               ? 'bg-emerald-950/40 text-emerald-400 border-emerald-900/40'
                               : 'bg-rose-950/40 text-rose-400 border-rose-900/40'
-                          }`}
+                            }`}
                         >
                           {isKredit ? (
                             <ArrowUpRight className='h-4 w-4' />
@@ -506,9 +504,8 @@ export default function TabunganClient() {
                       </div>
                       <div className='text-right'>
                         <span
-                          className={`text-sm font-extrabold ${
-                            isKredit ? 'text-emerald-400' : 'text-rose-400'
-                          }`}
+                          className={`text-sm font-extrabold ${isKredit ? 'text-emerald-400' : 'text-rose-400'
+                            }`}
                         >
                           {isKredit ? '+' : '-'} {formatIDR(tx.amount)}
                         </span>
@@ -519,7 +516,7 @@ export default function TabunganClient() {
               </div>
             ) : (
               <div className='text-center py-12 text-zinc-650 text-xs'>
-                Siswa ini belum memiliki transaksi jurnal.
+                Siswa ini belum memiliki transaksi tabungan.
               </div>
             )}
           </div>

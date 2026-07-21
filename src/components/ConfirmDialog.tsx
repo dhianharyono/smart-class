@@ -37,10 +37,10 @@ export default function ConfirmDialog({
   variant = 'warning',
   icon,
 }: ConfirmDialogProps) {
-  
+
   const getIcon = () => {
     if (icon) return icon;
-    
+
     switch (variant) {
       case 'danger':
         return (

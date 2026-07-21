@@ -37,7 +37,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
       teacher={{ 
         name: teacher.name || 'Guru Smart Class', 
         email: teacher.email,
-        isAdmin: !!session.isAdmin
+        schoolName: teacher.schoolName || '',
+        className: teacher.className || '',
+        nip: teacher.nip || '-',
+        isAdmin: !!session.isAdmin,
+        isFirstLogin: teacher.isFirstLogin ?? false,
+        enabledMenus: teacher.enabledMenus || ['/', '/siswa', '/absensi', '/nilai', '/tabungan', '/jurnal'],
       }}
     >
       {children}

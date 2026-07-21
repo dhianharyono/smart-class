@@ -99,6 +99,8 @@ export async function registerTeacher(data: {
       password: hashedPassword,
       schoolName: trimmedSchoolName,
       className: className?.trim(),
+      isFirstLogin: true,
+      enabledMenus: ['/', '/siswa', '/absensi', '/nilai', '/tabungan', '/jurnal'],
     });
 
     await newTeacher.save();

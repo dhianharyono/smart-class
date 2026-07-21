@@ -180,7 +180,7 @@ export default function SiswaClient({ initialStudents }: SiswaClientProps) {
   };
 
   return (
-    <div className='space-y-6'>
+    <div className='space-y-6 animate-fade-in'>
       {/* Header */}
       <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
         <div>
@@ -264,11 +264,10 @@ export default function SiswaClient({ initialStudents }: SiswaClientProps) {
                     <TableCell>{student.className}</TableCell>
                     <TableCell>
                       <span
-                        className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                          student.gender === 'L'
+                        className={`px-2 py-0.5 rounded-full text-xs font-semibold ${student.gender === 'L'
                             ? 'bg-blue-950/40 text-blue-400 border border-blue-900/40'
                             : 'bg-rose-950/40 text-rose-400 border border-rose-900/40'
-                        }`}
+                          }`}
                       >
                         {student.gender}
                       </span>
@@ -558,7 +557,7 @@ export default function SiswaClient({ initialStudents }: SiswaClientProps) {
             <DialogDescription className='text-center text-xs text-zinc-400'>
               Apakah Anda yakin ingin menghapus{' '}
               <strong>{selectedStudent?.name}</strong>? Tindakan ini akan
-              menghapus permanen semua data kehadiran, nilai, dan jurnal terkait
+              menghapus permanen semua data kehadiran, nilai, dan tabungan terkait
               siswa ini!
             </DialogDescription>
           </DialogHeader>
