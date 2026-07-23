@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { Mail, Lock, BookOpen, Loader2, ArrowRight, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import LoadingScreen from '@/components/LoadingScreen';
+import ReCaptcha from '@/components/ReCaptcha';
 
 export default function SignInPage() {
   const router = useRouter();
@@ -17,6 +18,8 @@ export default function SignInPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [redirectVariant, setRedirectVariant] = useState<'teacher' | 'admin'>('teacher');
+  const [recaptchaToken, setRecaptchaToken] = useState<string>('');
+  const [resetCaptcha, setResetCaptcha] = useState<number>(0);
 
   useEffect(() => {
     // Clear stale session cookie to prevent redirect loops
@@ -32,7 +35,7 @@ export default function SignInPage() {
 
     setLoading(true);
     try {
-      const res = await loginTeacher({ email, password });
+      const res = await loginTeacher({ email, password, recaptchaToken });
       if (res.success) {
         toast.success('Selamat datang kembali!');
         setRedirectVariant(res.isAdmin ? 'admin' : 'teacher');
@@ -45,10 +48,14 @@ export default function SignInPage() {
         router.refresh();
       } else {
         toast.error(res.error || 'Email/username atau password salah.');
+        setResetCaptcha((prev) => prev + 1);
+        setRecaptchaToken('');
         setLoading(false);
       }
     } catch (err) {
       toast.error('Terjadi kesalahan. Silakan coba lagi.');
+      setResetCaptcha((prev) => prev + 1);
+      setRecaptchaToken('');
       setLoading(false);
     }
   };
@@ -147,10 +154,17 @@ export default function SignInPage() {
               </div>
             </div>
 
+            {/* Google reCAPTCHA Protection */}
+            <ReCaptcha
+              onVerify={(token) => setRecaptchaToken(token)}
+              onExpire={() => setRecaptchaToken('')}
+              resetTrigger={resetCaptcha}
+            />
+
             {/* Submit Button */}
             <Button
               type="submit"
-              disabled={loading}
+              disabled={loading || (!!process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && !recaptchaToken)}
               className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold py-3 px-4 rounded-xl shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20 transition-all duration-200 flex items-center justify-center gap-2 text-sm cursor-pointer disabled:opacity-50"
             >
               {loading ? (

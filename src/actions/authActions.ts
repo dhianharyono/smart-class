@@ -8,9 +8,23 @@ import { hashPassword, verifyPassword } from '@/lib/password';
 import { signSession } from '@/lib/auth';
 import { cookies } from 'next/headers';
 import { escapeRegExp } from '@/lib/utils';
+import { checkRateLimit } from '@/lib/rateLimit';
+import { verifyRecaptchaToken } from '@/lib/recaptcha';
 
-export async function loginTeacher(data: { email: string; password: string }) {
+export async function loginTeacher(data: { email: string; password: string; recaptchaToken?: string }) {
   try {
+    // 1. Rate Limiting Check (Max 5 attempts per minute)
+    const rateLimit = await checkRateLimit('login', 5, 60 * 1000);
+    if (!rateLimit.allowed) {
+      throw new Error(`Terlalu banyak percobaan login. Silakan coba lagi dalam ${rateLimit.retryAfterSeconds} detik.`);
+    }
+
+    // 2. Google reCAPTCHA Check
+    const recaptchaRes = await verifyRecaptchaToken(data.recaptchaToken);
+    if (!recaptchaRes.success) {
+      throw new Error(recaptchaRes.error || 'Verifikasi reCAPTCHA gagal.');
+    }
+
     await dbConnect();
     const { email, password } = data;
 
@@ -62,8 +76,21 @@ export async function registerTeacher(data: {
   password: string;
   schoolName?: string;
   className?: string;
+  recaptchaToken?: string;
 }) {
   try {
+    // 1. Rate Limiting Check (Max 5 attempts per minute)
+    const rateLimit = await checkRateLimit('register', 5, 60 * 1000);
+    if (!rateLimit.allowed) {
+      throw new Error(`Terlalu banyak percobaan pendaftaran. Silakan coba lagi dalam ${rateLimit.retryAfterSeconds} detik.`);
+    }
+
+    // 2. Google reCAPTCHA Check
+    const recaptchaRes = await verifyRecaptchaToken(data.recaptchaToken);
+    if (!recaptchaRes.success) {
+      throw new Error(recaptchaRes.error || 'Verifikasi reCAPTCHA gagal.');
+    }
+
     await dbConnect();
     const { name, email, password, schoolName, className } = data;
 
