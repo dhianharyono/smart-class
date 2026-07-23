@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   getProfile,
@@ -215,11 +216,10 @@ export default function ProfileClient() {
         <Button
           onClick={() => setActiveTab('profile')}
           variant='ghost'
-          className={`rounded-xl text-xs font-semibold h-10 px-4 gap-2 transition-all ${
-            activeTab === 'profile'
-              ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-900/60 shadow-md shadow-emerald-950/20'
-              : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'
-          }`}
+          className={`rounded-xl text-xs font-semibold h-10 px-4 gap-2 transition-all ${activeTab === 'profile'
+            ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-900/60 shadow-md shadow-emerald-950/20'
+            : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'
+            }`}
         >
           <User className='h-4 w-4' />
           <span>Data Pribadi & Sekolah</span>
@@ -228,27 +228,13 @@ export default function ProfileClient() {
         <Button
           onClick={() => setActiveTab('security')}
           variant='ghost'
-          className={`rounded-xl text-xs font-semibold h-10 px-4 gap-2 transition-all ${
-            activeTab === 'security'
-              ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-900/60 shadow-md shadow-emerald-950/20'
-              : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'
-          }`}
+          className={`rounded-xl text-xs font-semibold h-10 px-4 gap-2 transition-all ${activeTab === 'security'
+            ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-900/60 shadow-md shadow-emerald-950/20'
+            : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'
+            }`}
         >
           <ShieldCheck className='h-4 w-4' />
           <span>Keamanan & Password</span>
-        </Button>
-
-        <Button
-          onClick={() => setActiveTab('menus')}
-          variant='ghost'
-          className={`rounded-xl text-xs font-semibold h-10 px-4 gap-2 transition-all ${
-            activeTab === 'menus'
-              ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-900/60 shadow-md shadow-emerald-950/20'
-              : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'
-          }`}
-        >
-          <Sliders className='h-4 w-4' />
-          <span>Pengaturan Menu Sidebar</span>
         </Button>
       </div>
 
@@ -434,90 +420,6 @@ export default function ProfileClient() {
               </Button>
             </div>
           </form>
-        </Card>
-      )}
-
-      {/* TAB 3: PENGATURAN MENU SIDEBAR */}
-      {activeTab === 'menus' && (
-        <Card className='bg-zinc-900/30 border-zinc-900 rounded-2xl shadow-xl p-6'>
-          <CardHeader className='p-0 pb-6 border-b border-zinc-800/80 mb-6'>
-            <CardTitle className='text-lg font-bold text-zinc-100 flex items-center gap-2'>
-              <Sliders className='h-5 w-5 text-emerald-500' />
-              Kustomisasi Menu Navigation Sidebar
-            </CardTitle>
-            <CardDescription className='text-xs text-zinc-400 mt-1'>
-              Pilih menu fitur mana saja yang ingin Anda tampilkan di bilah samping (sidebar). Menu <strong>Dashboard</strong> dan <strong>Profil Saya</strong> akan selalu tampil.
-            </CardDescription>
-          </CardHeader>
-
-          <div className='space-y-3 mb-6'>
-            {ALL_MENUS.map((menu) => {
-              const isChecked = selectedMenus.includes(menu.href);
-              const MenuIcon = menu.icon;
-              return (
-                <div
-                  key={menu.href}
-                  onClick={() => handleMenuToggle(menu.href)}
-                  className={`flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer ${
-                    isChecked
-                      ? 'bg-emerald-950/30 border-emerald-900/50 text-emerald-300'
-                      : 'bg-zinc-950 border-zinc-850 text-zinc-400 hover:border-zinc-800'
-                  }`}
-                >
-                  <div className='flex items-center gap-3.5'>
-                    <div
-                      className={`p-2.5 rounded-xl border ${
-                        isChecked
-                          ? 'bg-emerald-900/40 text-emerald-400 border-emerald-800/50'
-                          : 'bg-zinc-900 text-zinc-500 border-zinc-800'
-                      }`}
-                    >
-                      <MenuIcon className='h-5 w-5' />
-                    </div>
-                    <div>
-                      <span className='text-sm font-bold text-zinc-200 block'>
-                        {menu.label}
-                      </span>
-                      <span className='text-xs text-zinc-500 block mt-0.5'>
-                        {menu.desc}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div
-                    className={`h-6 w-6 rounded-lg border flex items-center justify-center transition-colors ${
-                      isChecked
-                        ? 'bg-emerald-600 border-emerald-500 text-white'
-                        : 'border-zinc-700 bg-zinc-900'
-                    }`}
-                  >
-                    {isChecked && <Check className='h-4 w-4 stroke-[3]' />}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className='pt-4 flex items-center justify-between border-t border-zinc-800/80'>
-            <span className='text-xs text-zinc-500'>
-              {selectedMenus.length} dari {ALL_MENUS.length} menu modul diaktifkan
-            </span>
-            <Button
-              type='button'
-              onClick={handleSaveMenus}
-              disabled={updateMenusMutation.isPending}
-              className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl px-5 h-10 gap-2 shadow-lg shadow-emerald-950/30'
-            >
-              {updateMenusMutation.isPending ? (
-                <Loader2 className='h-4 w-4 animate-spin' />
-              ) : (
-                <>
-                  <Save className='h-4 w-4' />
-                  <span>Simpan Pengaturan Menu</span>
-                </>
-              )}
-            </Button>
-          </div>
         </Card>
       )}
     </div>

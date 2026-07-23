@@ -75,7 +75,7 @@ export default function AdminLayoutClient({ children, admin }: AdminLayoutClient
             <h1 className="text-lg font-bold bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
               Smart Admin
             </h1>
-            <p className="text-[10px] text-zinc-500 tracking-widest uppercase">System Admin</p>
+            <p className="text-[10px] text-zinc-500 tracking-widest uppercase">Dashboard Admin</p>
           </div>
         </div>
 
@@ -89,16 +89,14 @@ export default function AdminLayoutClient({ children, admin }: AdminLayoutClient
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group ${
-                  isActive
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group ${isActive
                     ? 'bg-indigo-950/60 text-indigo-400 border border-indigo-900/50 shadow-md shadow-indigo-950/20'
                     : 'text-zinc-400 hover:bg-zinc-900/60 hover:text-zinc-200 border border-transparent'
-                }`}
+                  }`}
               >
                 <Icon
-                  className={`h-5 w-5 transition-transform duration-200 group-hover:scale-110 ${
-                    isActive ? 'text-indigo-400' : 'text-zinc-500 group-hover:text-zinc-300'
-                  }`}
+                  className={`h-5 w-5 transition-transform duration-200 group-hover:scale-110 ${isActive ? 'text-indigo-400' : 'text-zinc-500 group-hover:text-zinc-300'
+                    }`}
                 />
                 <span>{item.name}</span>
                 {isActive && (

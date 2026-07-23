@@ -21,6 +21,7 @@ import {
   Sparkles,
   Sliders,
   Check,
+  Settings,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -48,6 +49,7 @@ const allSidebarItems: SidebarItem[] = [
   { name: 'Tabungan Siswa', href: '/tabungan', icon: Wallet },
   { name: 'Jurnal Wali Kelas', href: '/jurnal', icon: BookMarked },
   { name: 'Profil Saya', href: '/profile', icon: User },
+  { name: 'Pengaturan', href: '/settings', icon: Settings },
 ];
 
 const CONFIGURABLE_MENUS = [
@@ -84,7 +86,7 @@ export default function DashboardLayoutClient({
   const [enabledMenus, setEnabledMenus] = useState<string[]>(
     teacher.enabledMenus && teacher.enabledMenus.length > 0
       ? teacher.enabledMenus
-      : ['/', '/siswa', '/absensi', '/nilai', '/tabungan', '/jurnal']
+      : ['/', '/siswa', '/absensi', '/nilai', '/tabungan', '/jurnal', '/settings']
   );
 
   // Sync state if teacher prop changes
@@ -125,7 +127,7 @@ export default function DashboardLayoutClient({
   const handleSaveOnboarding = async () => {
     setIsSavingOnboarding(true);
     try {
-      const finalMenus = ['/', ...selectedOnboardingMenus, '/profile'];
+      const finalMenus = ['/', ...selectedOnboardingMenus, '/profile', '/settings'];
       await updateMenuPreferences(finalMenus, true);
       setEnabledMenus(finalMenus);
       setOnboardingOpen(false);
@@ -141,7 +143,7 @@ export default function DashboardLayoutClient({
 
   // Filter visible sidebar items
   const visibleSidebarItems = allSidebarItems.filter((item) => {
-    if (item.href === '/' || item.href === '/profile') return true;
+    if (item.href === '/' || item.href === '/profile' || item.href === '/settings') return true;
     return enabledMenus.includes(item.href);
   });
 

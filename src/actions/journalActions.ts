@@ -247,6 +247,7 @@ export async function createJournal(data: {
   absentI: number;
   absentA: number;
   notes?: string;
+  attendanceRecords?: { studentId: string; status: 'Hadir' | 'Sakit' | 'Izin' | 'Alfa' }[];
 }) {
   try {
     await dbConnect();
@@ -271,14 +272,30 @@ export async function createJournal(data: {
     await newJournal.save();
 
     // Two-way sync to Attendance collection
-    await syncAttendanceFromJournal(
-      teacherId,
-      targetDate,
-      data.absentS || 0,
-      data.absentI || 0,
-      data.absentA || 0,
-      data.notes
-    );
+    if (data.attendanceRecords && data.attendanceRecords.length > 0) {
+      const bulkOps = data.attendanceRecords.map((rec) => ({
+        updateOne: {
+          filter: { studentId: rec.studentId, date: targetDate, teacherId },
+          update: {
+            $set: {
+              status: rec.status,
+              createdAt: new Date(),
+            },
+          },
+          upsert: true,
+        },
+      }));
+      await Attendance.bulkWrite(bulkOps);
+    } else {
+      await syncAttendanceFromJournal(
+        teacherId,
+        targetDate,
+        data.absentS || 0,
+        data.absentI || 0,
+        data.absentA || 0,
+        data.notes
+      );
+    }
 
     revalidatePath('/jurnal');
     revalidatePath('/absensi');
@@ -306,6 +323,7 @@ export async function updateJournal(
     absentI: number;
     absentA: number;
     notes?: string;
+    attendanceRecords?: { studentId: string; status: 'Hadir' | 'Sakit' | 'Izin' | 'Alfa' }[];
   }
 ) {
   try {
@@ -338,14 +356,30 @@ export async function updateJournal(
     }
 
     // Two-way sync to Attendance collection
-    await syncAttendanceFromJournal(
-      teacherId,
-      targetDate,
-      data.absentS || 0,
-      data.absentI || 0,
-      data.absentA || 0,
-      data.notes
-    );
+    if (data.attendanceRecords && data.attendanceRecords.length > 0) {
+      const bulkOps = data.attendanceRecords.map((rec) => ({
+        updateOne: {
+          filter: { studentId: rec.studentId, date: targetDate, teacherId },
+          update: {
+            $set: {
+              status: rec.status,
+              createdAt: new Date(),
+            },
+          },
+          upsert: true,
+        },
+      }));
+      await Attendance.bulkWrite(bulkOps);
+    } else {
+      await syncAttendanceFromJournal(
+        teacherId,
+        targetDate,
+        data.absentS || 0,
+        data.absentI || 0,
+        data.absentA || 0,
+        data.notes
+      );
+    }
 
     revalidatePath('/jurnal');
     revalidatePath('/absensi');

@@ -9,6 +9,9 @@ import {
   TrendingUp,
   ArrowRight,
   ShieldCheck,
+  BookOpen,
+  CheckCircle2,
+  FileText,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
@@ -21,6 +24,10 @@ interface TeacherStat {
   className: string;
   studentCount: number;
   totalSavings: number;
+  journalCount?: number;
+  gradeCount?: number;
+  attendanceRate?: number;
+  totalAttendance?: number;
   createdAt: string;
 }
 
@@ -46,6 +53,8 @@ interface AdminDashboardClientProps {
     schoolCount: number;
     studentCount: number;
     totalSavingsBalance: number;
+    totalJournalCount?: number;
+    overallAttendanceRate?: number;
     teacherStats: TeacherStat[];
     onlineUsers?: OnlineUser[];
   };
@@ -246,59 +255,158 @@ export default function AdminDashboardClient({ stats, schools }: AdminDashboardC
         </Card>
       </div>
 
-      {/* Detail Guru */}
+      {/* Detail & Statistik Wali Kelas (Guru) */}
       <Card className="bg-zinc-900/30 border-zinc-900 rounded-2xl shadow-xl">
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <CardTitle className="text-md font-bold text-zinc-200">Statistik Wali Kelas (Guru)</CardTitle>
-            <CardDescription className="text-xs text-zinc-500">Performa kelas, sekolah, dan jumlah siswa per wali kelas.</CardDescription>
+            <CardTitle className="text-md font-bold text-zinc-200 flex items-center gap-2">
+              <GraduationCap className="h-5 w-5 text-indigo-400" />
+              <span>Statistik Wali Kelas (Guru)</span>
+            </CardTitle>
+            <CardDescription className="text-xs text-zinc-500 mt-1">
+              Ringkasan aktivitas pembelajaran, tingkat kehadiran siswa, jurnal, nilai, dan total tabungan kelas.
+            </CardDescription>
           </div>
-          <Link href="/admin/guru" className="flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 font-semibold transition-colors">
+          <Link href="/admin/guru" className="flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 font-semibold transition-colors shrink-0">
             <span>Kelola Guru</span>
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-6">
+          {/* Mini KPI Ringkasan Aktivitas Sistem */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="bg-zinc-950/50 border border-zinc-800/80 rounded-xl p-3 flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 shrink-0">
+                <Users className="h-4 w-4" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] font-medium text-zinc-400 uppercase tracking-wider">Total Siswa</p>
+                <p className="text-base font-bold text-zinc-100">{stats.studentCount} Siswa</p>
+              </div>
+            </div>
+
+            <div className="bg-zinc-950/50 border border-zinc-800/80 rounded-xl p-3 flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 shrink-0">
+                <CheckCircle2 className="h-4 w-4" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] font-medium text-zinc-400 uppercase tracking-wider">Rata2 Presensi</p>
+                <p className="text-base font-bold text-zinc-100">{stats.overallAttendanceRate ?? 0}%</p>
+              </div>
+            </div>
+
+            <div className="bg-zinc-950/50 border border-zinc-800/80 rounded-xl p-3 flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-blue-500/10 text-blue-400 shrink-0">
+                <BookOpen className="h-4 w-4" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] font-medium text-zinc-400 uppercase tracking-wider">Total Jurnal</p>
+                <p className="text-base font-bold text-zinc-100">{stats.totalJournalCount ?? 0} Entri</p>
+              </div>
+            </div>
+
+            <div className="bg-zinc-950/50 border border-zinc-800/80 rounded-xl p-3 flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400 shrink-0">
+                <Wallet className="h-4 w-4" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] font-medium text-zinc-400 uppercase tracking-wider">Total Tabungan</p>
+                <p className="text-xs sm:text-sm font-bold text-zinc-100 truncate">{formatIDR(stats.totalSavingsBalance || 0)}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Tabel Statistik Wali Kelas */}
           {stats.teacherStats.length > 0 ? (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto rounded-xl border border-zinc-850">
               <table className="w-full text-left text-sm text-zinc-300 border-collapse">
                 <thead>
-                  <tr className="border-b border-zinc-800 text-zinc-400 text-xs font-semibold uppercase tracking-wider">
+                  <tr className="bg-zinc-950/70 border-b border-zinc-800 text-zinc-400 text-[11px] font-semibold uppercase tracking-wider">
                     <th className="py-3 px-4">Nama Guru</th>
-                    <th className="py-3 px-4">Sekolah</th>
-                    <th className="py-3 px-4">Kelas</th>
-                    <th className="py-3 px-4 text-center">Jumlah Siswa</th>
+                    <th className="py-3 px-4">Sekolah / Kelas</th>
+                    <th className="py-3 px-4 text-center">Siswa</th>
+                    <th className="py-3 px-4 text-center">Tingkat Kehadiran</th>
+                    <th className="py-3 px-4 text-center">Jurnal</th>
+                    <th className="py-3 px-4 text-center">Nilai</th>
+                    <th className="py-3 px-4 text-right">Tabungan Kelas</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-900">
-                  {stats.teacherStats.map((teacher) => (
-                    <tr key={teacher.id} className="hover:bg-zinc-900/20 transition-colors group">
-                      <td className="py-3.5 px-4">
-                        <div className="flex flex-col">
-                          <span className="font-semibold text-zinc-200 group-hover:text-white transition-colors">
-                            {teacher.name}
+                  {stats.teacherStats.map((teacher) => {
+                    const rate = teacher.attendanceRate ?? 0;
+                    const hasAttendance = (teacher.totalAttendance ?? 0) > 0;
+
+                    let rateBadgeClass = "bg-zinc-800 text-zinc-400 border-zinc-700";
+                    if (hasAttendance) {
+                      if (rate >= 85) {
+                        rateBadgeClass = "bg-emerald-950/40 text-emerald-400 border-emerald-900/50";
+                      } else if (rate >= 70) {
+                        rateBadgeClass = "bg-amber-950/40 text-amber-400 border-amber-900/50";
+                      } else {
+                        rateBadgeClass = "bg-rose-950/40 text-rose-400 border-rose-900/50";
+                      }
+                    }
+
+                    return (
+                      <tr key={teacher.id} className="hover:bg-zinc-900/40 transition-colors group">
+                        <td className="py-3.5 px-4">
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-zinc-200 group-hover:text-white transition-colors">
+                              {teacher.name}
+                            </span>
+                            <span className="text-xs text-zinc-500">
+                              {teacher.email}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <div className="flex flex-col gap-1 items-start">
+                            <span className="text-zinc-300 font-medium text-xs">{teacher.schoolName}</span>
+                            <span className="bg-zinc-850 border border-zinc-750 text-zinc-300 px-2 py-0.5 rounded text-[11px] font-mono">
+                              Kelas {teacher.className}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4 text-center">
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-zinc-200 bg-zinc-900 px-2.5 py-1 rounded-lg border border-zinc-800">
+                            <Users className="h-3 w-3 text-indigo-400" />
+                            {teacher.studentCount}
                           </span>
-                          <span className="text-xs text-zinc-500">
-                            {teacher.email}
+                        </td>
+                        <td className="py-3.5 px-4 text-center">
+                          {hasAttendance ? (
+                            <span className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg border ${rateBadgeClass}`}>
+                              {rate}% Hadir
+                            </span>
+                          ) : (
+                            <span className="text-xs text-zinc-500 italic">Belum Ada Log</span>
+                          )}
+                        </td>
+                        <td className="py-3.5 px-4 text-center">
+                          <span className="inline-flex items-center gap-1.5 text-xs text-zinc-300 font-medium bg-zinc-900/80 border border-zinc-800 px-2.5 py-1 rounded-lg">
+                            <BookOpen className="h-3.5 w-3.5 text-blue-400" />
+                            {teacher.journalCount || 0}
                           </span>
-                        </div>
-                      </td>
-                      <td className="py-3.5 px-4 text-zinc-300">{teacher.schoolName}</td>
-                      <td className="py-3.5 px-4">
-                        <span className="bg-zinc-800 border border-zinc-700/50 text-zinc-300 px-2 py-0.5 rounded text-xs font-mono">
-                          {teacher.className}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-4 text-center text-zinc-200 font-medium">
-                        {teacher.studentCount} Siswa
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="py-3.5 px-4 text-center">
+                          <span className="inline-flex items-center gap-1.5 text-xs text-zinc-300 font-medium bg-zinc-900/80 border border-zinc-800 px-2.5 py-1 rounded-lg">
+                            <FileText className="h-3.5 w-3.5 text-violet-400" />
+                            {teacher.gradeCount || 0}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 text-right">
+                          <span className="text-xs font-semibold text-emerald-400 bg-emerald-950/20 border border-emerald-900/30 px-2.5 py-1 rounded-lg">
+                            {formatIDR(teacher.totalSavings || 0)}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-12 text-zinc-600 text-xs">
+            <div className="flex flex-col items-center justify-center py-12 text-zinc-600 text-xs border border-dashed border-zinc-800 rounded-xl">
               <span className="text-indigo-400 font-semibold mb-1">Belum Ada Wali Kelas</span>
               Wali kelas yang mendaftar akan muncul di sini beserta statistiknya.
             </div>
@@ -308,3 +416,4 @@ export default function AdminDashboardClient({ stats, schools }: AdminDashboardC
     </div>
   );
 }
+

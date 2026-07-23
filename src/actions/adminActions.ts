@@ -6,6 +6,7 @@ import Student from '@/models/Student';
 import Attendance from '@/models/Attendance';
 import Grade from '@/models/Grade';
 import Saving from '@/models/Saving';
+import Journal from '@/models/Journal';
 import AdminUser from '@/models/AdminUser';
 import School from '@/models/School';
 import { cookies } from 'next/headers';
@@ -61,6 +62,7 @@ export async function getAdminStats() {
     const teacherCount = await Teacher.countDocuments({ email: { $nin: adminEmails } });
     const schoolCount = await School.countDocuments();
     const studentCount = await Student.countDocuments();
+    const totalJournalCount = await Journal.countDocuments();
 
     // 2. Hitung total saldo tabungan di seluruh sistem
     const savings = await Saving.find({}).lean();
@@ -73,26 +75,44 @@ export async function getAdminStats() {
     const teachers = await Teacher.find({ email: { $nin: adminEmails } }).sort({ name: 1 }).lean();
     const teacherStats = await Promise.all(
       teachers.map(async (t) => {
-        const classStudentCount = await Student.countDocuments({ teacherId: t._id.toString() });
-        const teacherSavings = await Saving.find({ teacherId: t._id.toString() }).lean();
+        const teacherIdStr = t._id.toString();
+        const classStudentCount = await Student.countDocuments({ teacherId: teacherIdStr });
+        const teacherSavings = await Saving.find({ teacherId: teacherIdStr }).lean();
         
         let classSavingsBalance = 0;
         teacherSavings.forEach((tx) => {
           classSavingsBalance += tx.type === 'Kredit' ? tx.amount : -tx.amount;
         });
 
+        const journalCount = await Journal.countDocuments({ teacherId: teacherIdStr });
+        const gradeCount = await Grade.countDocuments({ teacherId: teacherIdStr });
+
+        const totalAttendance = await Attendance.countDocuments({ teacherId: teacherIdStr });
+        const hadirAttendance = await Attendance.countDocuments({ teacherId: teacherIdStr, status: 'Hadir' });
+        const attendanceRate = totalAttendance > 0 ? Math.round((hadirAttendance / totalAttendance) * 100) : 0;
+
         return {
-          id: t._id.toString(),
+          id: teacherIdStr,
           name: t.name,
           email: t.email,
           schoolName: t.schoolName || '-',
           className: t.className || '-',
           studentCount: classStudentCount,
           totalSavings: classSavingsBalance,
+          journalCount,
+          gradeCount,
+          attendanceRate,
+          totalAttendance,
           createdAt: t.createdAt.toISOString(),
         };
       })
     );
+
+    // Hitung rata-rata tingkat kehadiran seluruh kelas di mana ada data absensi
+    const teachersWithAttendance = teacherStats.filter(t => t.totalAttendance > 0);
+    const overallAttendanceRate = teachersWithAttendance.length > 0
+      ? Math.round(teachersWithAttendance.reduce((acc, curr) => acc + curr.attendanceRate, 0) / teachersWithAttendance.length)
+      : 0;
 
     // 4. Dapatkan pengguna online (aktif dalam 5 menit terakhir)
     const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
@@ -119,6 +139,8 @@ export async function getAdminStats() {
       schoolCount,
       studentCount,
       totalSavingsBalance,
+      totalJournalCount,
+      overallAttendanceRate,
       teacherStats,
       onlineUsers,
     };

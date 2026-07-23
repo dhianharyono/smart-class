@@ -9,8 +9,8 @@ import {
   createJournal,
   updateJournal,
   deleteJournal,
-  getAttendanceSummaryForJournalDate,
 } from '@/actions/journalActions';
+import { getAttendanceByDate } from '@/actions/attendanceActions';
 import { exportJournalToExcel } from '@/lib/excelExport';
 import { toast } from 'sonner';
 import {
@@ -78,6 +78,17 @@ interface JournalEntry {
   notes?: string;
 }
 
+type AttendanceStatus = 'Hadir' | 'Sakit' | 'Izin' | 'Alfa';
+
+interface StudentAttendanceItem {
+  studentId: string;
+  name: string;
+  nis: string;
+  className?: string;
+  gender?: string;
+  status: AttendanceStatus;
+}
+
 export default function JurnalClient() {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
@@ -94,10 +105,10 @@ export default function JurnalClient() {
   const [basicCompetency, setBasicCompetency] = useState('');
   const [material, setMaterial] = useState('');
   const [learningActivity, setLearningActivity] = useState('');
-  const [absentS, setAbsentS] = useState<number>(0);
-  const [absentI, setAbsentI] = useState<number>(0);
-  const [absentA, setAbsentA] = useState<number>(0);
-  const [notes, setNotes] = useState('');
+
+  // Student Attendance States
+  const [studentAttendanceList, setStudentAttendanceList] = useState<StudentAttendanceItem[]>([]);
+  const [attendanceSearch, setAttendanceSearch] = useState('');
   const [isFetchingAttendance, setIsFetchingAttendance] = useState(false);
 
   // Header State
@@ -137,25 +148,23 @@ export default function JurnalClient() {
     }
   }, [headerData]);
 
-  // Handle Date Change -> Auto-fetch attendance summary
+  // Load student attendance for target date
+  const loadStudentAttendance = async (dateStr: string) => {
+    setIsFetchingAttendance(true);
+    try {
+      const records = await getAttendanceByDate(dateStr);
+      setStudentAttendanceList(records || []);
+    } catch (err) {
+      console.error('Error fetching student attendance:', err);
+    } finally {
+      setIsFetchingAttendance(false);
+    }
+  };
+
+  // Handle Date Change -> load attendance
   const handleDateChange = async (newDateStr: string) => {
     setFormDate(newDateStr);
-    if (!editingEntry) {
-      setIsFetchingAttendance(true);
-      try {
-        const att = await getAttendanceSummaryForJournalDate(newDateStr);
-        setAbsentS(att.absentS);
-        setAbsentI(att.absentI);
-        setAbsentA(att.absentA);
-        if (att.notes && !notes) {
-          setNotes(att.notes);
-        }
-      } catch (err) {
-        console.error('Error fetching attendance summary:', err);
-      } finally {
-        setIsFetchingAttendance(false);
-      }
-    }
+    await loadStudentAttendance(newDateStr);
   };
 
   // Open modal for Create
@@ -173,15 +182,10 @@ export default function JurnalClient() {
     setBasicCompetency('');
     setMaterial('');
     setLearningActivity('');
-    setAbsentS(0);
-    setAbsentI(0);
-    setAbsentA(0);
-    setNotes('');
-
+    setAttendanceSearch('');
     setJournalModalOpen(true);
 
-    // Auto load attendance summary for today
-    handleDateChange(todayStr);
+    loadStudentAttendance(todayStr);
   };
 
   // Open modal for Edit
@@ -193,12 +197,46 @@ export default function JurnalClient() {
     setBasicCompetency(entry.basicCompetency);
     setMaterial(entry.material);
     setLearningActivity(entry.learningActivity);
-    setAbsentS(entry.absentS || 0);
-    setAbsentI(entry.absentI || 0);
-    setAbsentA(entry.absentA || 0);
-    setNotes(entry.notes || '');
+    setAttendanceSearch('');
     setJournalModalOpen(true);
+
+    loadStudentAttendance(dStr);
   };
+
+  // Student Attendance Handlers
+  const handleStudentStatusChange = (studentId: string, status: AttendanceStatus) => {
+    setStudentAttendanceList((prev) =>
+      prev.map((st) => (st.studentId === studentId ? { ...st, status } : st))
+    );
+  };
+
+  const handleMarkAllHadir = () => {
+    setStudentAttendanceList((prev) => prev.map((st) => ({ ...st, status: 'Hadir' })));
+    toast.success('Semua siswa ditandai Hadir');
+  };
+
+  // Calculated attendance metrics
+  const currentCounts = React.useMemo(() => {
+    const hadir = studentAttendanceList.filter((s) => s.status === 'Hadir').length;
+    const sakit = studentAttendanceList.filter((s) => s.status === 'Sakit').length;
+    const izin = studentAttendanceList.filter((s) => s.status === 'Izin').length;
+    const alfa = studentAttendanceList.filter((s) => s.status === 'Alfa').length;
+    return { hadir, sakit, izin, alfa };
+  }, [studentAttendanceList]);
+
+  const generatedNotes = React.useMemo(() => {
+    const nonHadir = studentAttendanceList.filter((s) => s.status !== 'Hadir');
+    if (nonHadir.length === 0) return '';
+    return nonHadir.map((s) => `${s.name} (${s.status})`).join(', ');
+  }, [studentAttendanceList]);
+
+  const filteredStudentList = React.useMemo(() => {
+    if (!attendanceSearch.trim()) return studentAttendanceList;
+    const q = attendanceSearch.toLowerCase();
+    return studentAttendanceList.filter(
+      (st) => st.name.toLowerCase().includes(q) || (st.nis && st.nis.toLowerCase().includes(q))
+    );
+  }, [studentAttendanceList, attendanceSearch]);
 
   // Save Header Mutation
   const saveHeaderMutation = useMutation({
@@ -223,10 +261,14 @@ export default function JurnalClient() {
         basicCompetency,
         material,
         learningActivity,
-        absentS,
-        absentI,
-        absentA,
-        notes,
+        absentS: currentCounts.sakit,
+        absentI: currentCounts.izin,
+        absentA: currentCounts.alfa,
+        notes: generatedNotes,
+        attendanceRecords: studentAttendanceList.map((s) => ({
+          studentId: s.studentId,
+          status: s.status,
+        })),
       };
 
       if (editingEntry) {
@@ -237,6 +279,7 @@ export default function JurnalClient() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['journals'] });
+      queryClient.invalidateQueries({ queryKey: ['attendance'] });
       toast.success(
         editingEntry ? 'Catatan jurnal berhasil diperbarui!' : 'Catatan jurnal berhasil ditambahkan!'
       );
@@ -771,60 +814,138 @@ export default function JurnalClient() {
                 />
               </div>
 
-              {/* Row 4: Rekap Absensi Siswa & Keterangan Siswa Tidak Hadir */}
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-5 border-t border-zinc-850 pt-4'>
-                <div className='space-y-2'>
-                  <Label className='text-zinc-300 text-xs font-bold uppercase tracking-wider block'>
-                    Rekap Absensi Siswa (Terisi Otomatis Dari Absensi Kelas)
-                  </Label>
+              {/* Row 4: Input Absensi Siswa (Pilihan Siswa & Status Kehadiran) */}
+              <div className='border-t border-zinc-800 pt-5 space-y-4'>
+                <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-3'>
+                  <div>
+                    <Label className='text-zinc-200 text-sm font-bold flex items-center gap-2'>
+                      <UserCheck className='h-4 w-4 text-emerald-400' />
+                      Input Absensi Siswa
+                    </Label>
+                    <p className='text-[11px] text-zinc-400 mt-0.5'>
+                      Pilih siswa dan tentukan status kehadirannya untuk tanggal ini.
+                    </p>
+                  </div>
 
-                  <div className='grid grid-cols-3 gap-3'>
-                    <div className='space-y-1'>
-                      <Label className='text-zinc-400 text-[10px] font-semibold'>Sakit (S)</Label>
-                      <Input
-                        type='number'
-                        min={0}
-                        value={absentS}
-                        onChange={(e) => setAbsentS(Number(e.target.value))}
-                        className='bg-zinc-950 border-zinc-800 text-amber-400 font-bold text-center rounded-xl text-xs h-9'
-                      />
+                  <div className='flex items-center gap-2 flex-wrap'>
+                    {/* Badge Counters */}
+                    <div className='flex items-center gap-2 bg-zinc-950 px-3 py-1.5 rounded-xl border border-zinc-800 text-[11px] font-semibold'>
+                      <span className='text-emerald-400'>Hadir: {currentCounts.hadir}</span>
+                      <span className='text-zinc-700'>|</span>
+                      <span className='text-amber-400'>Sakit: {currentCounts.sakit}</span>
+                      <span className='text-zinc-700'>|</span>
+                      <span className='text-blue-400'>Izin: {currentCounts.izin}</span>
+                      <span className='text-zinc-700'>|</span>
+                      <span className='text-rose-400'>Alfa: {currentCounts.alfa}</span>
                     </div>
 
-                    <div className='space-y-1'>
-                      <Label className='text-zinc-400 text-[10px] font-semibold'>Izin (I)</Label>
-                      <Input
-                        type='number'
-                        min={0}
-                        value={absentI}
-                        onChange={(e) => setAbsentI(Number(e.target.value))}
-                        className='bg-zinc-950 border-zinc-800 text-blue-400 font-bold text-center rounded-xl text-xs h-9'
-                      />
-                    </div>
-
-                    <div className='space-y-1'>
-                      <Label className='text-zinc-400 text-[10px] font-semibold'>Alpha (A)</Label>
-                      <Input
-                        type='number'
-                        min={0}
-                        value={absentA}
-                        onChange={(e) => setAbsentA(Number(e.target.value))}
-                        className='bg-zinc-950 border-zinc-800 text-rose-400 font-bold text-center rounded-xl text-xs h-9'
-                      />
-                    </div>
+                    <Button
+                      type='button'
+                      variant='outline'
+                      size='sm'
+                      onClick={handleMarkAllHadir}
+                      className='border-zinc-800 bg-zinc-950 hover:bg-zinc-800 text-emerald-400 hover:text-emerald-300 text-xs rounded-xl h-8 px-2.5 gap-1.5'
+                    >
+                      <CheckCircle2 className='h-3.5 w-3.5' />
+                      Tandai Semua Hadir
+                    </Button>
                   </div>
                 </div>
 
-                <div className='space-y-1.5'>
-                  <Label className='text-zinc-300 text-xs font-semibold'>
-                    Keterangan / Nama Siswa Tidak Hadir
-                  </Label>
-                  <textarea
-                    rows={2}
-                    placeholder='Contoh: Alfan, Arif, Eko, Bayu (Sakit/Izin)'
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    className='w-full bg-zinc-950 border border-zinc-800 focus:border-emerald-500 rounded-xl p-3 text-xs text-white focus:outline-none'
-                  />
+                {/* Filter / Search Siswa */}
+                <div className='flex items-center gap-3'>
+                  <div className='relative flex-1'>
+                    <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-500' />
+                    <Input
+                      placeholder='Cari nama siswa atau NIS...'
+                      value={attendanceSearch}
+                      onChange={(e) => setAttendanceSearch(e.target.value)}
+                      className='pl-9 bg-zinc-950 border-zinc-800 text-white text-xs h-8.5 rounded-xl focus:border-emerald-500'
+                    />
+                  </div>
+                </div>
+
+                {/* Student Attendance Selection List */}
+                <div className='bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden max-h-64 overflow-y-auto'>
+                  {isFetchingAttendance ? (
+                    <div className='flex items-center justify-center py-8 text-zinc-400 text-xs gap-2'>
+                      <Loader2 className='h-4 w-4 animate-spin text-emerald-500' />
+                      <span>Memuat data absensi siswa...</span>
+                    </div>
+                  ) : studentAttendanceList.length === 0 ? (
+                    <div className='text-center py-6 text-zinc-500 text-xs'>
+                      Belum ada data siswa di kelas. Tambahkan siswa di menu Data Siswa.
+                    </div>
+                  ) : (
+                    <div className='divide-y divide-zinc-850'>
+                      {filteredStudentList.map((st, idx) => (
+                        <div
+                          key={st.studentId}
+                          className='flex items-center justify-between p-2.5 hover:bg-zinc-900/60 transition-colors text-xs gap-2'
+                        >
+                          <div className='flex items-center gap-3 min-w-0 pr-2'>
+                            <span className='text-[10px] text-zinc-500 w-5 text-center font-semibold shrink-0'>
+                              {idx + 1}
+                            </span>
+                            <div className='truncate'>
+                              <p className='font-semibold text-zinc-200 truncate'>{st.name}</p>
+                              <p className='text-[10px] text-zinc-500 font-mono'>
+                                {st.nis ? `NIS: ${st.nis}` : st.className || ''}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Attendance Status Buttons */}
+                          <div className='flex items-center gap-1 shrink-0'>
+                            <button
+                              type='button'
+                              onClick={() => handleStudentStatusChange(st.studentId, 'Hadir')}
+                              className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all ${
+                                st.status === 'Hadir'
+                                  ? 'bg-emerald-600 text-white shadow-sm'
+                                  : 'bg-zinc-900 text-zinc-400 hover:text-zinc-200 border border-zinc-800'
+                              }`}
+                            >
+                              Hadir
+                            </button>
+                            <button
+                              type='button'
+                              onClick={() => handleStudentStatusChange(st.studentId, 'Sakit')}
+                              className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all ${
+                                st.status === 'Sakit'
+                                  ? 'bg-amber-600 text-white shadow-sm'
+                                  : 'bg-zinc-900 text-zinc-400 hover:text-zinc-200 border border-zinc-800'
+                              }`}
+                            >
+                              Sakit
+                            </button>
+                            <button
+                              type='button'
+                              onClick={() => handleStudentStatusChange(st.studentId, 'Izin')}
+                              className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all ${
+                                st.status === 'Izin'
+                                  ? 'bg-blue-600 text-white shadow-sm'
+                                  : 'bg-zinc-900 text-zinc-400 hover:text-zinc-200 border border-zinc-800'
+                              }`}
+                            >
+                              Izin
+                            </button>
+                            <button
+                              type='button'
+                              onClick={() => handleStudentStatusChange(st.studentId, 'Alfa')}
+                              className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all ${
+                                st.status === 'Alfa'
+                                  ? 'bg-rose-600 text-white shadow-sm'
+                                  : 'bg-zinc-900 text-zinc-400 hover:text-zinc-200 border border-zinc-800'
+                              }`}
+                            >
+                              Alfa
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
