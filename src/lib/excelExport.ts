@@ -1,4 +1,5 @@
 import ExcelJS from 'exceljs';
+import { sanitizeExcelCell } from '@/lib/utils';
 
 export async function exportStudentsToExcel(students: any[]) {
   const workbook = new ExcelJS.Workbook();
@@ -33,9 +34,9 @@ export async function exportStudentsToExcel(students: any[]) {
   students.forEach((student, index) => {
     worksheet.addRow({
       no: index + 1,
-      nis: student.nis,
-      name: student.name,
-      className: student.className,
+      nis: sanitizeExcelCell(student.nis),
+      name: sanitizeExcelCell(student.name),
+      className: sanitizeExcelCell(student.className),
       gender: student.gender === 'L' ? 'Laki-laki (L)' : 'Perempuan (P)',
     });
   });
@@ -95,10 +96,10 @@ export async function exportAttendanceToExcel(
   attendanceData.forEach((record, index) => {
     worksheet.addRow({
       no: index + 1,
-      nis: record.nis,
-      name: record.name,
-      className: record.className,
-      status: record.status,
+      nis: sanitizeExcelCell(record.nis),
+      name: sanitizeExcelCell(record.name),
+      className: sanitizeExcelCell(record.className),
+      status: sanitizeExcelCell(record.status),
     });
   });
 
@@ -173,10 +174,10 @@ export async function exportGradesToExcel(
   gradesData.forEach((record, index) => {
     worksheet.addRow({
       no: index + 1,
-      nis: record.nis,
-      name: record.name,
-      subject,
-      category,
+      nis: sanitizeExcelCell(record.nis),
+      name: sanitizeExcelCell(record.name),
+      subject: sanitizeExcelCell(subject),
+      category: sanitizeExcelCell(category),
       score: record.score === '' ? 'Belum Dinilai' : Number(record.score),
     });
   });
@@ -242,9 +243,9 @@ export async function exportSavingsToExcel(savingsSummary: any[]) {
   savingsSummary.forEach((record, index) => {
     worksheet.addRow({
       no: index + 1,
-      nis: record.nis,
-      name: record.name,
-      className: record.className,
+      nis: sanitizeExcelCell(record.nis),
+      name: sanitizeExcelCell(record.name),
+      className: sanitizeExcelCell(record.className),
       txCount: record.transactionsCount,
       balance: record.balance,
     });
@@ -400,13 +401,13 @@ export async function exportJournalToExcel(
     row.getCell(1).value = index + 1;
     row.getCell(2).value = formattedDate;
     row.getCell(3).value = entry.meetingNo;
-    row.getCell(4).value = entry.basicCompetency;
-    row.getCell(5).value = entry.material;
-    row.getCell(6).value = entry.learningActivity;
+    row.getCell(4).value = sanitizeExcelCell(entry.basicCompetency);
+    row.getCell(5).value = sanitizeExcelCell(entry.material);
+    row.getCell(6).value = sanitizeExcelCell(entry.learningActivity);
     row.getCell(7).value = entry.absentS || '';
     row.getCell(8).value = entry.absentI || '';
     row.getCell(9).value = entry.absentA || '';
-    row.getCell(10).value = entry.notes || '';
+    row.getCell(10).value = sanitizeExcelCell(entry.notes || '');
 
     // Cell alignments
     row.getCell(1).alignment = { horizontal: 'center', vertical: 'top' };

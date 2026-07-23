@@ -77,7 +77,12 @@ export async function saveBulkAttendance(
     const teacherId = await requireAuth();
     const targetDate = parseLocalDate(dateStr);
 
-    const bulkOps = records.map((rec) => ({
+    // Verify student ownership to prevent cross-tenant parameter tampering
+    const teacherStudents = await Student.find({ teacherId }).select('_id').lean();
+    const validStudentSet = new Set(teacherStudents.map((s) => s._id.toString()));
+    const validRecords = records.filter((rec) => validStudentSet.has(rec.studentId));
+
+    const bulkOps = validRecords.map((rec) => ({
       updateOne: {
         filter: { studentId: rec.studentId, date: targetDate, teacherId },
         update: {

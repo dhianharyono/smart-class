@@ -88,10 +88,17 @@ export async function saveBulkGrades(
     await dbConnect();
     const teacherId = await requireAuth();
 
+    // Verify student ownership to prevent cross-tenant parameter tampering
+    const teacherStudents = await Student.find({ teacherId }).select('_id').lean();
+    const validStudentSet = new Set(teacherStudents.map((s) => s._id.toString()));
+
     const bulkOps = [];
     const deleteIds: string[] = [];
 
     for (const rec of grades) {
+      if (!validStudentSet.has(rec.studentId)) {
+        continue;
+      }
       if (rec.score === '') {
         // If score is cleared, delete the entry
         deleteIds.push(rec.studentId);

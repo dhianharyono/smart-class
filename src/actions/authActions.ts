@@ -7,6 +7,7 @@ import School from '@/models/School';
 import { hashPassword, verifyPassword } from '@/lib/password';
 import { signSession } from '@/lib/auth';
 import { cookies } from 'next/headers';
+import { escapeRegExp } from '@/lib/utils';
 
 export async function loginTeacher(data: { email: string; password: string }) {
   try {
@@ -85,7 +86,8 @@ export async function registerTeacher(data: {
     let trimmedSchoolName = schoolName?.trim();
     if (trimmedSchoolName) {
       // Check if school already exists (case-insensitive)
-      const schoolExists = await School.findOne({ name: { $regex: new RegExp(`^${trimmedSchoolName}$`, 'i') } });
+      const safePattern = escapeRegExp(trimmedSchoolName);
+      const schoolExists = await School.findOne({ name: { $regex: new RegExp(`^${safePattern}$`, 'i') } });
       if (!schoolExists) {
         await School.create({ name: trimmedSchoolName });
       } else {

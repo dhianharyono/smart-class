@@ -13,7 +13,7 @@ import { cookies } from 'next/headers';
 import { verifySession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { hashPassword } from '@/lib/password';
-import { isRedirectError } from '@/lib/utils';
+import { isRedirectError, escapeRegExp } from '@/lib/utils';
 
 /**
  * Memverifikasi halaman admin secara sinkronus sebelum render halaman berlanjut.
@@ -374,8 +374,9 @@ export async function addSchool(name: string) {
     }
 
     const trimmed = name.trim();
-    // Case-insensitive check
-    const exists = await School.findOne({ name: { $regex: new RegExp(`^${trimmed}$`, 'i') } });
+    // Case-insensitive check with safe regex pattern
+    const safePattern = escapeRegExp(trimmed);
+    const exists = await School.findOne({ name: { $regex: new RegExp(`^${safePattern}$`, 'i') } });
     if (exists) {
       throw new Error('Nama sekolah sudah terdaftar.');
     }

@@ -1,30 +1,28 @@
-const secretStr = process.env.SESSION_SECRET || 'fallback-super-secret-key-32-chars-long!';
+function getSecretKey(): string {
+  const secret = process.env.SESSION_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('CRITICAL SECURITY ERROR: SESSION_SECRET is not configured in production environment.');
+    }
+    console.warn('[SECURITY WARNING] SESSION_SECRET is not set. Using local development fallback secret.');
+    return 'dev-secret-key-smart-class-secure-32-chars-long!';
+  }
+  return secret;
+}
+
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
 function base64urlEncode(str: string): string {
-  const bytes = encoder.encode(str);
-  let binString = '';
-  for (let i = 0; i < bytes.byteLength; i++) {
-    binString += String.fromCharCode(bytes[i]);
-  }
-  return btoa(binString)
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=/g, '');
+  return Buffer.from(str, 'utf-8').toString('base64url');
 }
 
 function base64urlDecode(str: string): string {
-  const base64 = str.replace(/-/g, '+').replace(/_/g, '/');
-  const binString = atob(base64);
-  const bytes = new Uint8Array(binString.length);
-  for (let i = 0; i < binString.length; i++) {
-    bytes[i] = binString.charCodeAt(i);
-  }
-  return decoder.decode(bytes);
+  return Buffer.from(str, 'base64url').toString('utf-8');
 }
 
 async function getCryptoKey() {
+  const secretStr = getSecretKey();
   const keyData = encoder.encode(secretStr);
   return globalThis.crypto.subtle.importKey(
     'raw',
@@ -51,11 +49,7 @@ export async function signSession(payload: any): Promise<string> {
     encoder.encode(`${header}.${data}`)
   );
 
-  const signatureArray = Array.from(new Uint8Array(signatureBuffer));
-  const signature = btoa(String.fromCharCode.apply(null, signatureArray))
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=/g, '');
+  const signature = Buffer.from(signatureBuffer).toString('base64url');
 
   return `${header}.${data}.${signature}`;
 }
@@ -70,11 +64,7 @@ export async function verifySession(token: string): Promise<any | null> {
     const dataToVerify = encoder.encode(`${header}.${data}`);
 
     // Decode signature
-    const binarySign = atob(signature.replace(/-/g, '+').replace(/_/g, '/'));
-    const signatureBytes = new Uint8Array(binarySign.length);
-    for (let i = 0; i < binarySign.length; i++) {
-      signatureBytes[i] = binarySign.charCodeAt(i);
-    }
+    const signatureBytes = new Uint8Array(Buffer.from(signature, 'base64url'));
 
     const isValid = await globalThis.crypto.subtle.verify(
       'HMAC',
