@@ -723,7 +723,7 @@ export default function JurnalClient() {
 
       {/* Modal Dialog: Add / Edit Journal */}
       <Dialog open={journalModalOpen} onOpenChange={setJournalModalOpen}>
-        <DialogContent className='bg-zinc-900 border border-zinc-800 text-white rounded-2xl max-w-full sm:max-w-4xl lg:max-w-5xl max-h-[90vh] overflow-y-auto p-6 md:p-8'>
+        <DialogContent className='bg-zinc-900 border border-zinc-800 text-white rounded-2xl w-[calc(100%-2.5rem)] sm:w-full max-w-full sm:max-w-4xl lg:max-w-5xl max-h-[88vh] overflow-y-auto p-4 sm:p-6 md:p-8 my-4'>
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -757,7 +757,7 @@ export default function JurnalClient() {
                     required
                     value={formDate}
                     onChange={(e) => handleDateChange(e.target.value)}
-                    className='bg-zinc-950 border-zinc-800 focus:border-emerald-500 text-white rounded-xl text-xs h-10'
+                    className='bg-zinc-950 border-zinc-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/40 focus-visible:border-emerald-500 focus-visible:ring-1 focus-visible:ring-emerald-500/40 text-white rounded-xl text-xs h-10 [color-scheme:dark] outline-none transition-all'
                   />
                 </div>
 
@@ -769,7 +769,7 @@ export default function JurnalClient() {
                     min={1}
                     value={meetingNo}
                     onChange={(e) => setMeetingNo(Number(e.target.value))}
-                    className='bg-zinc-950 border-zinc-800 focus:border-emerald-500 text-white rounded-xl text-xs h-10'
+                    className='bg-zinc-950 border-zinc-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/40 focus-visible:border-emerald-500 focus-visible:ring-1 focus-visible:ring-emerald-500/40 text-white rounded-xl text-xs h-10 outline-none transition-all'
                   />
                 </div>
               </div>
@@ -784,7 +784,7 @@ export default function JurnalClient() {
                     placeholder='Contoh: 4.2. Merencanakan rangkaian penjumlahan dan Pengurangan dengan Gerbang logika'
                     value={basicCompetency}
                     onChange={(e) => setBasicCompetency(e.target.value)}
-                    className='w-full bg-zinc-950 border border-zinc-800 focus:border-emerald-500 rounded-xl p-3 text-xs text-white focus:outline-none'
+                    className='w-full bg-zinc-950 border border-zinc-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/40 focus-visible:border-emerald-500 focus-visible:ring-1 focus-visible:ring-emerald-500/40 rounded-xl p-3 text-xs text-white outline-none transition-all'
                   />
                 </div>
 
@@ -796,7 +796,7 @@ export default function JurnalClient() {
                     placeholder='Contoh: - Gerbang Logika / Half-full adder'
                     value={material}
                     onChange={(e) => setMaterial(e.target.value)}
-                    className='w-full bg-zinc-950 border border-zinc-800 focus:border-emerald-500 rounded-xl p-3 text-xs text-white focus:outline-none'
+                    className='w-full bg-zinc-950 border border-zinc-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/40 focus-visible:border-emerald-500 focus-visible:ring-1 focus-visible:ring-emerald-500/40 rounded-xl p-3 text-xs text-white outline-none transition-all'
                   />
                 </div>
               </div>
@@ -810,7 +810,7 @@ export default function JurnalClient() {
                   placeholder='Contoh: - Guru menjelaskan materi&#10;- Siswa mengerjakan latihan soal LKPD'
                   value={learningActivity}
                   onChange={(e) => setLearningActivity(e.target.value)}
-                  className='w-full bg-zinc-950 border border-zinc-800 focus:border-emerald-500 rounded-xl p-3 text-xs text-white focus:outline-none'
+                  className='w-full bg-zinc-950 border border-zinc-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/40 focus-visible:border-emerald-500 focus-visible:ring-1 focus-visible:ring-emerald-500/40 rounded-xl p-3 text-xs text-white outline-none transition-all'
                 />
               </div>
 
@@ -900,44 +900,40 @@ export default function JurnalClient() {
                             <button
                               type='button'
                               onClick={() => handleStudentStatusChange(st.studentId, 'Hadir')}
-                              className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all ${
-                                st.status === 'Hadir'
+                              className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all ${st.status === 'Hadir'
                                   ? 'bg-emerald-600 text-white shadow-sm'
                                   : 'bg-zinc-900 text-zinc-400 hover:text-zinc-200 border border-zinc-800'
-                              }`}
+                                }`}
                             >
                               Hadir
                             </button>
                             <button
                               type='button'
                               onClick={() => handleStudentStatusChange(st.studentId, 'Sakit')}
-                              className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all ${
-                                st.status === 'Sakit'
+                              className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all ${st.status === 'Sakit'
                                   ? 'bg-amber-600 text-white shadow-sm'
                                   : 'bg-zinc-900 text-zinc-400 hover:text-zinc-200 border border-zinc-800'
-                              }`}
+                                }`}
                             >
                               Sakit
                             </button>
                             <button
                               type='button'
                               onClick={() => handleStudentStatusChange(st.studentId, 'Izin')}
-                              className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all ${
-                                st.status === 'Izin'
+                              className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all ${st.status === 'Izin'
                                   ? 'bg-blue-600 text-white shadow-sm'
                                   : 'bg-zinc-900 text-zinc-400 hover:text-zinc-200 border border-zinc-800'
-                              }`}
+                                }`}
                             >
                               Izin
                             </button>
                             <button
                               type='button'
                               onClick={() => handleStudentStatusChange(st.studentId, 'Alfa')}
-                              className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all ${
-                                st.status === 'Alfa'
+                              className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all ${st.status === 'Alfa'
                                   ? 'bg-rose-600 text-white shadow-sm'
                                   : 'bg-zinc-900 text-zinc-400 hover:text-zinc-200 border border-zinc-800'
-                              }`}
+                                }`}
                             >
                               Alfa
                             </button>
@@ -979,7 +975,7 @@ export default function JurnalClient() {
 
       {/* Modal Dialog: Settings Header Info */}
       <Dialog open={headerModalOpen} onOpenChange={setHeaderModalOpen}>
-        <DialogContent className='bg-zinc-900 border border-zinc-800 text-white rounded-2xl max-w-lg p-6'>
+        <DialogContent className='bg-zinc-900 border border-zinc-800 text-white rounded-2xl w-[calc(100%-2.5rem)] sm:w-full max-w-lg p-4 sm:p-6'>
           <form
             onSubmit={(e) => {
               e.preventDefault();

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { loginTeacher, logoutTeacher } from '@/actions/authActions';
 import { toast } from 'sonner';
-import { Mail, Lock, BookOpen, Loader2, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, BookOpen, Loader2, ArrowRight, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import LoadingScreen from '@/components/LoadingScreen';
 
@@ -40,7 +40,7 @@ export default function SignInPage() {
         if (res.isAdmin) {
           router.push('/admin');
         } else {
-          router.push('/');
+          router.push('/dashboard');
         }
         router.refresh();
       } else {
@@ -59,11 +59,21 @@ export default function SignInPage() {
 
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-4 py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-4 py-16 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Back to Landing Page Button */}
+      <div className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-zinc-100 transition-all text-xs font-semibold backdrop-blur-md shadow-lg"
+        >
+          <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-400" />
+          <span>Kembali ke Beranda</span>
+        </Link>
+      </div>
       {/* Background radial glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-[120px] pointer-events-none" />
 
-      <div className="w-full max-w-md space-y-8 relative z-10">
+      <div className="w-full max-w-md space-y-8 relative z-10 animate-fade-in">
         {/* Brand Logo & Header */}
         <div className="flex flex-col items-center text-center">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-xl shadow-emerald-500/20 mb-4 animate-bounce-slow">

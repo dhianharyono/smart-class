@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 import { verifySession } from '@/lib/auth';
 
 const isPublicRoute = (path: string) => {
-  return path.startsWith('/sign-in') || path.startsWith('/sign-up');
+  return path === '/' || path.startsWith('/sign-in') || path.startsWith('/sign-up');
 };
 
 export async function proxy(req: NextRequest) {
@@ -21,23 +21,30 @@ export async function proxy(req: NextRequest) {
   const session = sessionToken ? await verifySession(sessionToken) : null;
   const isAuthenticated = !!session;
 
-  if (isPublicRoute(path)) {
+  // Halaman landing utama (/) publik untuk siapapun
+  if (path === '/') {
+    return NextResponse.next();
+  }
+
+  // Rute autentikasi (sign-in & sign-up)
+  if (path.startsWith('/sign-in') || path.startsWith('/sign-up')) {
     if (isAuthenticated) {
       if (session?.isAdmin) {
         return NextResponse.redirect(new URL('/admin', req.nextUrl));
       }
-      return NextResponse.redirect(new URL('/', req.nextUrl));
+      return NextResponse.redirect(new URL('/dashboard', req.nextUrl));
     }
     return NextResponse.next();
   }
 
+  // Rute lainnya membutuhkan autentikasi
   if (!isAuthenticated) {
     return NextResponse.redirect(new URL('/sign-in', req.nextUrl));
   }
 
   if (path.startsWith('/admin')) {
     if (!session?.isAdmin) {
-      return NextResponse.redirect(new URL('/', req.nextUrl));
+      return NextResponse.redirect(new URL('/dashboard', req.nextUrl));
     }
   } else {
     // Admin tidak boleh mengakses rute guru reguler, redirect ke /admin

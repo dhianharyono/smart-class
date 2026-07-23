@@ -71,22 +71,23 @@ export default function ConfirmDialog({
   };
 
   const getConfirmButtonStyles = () => {
+    const base = 'h-10 px-4 rounded-xl flex-1 gap-2 font-semibold text-xs sm:text-sm cursor-pointer shadow-lg transition-all duration-200 justify-center items-center';
     switch (variant) {
       case 'danger':
-        return 'bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl flex-1 gap-2 cursor-pointer shadow-lg shadow-rose-600/10 hover:shadow-rose-600/20 transition-all duration-200';
+        return `${base} bg-rose-600 hover:bg-rose-700 text-white shadow-rose-600/20`;
       case 'success':
-        return 'bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl flex-1 gap-2 cursor-pointer shadow-lg shadow-emerald-600/10 hover:shadow-emerald-600/20 transition-all duration-200';
+        return `${base} bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20`;
       case 'info':
-        return 'bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl flex-1 gap-2 cursor-pointer shadow-lg shadow-blue-600/10 hover:shadow-blue-600/20 transition-all duration-200';
+        return `${base} bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/20`;
       case 'warning':
       default:
-        return 'bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-xl flex-1 gap-2 cursor-pointer shadow-lg shadow-amber-600/10 hover:shadow-amber-600/20 transition-all duration-200';
+        return `${base} bg-amber-600 hover:bg-amber-700 text-white shadow-amber-600/20`;
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='bg-zinc-900/95 backdrop-blur-md border border-zinc-800/80 text-white rounded-2xl max-w-sm p-6 shadow-2xl' showCloseButton={false}>
+      <DialogContent className='bg-zinc-900/95 backdrop-blur-md border border-zinc-800/80 text-white rounded-2xl w-[calc(100%-2.5rem)] sm:w-full max-w-sm p-5 sm:p-6 shadow-2xl' showCloseButton={false}>
         <DialogHeader>
           {getIcon()}
           <DialogTitle className='text-center text-lg font-bold text-zinc-100 tracking-tight'>
@@ -96,13 +97,13 @@ export default function ConfirmDialog({
             {description}
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter className='mt-5 gap-2.5 sm:gap-0 flex justify-center w-full'>
+        <div className='mt-6 flex flex-row items-center justify-center gap-3 w-full'>
           <Button
             type='button'
             variant='ghost'
             onClick={() => onOpenChange(false)}
             disabled={isLoading}
-            className='text-zinc-400 hover:text-zinc-200 flex-1 hover:bg-zinc-800/50 rounded-xl cursor-pointer transition-all duration-200'
+            className='h-10 rounded-xl flex-1 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-300 font-semibold text-xs sm:text-sm cursor-pointer transition-all duration-200'
           >
             {cancelText}
           </Button>
@@ -118,7 +119,7 @@ export default function ConfirmDialog({
               confirmText
             )}
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );

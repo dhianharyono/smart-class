@@ -319,7 +319,7 @@ export default function SiswaClient({ initialStudents }: SiswaClientProps) {
 
       {/* Add Dialog */}
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
-        <DialogContent className='bg-zinc-900 border border-zinc-800 text-white rounded-2xl max-w-md'>
+        <DialogContent className='bg-zinc-900 border border-zinc-800 text-white rounded-2xl max-w-md w-[calc(100%-2.5rem)] sm:w-full p-5 sm:p-6'>
           <form onSubmit={handleAddSubmit}>
             <DialogHeader>
               <DialogTitle className='text-lg font-bold text-zinc-100'>
@@ -433,7 +433,7 @@ export default function SiswaClient({ initialStudents }: SiswaClientProps) {
 
       {/* Edit Dialog */}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent className='bg-zinc-900 border border-zinc-800 text-white rounded-2xl max-w-md'>
+        <DialogContent className='bg-zinc-900 border border-zinc-800 text-white rounded-2xl max-w-md w-[calc(100%-2.5rem)] sm:w-full p-5 sm:p-6'>
           <form onSubmit={handleEditSubmit}>
             <DialogHeader>
               <DialogTitle className='text-lg font-bold text-zinc-100'>
@@ -546,7 +546,7 @@ export default function SiswaClient({ initialStudents }: SiswaClientProps) {
 
       {/* Delete Dialog */}
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <DialogContent className='bg-zinc-900 border border-zinc-800 text-white rounded-2xl max-w-sm'>
+        <DialogContent className='bg-zinc-900 border border-zinc-800 text-white rounded-2xl max-w-sm w-[calc(100%-2.5rem)] sm:w-full p-5 sm:p-6'>
           <DialogHeader>
             <div className='mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-950 border border-red-900 text-red-500 mb-4'>
               <AlertTriangle className='h-6 w-6' />

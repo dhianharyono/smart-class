@@ -42,7 +42,7 @@ interface SidebarItem {
 }
 
 const allSidebarItems: SidebarItem[] = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Data Siswa', href: '/siswa', icon: Users },
   { name: 'Absensi Kelas', href: '/absensi', icon: CalendarCheck2 },
   { name: 'Nilai Akademik', href: '/nilai', icon: GraduationCap },
@@ -86,7 +86,7 @@ export default function DashboardLayoutClient({
   const [enabledMenus, setEnabledMenus] = useState<string[]>(
     teacher.enabledMenus && teacher.enabledMenus.length > 0
       ? teacher.enabledMenus
-      : ['/', '/siswa', '/absensi', '/nilai', '/tabungan', '/jurnal', '/settings']
+      : ['/dashboard', '/siswa', '/absensi', '/nilai', '/tabungan', '/jurnal', '/settings']
   );
 
   // Sync state if teacher prop changes
@@ -127,7 +127,7 @@ export default function DashboardLayoutClient({
   const handleSaveOnboarding = async () => {
     setIsSavingOnboarding(true);
     try {
-      const finalMenus = ['/', ...selectedOnboardingMenus, '/profile', '/settings'];
+      const finalMenus = ['/dashboard', ...selectedOnboardingMenus, '/profile', '/settings'];
       await updateMenuPreferences(finalMenus, true);
       setEnabledMenus(finalMenus);
       setOnboardingOpen(false);
@@ -143,7 +143,7 @@ export default function DashboardLayoutClient({
 
   // Filter visible sidebar items
   const visibleSidebarItems = allSidebarItems.filter((item) => {
-    if (item.href === '/' || item.href === '/profile' || item.href === '/settings') return true;
+    if (item.href === '/dashboard' || item.href === '/' || item.href === '/profile' || item.href === '/settings') return true;
     return enabledMenus.includes(item.href);
   });
 
