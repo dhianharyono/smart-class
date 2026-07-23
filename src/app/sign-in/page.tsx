@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { loginTeacher, logoutTeacher } from '@/actions/authActions';
 import { toast } from 'sonner';
-import { Mail, Lock, BookOpen, Loader2, ArrowRight, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, BookOpen, Loader2, ArrowRight, ArrowLeft, Eye, EyeOff, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import LoadingScreen from '@/components/LoadingScreen';
 import ReCaptcha from '@/components/ReCaptcha';
@@ -20,10 +20,20 @@ export default function SignInPage() {
   const [redirectVariant, setRedirectVariant] = useState<'teacher' | 'admin'>('teacher');
   const [recaptchaToken, setRecaptchaToken] = useState<string>('');
   const [resetCaptcha, setResetCaptcha] = useState<number>(0);
+  const [failedAttempts, setFailedAttempts] = useState<number>(0);
+
+  const CAPTCHA_THRESHOLD = 2; // Show reCAPTCHA after 2 failed attempts
+  const isCaptchaRequired = failedAttempts >= CAPTCHA_THRESHOLD;
 
   useEffect(() => {
     // Clear stale session cookie to prevent redirect loops
     logoutTeacher();
+
+    // Retrieve saved failed login attempts from sessionStorage
+    const saved = sessionStorage.getItem('login_failed_attempts');
+    if (saved) {
+      setFailedAttempts(parseInt(saved, 10) || 0);
+    }
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -33,10 +43,21 @@ export default function SignInPage() {
       return;
     }
 
+    if (isCaptchaRequired && !!process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && !recaptchaToken) {
+      toast.error('Harap selesaikan verifikasi reCAPTCHA terlebih dahulu.');
+      return;
+    }
+
     setLoading(true);
     try {
-      const res = await loginTeacher({ email, password, recaptchaToken });
+      const res = await loginTeacher({
+        email,
+        password,
+        recaptchaToken: isCaptchaRequired ? recaptchaToken : undefined,
+      });
+
       if (res.success) {
+        sessionStorage.removeItem('login_failed_attempts');
         toast.success('Selamat datang kembali!');
         setRedirectVariant(res.isAdmin ? 'admin' : 'teacher');
         setIsRedirecting(true);
@@ -48,12 +69,18 @@ export default function SignInPage() {
         router.refresh();
       } else {
         toast.error(res.error || 'Email/username atau password salah.');
+        const nextAttempts = failedAttempts + 1;
+        setFailedAttempts(nextAttempts);
+        sessionStorage.setItem('login_failed_attempts', nextAttempts.toString());
         setResetCaptcha((prev) => prev + 1);
         setRecaptchaToken('');
         setLoading(false);
       }
     } catch (err) {
       toast.error('Terjadi kesalahan. Silakan coba lagi.');
+      const nextAttempts = failedAttempts + 1;
+      setFailedAttempts(nextAttempts);
+      sessionStorage.setItem('login_failed_attempts', nextAttempts.toString());
       setResetCaptcha((prev) => prev + 1);
       setRecaptchaToken('');
       setLoading(false);
@@ -154,17 +181,21 @@ export default function SignInPage() {
               </div>
             </div>
 
-            {/* Google reCAPTCHA Protection */}
-            <ReCaptcha
-              onVerify={(token) => setRecaptchaToken(token)}
-              onExpire={() => setRecaptchaToken('')}
-              resetTrigger={resetCaptcha}
-            />
+            {/* Google reCAPTCHA Protection (Conditional) */}
+            {isCaptchaRequired && (
+              <div className="space-y-2 pt-1 animate-fade-in">
+                <ReCaptcha
+                  onVerify={(token) => setRecaptchaToken(token)}
+                  onExpire={() => setRecaptchaToken('')}
+                  resetTrigger={resetCaptcha}
+                />
+              </div>
+            )}
 
             {/* Submit Button */}
             <Button
               type="submit"
-              disabled={loading || (!!process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && !recaptchaToken)}
+              disabled={loading || (isCaptchaRequired && !!process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && !recaptchaToken)}
               className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold py-3 px-4 rounded-xl shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20 transition-all duration-200 flex items-center justify-center gap-2 text-sm cursor-pointer disabled:opacity-50"
             >
               {loading ? (

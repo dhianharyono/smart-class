@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import Script from 'next/script';
-import { ShieldCheck, AlertCircle } from 'lucide-react';
+import { ShieldCheck, AlertCircle, Loader2 } from 'lucide-react';
 
 declare global {
   interface Window {
@@ -20,22 +20,26 @@ interface ReCaptchaProps {
 export default function ReCaptcha({ onVerify, onExpire, resetTrigger }: ReCaptchaProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<number | null>(null);
-  const [scriptLoaded, setScriptLoaded] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 
-  // Render reCAPTCHA widget once script is loaded
   const renderWidget = () => {
-    if (!siteKey || !containerRef.current || !window.grecaptcha || !window.grecaptcha.render) {
-      return;
+    if (!siteKey || !containerRef.current || !window.grecaptcha || typeof window.grecaptcha.render !== 'function') {
+      return false;
     }
 
     try {
       if (widgetIdRef.current !== null) {
         window.grecaptcha.reset(widgetIdRef.current);
-        return;
+        setIsReady(true);
+        return true;
       }
+
+      // Clear container in case of re-mount
+      containerRef.current.innerHTML = '';
 
       const widgetId = window.grecaptcha.render(containerRef.current, {
         sitekey: siteKey,
@@ -48,33 +52,57 @@ export default function ReCaptcha({ onVerify, onExpire, resetTrigger }: ReCaptch
           onExpire?.();
         },
         'error-callback': () => {
-          setError('Gagal memuat reCAPTCHA. Silakan refresh halaman.');
+          setError('Gagal memuat reCAPTCHA. Silakan coba lagi.');
           onExpire?.();
         },
       });
 
       widgetIdRef.current = widgetId;
+      setIsReady(true);
+      return true;
     } catch (err: any) {
       console.error('Error rendering reCAPTCHA:', err);
+      return false;
     }
   };
 
   useEffect(() => {
-    if (window.grecaptcha && window.grecaptcha.render) {
-      setScriptLoaded(true);
+    // Check if grecaptcha is already available globally (e.g. from previous navigation)
+    if (window.grecaptcha && typeof window.grecaptcha.render === 'function') {
+      setIsLoaded(true);
       renderWidget();
-    } else {
-      window.onReCaptchaLoadCallback = () => {
-        setScriptLoaded(true);
-      };
+      return;
     }
+
+    // Set callback on window
+    window.onReCaptchaLoadCallback = () => {
+      setIsLoaded(true);
+    };
+
+    // Polling fallback to check if script loaded without firing callback
+    const interval = setInterval(() => {
+      if (window.grecaptcha && typeof window.grecaptcha.render === 'function') {
+        setIsLoaded(true);
+        renderWidget();
+        clearInterval(interval);
+      }
+    }, 150);
+
+    const timeout = setTimeout(() => {
+      clearInterval(interval);
+    }, 8000);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
   }, []);
 
   useEffect(() => {
-    if (scriptLoaded) {
+    if (isLoaded) {
       renderWidget();
     }
-  }, [scriptLoaded]);
+  }, [isLoaded]);
 
   // Reset widget when resetTrigger changes
   useEffect(() => {
@@ -100,15 +128,22 @@ export default function ReCaptcha({ onVerify, onExpire, resetTrigger }: ReCaptch
   }
 
   return (
-    <div className="flex flex-col items-center justify-center my-3">
+    <div className="flex flex-col items-center justify-center my-3 relative min-h-[78px] w-full">
       <Script
-        src={`https://www.google.com/recaptcha/api.js?onload=onReCaptchaLoadCallback&render=explicit`}
+        src="https://www.google.com/recaptcha/api.js?onload=onReCaptchaLoadCallback&render=explicit"
         strategy="afterInteractive"
-        onLoad={() => {
-          setScriptLoaded(true);
+        onReady={() => {
+          setIsLoaded(true);
+          renderWidget();
         }}
       />
-      <div ref={containerRef} className="min-h-[78px] flex items-center justify-center" />
+      {!isReady && !error && (
+        <div className="flex items-center justify-center gap-2 px-4 py-5 bg-zinc-950/60 border border-zinc-800/80 rounded-xl text-xs text-zinc-400 w-full max-w-[304px] animate-pulse my-1">
+          <Loader2 className="h-4 w-4 animate-spin text-emerald-400 shrink-0" />
+          <span>Memuat verifikasi reCAPTCHA...</span>
+        </div>
+      )}
+      <div ref={containerRef} className={`min-h-[78px] flex items-center justify-center ${!isReady ? 'hidden' : 'block'}`} />
       {error && (
         <div className="flex items-center gap-1.5 mt-2 text-xs text-rose-400">
           <AlertCircle className="h-3.5 w-3.5" />
@@ -118,3 +153,4 @@ export default function ReCaptcha({ onVerify, onExpire, resetTrigger }: ReCaptch
     </div>
   );
 }
+

@@ -19,10 +19,12 @@ export async function loginTeacher(data: { email: string; password: string; reca
       throw new Error(`Terlalu banyak percobaan login. Silakan coba lagi dalam ${rateLimit.retryAfterSeconds} detik.`);
     }
 
-    // 2. Google reCAPTCHA Check
-    const recaptchaRes = await verifyRecaptchaToken(data.recaptchaToken);
-    if (!recaptchaRes.success) {
-      throw new Error(recaptchaRes.error || 'Verifikasi reCAPTCHA gagal.');
+    // 2. Google reCAPTCHA Check (Verified if token is provided)
+    if (data.recaptchaToken) {
+      const recaptchaRes = await verifyRecaptchaToken(data.recaptchaToken);
+      if (!recaptchaRes.success) {
+        throw new Error(recaptchaRes.error || 'Verifikasi reCAPTCHA gagal.');
+      }
     }
 
     await dbConnect();

@@ -72,10 +72,11 @@ function ScrollReveal({
     <div
       ref={ref}
       style={{ transitionDelay: `${delay}ms` }}
-      className={`transition-all duration-700 ease-out transform ${isVisible
-        ? 'opacity-100 translate-y-0 scale-100'
-        : 'opacity-0 translate-y-8 scale-[0.98]'
-        } ${className}`}
+      className={`transition-all duration-700 ease-out transform ${
+        isVisible
+          ? 'opacity-100 translate-y-0 scale-100'
+          : 'opacity-0 translate-y-8 scale-[0.98]'
+      } ${className}`}
     >
       {children}
     </div>
@@ -169,16 +170,16 @@ export default function LandingPage() {
             href='/'
             className='flex items-center gap-3 group cursor-pointer'
           >
-            <div className='flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-xl shadow-emerald-500/20 group-hover:scale-105 transition-transform duration-300'>
-              <BookOpen className='h-6 w-6' />
+            <div className='flex h-9 w-9 lg:h-11 lg:w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-xl shadow-emerald-500/20 group-hover:scale-105 transition-transform duration-300'>
+              <BookOpen className='h-4 w-4 lg:h-6 lg:w-6' />
             </div>
             <div>
               <div className='flex items-center gap-2'>
-                <span className='text-xl font-extrabold tracking-tight bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent'>
+                <span className='text-sm lg:text-xl font-extrabold tracking-tight bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent'>
                   Smart Class
                 </span>
               </div>
-              <p className='text-[11px] text-zinc-400 font-medium'>
+              <p className='text-xs lg:text-[11px] text-zinc-400 font-medium'>
                 Dashboard Wali Kelas
               </p>
             </div>
@@ -314,7 +315,10 @@ export default function LandingPage() {
             <div className='pt-3 border-t border-zinc-800/80 flex flex-col gap-2.5'>
               {currentUser ? (
                 <>
-                  <Link href={dashboardHref} onClick={() => setMobileMenuOpen(false)}>
+                  <Link
+                    href={dashboardHref}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
                     <Button className='w-full justify-center bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-xl py-3 flex items-center gap-2 cursor-pointer'>
                       <LayoutDashboard className='h-4 w-4' />
                       <span>Dashboard</span>
@@ -334,7 +338,10 @@ export default function LandingPage() {
                 </>
               ) : (
                 <>
-                  <Link href='/sign-in' onClick={() => setMobileMenuOpen(false)}>
+                  <Link
+                    href='/sign-in'
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
                     <Button
                       variant='ghost'
                       className='w-full justify-center text-zinc-300 hover:bg-zinc-900 rounded-xl font-semibold cursor-pointer'
@@ -342,7 +349,10 @@ export default function LandingPage() {
                       Masuk Aplikasi
                     </Button>
                   </Link>
-                  <Link href='/sign-up' onClick={() => setMobileMenuOpen(false)}>
+                  <Link
+                    href='/sign-up'
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
                     <Button className='w-full justify-center bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-xl cursor-pointer'>
                       Mulai Sekarang
                     </Button>
@@ -522,50 +532,55 @@ export default function LandingPage() {
             <div className='flex items-center justify-start sm:justify-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar pb-3 sm:pb-0 mb-8 sm:mb-10 max-w-full px-1'>
               <button
                 onClick={() => setActiveTab('absensi')}
-                className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border ${activeTab === 'absensi'
-                  ? 'bg-emerald-600 text-white border-emerald-500 shadow-lg shadow-emerald-600/30'
-                  : 'bg-zinc-900/60 text-zinc-400 hover:bg-zinc-800 border-zinc-800'
-                  }`}
+                className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border ${
+                  activeTab === 'absensi'
+                    ? 'bg-emerald-600 text-white border-emerald-500 shadow-lg shadow-emerald-600/30'
+                    : 'bg-zinc-900/60 text-zinc-400 hover:bg-zinc-800 border-zinc-800'
+                }`}
               >
                 <CalendarCheck2 className='h-4 w-4' />
                 <span>Absensi Kelas</span>
               </button>
               <button
                 onClick={() => setActiveTab('nilai')}
-                className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border ${activeTab === 'nilai'
-                  ? 'bg-emerald-600 text-white border-emerald-500 shadow-lg shadow-emerald-600/30'
-                  : 'bg-zinc-900/60 text-zinc-400 hover:bg-zinc-800 border-zinc-800'
-                  }`}
+                className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border ${
+                  activeTab === 'nilai'
+                    ? 'bg-emerald-600 text-white border-emerald-500 shadow-lg shadow-emerald-600/30'
+                    : 'bg-zinc-900/60 text-zinc-400 hover:bg-zinc-800 border-zinc-800'
+                }`}
               >
                 <GraduationCap className='h-4 w-4' />
                 <span>Nilai Akademik</span>
               </button>
               <button
                 onClick={() => setActiveTab('tabungan')}
-                className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border ${activeTab === 'tabungan'
-                  ? 'bg-emerald-600 text-white border-emerald-500 shadow-lg shadow-emerald-600/30'
-                  : 'bg-zinc-900/60 text-zinc-400 hover:bg-zinc-800 border-zinc-800'
-                  }`}
+                className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border ${
+                  activeTab === 'tabungan'
+                    ? 'bg-emerald-600 text-white border-emerald-500 shadow-lg shadow-emerald-600/30'
+                    : 'bg-zinc-900/60 text-zinc-400 hover:bg-zinc-800 border-zinc-800'
+                }`}
               >
                 <Wallet className='h-4 w-4' />
                 <span>Tabungan Siswa</span>
               </button>
               <button
                 onClick={() => setActiveTab('jurnal')}
-                className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border ${activeTab === 'jurnal'
-                  ? 'bg-emerald-600 text-white border-emerald-500 shadow-lg shadow-emerald-600/30'
-                  : 'bg-zinc-900/60 text-zinc-400 hover:bg-zinc-800 border-zinc-800'
-                  }`}
+                className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border ${
+                  activeTab === 'jurnal'
+                    ? 'bg-emerald-600 text-white border-emerald-500 shadow-lg shadow-emerald-600/30'
+                    : 'bg-zinc-900/60 text-zinc-400 hover:bg-zinc-800 border-zinc-800'
+                }`}
               >
                 <BookMarked className='h-4 w-4' />
                 <span>Jurnal KBM</span>
               </button>
               <button
                 onClick={() => setActiveTab('siswa')}
-                className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border ${activeTab === 'siswa'
-                  ? 'bg-emerald-600 text-white border-emerald-500 shadow-lg shadow-emerald-600/30'
-                  : 'bg-zinc-900/60 text-zinc-400 hover:bg-zinc-800 border-zinc-800'
-                  }`}
+                className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border ${
+                  activeTab === 'siswa'
+                    ? 'bg-emerald-600 text-white border-emerald-500 shadow-lg shadow-emerald-600/30'
+                    : 'bg-zinc-900/60 text-zinc-400 hover:bg-zinc-800 border-zinc-800'
+                }`}
               >
                 <Users className='h-4 w-4' />
                 <span>Data Siswa</span>
@@ -1018,8 +1033,9 @@ export default function LandingPage() {
                   >
                     <span>{item.q}</span>
                     <ChevronDown
-                      className={`h-5 w-5 text-zinc-400 transition-transform duration-300 flex-shrink-0 ${openFaq === idx ? 'rotate-180 text-emerald-400' : ''
-                        }`}
+                      className={`h-5 w-5 text-zinc-400 transition-transform duration-300 flex-shrink-0 ${
+                        openFaq === idx ? 'rotate-180 text-emerald-400' : ''
+                      }`}
                     />
                   </button>
                   {openFaq === idx && (
