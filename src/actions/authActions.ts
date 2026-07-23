@@ -5,7 +5,7 @@ import Teacher from '@/models/Teacher';
 import AdminUser from '@/models/AdminUser';
 import School from '@/models/School';
 import { hashPassword, verifyPassword } from '@/lib/password';
-import { signSession } from '@/lib/auth';
+import { signSession, verifySession } from '@/lib/auth';
 import { cookies } from 'next/headers';
 import { escapeRegExp } from '@/lib/utils';
 import { checkRateLimit } from '@/lib/rateLimit';
@@ -168,5 +168,23 @@ export async function logoutTeacher() {
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message || 'Gagal logout.' };
+  }
+}
+
+export async function getCurrentUserSession() {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('session')?.value;
+    if (!token) return null;
+    const payload = await verifySession(token);
+    if (!payload || !payload.userId) return null;
+    return {
+      userId: payload.userId as string,
+      name: (payload.name as string) || '',
+      email: (payload.email as string) || '',
+      isAdmin: !!payload.isAdmin,
+    };
+  } catch (error) {
+    return null;
   }
 }

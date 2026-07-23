@@ -13,6 +13,7 @@ import {
   X,
   ShieldCheck,
   LogOut,
+  Home,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ConfirmDialog from '@/components/ConfirmDialog';
@@ -90,8 +91,8 @@ export default function AdminLayoutClient({ children, admin }: AdminLayoutClient
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group ${isActive
-                    ? 'bg-indigo-950/60 text-indigo-400 border border-indigo-900/50 shadow-md shadow-indigo-950/20'
-                    : 'text-zinc-400 hover:bg-zinc-900/60 hover:text-zinc-200 border border-transparent'
+                  ? 'bg-indigo-950/60 text-indigo-400 border border-indigo-900/50 shadow-md shadow-indigo-950/20'
+                  : 'text-zinc-400 hover:bg-zinc-900/60 hover:text-zinc-200 border border-transparent'
                   }`}
               >
                 <Icon

@@ -22,6 +22,7 @@ import {
   Sliders,
   Check,
   Settings,
+  Home,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {

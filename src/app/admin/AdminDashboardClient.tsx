@@ -12,9 +12,11 @@ import {
   BookOpen,
   CheckCircle2,
   FileText,
+  Home,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 interface TeacherStat {
   id: string;
@@ -110,7 +112,7 @@ export default function AdminDashboardClient({ stats, schools }: AdminDashboardC
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <ShieldCheck className="h-5 w-5 text-indigo-400" />
@@ -125,6 +127,15 @@ export default function AdminDashboardClient({ stats, schools }: AdminDashboardC
             Ikhtisar operasional, statistik guru, dan sekolah terdaftar di seluruh sistem.
           </p>
         </div>
+        <Link href="/">
+          <Button
+            variant="outline"
+            className="border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-300 hover:text-white rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 self-start sm:self-auto cursor-pointer shadow-sm"
+          >
+            <Home className="h-4 w-4 text-indigo-400" />
+            <span>Kembali Ke Halaman Utama</span>
+          </Button>
+        </Link>
       </div>
 
       {/* Grid Stats */}
@@ -231,7 +242,7 @@ export default function AdminDashboardClient({ stats, schools }: AdminDashboardC
                     } else if (user.role === 'Wali Kelas') {
                       badgeColor = "bg-emerald-950/40 text-emerald-400 border-emerald-900/30";
                     }
-                    
+
                     return (
                       <div key={user.id} className="flex items-center justify-between p-2.5 bg-zinc-950/40 border border-zinc-850 rounded-xl hover:bg-zinc-900/10 transition-colors">
                         <div className="flex flex-col min-w-0">

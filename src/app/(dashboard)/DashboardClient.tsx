@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import {
   Users,
   Calendar,
@@ -12,7 +13,9 @@ import {
   LogOut,
   BarChart3,
   BookMarked,
+  Home,
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -110,7 +113,7 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
   };
 
   const enabled = stats.enabledMenus || ['/', '/siswa', '/absensi', '/nilai', '/tabungan', '/jurnal'];
-  
+
   const isSiswaEnabled = enabled.includes('/siswa');
   const isAbsensiEnabled = enabled.includes('/absensi');
   const isTabunganEnabled = enabled.includes('/tabungan');
@@ -157,7 +160,7 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
   return (
     <div className='space-y-8 animate-fade-in'>
       {/* Header */}
-      <div className='flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-zinc-900/50 pb-5'>
+      <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-zinc-900/50 pb-5'>
         <div>
           <h2 className='text-3xl font-extrabold tracking-tight bg-gradient-to-r from-zinc-50 to-zinc-400 bg-clip-text text-transparent'>
             Dashboard Utama
@@ -166,6 +169,15 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
             Ringkasan performa akademik, kehadiran, dan tabungan kelas Anda.
           </p>
         </div>
+        <Link href='/'>
+          <Button
+            variant='outline'
+            className='border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-300 hover:text-white rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 self-start sm:self-auto cursor-pointer shadow-sm'
+          >
+            <Home className='h-4 w-4 text-emerald-400' />
+            <span>Kembali Ke Halaman Utama</span>
+          </Button>
+        </Link>
       </div>
 
       {/* Grid Stats */}

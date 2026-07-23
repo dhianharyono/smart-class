@@ -175,7 +175,6 @@ export default function SignInPage() {
               ) : (
                 <>
                   <span>Masuk Aplikasi</span>
-                  <ArrowRight className="h-4 w-4" />
                 </>
               )}
             </Button>

@@ -30,8 +30,13 @@ import {
   FileSpreadsheet,
   Check,
   Plus,
+  LayoutDashboard,
+  LogOut,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { getCurrentUserSession, logoutTeacher } from '@/actions/authActions';
+import { toast } from 'sonner';
+import ConfirmDialog from '@/components/ConfirmDialog';
 
 function ScrollReveal({
   children,
@@ -53,7 +58,7 @@ function ScrollReveal({
           observer.unobserve(entry.target);
         }
       },
-      { threshold: 0.1, rootMargin: '0px 0px -30px 0px' }
+      { threshold: 0.1, rootMargin: '0px 0px -30px 0px' },
     );
 
     if (ref.current) {
@@ -78,6 +83,39 @@ function ScrollReveal({
 }
 
 export default function LandingPage() {
+  const [currentUser, setCurrentUser] = useState<{
+    userId: string;
+    name: string;
+    email: string;
+    isAdmin: boolean;
+  } | null>(null);
+
+  useEffect(() => {
+    getCurrentUserSession().then((user) => {
+      if (user) {
+        setCurrentUser(user);
+      }
+    });
+  }, []);
+
+  const dashboardHref = currentUser?.isAdmin ? '/admin' : '/dashboard';
+
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogoutSubmit = async () => {
+    setIsLoggingOut(true);
+    const res = await logoutTeacher();
+    setIsLoggingOut(false);
+    setShowLogoutConfirm(false);
+    if (res.success) {
+      setCurrentUser(null);
+      toast.success('Berhasil keluar aplikasi');
+    } else {
+      toast.error(res.error || 'Gagal keluar aplikasi.');
+    }
+  };
+
   const [activeTab, setActiveTab] = useState<
     'absensi' | 'nilai' | 'tabungan' | 'jurnal' | 'siswa'
   >('absensi');
@@ -180,19 +218,40 @@ export default function LandingPage() {
 
           {/* Action CTAs (Desktop) */}
           <div className='hidden md:flex items-center gap-3'>
-            <Link href='/sign-in'>
-              <Button
-                variant='ghost'
-                className='text-zinc-300 hover:text-white hover:bg-zinc-900 rounded-xl text-sm font-semibold px-4'
-              >
-                Masuk
-              </Button>
-            </Link>
-            <Link href='/sign-up'>
-              <Button className='bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all duration-300 flex items-center gap-2'>
-                <span>Mulai Sekarang</span>
-              </Button>
-            </Link>
+            {currentUser ? (
+              <div className='flex items-center gap-2.5'>
+                <Link href={dashboardHref}>
+                  <Button className='bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all duration-300 flex items-center gap-2 cursor-pointer'>
+                    <LayoutDashboard className='h-4 w-4' />
+                    <span>Dashboard</span>
+                  </Button>
+                </Link>
+                <Button
+                  variant='outline'
+                  onClick={() => setShowLogoutConfirm(true)}
+                  className='border-zinc-800 bg-zinc-900/60 hover:bg-rose-950/40 text-zinc-300 hover:text-rose-400 hover:border-rose-900/50 rounded-xl text-sm font-semibold px-4 py-2.5 flex items-center gap-2 cursor-pointer transition-all'
+                >
+                  <LogOut className='h-4 w-4' />
+                  <span>Keluar</span>
+                </Button>
+              </div>
+            ) : (
+              <>
+                <Link href='/sign-in'>
+                  <Button
+                    variant='ghost'
+                    className='text-zinc-300 hover:text-white hover:bg-zinc-900 rounded-xl text-sm font-semibold px-4 cursor-pointer'
+                  >
+                    Masuk
+                  </Button>
+                </Link>
+                <Link href='/sign-up'>
+                  <Button className='bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all duration-300 flex items-center gap-2 cursor-pointer'>
+                    <span>Mulai Sekarang</span>
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Hamburger Menu Button (Mobile) */}
@@ -253,19 +312,43 @@ export default function LandingPage() {
               FAQ
             </a>
             <div className='pt-3 border-t border-zinc-800/80 flex flex-col gap-2.5'>
-              <Link href='/sign-in' onClick={() => setMobileMenuOpen(false)}>
-                <Button
-                  variant='ghost'
-                  className='w-full justify-center text-zinc-300 hover:bg-zinc-900 rounded-xl font-semibold'
-                >
-                  Masuk Aplikasi
-                </Button>
-              </Link>
-              <Link href='/sign-up' onClick={() => setMobileMenuOpen(false)}>
-                <Button className='w-full justify-center bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-xl'>
-                  Mulai Sekarang
-                </Button>
-              </Link>
+              {currentUser ? (
+                <>
+                  <Link href={dashboardHref} onClick={() => setMobileMenuOpen(false)}>
+                    <Button className='w-full justify-center bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-xl py-3 flex items-center gap-2 cursor-pointer'>
+                      <LayoutDashboard className='h-4 w-4' />
+                      <span>Dashboard</span>
+                    </Button>
+                  </Link>
+                  <Button
+                    variant='outline'
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      setShowLogoutConfirm(true);
+                    }}
+                    className='w-full justify-center border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:text-rose-400 hover:bg-rose-950/40 rounded-xl font-semibold py-3 flex items-center gap-2 cursor-pointer'
+                  >
+                    <LogOut className='h-4 w-4' />
+                    <span>Keluar</span>
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link href='/sign-in' onClick={() => setMobileMenuOpen(false)}>
+                    <Button
+                      variant='ghost'
+                      className='w-full justify-center text-zinc-300 hover:bg-zinc-900 rounded-xl font-semibold cursor-pointer'
+                    >
+                      Masuk Aplikasi
+                    </Button>
+                  </Link>
+                  <Link href='/sign-up' onClick={() => setMobileMenuOpen(false)}>
+                    <Button className='w-full justify-center bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-xl cursor-pointer'>
+                      Mulai Sekarang
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         )}
@@ -273,10 +356,10 @@ export default function LandingPage() {
 
       <main className='relative z-10'>
         {/* ==================== HERO SECTION ==================== */}
-        <section className='relative min-h-[80vh] py-12 sm:py-20 md:py-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center flex flex-col items-center justify-center'>
+        <section className='relative min-h-[70vh] sm:min-h-[80vh] py-8 sm:py-20 md:py-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center flex flex-col items-center justify-center'>
           <ScrollReveal>
             {/* Main Title H1 */}
-            <h1 className='text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white max-w-5xl mx-auto leading-[1.15]'>
+            <h1 className='text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-white max-w-5xl mx-auto leading-snug sm:leading-[1.15]'>
               Smart Class
               <br />
               <span className='bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent'>
@@ -285,41 +368,66 @@ export default function LandingPage() {
             </h1>
 
             {/* Subtitle */}
-            <p className='mt-6 text-lg sm:text-xl text-zinc-400 max-w-3xl mx-auto leading-relaxed font-normal'>
+            <p className='mt-4 sm:mt-6 text-sm sm:text-lg md:text-xl text-zinc-400 max-w-2xl sm:max-w-3xl mx-auto leading-relaxed font-normal px-2'>
               Platform terpadu untuk pencatatan presensi siswa real-time,
               pengelolaan nilai akademik, buku tabungan digital, agenda jurnal
               harian, dan analisis perkembangan kelas tanpa ribet.
             </p>
 
             {/* CTA Buttons */}
-            <div className='mt-10 flex flex-col sm:flex-row items-center justify-center gap-4'>
-              <Link href='/sign-up' className='w-full sm:w-auto'>
-                <Button className='w-full sm:w-auto bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-base px-8 py-6 rounded-2xl shadow-xl shadow-emerald-600/25 hover:shadow-emerald-500/40 transition-all duration-300 flex items-center justify-center gap-3'>
-                  <span>Coba Smart Class </span>
-                </Button>
-              </Link>
-              <a href='#modul' className='w-full sm:w-auto'>
-                <Button
-                  variant='outline'
-                  className='w-full sm:w-auto border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-200 font-semibold text-base px-8 py-6 rounded-2xl backdrop-blur-md transition-all'
-                >
-                  <span>Lihat Preview Interactive</span>
-                </Button>
-              </a>
+            <div className='mt-6 sm:mt-10 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto max-w-xs sm:max-w-none mx-auto'>
+              {currentUser ? (
+                <>
+                  <Link href={dashboardHref} className='w-full sm:w-auto'>
+                    <Button className='w-full sm:w-auto h-12 sm:h-14 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm sm:text-base px-6 sm:px-8 rounded-xl sm:rounded-2xl shadow-xl shadow-emerald-600/25 hover:shadow-emerald-500/40 transition-all duration-300 flex items-center justify-center gap-2.5 cursor-pointer'>
+                      <LayoutDashboard className='h-5 w-5' />
+                      <span>Buka Dashboard Saya</span>
+                    </Button>
+                  </Link>
+                  <a
+                    href='#fitur'
+                    onClick={(e) => scrollToSection(e, 'fitur')}
+                    className='w-full sm:w-auto'
+                  >
+                    <Button
+                      variant='outline'
+                      className='w-full sm:w-auto h-12 sm:h-14 border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-200 font-semibold text-sm sm:text-base px-6 sm:px-8 rounded-xl sm:rounded-2xl backdrop-blur-md transition-all flex items-center justify-center cursor-pointer'
+                    >
+                      <span>Jelajahi Fitur</span>
+                    </Button>
+                  </a>
+                </>
+              ) : (
+                <>
+                  <Link href='/sign-up' className='w-full sm:w-auto'>
+                    <Button className='w-full sm:w-auto h-12 sm:h-14 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm sm:text-base px-6 sm:px-8 rounded-xl sm:rounded-2xl shadow-xl shadow-emerald-600/25 hover:shadow-emerald-500/40 transition-all duration-300 flex items-center justify-center gap-2.5 cursor-pointer'>
+                      <span>Daftar Smart Class</span>
+                    </Button>
+                  </Link>
+                  <Link href='/sign-in' className='w-full sm:w-auto'>
+                    <Button
+                      variant='outline'
+                      className='w-full sm:w-auto h-12 sm:h-14 border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-200 font-semibold text-sm sm:text-base px-6 sm:px-8 rounded-xl sm:rounded-2xl backdrop-blur-md transition-all flex items-center justify-center cursor-pointer'
+                    >
+                      <span>Masuk ke Dashboard</span>
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Feature Micro-Badges */}
-            <div className='mt-12 flex flex-wrap items-center justify-center gap-6 text-xs text-zinc-400 font-medium'>
+            <div className='mt-8 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-6 text-xs sm:text-sm text-zinc-400 font-medium'>
               <div className='flex items-center gap-2'>
-                <CheckCircle2 className='h-4 w-4 text-emerald-400' />
-                <span>Tanpa Instalasi Aplikasi Kontak</span>
+                <CheckCircle2 className='h-4 w-4 text-emerald-400 shrink-0' />
+                <span>Tanpa Instalasi Aplikasi</span>
               </div>
               <div className='flex items-center gap-2'>
-                <CheckCircle2 className='h-4 w-4 text-emerald-400' />
+                <CheckCircle2 className='h-4 w-4 text-emerald-400 shrink-0' />
                 <span>100% Bebas Kertas (Paperless)</span>
               </div>
               <div className='flex items-center gap-2'>
-                <CheckCircle2 className='h-4 w-4 text-emerald-400' />
+                <CheckCircle2 className='h-4 w-4 text-emerald-400 shrink-0' />
                 <span>Akses HP, Tablet & Laptop</span>
               </div>
             </div>
@@ -467,7 +575,10 @@ export default function LandingPage() {
 
           {/* Active Tab Content Card */}
           <ScrollReveal delay={200}>
-            <div key={activeTab} className='bg-zinc-900/60 border border-zinc-800/80 rounded-3xl p-6 sm:p-10 backdrop-blur-xl shadow-2xl transition-all animate-fade-in'>
+            <div
+              key={activeTab}
+              className='bg-zinc-900/60 border border-zinc-800/80 rounded-3xl p-6 sm:p-10 backdrop-blur-xl shadow-2xl transition-all animate-fade-in'
+            >
               {activeTab === 'absensi' && (
                 <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 items-center'>
                   <div className='space-y-6'>
@@ -556,8 +667,8 @@ export default function LandingPage() {
                     </h3>
                     <p className='text-zinc-400 text-sm leading-relaxed'>
                       Input nilai per mata pelajaran, set nilai KKM standar, dan
-                      biarkan Smart Class mengalkulasi rata-rata serta memberikan
-                      notifikasi siswa yang perlu perhatian khusus.
+                      biarkan Smart Class mengalkulasi rata-rata serta
+                      memberikan notifikasi siswa yang perlu perhatian khusus.
                     </p>
                     <ul className='space-y-3 text-sm text-zinc-300'>
                       <li className='flex items-center gap-3'>
@@ -566,7 +677,9 @@ export default function LandingPage() {
                       </li>
                       <li className='flex items-center gap-3'>
                         <Check className='h-4 w-4 text-teal-400' />
-                        <span>Indikator peringatan batas KKM mata pelajaran</span>
+                        <span>
+                          Indikator peringatan batas KKM mata pelajaran
+                        </span>
                       </li>
                       <li className='flex items-center gap-3'>
                         <Check className='h-4 w-4 text-teal-400' />
@@ -624,7 +737,9 @@ export default function LandingPage() {
                     <ul className='space-y-3 text-sm text-zinc-300'>
                       <li className='flex items-center gap-3'>
                         <Check className='h-4 w-4 text-cyan-400' />
-                        <span>Catat setoran & penarikan kas tabungan kelas</span>
+                        <span>
+                          Catat setoran & penarikan kas tabungan kelas
+                        </span>
                       </li>
                       <li className='flex items-center gap-3'>
                         <Check className='h-4 w-4 text-cyan-400' />
@@ -690,8 +805,8 @@ export default function LandingPage() {
                     </h3>
                     <p className='text-zinc-400 text-sm leading-relaxed'>
                       Dokumentasikan agenda kegiatan mengajar harian, materi
-                      pembelajaran, serta absensi per siswa secara langsung dalam
-                      satu formulir jurnal.
+                      pembelajaran, serta absensi per siswa secara langsung
+                      dalam satu formulir jurnal.
                     </p>
                     <ul className='space-y-3 text-sm text-zinc-300'>
                       <li className='flex items-center gap-3'>
@@ -835,8 +950,8 @@ export default function LandingPage() {
                     Responsif Di Mana Saja
                   </h3>
                   <p className='text-sm text-zinc-400 leading-relaxed'>
-                    Akses langsung dari HP di dalam ruang kelas, dari tablet, atau
-                    laptop di rumah. Tampilan menyesuaikan secara optimal.
+                    Akses langsung dari HP di dalam ruang kelas, dari tablet,
+                    atau laptop di rumah. Tampilan menyesuaikan secara optimal.
                   </p>
                 </div>
               </ScrollReveal>
@@ -935,19 +1050,30 @@ export default function LandingPage() {
                   administrasi kelas lebih cepat, akurat, dan paperless.
                 </p>
                 <div className='pt-4 flex flex-col sm:flex-row items-center justify-center gap-4'>
-                  <Link href='/sign-up' className='w-full sm:w-auto'>
-                    <Button className='w-full sm:w-auto bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-base px-8 py-6 rounded-2xl shadow-xl shadow-emerald-500/20 transition-all duration-300 flex items-center justify-center gap-2'>
-                      <span>Daftar Akun Wali Kelas</span>
-                    </Button>
-                  </Link>
-                  <Link href='/sign-in' className='w-full sm:w-auto'>
-                    <Button
-                      variant='outline'
-                      className='w-full sm:w-auto border-zinc-700 bg-zinc-950/60 hover:bg-zinc-900 text-zinc-200 font-semibold text-base px-8 py-6 rounded-2xl transition-all'
-                    >
-                      <span>Masuk Aplikasi</span>
-                    </Button>
-                  </Link>
+                  {currentUser ? (
+                    <Link href={dashboardHref} className='w-full sm:w-auto'>
+                      <Button className='w-full sm:w-auto bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-base px-8 py-6 rounded-2xl shadow-xl shadow-emerald-500/20 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer'>
+                        <LayoutDashboard className='h-5 w-5' />
+                        <span>Buka Dashboard</span>
+                      </Button>
+                    </Link>
+                  ) : (
+                    <>
+                      <Link href='/sign-up' className='w-full sm:w-auto'>
+                        <Button className='w-full sm:w-auto bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-base px-8 py-6 rounded-2xl shadow-xl shadow-emerald-500/20 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer'>
+                          <span>Daftar Akun Wali Kelas</span>
+                        </Button>
+                      </Link>
+                      <Link href='/sign-in' className='w-full sm:w-auto'>
+                        <Button
+                          variant='outline'
+                          className='w-full sm:w-auto border-zinc-700 bg-zinc-950/60 hover:bg-zinc-900 text-zinc-200 font-semibold text-base px-8 py-6 rounded-2xl transition-all cursor-pointer'
+                        >
+                          <span>Masuk Aplikasi</span>
+                        </Button>
+                      </Link>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -1000,10 +1126,10 @@ export default function LandingPage() {
               FAQ
             </a>
             <Link
-              href='/sign-in'
+              href={currentUser ? dashboardHref : '/sign-in'}
               className='hover:text-emerald-400 transition-colors'
             >
-              Masuk
+              {currentUser ? 'Dashboard' : 'Masuk'}
             </Link>
           </div>
         </div>
@@ -1019,6 +1145,19 @@ export default function LandingPage() {
           <ArrowUp className='h-5 w-5' />
         </button>
       )}
+
+      {/* ==================== LOGOUT CONFIRMATION DIALOG ==================== */}
+      <ConfirmDialog
+        open={showLogoutConfirm}
+        onOpenChange={setShowLogoutConfirm}
+        title='Konfirmasi Keluar Aplikasi'
+        description='Apakah Anda yakin ingin keluar dari akun Smart Class?'
+        confirmText='Ya, Keluar'
+        cancelText='Batal'
+        variant='danger'
+        isLoading={isLoggingOut}
+        onConfirm={handleLogoutSubmit}
+      />
     </div>
   );
 }
