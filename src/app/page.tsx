@@ -77,6 +77,9 @@ export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
+    if (typeof window !== 'undefined' && 'scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
     const handleScroll = () => {
       if (window.scrollY > 300) {
         setShowScrollTop(true);
@@ -115,28 +118,23 @@ export default function LandingPage() {
       <div className='fixed bottom-10 -left-48 w-[500px] h-[500px] bg-emerald-600/10 rounded-full blur-[160px] pointer-events-none z-0' />
 
       {/* ==================== HEADER / NAVBAR ==================== */}
-      <motion.header
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
-        className='sticky top-0 z-50 backdrop-blur-xl bg-white/90 border-b border-slate-200/80 transition-all shadow-xs'
-      >
-        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between'>
+      <header className='sticky top-0 z-50 backdrop-blur-xl bg-white/95 border-b border-slate-200/80 transition-all shadow-xs'>
+        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 sm:py-4 flex items-center justify-between min-h-[72px] sm:min-h-[80px]'>
           {/* Brand Logo */}
           <Link
             href='/'
-            className='flex items-center gap-3 group cursor-pointer'
+            className='flex items-center gap-3 group cursor-pointer shrink-0'
           >
             <div className='flex h-9 w-9 lg:h-11 lg:w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-md group-hover:scale-105 transition-transform duration-300'>
               <BookOpen className='h-4 w-4 lg:h-6 lg:w-6' />
             </div>
             <div>
               <div className='flex items-center gap-2'>
-                <span className='text-sm lg:text-xl font-extrabold tracking-tight text-slate-900'>
+                <span className='text-sm lg:text-xl font-extrabold tracking-tight text-slate-900 leading-none'>
                   Smart Class
                 </span>
               </div>
-              <p className='text-xs lg:text-[11px] text-slate-500 font-bold'>
+              <p className='text-xs lg:text-[11px] text-slate-500 font-bold mt-0.5'>
                 Dashboard Wali Kelas
               </p>
             </div>
@@ -327,7 +325,7 @@ export default function LandingPage() {
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.header>
+      </header>
 
       <main className='relative z-10'>
         {/* ==================== HERO SECTION ==================== */}
