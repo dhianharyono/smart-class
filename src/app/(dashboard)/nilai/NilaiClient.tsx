@@ -195,10 +195,10 @@ export default function NilaiClient({ initialSubjects, initialKkm }: NilaiClient
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-zinc-50 to-zinc-400 bg-clip-text text-transparent">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900">
             Nilai Akademik
           </h2>
-          <p className="text-zinc-400 text-sm">
+          <p className="text-slate-600 text-xs sm:text-sm mt-1">
             Input dan kelola perolehan skor nilai tugas, UH, UTS, dan UAS siswa secara terstruktur.
           </p>
         </div>
@@ -209,26 +209,26 @@ export default function NilaiClient({ initialSubjects, initialKkm }: NilaiClient
               render={
                 <Button
                   variant="outline"
-                  className="border-zinc-800 bg-zinc-900/50 hover:bg-zinc-900 text-zinc-300 font-medium rounded-xl h-10 px-4 gap-2"
+                  className="border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-semibold rounded-xl h-10 px-4 gap-2 shadow-xs"
                 />
               }
             >
-              <Settings className="h-4 w-4 text-emerald-400" />
+              <Settings className="h-4 w-4 text-emerald-600" />
               <span>KKM: {kkm}</span>
             </DialogTrigger>
-            <DialogContent className="bg-zinc-900 border border-zinc-800 text-white rounded-2xl max-w-sm">
+            <DialogContent className="bg-white border border-slate-200 text-slate-900 rounded-2xl max-w-sm p-5 sm:p-6 shadow-2xl">
               <form onSubmit={handleSaveKkm}>
                 <DialogHeader>
-                  <DialogTitle className="text-lg font-bold text-zinc-100">
+                  <DialogTitle className="text-lg font-bold text-slate-900">
                     Pengaturan Batas KKM
                   </DialogTitle>
-                  <DialogDescription className="text-xs text-zinc-400">
+                  <DialogDescription className="text-xs text-slate-500">
                     Tentukan batas Kriteria Ketuntasan Minimal (KKM) untuk evaluasi akademik kelas Anda.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="kkm-input" className="text-zinc-300 text-sm font-semibold">
+                    <Label htmlFor="kkm-input" className="text-slate-700 text-sm font-semibold">
                       Batas Nilai KKM
                     </Label>
                     <Input
@@ -239,7 +239,7 @@ export default function NilaiClient({ initialSubjects, initialKkm }: NilaiClient
                       max={100}
                       value={kkmInput}
                       onChange={(e) => setKkmInput(e.target.value)}
-                      className="bg-zinc-950 border-zinc-800 focus:border-emerald-500 text-white rounded-xl font-bold text-center text-lg"
+                      className="bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl font-bold text-center text-lg"
                     />
                   </div>
                 </div>
@@ -248,14 +248,14 @@ export default function NilaiClient({ initialSubjects, initialKkm }: NilaiClient
                     type="button"
                     variant="ghost"
                     onClick={() => setEditKkmOpen(false)}
-                    className="text-zinc-400 hover:text-zinc-200"
+                    className="text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200"
                   >
                     Batal
                   </Button>
                   <Button
                     type="submit"
                     disabled={isUpdatingKkm}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl px-4"
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl px-4 shadow-xs"
                   >
                     {isUpdatingKkm ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Simpan'}
                   </Button>
@@ -267,7 +267,7 @@ export default function NilaiClient({ initialSubjects, initialKkm }: NilaiClient
           <Button
             onClick={handleExcelExport}
             variant="outline"
-            className="border-zinc-800 bg-zinc-900/50 hover:bg-zinc-900 text-zinc-300 font-medium rounded-xl h-10 px-4 gap-2"
+            className="border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-semibold rounded-xl h-10 px-4 gap-2 shadow-xs"
           >
             <Download className="h-4 w-4" />
             Ekspor Excel
@@ -275,7 +275,7 @@ export default function NilaiClient({ initialSubjects, initialKkm }: NilaiClient
           <Button
             onClick={handleSave}
             disabled={isPending || isLoading}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl h-10 px-6 gap-2 shadow-lg shadow-emerald-500/10"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl h-10 px-6 gap-2 shadow-xs"
           >
             {isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -288,15 +288,15 @@ export default function NilaiClient({ initialSubjects, initialKkm }: NilaiClient
       </div>
 
       {/* Subject and Category Filters */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-zinc-900/30 border border-zinc-900/80 rounded-2xl p-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white border border-slate-200/80 rounded-2xl p-4 shadow-xs">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1 w-full">
           {/* Subject Dropdown */}
           <div className="w-full sm:max-w-xs sm:flex-1">
             <Select value={selectedSubject} onValueChange={(val) => val && setSelectedSubject(val)}>
-              <SelectTrigger className="bg-zinc-950 border-zinc-800 text-white rounded-xl h-10">
+              <SelectTrigger className="bg-slate-50 border-slate-200 text-slate-900 rounded-xl h-10">
                 <SelectValue placeholder="Pilih Mata Pelajaran" />
               </SelectTrigger>
-              <SelectContent className="bg-zinc-900 border-zinc-800 text-white rounded-xl">
+              <SelectContent className="bg-white border-slate-200 text-slate-900 rounded-xl">
                 {subjects.map((subj) => (
                   <SelectItem key={subj} value={subj}>
                     {subj}
@@ -308,23 +308,23 @@ export default function NilaiClient({ initialSubjects, initialKkm }: NilaiClient
 
           {/* Add Subject Dialog */}
           <Dialog open={addSubjectOpen} onOpenChange={setAddSubjectOpen}>
-            <DialogTrigger className="border border-zinc-800 bg-zinc-900/50 hover:bg-zinc-900 text-zinc-300 rounded-xl h-10 px-4 gap-2 flex items-center justify-center cursor-pointer">
-              <Plus className="h-4 w-4" />
+            <DialogTrigger className="border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl h-10 px-4 gap-2 flex items-center justify-center cursor-pointer font-medium text-xs sm:text-sm">
+              <Plus className="h-4 w-4 text-emerald-600" />
               Mata Pelajaran Baru
             </DialogTrigger>
-            <DialogContent className="bg-zinc-900 border border-zinc-800 text-white rounded-2xl max-w-sm">
+            <DialogContent className="bg-white border border-slate-200 text-slate-900 rounded-2xl max-w-sm p-5 sm:p-6 shadow-2xl">
               <form onSubmit={handleAddSubject}>
                 <DialogHeader>
-                  <DialogTitle className="text-lg font-bold text-zinc-100">
+                  <DialogTitle className="text-lg font-bold text-slate-900">
                     Tambah Mata Pelajaran
                   </DialogTitle>
-                  <DialogDescription className="text-xs text-zinc-400">
+                  <DialogDescription className="text-xs text-slate-500">
                     Buat subjek/mapel baru yang belum ada di daftar bimbingan kelas Anda.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="subj-name" className="text-zinc-300 text-sm font-semibold">
+                    <Label htmlFor="subj-name" className="text-slate-700 text-sm font-semibold">
                       Nama Mata Pelajaran
                     </Label>
                     <Input
@@ -333,7 +333,7 @@ export default function NilaiClient({ initialSubjects, initialKkm }: NilaiClient
                       placeholder="Contoh: Fisika, Sejarah, Agama"
                       value={newSubjectName}
                       onChange={(e) => setNewSubjectName(e.target.value)}
-                      className="bg-zinc-950 border-zinc-800 focus:border-emerald-500 text-white rounded-xl"
+                      className="bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl"
                     />
                   </div>
                 </div>
@@ -342,13 +342,13 @@ export default function NilaiClient({ initialSubjects, initialKkm }: NilaiClient
                     type="button"
                     variant="ghost"
                     onClick={() => setAddSubjectOpen(false)}
-                    className="text-zinc-400 hover:text-zinc-200"
+                    className="text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200"
                   >
                     Batal
                   </Button>
                   <Button
                     type="submit"
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl px-4"
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl px-4 shadow-xs"
                   >
                     Tambah
                   </Button>
@@ -357,7 +357,7 @@ export default function NilaiClient({ initialSubjects, initialKkm }: NilaiClient
             </DialogContent>
           </Dialog>
 
-          <span className="hidden sm:inline text-zinc-700">|</span>
+          <span className="hidden sm:inline text-slate-300">|</span>
 
           {/* Test Category Dropdown */}
           <div className="w-full sm:w-48">
@@ -365,10 +365,10 @@ export default function NilaiClient({ initialSubjects, initialKkm }: NilaiClient
               value={selectedCategory}
               onValueChange={(val) => val && setSelectedCategory(val as any)}
             >
-              <SelectTrigger className="bg-zinc-950 border-zinc-800 text-white rounded-xl h-10">
+              <SelectTrigger className="bg-slate-50 border-slate-200 text-slate-900 rounded-xl h-10">
                 <SelectValue placeholder="Pilih Kategori" />
               </SelectTrigger>
-              <SelectContent className="bg-zinc-900 border-zinc-800 text-white rounded-xl">
+              <SelectContent className="bg-white border-slate-200 text-slate-900 rounded-xl">
                 <SelectItem value="Tugas">Tugas</SelectItem>
                 <SelectItem value="UH">UH (Ulangan Harian)</SelectItem>
                 <SelectItem value="UTS">UTS (Tengah Semester)</SelectItem>
@@ -380,26 +380,26 @@ export default function NilaiClient({ initialSubjects, initialKkm }: NilaiClient
       </div>
 
       {/* Main Table */}
-      <Card className="bg-zinc-900/30 border-zinc-900 rounded-2xl overflow-hidden shadow-xl">
+      <Card className="bg-white border-slate-200/80 rounded-2xl overflow-hidden shadow-xs">
         <CardContent className="p-0">
           {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-20 text-zinc-500 text-sm">
-              <Loader2 className="h-8 w-8 animate-spin text-emerald-500 mb-3" />
+            <div className="flex flex-col items-center justify-center py-20 text-slate-500 text-sm">
+              <Loader2 className="h-8 w-8 animate-spin text-emerald-600 mb-3" />
               <span>Memuat daftar nilai...</span>
             </div>
           ) : isError ? (
-            <div className="text-center py-20 text-red-400 text-sm">
+            <div className="text-center py-20 text-rose-600 text-sm font-medium">
               Gagal memuat data nilai. Periksa koneksi server.
             </div>
           ) : localGrades.length > 0 ? (
             <Table>
-              <TableHeader className="bg-zinc-900/50 border-b border-zinc-800">
-                <TableRow className="border-b border-zinc-800 hover:bg-transparent">
-                  <TableHead className="w-12 text-center text-zinc-400 font-bold">No</TableHead>
-                  <TableHead className="w-32 text-zinc-400 font-bold">NIS</TableHead>
-                  <TableHead className="text-zinc-400 font-bold">Nama Lengkap</TableHead>
-                  <TableHead className="w-32 text-zinc-400 font-bold">Kelas</TableHead>
-                  <TableHead className="w-48 text-center text-zinc-400 font-bold">
+              <TableHeader className="bg-slate-50/80 border-b border-slate-200">
+                <TableRow className="border-b border-slate-200 hover:bg-transparent">
+                  <TableHead className="w-12 text-center text-slate-700 font-bold">No</TableHead>
+                  <TableHead className="w-32 text-slate-700 font-bold">NIS</TableHead>
+                  <TableHead className="text-slate-700 font-bold">Nama Lengkap</TableHead>
+                  <TableHead className="w-32 text-slate-700 font-bold">Kelas</TableHead>
+                  <TableHead className="w-48 text-center text-slate-700 font-bold">
                     Nilai (0 - 100)
                   </TableHead>
                 </TableRow>
@@ -408,12 +408,12 @@ export default function NilaiClient({ initialSubjects, initialKkm }: NilaiClient
                 {localGrades.map((row, index) => (
                   <TableRow
                     key={row.studentId}
-                    className="border-b border-zinc-900 hover:bg-zinc-900/20 text-zinc-300"
+                    className="border-b border-slate-100 hover:bg-slate-50/80 text-slate-700 transition-colors"
                   >
                     <TableCell className="text-center font-medium">{index + 1}</TableCell>
-                    <TableCell className="font-mono">{row.nis}</TableCell>
-                    <TableCell className="font-semibold text-zinc-200">{row.name}</TableCell>
-                    <TableCell>{row.className}</TableCell>
+                    <TableCell className="font-mono font-medium">{row.nis}</TableCell>
+                    <TableCell className="font-bold text-slate-900">{row.name}</TableCell>
+                    <TableCell className="font-medium">{row.className}</TableCell>
                     <TableCell>
                       <div className="flex justify-center">
                         <div className="relative w-28">
@@ -424,13 +424,13 @@ export default function NilaiClient({ initialSubjects, initialKkm }: NilaiClient
                             max={100}
                             value={row.score}
                             onChange={(e) => handleScoreChange(row.studentId, e.target.value)}
-                            className={`text-center font-bold bg-zinc-950 border text-white rounded-xl focus:ring-1 focus:ring-emerald-500 h-9 pr-2 ${row.score !== '' && row.score < kkm
-                                ? 'border-rose-900/60 text-rose-400 focus:border-rose-500 bg-rose-950/10'
-                                : 'border-zinc-800 focus:border-emerald-500'
+                            className={`text-center font-bold rounded-xl focus:ring-1 focus:ring-emerald-500 h-9 pr-2 ${row.score !== '' && row.score < kkm
+                                ? 'border-rose-300 text-rose-700 bg-rose-50 focus:border-rose-500'
+                                : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-emerald-500'
                               }`}
                           />
                           {row.score !== '' && row.score < kkm && (
-                            <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] font-bold text-rose-500 uppercase tracking-wider">
+                            <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] font-extrabold text-rose-600 uppercase tracking-wider">
                               &lt; KKM
                             </span>
                           )}
@@ -442,10 +442,10 @@ export default function NilaiClient({ initialSubjects, initialKkm }: NilaiClient
               </TableBody>
             </Table>
           ) : (
-            <div className="flex flex-col items-center justify-center py-20 text-zinc-500">
-              <GraduationCap className="h-10 w-10 text-zinc-700 mb-2" />
-              <p className="text-sm font-semibold">Tidak ada siswa terdaftar di kelas.</p>
-              <p className="text-xs text-zinc-650">Silakan tambahkan siswa terlebih dahulu di halaman Data Siswa.</p>
+            <div className="flex flex-col items-center justify-center py-20 text-slate-500">
+              <GraduationCap className="h-10 w-10 text-slate-300 mb-2" />
+              <p className="text-sm font-bold text-slate-700">Tidak ada siswa terdaftar di kelas.</p>
+              <p className="text-xs text-slate-400 mt-1">Silakan tambahkan siswa terlebih dahulu di halaman Data Siswa.</p>
             </div>
           )}
         </CardContent>

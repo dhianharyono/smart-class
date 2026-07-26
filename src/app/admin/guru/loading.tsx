@@ -14,7 +14,7 @@ export default function AdminGuruLoading() {
       </div>
 
       {/* Control Bar */}
-      <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-zinc-900/20 p-4 border border-zinc-900 rounded-2xl w-full">
+      <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-white p-4 border border-slate-200/80 rounded-2xl w-full shadow-xs">
         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
           <Skeleton className="h-10 w-full sm:w-64 rounded-xl" />
           <Skeleton className="h-10 w-full sm:w-64 rounded-xl" />
@@ -23,11 +23,11 @@ export default function AdminGuruLoading() {
       </div>
 
       {/* Table Skeleton */}
-      <div className="bg-zinc-900/20 border border-zinc-900/60 rounded-2xl overflow-hidden shadow-xl">
+      <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-xs">
         <div className="p-0 overflow-x-auto w-full">
           <div className="min-w-[640px]">
             {/* Table Header */}
-            <div className="grid grid-cols-5 gap-4 p-4 bg-zinc-900/40 border-b border-zinc-900">
+            <div className="grid grid-cols-5 gap-4 p-4 bg-slate-50 border-b border-slate-200">
               <Skeleton className="h-4 w-32" />
               <Skeleton className="h-4 w-28" />
               <Skeleton className="h-4 w-16" />
@@ -35,7 +35,7 @@ export default function AdminGuruLoading() {
               <Skeleton className="h-4 w-16 justify-self-center" />
             </div>
             {/* Table Rows */}
-            <div className="divide-y divide-zinc-900/50">
+            <div className="divide-y divide-slate-100">
               {[...Array(6)].map((_, i) => (
                 <div key={i} className="grid grid-cols-5 gap-4 p-4 items-center">
                   <div className="space-y-1.5">

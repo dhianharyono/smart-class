@@ -86,18 +86,18 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
   if (!mounted) {
     return (
       <div className='space-y-6'>
-        <div className='h-10 w-48 bg-zinc-900 rounded animate-pulse' />
+        <div className='h-10 w-48 bg-slate-200 rounded animate-pulse' />
         <div className='grid gap-4 md:grid-cols-4'>
           {[...Array(4)].map((_, i) => (
             <div
               key={i}
-              className='h-28 bg-zinc-900 rounded-2xl animate-pulse'
+              className='h-28 bg-slate-200 rounded-2xl animate-pulse'
             />
           ))}
         </div>
         <div className='grid gap-6 md:grid-cols-3'>
-          <div className='h-96 md:col-span-2 bg-zinc-900 rounded-2xl animate-pulse' />
-          <div className='h-96 bg-zinc-900 rounded-2xl animate-pulse' />
+          <div className='h-96 md:col-span-2 bg-slate-200 rounded-2xl animate-pulse' />
+          <div className='h-96 bg-slate-200 rounded-2xl animate-pulse' />
         </div>
       </div>
     );
@@ -127,7 +127,7 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
       description: 'Siswa aktif terdaftar',
       icon: Users,
       color:
-        'from-emerald-500/20 to-teal-500/10 text-emerald-400 border-emerald-950',
+        'from-emerald-50 to-teal-50/30 text-emerald-700 border-emerald-200/70',
       visible: isSiswaEnabled,
     },
     {
@@ -135,7 +135,7 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
       value: `${stats.monthlyAttendanceRate}%`,
       description: 'Kehadiran bulan ini',
       icon: Calendar,
-      color: 'from-blue-500/20 to-indigo-500/10 text-blue-400 border-blue-950',
+      color: 'from-blue-50 to-indigo-50/30 text-blue-700 border-blue-200/70',
       visible: isAbsensiEnabled,
     },
     {
@@ -144,7 +144,7 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
       description: 'Total dana terkumpul',
       icon: Wallet,
       color:
-        'from-amber-500/20 to-orange-500/10 text-amber-400 border-amber-950',
+        'from-amber-50 to-orange-50/30 text-amber-700 border-amber-200/70',
       visible: isTabunganEnabled,
     },
     {
@@ -152,7 +152,7 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
       value: stats.lowGradeCount,
       description: 'Siswa di bawah standar KKM',
       icon: AlertTriangle,
-      color: 'from-rose-500/20 to-red-500/10 text-rose-400 border-rose-950',
+      color: 'from-rose-50 to-red-50/30 text-rose-700 border-rose-200/70',
       visible: isNilaiEnabled,
     },
   ].filter((c) => c.visible);
@@ -160,21 +160,21 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
   return (
     <div className='space-y-8 animate-fade-in'>
       {/* Header */}
-      <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-zinc-900/50 pb-5'>
+      <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200/80 pb-5'>
         <div>
-          <h2 className='text-3xl font-extrabold tracking-tight bg-gradient-to-r from-zinc-50 to-zinc-400 bg-clip-text text-transparent'>
+          <h2 className='text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900'>
             Dashboard Utama
           </h2>
-          <p className='text-zinc-400 text-sm mt-1'>
+          <p className='text-slate-600 text-sm mt-1'>
             Ringkasan performa akademik, kehadiran, dan tabungan kelas Anda.
           </p>
         </div>
         <Link href='/'>
           <Button
             variant='outline'
-            className='border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-300 hover:text-white rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 self-start sm:self-auto cursor-pointer shadow-sm'
+            className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 self-start sm:self-auto cursor-pointer shadow-xs'
           >
-            <Home className='h-4 w-4 text-emerald-400' />
+            <Home className='h-4 w-4 text-emerald-600' />
             <span>Kembali Ke Halaman Utama</span>
           </Button>
         </Link>
@@ -188,21 +188,21 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
             return (
               <Card
                 key={i}
-                className={`bg-zinc-900/40 border backdrop-blur-sm shadow-xl rounded-2xl relative overflow-hidden bg-gradient-to-b ${card.color}`}
+                className={`bg-white border backdrop-blur-sm shadow-xs rounded-2xl relative overflow-hidden bg-gradient-to-b ${card.color}`}
               >
                 <CardHeader className='flex flex-row items-center justify-between pb-2'>
-                  <CardTitle className='text-xs font-semibold text-zinc-400 uppercase tracking-wider'>
+                  <CardTitle className='text-xs font-bold text-slate-500 uppercase tracking-wider'>
                     {card.title}
                   </CardTitle>
-                  <div className='p-2 rounded-xl bg-zinc-950/60 border border-zinc-800'>
+                  <div className='p-2 rounded-xl bg-white border border-slate-200 shadow-xs'>
                     <Icon className='h-4 w-4' />
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className='text-2xl font-bold tracking-tight text-white mb-1'>
+                  <div className='text-2xl font-extrabold tracking-tight text-slate-900 mb-1'>
                     {card.value}
                   </div>
-                  <p className='text-[10px] text-zinc-500'>{card.description}</p>
+                  <p className='text-[10px] text-slate-500 font-medium'>{card.description}</p>
                 </CardContent>
               </Card>
             );
@@ -215,17 +215,17 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
         <div className='grid gap-6 md:grid-cols-3'>
           {/* Savings Growth Trend Chart */}
           {isTabunganEnabled && (
-            <Card className={`bg-zinc-900/30 border-zinc-900 rounded-2xl shadow-xl ${isAbsensiEnabled ? 'md:col-span-2' : 'md:col-span-3'}`}>
+            <Card className={`bg-white border-slate-200/80 rounded-2xl shadow-xs ${isAbsensiEnabled ? 'md:col-span-2' : 'md:col-span-3'}`}>
               <CardHeader className='flex flex-row items-center justify-between'>
                 <div>
-                  <CardTitle className='text-md font-bold text-zinc-200'>
+                  <CardTitle className='text-md font-bold text-slate-900'>
                     Tren Tabungan Kelas
                   </CardTitle>
-                  <CardDescription className='text-xs text-zinc-500'>
+                  <CardDescription className='text-xs text-slate-500'>
                     Pertumbuhan total saldo tabungan kelas
                   </CardDescription>
                 </div>
-                <TrendingUp className='h-5 w-5 text-emerald-500' />
+                <TrendingUp className='h-5 w-5 text-emerald-600' />
               </CardHeader>
               <CardContent className='h-80'>
                 {stats.savingsTrend.length > 0 ? (
@@ -236,19 +236,19 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
                     >
                       <defs>
                         <linearGradient id='colorSaldo' x1='0' y1='0' x2='0' y2='1'>
-                          <stop offset='5%' stopColor='#10b981' stopOpacity={0.2} />
+                          <stop offset='5%' stopColor='#10b981' stopOpacity={0.25} />
                           <stop offset='95%' stopColor='#10b981' stopOpacity={0} />
                         </linearGradient>
                       </defs>
                       <XAxis
                         dataKey='date'
-                        stroke='#52525b'
+                        stroke='#64748b'
                         fontSize={10}
                         tickLine={false}
                         axisLine={false}
                       />
                       <YAxis
-                        stroke='#52525b'
+                        stroke='#64748b'
                         fontSize={10}
                         tickLine={false}
                         axisLine={false}
@@ -256,12 +256,13 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
                       />
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: '#18181b',
-                          borderColor: '#27272a',
+                          backgroundColor: '#ffffff',
+                          borderColor: '#e2e8f0',
                           borderRadius: '12px',
+                          boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
                         }}
-                        labelStyle={{ color: '#a1a1aa', fontWeight: 'bold' }}
-                        itemStyle={{ color: '#10b981' }}
+                        labelStyle={{ color: '#0f172a', fontWeight: 'bold' }}
+                        itemStyle={{ color: '#059669' }}
                         formatter={(value: any) => [
                           formatIDR(Number(value)),
                           'Saldo',
@@ -270,7 +271,7 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
                       <Area
                         type='monotone'
                         dataKey='Saldo'
-                        stroke='#10b981'
+                        stroke='#059669'
                         strokeWidth={2.5}
                         fillOpacity={1}
                         fill='url(#colorSaldo)'
@@ -278,7 +279,7 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
                     </AreaChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className='flex h-full items-center justify-center text-zinc-600 text-xs'>
+                  <div className='flex h-full items-center justify-center text-slate-400 text-xs'>
                     Belum ada data tabungan.
                   </div>
                 )}
@@ -288,12 +289,12 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
 
           {/* Attendance Pie Chart */}
           {isAbsensiEnabled && (
-            <Card className={`bg-zinc-900/30 border-zinc-900 rounded-2xl shadow-xl ${isTabunganEnabled ? 'md:col-span-1' : 'md:col-span-3'}`}>
+            <Card className={`bg-white border-slate-200/80 rounded-2xl shadow-xs ${isTabunganEnabled ? 'md:col-span-1' : 'md:col-span-3'}`}>
               <CardHeader>
-                <CardTitle className='text-md font-bold text-zinc-200'>
+                <CardTitle className='text-md font-bold text-slate-900'>
                   Distribusi Kehadiran
                 </CardTitle>
-                <CardDescription className='text-xs text-zinc-500'>
+                <CardDescription className='text-xs text-slate-500'>
                   Rincian status kehadiran bulan ini
                 </CardDescription>
               </CardHeader>
@@ -316,9 +317,10 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
                       </Pie>
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: '#18181b',
-                          borderColor: '#27272a',
+                          backgroundColor: '#ffffff',
+                          borderColor: '#e2e8f0',
                           borderRadius: '12px',
+                          boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
                         }}
                         formatter={(value: any, name: any) => [
                           `${value} Log Kehadiran`,
@@ -329,40 +331,40 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
                   </ResponsiveContainer>
                   {/* Central text displaying Rate */}
                   <div className='absolute inset-0 flex flex-col items-center justify-center pointer-events-none'>
-                    <span className='text-3xl font-extrabold text-white'>
+                    <span className='text-3xl font-extrabold text-slate-900'>
                       {stats.monthlyAttendanceRate}%
                     </span>
-                    <span className='text-[10px] text-zinc-500 uppercase tracking-wider'>
+                    <span className='text-[10px] text-slate-500 font-bold uppercase tracking-wider'>
                       Hadir
                     </span>
                   </div>
                 </div>
 
                 {/* Attendance Legends */}
-                <div className='grid grid-cols-4 gap-1 text-center border-t border-zinc-900 pt-4'>
+                <div className='grid grid-cols-4 gap-1 text-center border-t border-slate-100 pt-4'>
                   <div>
-                    <p className='text-sm sm:text-base font-bold text-emerald-400'>
+                    <p className='text-sm sm:text-base font-bold text-emerald-600'>
                       {stats.attendanceBreakdown.Hadir}
                     </p>
-                    <p className='text-xs text-zinc-400'>Hadir</p>
+                    <p className='text-xs text-slate-500 font-medium'>Hadir</p>
                   </div>
                   <div>
-                    <p className='text-sm sm:text-base font-bold text-blue-400'>
+                    <p className='text-sm sm:text-base font-bold text-blue-600'>
                       {stats.attendanceBreakdown.Sakit}
                     </p>
-                    <p className='text-xs text-zinc-400'>Sakit</p>
+                    <p className='text-xs text-slate-500 font-medium'>Sakit</p>
                   </div>
                   <div>
-                    <p className='text-sm sm:text-base font-bold text-amber-400'>
+                    <p className='text-sm sm:text-base font-bold text-amber-600'>
                       {stats.attendanceBreakdown.Izin}
                     </p>
-                    <p className='text-xs text-zinc-400'>Izin</p>
+                    <p className='text-xs text-slate-500 font-medium'>Izin</p>
                   </div>
                   <div>
-                    <p className='text-sm sm:text-base font-bold text-red-400'>
+                    <p className='text-sm sm:text-base font-bold text-rose-600'>
                       {stats.attendanceBreakdown.Alfa}
                     </p>
-                    <p className='text-xs text-zinc-400'>Alfa</p>
+                    <p className='text-xs text-slate-500 font-medium'>Alfa</p>
                   </div>
                 </div>
               </CardContent>
@@ -373,39 +375,40 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
 
       {/* Monthly Journal Meetings & Absence Analytics Chart */}
       {isJurnalEnabled && stats.journalMonthlyStats && stats.journalMonthlyStats.length > 0 && (
-        <Card className='bg-zinc-900/30 border-zinc-900 rounded-2xl p-5 shadow-xl'>
-          <CardHeader className='pb-2 flex flex-row items-center justify-between'>
-            <div>
-              <CardTitle className='text-md font-bold text-zinc-200 flex items-center gap-2'>
-                <BarChart3 className='h-5 w-5 text-emerald-400' />
-                Statistik Pertemuan & Ketidakhadiran Siswa Per Bulan
+        <Card className='bg-white border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-xs'>
+          <CardHeader className='pb-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-0 sm:p-6 sm:pb-2'>
+            <div className='min-w-0 flex-1'>
+              <CardTitle className='text-sm sm:text-md font-bold text-slate-900 flex items-center gap-2'>
+                <BarChart3 className='h-5 w-5 text-emerald-600 shrink-0' />
+                <span>Statistik Pertemuan & Ketidakhadiran Siswa Per Bulan</span>
               </CardTitle>
-              <CardDescription className='text-xs text-zinc-500 mt-0.5'>
+              <CardDescription className='text-xs text-slate-500 mt-1'>
                 Grafik intensitas agenda harian mengajar wali kelas dan rekapitulasi absensi per bulan
               </CardDescription>
             </div>
-            <div className='text-right text-xs'>
-              <span className='text-zinc-400 block font-semibold'>Total Agenda Jurnal:</span>
-              <span className='text-emerald-400 font-extrabold text-sm'>
+            <div className='text-left sm:text-right text-xs bg-emerald-50/80 sm:bg-transparent p-2.5 sm:p-0 rounded-xl border border-emerald-100 sm:border-none shrink-0'>
+              <span className='text-slate-500 inline sm:block font-medium mr-1 sm:mr-0'>Total Agenda Jurnal:</span>
+              <span className='text-emerald-700 font-extrabold text-xs sm:text-sm'>
                 {stats.totalJournalEntries || 0} Pertemuan
               </span>
             </div>
           </CardHeader>
-          <CardContent className='h-72 pt-4'>
+          <CardContent className='h-72 sm:h-80 pt-4 p-0 sm:p-6 sm:pt-4'>
             <ResponsiveContainer width='100%' height='100%'>
-              <BarChart data={stats.journalMonthlyStats} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray='3 3' stroke='#27272a' vertical={false} />
-                <XAxis dataKey='month' stroke='#71717a' fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis stroke='#71717a' fontSize={11} tickLine={false} axisLine={false} />
+              <BarChart data={stats.journalMonthlyStats} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                <CartesianGrid strokeDasharray='3 3' stroke='#f1f5f9' vertical={false} />
+                <XAxis dataKey='month' stroke='#64748b' fontSize={10} tickLine={false} axisLine={false} />
+                <YAxis stroke='#64748b' fontSize={10} tickLine={false} axisLine={false} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#18181b',
-                    borderColor: '#27272a',
+                    backgroundColor: '#ffffff',
+                    borderColor: '#e2e8f0',
                     borderRadius: '12px',
                     fontSize: '12px',
+                    boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
                   }}
                 />
-                <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '8px' }} />
+                <Legend wrapperStyle={{ fontSize: '10px', paddingTop: '8px' }} />
                 <Bar dataKey='Pertemuan' fill='#10b981' radius={[4, 4, 0, 0]} name='Sesi Pertemuan' />
                 <Bar dataKey='Sakit' fill='#f59e0b' radius={[4, 4, 0, 0]} name='Sakit (S)' />
                 <Bar dataKey='Izin' fill='#3b82f6' radius={[4, 4, 0, 0]} name='Izin (I)' />
@@ -418,43 +421,42 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
 
       {/* Notifications Alert Center */}
       {isNilaiEnabled && (
-        <Card className='bg-zinc-900/30 border-zinc-900 rounded-2xl shadow-xl'>
-          <CardHeader className='flex flex-row items-center gap-3'>
-            <div className='p-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400'>
+        <Card className='bg-white border-slate-200/80 rounded-2xl shadow-xs'>
+          <CardHeader className='flex flex-row items-start gap-3 p-4 sm:p-6 pb-2 sm:pb-4'>
+            <div className='p-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 shrink-0 mt-0.5'>
               <AlertCircle className='h-5 w-5' />
             </div>
-            <div>
-              <CardTitle className='text-md font-bold text-zinc-200'>
+            <div className='min-w-0 flex-1'>
+              <CardTitle className='text-sm sm:text-md font-bold text-slate-900 leading-snug'>
                 Notifikasi Evaluasi Akademik (Di Bawah KKM &lt; {kkm})
               </CardTitle>
-              <CardDescription className='text-xs text-zinc-500'>
-                Siswa dengan pencapaian akademis yang memerlukan bimbingan lebih
-                lanjut.
+              <CardDescription className='text-xs text-slate-500 mt-1'>
+                Siswa dengan pencapaian akademis yang memerlukan bimbingan lebih lanjut.
               </CardDescription>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className='p-4 sm:p-6 pt-2 sm:pt-0'>
             {stats.lowGradeNotifications.length > 0 ? (
-              <div className='divide-y divide-zinc-900'>
+              <div className='divide-y divide-slate-100'>
                 {stats.lowGradeNotifications.map((notif) => (
                   <div
                     key={notif.gradeId}
-                    className='flex items-center justify-between py-3 group'
+                    className='flex flex-col sm:flex-row sm:items-center justify-between py-3 gap-2 group'
                   >
                     <div className='flex flex-col'>
-                      <span className='text-sm font-semibold text-zinc-200 group-hover:text-white transition-colors duration-150'>
+                      <span className='text-sm font-bold text-slate-900 group-hover:text-emerald-700 transition-colors duration-150'>
                         {notif.studentName}
                       </span>
-                      <span className='text-xs text-zinc-500'>
+                      <span className='text-xs text-slate-500 font-medium'>
                         NIS: {notif.nis} • Kelas: {notif.className}
                       </span>
                     </div>
-                    <div className='flex items-center gap-4'>
-                      <div className='text-right'>
-                        <span className='text-xs font-medium text-zinc-400 block'>
+                    <div className='flex items-center gap-4 self-start sm:self-auto'>
+                      <div className='text-left sm:text-right'>
+                        <span className='text-xs font-semibold text-slate-600 block'>
                           {notif.subject} ({notif.category})
                         </span>
-                        <span className='text-xs font-semibold text-rose-400 bg-rose-950/40 border border-rose-900/40 px-2.5 py-0.5 rounded-full'>
+                        <span className='text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-0.5 rounded-full inline-block mt-0.5'>
                           Skor: {notif.score}
                         </span>
                       </div>
@@ -463,11 +465,13 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
                 ))}
               </div>
             ) : (
-              <div className='flex flex-col items-center justify-center py-6 text-zinc-600 text-xs'>
-                <span className='text-emerald-500 font-semibold mb-1'>
+              <div className='flex flex-col items-center justify-center py-8 text-slate-500 text-xs text-center border border-dashed border-slate-200 rounded-xl bg-slate-50/50 my-1'>
+                <span className='text-emerald-600 font-bold text-sm mb-1'>
                   Semua Siswa Lulus KKM!
                 </span>
-                Tidak ada siswa dengan nilai di bawah standar saat ini.
+                <span className='text-slate-500'>
+                  Tidak ada siswa dengan nilai di bawah standar saat ini.
+                </span>
               </div>
             )}
           </CardContent>

@@ -118,10 +118,10 @@ export default function ReCaptcha({ onVerify, onExpire, resetTrigger }: ReCaptch
   // Fallback if siteKey is missing (e.g. local dev without env)
   if (!siteKey) {
     return (
-      <div className="flex items-center gap-2 p-3 bg-zinc-950/80 border border-zinc-800 rounded-xl text-xs text-zinc-400">
-        <ShieldCheck className="h-4 w-4 text-emerald-400 shrink-0" />
+      <div className="flex items-center gap-2 p-3 bg-slate-100 border border-slate-200 rounded-xl text-xs text-slate-600">
+        <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
         <span>
-          <strong className="text-zinc-300 font-medium">Dev Mode:</strong> Proteksi reCAPTCHA aktif (Bypass Mode karena Site Key belum diisi di .env.local).
+          <strong className="text-slate-800 font-medium">Dev Mode:</strong> Proteksi reCAPTCHA aktif (Bypass Mode karena Site Key belum diisi di .env.local).
         </span>
       </div>
     );
@@ -138,8 +138,8 @@ export default function ReCaptcha({ onVerify, onExpire, resetTrigger }: ReCaptch
         }}
       />
       {!isReady && !error && (
-        <div className="flex items-center justify-center gap-2 px-4 py-5 bg-zinc-950/60 border border-zinc-800/80 rounded-xl text-xs text-zinc-400 w-full max-w-[304px] animate-pulse my-1">
-          <Loader2 className="h-4 w-4 animate-spin text-emerald-400 shrink-0" />
+        <div className="flex items-center justify-center gap-2 px-4 py-5 bg-slate-100 border border-slate-200 rounded-xl text-xs text-slate-600 w-full max-w-[304px] animate-pulse my-1">
+          <Loader2 className="h-4 w-4 animate-spin text-emerald-600 shrink-0" />
           <span>Memuat verifikasi reCAPTCHA...</span>
         </div>
       )}

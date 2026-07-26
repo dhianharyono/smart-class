@@ -18,25 +18,25 @@ export default function NilaiLoading() {
       </div>
 
       {/* Filter Options Skeleton */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-zinc-900/20 border border-zinc-900/60 rounded-2xl p-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white border border-slate-200/80 rounded-2xl p-4 shadow-xs">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1 w-full">
           {/* Subject Dropdown */}
           <Skeleton className="h-10 w-full sm:max-w-xs sm:flex-1 rounded-xl" />
           {/* Add Subject Button */}
           <Skeleton className="h-10 w-full sm:w-44 rounded-xl" />
           {/* Divider */}
-          <span className="hidden sm:inline text-zinc-800">|</span>
+          <span className="hidden sm:inline text-slate-200">|</span>
           {/* Category Dropdown */}
           <Skeleton className="h-10 w-full sm:w-48 rounded-xl" />
         </div>
       </div>
 
       {/* Main Table Skeleton */}
-      <div className="bg-zinc-900/20 border border-zinc-900/60 rounded-2xl overflow-hidden shadow-xl">
+      <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-xs">
         <div className="p-0 overflow-x-auto w-full">
           <div className="min-w-[640px]">
             {/* Table Header */}
-            <div className="grid grid-cols-5 gap-4 p-4 bg-zinc-900/40 border-b border-zinc-900">
+            <div className="grid grid-cols-5 gap-4 p-4 bg-slate-50 border-b border-slate-200">
               <Skeleton className="h-4 w-8" />
               <Skeleton className="h-4 w-20" />
               <Skeleton className="h-4 w-40" />
@@ -44,7 +44,7 @@ export default function NilaiLoading() {
               <Skeleton className="h-4 w-24 justify-self-center" />
             </div>
             {/* Table Rows */}
-            <div className="divide-y divide-zinc-900/50">
+            <div className="divide-y divide-slate-100">
               {[...Array(6)].map((_, i) => (
                 <div key={i} className="grid grid-cols-5 gap-4 p-4 items-center">
                   <Skeleton className="h-4 w-6" />

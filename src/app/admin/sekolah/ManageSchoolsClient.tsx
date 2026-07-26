@@ -77,31 +77,31 @@ export default function ManageSchoolsClient({ initialSchools }: ManageSchoolsCli
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-zinc-50 to-zinc-400 bg-clip-text text-transparent">
+        <h2 className="text-3xl font-extrabold tracking-tight text-slate-900">
           Kelola Daftar Sekolah
         </h2>
-        <p className="text-zinc-400 text-sm">
+        <p className="text-slate-600 text-sm mt-1">
           Tambahkan sekolah baru agar dapat dipilih saat registrasi wali kelas, atau hapus sekolah yang tidak digunakan.
         </p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-3 items-start">
         {/* Tambah Sekolah Form */}
-        <Card className="bg-zinc-900/30 border-zinc-900 rounded-2xl shadow-xl md:col-span-1">
+        <Card className="bg-white border-slate-200/80 rounded-2xl shadow-xs md:col-span-1">
           <CardHeader>
-            <CardTitle className="text-md font-bold text-zinc-200">Tambah Sekolah Baru</CardTitle>
-            <CardDescription className="text-xs text-zinc-500">
+            <CardTitle className="text-md font-bold text-slate-900">Tambah Sekolah Baru</CardTitle>
+            <CardDescription className="text-xs text-slate-500">
               Sekolah yang didaftarkan akan muncul di form registrasi wali kelas.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleAddSubmit} className="space-y-4">
               <div className="space-y-1.5">
-                <label htmlFor="schoolName" className="text-xs font-semibold text-zinc-400 tracking-wider uppercase block">
+                <label htmlFor="schoolName" className="text-xs font-bold text-slate-700 tracking-wider uppercase block">
                   Nama Sekolah
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                     <Building className="h-4.5 w-4.5" />
                   </div>
                   <input
@@ -112,7 +112,7 @@ export default function ManageSchoolsClient({ initialSchools }: ManageSchoolsCli
                     value={newSchoolName}
                     onChange={(e) => setNewSchoolName(e.target.value)}
                     disabled={loading}
-                    className="w-full pl-10 pr-4 py-2.5 bg-zinc-950/60 border border-zinc-800 text-zinc-100 placeholder-zinc-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none rounded-xl text-sm transition-all duration-200 disabled:opacity-50"
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none rounded-xl text-sm transition-all duration-200 disabled:opacity-50"
                   />
                 </div>
               </div>
@@ -120,7 +120,7 @@ export default function ManageSchoolsClient({ initialSchools }: ManageSchoolsCli
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 px-4 rounded-xl shadow-lg shadow-indigo-500/10 hover:shadow-indigo-500/20 transition-all duration-200 flex items-center justify-center gap-2 text-xs cursor-pointer disabled:opacity-50"
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-4 rounded-xl shadow-xs transition-all duration-200 flex items-center justify-center gap-2 text-xs cursor-pointer disabled:opacity-50"
               >
                 {loading ? (
                   <>
@@ -139,27 +139,27 @@ export default function ManageSchoolsClient({ initialSchools }: ManageSchoolsCli
         </Card>
 
         {/* List Sekolah */}
-        <Card className="bg-zinc-900/30 border-zinc-900 rounded-2xl shadow-xl md:col-span-2">
+        <Card className="bg-white border-slate-200/80 rounded-2xl shadow-xs md:col-span-2">
           <CardHeader>
-            <CardTitle className="text-md font-bold text-zinc-200">Daftar Sekolah Saat Ini</CardTitle>
-            <CardDescription className="text-xs text-zinc-500">
+            <CardTitle className="text-md font-bold text-slate-900">Daftar Sekolah Saat Ini</CardTitle>
+            <CardDescription className="text-xs text-slate-500">
               Sekolah yang terdaftar di database. Sekolah yang masih aktif digunakan guru tidak bisa dihapus.
             </CardDescription>
           </CardHeader>
           <CardContent className="p-0">
             {schools.length > 0 ? (
-              <div className="divide-y divide-zinc-900">
+              <div className="divide-y divide-slate-100">
                 {schools.map((school) => (
-                  <div key={school._id} className="flex items-center justify-between px-6 py-4 hover:bg-zinc-900/10 transition-colors group">
+                  <div key={school._id} className="flex items-center justify-between px-6 py-4 hover:bg-slate-50/80 transition-colors group">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-xl bg-zinc-950/60 border border-zinc-850 text-zinc-400 group-hover:text-indigo-400 group-hover:border-indigo-900/30 transition-all">
+                      <div className="p-2 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 group-hover:bg-indigo-100 transition-all">
                         <School className="h-4 w-4" />
                       </div>
                       <div className="flex flex-col">
-                        <span className="font-semibold text-zinc-200 group-hover:text-white transition-colors text-sm">
+                        <span className="font-bold text-slate-900 group-hover:text-indigo-700 transition-colors text-sm">
                           {school.name}
                         </span>
-                        <span className="text-[10px] text-zinc-500 font-medium">
+                        <span className="text-[10px] text-slate-500 font-medium">
                           {school.teacherCount || 0} Guru
                         </span>
                       </div>
@@ -170,7 +170,7 @@ export default function ManageSchoolsClient({ initialSchools }: ManageSchoolsCli
                       size="icon"
                       disabled={deletingId !== null}
                       onClick={() => handleDelete(school._id, school.name)}
-                      className="h-8 w-8 text-zinc-400 hover:text-rose-400 hover:bg-rose-950/20 border border-transparent hover:border-rose-950/30 rounded-xl cursor-pointer"
+                      className="h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 rounded-xl cursor-pointer"
                     >
                       {deletingId === school._id ? (
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -182,9 +182,9 @@ export default function ManageSchoolsClient({ initialSchools }: ManageSchoolsCli
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-16 text-zinc-600 text-xs gap-1 px-6">
-                <AlertCircle className="h-8 w-8 text-zinc-700" />
-                <span>Belum ada sekolah terdaftar.</span>
+              <div className="flex flex-col items-center justify-center py-16 text-slate-400 text-xs gap-1 px-6">
+                <AlertCircle className="h-8 w-8 text-slate-300" />
+                <span className="font-bold text-slate-700">Belum ada sekolah terdaftar.</span>
                 <span>Gunakan form di samping untuk menambahkan sekolah pertama.</span>
               </div>
             )}

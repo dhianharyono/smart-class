@@ -22,11 +22,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang='en' className={`${outfit.variable} h-full antialiased dark`}>
-      <body className='font-sans min-h-full flex flex-col bg-zinc-950 text-zinc-100'>
+    <html lang='en' className={`${outfit.variable} h-full antialiased`}>
+      <body className='font-sans min-h-full flex flex-col bg-slate-50 text-slate-900'>
         <QueryProvider>
           {children}
-          <Toaster richColors closeButton theme='dark' position='top-right' />
+          <Toaster richColors closeButton theme='light' position='top-right' />
         </QueryProvider>
       </body>
     </html>

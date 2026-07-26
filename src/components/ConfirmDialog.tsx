@@ -44,26 +44,26 @@ export default function ConfirmDialog({
     switch (variant) {
       case 'danger':
         return (
-          <div className='mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-rose-950 border border-rose-900 text-rose-500 mb-4 animate-bounce-slow'>
+          <div className='mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-rose-50 border border-rose-200 text-rose-600 mb-4 animate-bounce-slow'>
             <LogOut className='h-6 w-6' />
           </div>
         );
       case 'success':
         return (
-          <div className='mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-950 border border-emerald-900 text-emerald-500 mb-4 animate-bounce-slow'>
+          <div className='mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 mb-4 animate-bounce-slow'>
             <CheckCircle2 className='h-6 w-6' />
           </div>
         );
       case 'info':
         return (
-          <div className='mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-950 border border-blue-900 text-blue-500 mb-4 animate-bounce-slow'>
+          <div className='mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 border border-blue-200 text-blue-600 mb-4 animate-bounce-slow'>
             <Info className='h-6 w-6' />
           </div>
         );
       case 'warning':
       default:
         return (
-          <div className='mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-950 border border-amber-900 text-amber-500 mb-4 animate-bounce-slow'>
+          <div className='mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-50 border border-amber-200 text-amber-600 mb-4 animate-bounce-slow'>
             <AlertTriangle className='h-6 w-6' />
           </div>
         );
@@ -87,13 +87,13 @@ export default function ConfirmDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='bg-zinc-900/95 backdrop-blur-md border border-zinc-800/80 text-white rounded-2xl w-[calc(100%-2.5rem)] sm:w-full max-w-sm p-5 sm:p-6 shadow-2xl' showCloseButton={false}>
+      <DialogContent className='bg-white border border-slate-200 text-slate-900 rounded-2xl w-[calc(100%-2.5rem)] sm:w-full max-w-sm p-5 sm:p-6 shadow-2xl' showCloseButton={false}>
         <DialogHeader>
           {getIcon()}
-          <DialogTitle className='text-center text-lg font-bold text-zinc-100 tracking-tight'>
+          <DialogTitle className='text-center text-lg font-bold text-slate-900 tracking-tight'>
             {title}
           </DialogTitle>
-          <DialogDescription className='text-center text-xs text-zinc-400 mt-1 leading-relaxed'>
+          <DialogDescription className='text-center text-xs text-slate-500 mt-1 leading-relaxed'>
             {description}
           </DialogDescription>
         </DialogHeader>
@@ -103,7 +103,7 @@ export default function ConfirmDialog({
             variant='ghost'
             onClick={() => onOpenChange(false)}
             disabled={isLoading}
-            className='h-10 rounded-xl flex-1 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-300 font-semibold text-xs sm:text-sm cursor-pointer transition-all duration-200'
+            className='h-10 rounded-xl flex-1 text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 font-semibold text-xs sm:text-sm cursor-pointer transition-all duration-200'
           >
             {cancelText}
           </Button>

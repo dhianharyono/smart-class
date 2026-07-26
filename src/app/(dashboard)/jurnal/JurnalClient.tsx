@@ -384,43 +384,35 @@ export default function JurnalClient() {
       {/* Header Bar */}
       <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between print:hidden'>
         <div>
-          <h2 className='text-3xl font-extrabold tracking-tight bg-gradient-to-r from-zinc-50 to-zinc-400 bg-clip-text text-transparent flex items-center gap-3'>
-            <BookMarked className='h-7 w-7 text-emerald-500' />
-            Jurnal Wali Kelas
+          <h2 className='text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2.5 sm:gap-3'>
+            <BookMarked className='h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 text-emerald-600 shrink-0' />
+            <span>Jurnal Wali Kelas</span>
           </h2>
-          <p className='text-zinc-400 text-sm mt-1'>
+          <p className='text-slate-600 text-xs sm:text-sm mt-1'>
             Pencatatan agenda harian mengajar guru, materi, KBM, dan rekapitulasi ketidakhadiran siswa.
           </p>
         </div>
 
         <div className='flex flex-wrap items-center gap-2.5'>
           <Button
-            onClick={() => setHeaderModalOpen(true)}
-            variant='outline'
-            className='border-zinc-800 bg-zinc-900/50 hover:bg-zinc-900 text-zinc-300 text-xs font-medium rounded-xl h-10 px-3.5 gap-2'
-          >
-            <Settings2 className='h-4 w-4 text-emerald-400' />
-            Pengaturan Header
-          </Button>
-          <Button
             onClick={handleExportExcel}
             variant='outline'
-            className='border-zinc-800 bg-zinc-900/50 hover:bg-zinc-900 text-zinc-300 text-xs font-medium rounded-xl h-10 px-3.5 gap-2'
+            className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl h-10 px-3.5 gap-2 shadow-xs'
           >
-            <Download className='h-4 w-4 text-amber-400' />
+            <Download className='h-4 w-4 text-amber-600' />
             Ekspor Excel
           </Button>
           <Button
             onClick={() => window.print()}
             variant='outline'
-            className='border-zinc-800 bg-zinc-900/50 hover:bg-zinc-900 text-zinc-300 text-xs font-medium rounded-xl h-10 px-3.5 gap-2'
+            className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl h-10 px-3.5 gap-2 shadow-xs'
           >
-            <Printer className='h-4 w-4 text-blue-400' />
+            <Printer className='h-4 w-4 text-blue-600' />
             Cetak Jurnal
           </Button>
           <Button
             onClick={handleOpenCreateModal}
-            className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium rounded-xl h-10 px-4 gap-2 shadow-lg shadow-emerald-950/30'
+            className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl h-10 px-4 gap-2 shadow-xs'
           >
             <Plus className='h-4 w-4' />
             Tambah Jurnal
@@ -431,139 +423,139 @@ export default function JurnalClient() {
       {/* Overview Cards & Analytics Section (Print Hidden) */}
       <div className='space-y-4 print:hidden'>
         <div className='grid gap-4 sm:grid-cols-2 md:grid-cols-4'>
-          <Card className='bg-zinc-900/40 border-zinc-800/80 backdrop-blur-sm shadow-xl rounded-2xl'>
+          <Card className='bg-white border-slate-200/80 shadow-xs rounded-2xl'>
             <CardHeader className='flex flex-row items-center justify-between pb-2'>
-              <CardTitle className='text-xs font-semibold text-zinc-400 uppercase tracking-wider'>
+              <CardTitle className='text-xs font-bold text-slate-500 uppercase tracking-wider'>
                 Total Pertemuan
               </CardTitle>
-              <div className='p-2 rounded-xl bg-emerald-950/60 border border-emerald-900/50 text-emerald-400'>
+              <div className='p-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700'>
                 <BookOpen className='h-4 w-4' />
               </div>
             </CardHeader>
             <CardContent>
-              <div className='text-2xl font-bold tracking-tight text-white mb-1'>
+              <div className='text-2xl font-bold tracking-tight text-slate-900 mb-1'>
                 {totalEntries} Kali
               </div>
-              <p className='text-[10px] text-zinc-500'>
+              <p className='text-[10px] text-slate-500'>
                 {thisMonthCount} pertemuan di bulan ini
               </p>
             </CardContent>
           </Card>
 
-          <Card className='bg-zinc-900/40 border-zinc-800/80 backdrop-blur-sm shadow-xl rounded-2xl'>
+          <Card className='bg-white border-slate-200/80 shadow-xs rounded-2xl'>
             <CardHeader className='flex flex-row items-center justify-between pb-2'>
-              <CardTitle className='text-xs font-semibold text-zinc-400 uppercase tracking-wider'>
+              <CardTitle className='text-xs font-bold text-slate-500 uppercase tracking-wider'>
                 Sakit (S)
               </CardTitle>
-              <div className='p-2 rounded-xl bg-amber-950/60 border border-amber-900/50 text-amber-400'>
+              <div className='p-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-700'>
                 <UserCheck className='h-4 w-4' />
               </div>
             </CardHeader>
             <CardContent>
-              <div className='text-2xl font-bold tracking-tight text-amber-400 mb-1'>
+              <div className='text-2xl font-bold tracking-tight text-amber-600 mb-1'>
                 {totalS} Siswa
               </div>
-              <p className='text-[10px] text-zinc-500'>Total ijin sakit</p>
+              <p className='text-[10px] text-slate-500'>Total ijin sakit</p>
             </CardContent>
           </Card>
 
-          <Card className='bg-zinc-900/40 border-zinc-800/80 backdrop-blur-sm shadow-xl rounded-2xl'>
+          <Card className='bg-white border-slate-200/80 shadow-xs rounded-2xl'>
             <CardHeader className='flex flex-row items-center justify-between pb-2'>
-              <CardTitle className='text-xs font-semibold text-zinc-400 uppercase tracking-wider'>
+              <CardTitle className='text-xs font-bold text-slate-500 uppercase tracking-wider'>
                 Izin (I)
               </CardTitle>
-              <div className='p-2 rounded-xl bg-blue-950/60 border border-blue-900/50 text-blue-400'>
+              <div className='p-2 rounded-xl bg-blue-50 border border-blue-200 text-blue-700'>
                 <Calendar className='h-4 w-4' />
               </div>
             </CardHeader>
             <CardContent>
-              <div className='text-2xl font-bold tracking-tight text-blue-400 mb-1'>
+              <div className='text-2xl font-bold tracking-tight text-blue-600 mb-1'>
                 {totalI} Siswa
               </div>
-              <p className='text-[10px] text-zinc-500'>Total ijin keperluan</p>
+              <p className='text-[10px] text-slate-500'>Total ijin keperluan</p>
             </CardContent>
           </Card>
 
-          <Card className='bg-zinc-900/40 border-zinc-800/80 backdrop-blur-sm shadow-xl rounded-2xl'>
+          <Card className='bg-white border-slate-200/80 shadow-xs rounded-2xl'>
             <CardHeader className='flex flex-row items-center justify-between pb-2'>
-              <CardTitle className='text-xs font-semibold text-zinc-400 uppercase tracking-wider'>
+              <CardTitle className='text-xs font-bold text-slate-500 uppercase tracking-wider'>
                 Alpha (A)
               </CardTitle>
-              <div className='p-2 rounded-xl bg-rose-950/60 border border-rose-900/50 text-rose-400'>
+              <div className='p-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-700'>
                 <FileText className='h-4 w-4' />
               </div>
             </CardHeader>
             <CardContent>
-              <div className='text-2xl font-bold tracking-tight text-rose-400 mb-1'>
+              <div className='text-2xl font-bold tracking-tight text-rose-600 mb-1'>
                 {totalA} Siswa
               </div>
-              <p className='text-[10px] text-zinc-500'>Total tanpa keterangan</p>
+              <p className='text-[10px] text-slate-500'>Total tanpa keterangan</p>
             </CardContent>
           </Card>
         </div>
       </div>
 
       {/* Document Header Card (Formatted matching official document in image) */}
-      <Card className='bg-zinc-900/40 border-zinc-800 shadow-xl rounded-2xl p-6 relative overflow-hidden group'>
-        <div className='flex items-center justify-center relative mb-6 border-b border-zinc-800 pb-4'>
-          <h1 className='text-xl font-extrabold text-white uppercase tracking-widest print:text-black print:text-2xl'>
+      <Card className='bg-white border-slate-200/80 shadow-xs rounded-2xl p-6 relative overflow-hidden group'>
+        <div className='flex items-center justify-center relative mb-6 border-b border-slate-200 pb-4'>
+          <h1 className='text-xl font-extrabold text-slate-900 uppercase tracking-widest print:text-black print:text-2xl'>
             Jurnal Harian Guru
           </h1>
           <Button
             onClick={() => setHeaderModalOpen(true)}
             variant='ghost'
             size='sm'
-            className='absolute right-0 text-xs text-zinc-400 hover:text-emerald-400 hover:bg-emerald-950/30 gap-1.5 rounded-xl print:hidden'
+            className='absolute right-0 text-xs text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 gap-1.5 rounded-xl print:hidden'
           >
             <Settings2 className='h-3.5 w-3.5' />
             Edit Header
           </Button>
         </div>
 
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-8 text-xs text-zinc-300 print:text-black print:grid-cols-2 print:text-sm'>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-8 text-xs text-slate-700 print:text-black print:grid-cols-2 print:text-sm'>
           <div className='space-y-1.5'>
-            <div className='flex justify-between border-b border-zinc-850 pb-1 print:border-zinc-300'>
-              <span className='font-bold text-zinc-400 print:text-black w-36'>Sekolah</span>
-              <span className='font-medium text-zinc-200 print:text-black flex-1'>
+            <div className='flex justify-between border-b border-slate-100 pb-1 print:border-zinc-300'>
+              <span className='font-bold text-slate-500 print:text-black w-36'>Sekolah</span>
+              <span className='font-bold text-slate-900 print:text-black flex-1'>
                 : {headerForm.schoolName || '-'}
               </span>
             </div>
-            <div className='flex justify-between border-b border-zinc-850 pb-1 print:border-zinc-300'>
-              <span className='font-bold text-zinc-400 print:text-black w-36'>Mata Pelajaran</span>
-              <span className='font-medium text-zinc-200 print:text-black flex-1'>
+            <div className='flex justify-between border-b border-slate-100 pb-1 print:border-zinc-300'>
+              <span className='font-bold text-slate-500 print:text-black w-36'>Mata Pelajaran</span>
+              <span className='font-bold text-slate-900 print:text-black flex-1'>
                 : {headerForm.subject || '-'}
               </span>
             </div>
-            <div className='flex justify-between border-b border-zinc-850 pb-1 print:border-zinc-300'>
-              <span className='font-bold text-zinc-400 print:text-black w-36'>Kelas/Semester</span>
-              <span className='font-medium text-zinc-200 print:text-black flex-1'>
+            <div className='flex justify-between border-b border-slate-100 pb-1 print:border-zinc-300'>
+              <span className='font-bold text-slate-500 print:text-black w-36'>Kelas/Semester</span>
+              <span className='font-bold text-slate-900 print:text-black flex-1'>
                 : {headerForm.classNameSemester || '-'}
               </span>
             </div>
-            <div className='flex justify-between border-b border-zinc-850 pb-1 print:border-zinc-300'>
-              <span className='font-bold text-zinc-400 print:text-black w-36'>Tahun Pelajaran</span>
-              <span className='font-medium text-zinc-200 print:text-black flex-1'>
+            <div className='flex justify-between border-b border-slate-100 pb-1 print:border-zinc-300'>
+              <span className='font-bold text-slate-500 print:text-black w-36'>Tahun Pelajaran</span>
+              <span className='font-bold text-slate-900 print:text-black flex-1'>
                 : {headerForm.academicYear || '-'}
               </span>
             </div>
           </div>
 
           <div className='space-y-1.5'>
-            <div className='flex justify-between border-b border-zinc-850 pb-1 print:border-zinc-300'>
-              <span className='font-bold text-zinc-400 print:text-black w-36'>Kurikulum</span>
-              <span className='font-medium text-zinc-200 print:text-black flex-1'>
+            <div className='flex justify-between border-b border-slate-100 pb-1 print:border-zinc-300'>
+              <span className='font-bold text-slate-500 print:text-black w-36'>Kurikulum</span>
+              <span className='font-bold text-slate-900 print:text-black flex-1'>
                 : {headerForm.curriculum || '-'}
               </span>
             </div>
-            <div className='flex justify-between border-b border-zinc-850 pb-1 print:border-zinc-300'>
-              <span className='font-bold text-zinc-400 print:text-black w-36'>Nama Guru</span>
-              <span className='font-medium text-zinc-200 print:text-black flex-1'>
+            <div className='flex justify-between border-b border-slate-100 pb-1 print:border-zinc-300'>
+              <span className='font-bold text-slate-500 print:text-black w-36'>Nama Guru</span>
+              <span className='font-bold text-slate-900 print:text-black flex-1'>
                 : {headerForm.teacherName || '-'}
               </span>
             </div>
-            <div className='flex justify-between border-b border-zinc-850 pb-1 print:border-zinc-300'>
-              <span className='font-bold text-zinc-400 print:text-black w-36'>NIP</span>
-              <span className='font-medium text-zinc-200 print:text-black flex-1'>
+            <div className='flex justify-between border-b border-slate-100 pb-1 print:border-zinc-300'>
+              <span className='font-bold text-slate-500 print:text-black w-36'>NIP</span>
+              <span className='font-bold text-slate-900 print:text-black flex-1'>
                 : {headerForm.nip || '-'}
               </span>
             </div>
@@ -574,66 +566,66 @@ export default function JurnalClient() {
       {/* Search Bar (Print Hidden) */}
       <div className='flex items-center gap-3 print:hidden'>
         <div className='relative flex-1'>
-          <Search className='absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500' />
+          <Search className='absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400' />
           <Input
             placeholder='Cari tanggal, KD, materi, atau kegiatan pembelajaran...'
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className='pl-10 bg-zinc-900/50 border-zinc-800 focus:border-emerald-500 text-white rounded-xl text-xs h-10'
+            className='pl-10 bg-white border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-10 shadow-xs'
           />
         </div>
       </div>
 
-      {/* Main Journal Table (Matching Image Format Exactly) */}
-      <Card className='bg-zinc-900/30 border-zinc-900 rounded-2xl overflow-hidden shadow-xl print:border-none print:shadow-none print:bg-white'>
+      {/* Main Journal Table */}
+      <Card className='bg-white border-slate-200/80 rounded-2xl overflow-hidden shadow-xs print:border-none print:shadow-none print:bg-white'>
         <CardContent className='p-0'>
           {isJournalsLoading ? (
-            <div className='flex flex-col items-center justify-center py-20 text-zinc-500 text-sm'>
-              <Loader2 className='h-8 w-8 animate-spin text-emerald-500 mb-3' />
+            <div className='flex flex-col items-center justify-center py-20 text-slate-500 text-sm'>
+              <Loader2 className='h-8 w-8 animate-spin text-emerald-600 mb-3' />
               <span>Memuat data jurnal harian guru...</span>
             </div>
           ) : filteredJournals.length > 0 ? (
             <div className='overflow-x-auto'>
               <Table className='print:text-black print:border-collapse print:w-full'>
-                <TableHeader className='bg-zinc-900/80 border-b border-zinc-800 print:bg-zinc-200'>
+                <TableHeader className='bg-slate-50/80 border-b border-slate-200 print:bg-zinc-200'>
                   {/* Two-row merged header matching image */}
-                  <TableRow className='border-b border-zinc-800 text-xs font-bold text-zinc-300 print:text-black print:border-black'>
-                    <TableHead rowSpan={2} className='w-12 text-center text-zinc-300 font-bold border-r border-zinc-800 print:border-black print:text-black'>
+                  <TableRow className='border-b border-slate-200 text-xs font-bold text-slate-700 print:text-black print:border-black'>
+                    <TableHead rowSpan={2} className='w-12 text-center text-slate-700 font-bold border-r border-slate-200 print:border-black print:text-black'>
                       No.
                     </TableHead>
-                    <TableHead rowSpan={2} className='w-36 text-zinc-300 font-bold border-r border-zinc-800 print:border-black print:text-black'>
+                    <TableHead rowSpan={2} className='w-36 text-slate-700 font-bold border-r border-slate-200 print:border-black print:text-black'>
                       Hari / Tanggal
                     </TableHead>
-                    <TableHead rowSpan={2} className='w-24 text-center text-zinc-300 font-bold border-r border-zinc-800 print:border-black print:text-black'>
+                    <TableHead rowSpan={2} className='w-24 text-center text-slate-700 font-bold border-r border-slate-200 print:border-black print:text-black'>
                       Pertemuan ke-
                     </TableHead>
-                    <TableHead rowSpan={2} className='w-64 text-zinc-300 font-bold border-r border-zinc-800 print:border-black print:text-black'>
+                    <TableHead rowSpan={2} className='w-64 text-slate-700 font-bold border-r border-slate-200 print:border-black print:text-black'>
                       Kompetensi Dasar
                     </TableHead>
-                    <TableHead rowSpan={2} className='w-52 text-zinc-300 font-bold border-r border-zinc-800 print:border-black print:text-black'>
+                    <TableHead rowSpan={2} className='w-52 text-slate-700 font-bold border-r border-slate-200 print:border-black print:text-black'>
                       Materi
                     </TableHead>
-                    <TableHead rowSpan={2} className='w-64 text-zinc-300 font-bold border-r border-zinc-800 print:border-black print:text-black'>
+                    <TableHead rowSpan={2} className='w-64 text-slate-700 font-bold border-r border-slate-200 print:border-black print:text-black'>
                       Kegiatan Belajar Mengajar
                     </TableHead>
-                    <TableHead colSpan={3} className='text-center text-zinc-300 font-bold border-b border-r border-zinc-800 print:border-black print:text-black'>
+                    <TableHead colSpan={3} className='text-center text-slate-700 font-bold border-b border-r border-slate-200 print:border-black print:text-black'>
                       Absensi Siswa
                     </TableHead>
-                    <TableHead rowSpan={2} className='w-48 text-zinc-300 font-bold border-r border-zinc-800 print:border-black print:text-black'>
+                    <TableHead rowSpan={2} className='w-48 text-slate-700 font-bold border-r border-slate-200 print:border-black print:text-black'>
                       Keterangan
                     </TableHead>
-                    <TableHead rowSpan={2} className='w-24 text-center text-zinc-300 font-bold print:hidden'>
+                    <TableHead rowSpan={2} className='w-24 text-center text-slate-700 font-bold print:hidden'>
                       Aksi
                     </TableHead>
                   </TableRow>
-                  <TableRow className='border-b border-zinc-800 text-xs font-bold text-zinc-300 print:text-black print:border-black'>
-                    <TableHead className='w-10 text-center text-zinc-300 font-bold border-r border-zinc-800 print:border-black print:text-black'>
+                  <TableRow className='border-b border-slate-200 text-xs font-bold text-slate-700 print:text-black print:border-black'>
+                    <TableHead className='w-10 text-center text-slate-700 font-bold border-r border-slate-200 print:border-black print:text-black'>
                       S
                     </TableHead>
-                    <TableHead className='w-10 text-center text-zinc-300 font-bold border-r border-zinc-800 print:border-black print:text-black'>
+                    <TableHead className='w-10 text-center text-slate-700 font-bold border-r border-slate-200 print:border-black print:text-black'>
                       I
                     </TableHead>
-                    <TableHead className='w-10 text-center text-zinc-300 font-bold border-r border-zinc-800 print:border-black print:text-black'>
+                    <TableHead className='w-10 text-center text-slate-700 font-bold border-r border-slate-200 print:border-black print:text-black'>
                       A
                     </TableHead>
                   </TableRow>
@@ -651,36 +643,36 @@ export default function JurnalClient() {
                     return (
                       <TableRow
                         key={entry._id}
-                        className='border-b border-zinc-800/60 hover:bg-zinc-900/40 transition-colors text-xs print:border-black print:text-black'
+                        className='border-b border-slate-100 hover:bg-slate-50/80 transition-colors text-xs print:border-black print:text-black'
                       >
-                        <TableCell className='text-center font-semibold text-zinc-400 border-r border-zinc-850 print:border-black print:text-black'>
+                        <TableCell className='text-center font-medium text-slate-500 border-r border-slate-200 print:border-black print:text-black'>
                           {index + 1}
                         </TableCell>
-                        <TableCell className='font-medium text-zinc-200 border-r border-zinc-850 print:border-black print:text-black'>
+                        <TableCell className='font-semibold text-slate-900 border-r border-slate-200 print:border-black print:text-black'>
                           {formattedDate}
                         </TableCell>
-                        <TableCell className='text-center font-bold text-emerald-400 border-r border-zinc-850 print:border-black print:text-black'>
+                        <TableCell className='text-center font-bold text-emerald-600 border-r border-slate-200 print:border-black print:text-black'>
                           {entry.meetingNo}
                         </TableCell>
-                        <TableCell className='whitespace-pre-line text-zinc-300 leading-relaxed border-r border-zinc-850 print:border-black print:text-black'>
+                        <TableCell className='whitespace-pre-line text-slate-700 leading-relaxed border-r border-slate-200 print:border-black print:text-black'>
                           {entry.basicCompetency}
                         </TableCell>
-                        <TableCell className='whitespace-pre-line text-zinc-300 leading-relaxed border-r border-zinc-850 print:border-black print:text-black'>
+                        <TableCell className='whitespace-pre-line text-slate-700 leading-relaxed border-r border-slate-200 print:border-black print:text-black'>
                           {entry.material}
                         </TableCell>
-                        <TableCell className='whitespace-pre-line text-zinc-300 leading-relaxed border-r border-zinc-850 print:border-black print:text-black'>
+                        <TableCell className='whitespace-pre-line text-slate-700 leading-relaxed border-r border-slate-200 print:border-black print:text-black'>
                           {entry.learningActivity}
                         </TableCell>
-                        <TableCell className='text-center font-bold text-amber-400 border-r border-zinc-850 print:border-black print:text-black'>
+                        <TableCell className='text-center font-bold text-amber-600 border-r border-slate-200 print:border-black print:text-black'>
                           {entry.absentS > 0 ? entry.absentS : ''}
                         </TableCell>
-                        <TableCell className='text-center font-bold text-blue-400 border-r border-zinc-850 print:border-black print:text-black'>
+                        <TableCell className='text-center font-bold text-blue-600 border-r border-slate-200 print:border-black print:text-black'>
                           {entry.absentI > 0 ? entry.absentI : ''}
                         </TableCell>
-                        <TableCell className='text-center font-bold text-rose-400 border-r border-zinc-850 print:border-black print:text-black'>
+                        <TableCell className='text-center font-bold text-rose-600 border-r border-slate-200 print:border-black print:text-black'>
                           {entry.absentA > 0 ? entry.absentA : ''}
                         </TableCell>
-                        <TableCell className='whitespace-pre-line text-zinc-400 italic border-r border-zinc-850 print:border-black print:text-black'>
+                        <TableCell className='whitespace-pre-line text-slate-500 italic border-r border-slate-200 print:border-black print:text-black'>
                           {entry.notes || '-'}
                         </TableCell>
                         <TableCell className='text-center print:hidden'>
@@ -689,7 +681,7 @@ export default function JurnalClient() {
                               size='icon'
                               variant='ghost'
                               onClick={() => handleOpenEditModal(entry)}
-                              className='h-7 w-7 text-zinc-400 hover:text-emerald-400 hover:bg-emerald-950/30 rounded-lg'
+                              className='h-7 w-7 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg'
                             >
                               <Edit2 className='h-3.5 w-3.5' />
                             </Button>
@@ -697,7 +689,7 @@ export default function JurnalClient() {
                               size='icon'
                               variant='ghost'
                               onClick={() => setDeleteId(entry._id)}
-                              className='h-7 w-7 text-zinc-400 hover:text-rose-400 hover:bg-rose-950/30 rounded-lg'
+                              className='h-7 w-7 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg'
                             >
                               <Trash2 className='h-3.5 w-3.5' />
                             </Button>
@@ -710,10 +702,10 @@ export default function JurnalClient() {
               </Table>
             </div>
           ) : (
-            <div className='flex flex-col items-center justify-center py-20 text-zinc-500'>
-              <BookMarked className='h-12 w-12 text-zinc-700 mb-3' />
-              <p className='text-sm font-semibold text-zinc-300'>Belum ada catatan jurnal.</p>
-              <p className='text-xs text-zinc-600 mt-1'>
+            <div className='flex flex-col items-center justify-center py-20 text-slate-500'>
+              <BookMarked className='h-12 w-12 text-slate-300 mb-3' />
+              <p className='text-sm font-bold text-slate-700'>Belum ada catatan jurnal.</p>
+              <p className='text-xs text-slate-400 mt-1'>
                 Klik tombol "+ Tambah Jurnal" untuk mencatat agenda pembelajaran harian Anda.
               </p>
             </div>
@@ -723,31 +715,32 @@ export default function JurnalClient() {
 
       {/* Modal Dialog: Add / Edit Journal */}
       <Dialog open={journalModalOpen} onOpenChange={setJournalModalOpen}>
-        <DialogContent className='bg-zinc-900 border border-zinc-800 text-white rounded-2xl w-[calc(100%-2.5rem)] sm:w-full max-w-full sm:max-w-4xl lg:max-w-5xl max-h-[88vh] overflow-y-auto p-4 sm:p-6 md:p-8 my-4'>
+        <DialogContent className='bg-white border border-slate-200 text-slate-900 rounded-2xl w-[calc(100vw-1.5rem)] max-w-[calc(100vw-1.5rem)] sm:w-full sm:max-w-4xl lg:max-w-5xl max-h-[85vh] sm:max-h-[88vh] p-0 shadow-2xl overflow-hidden box-border flex flex-col'>
           <form
             onSubmit={(e) => {
               e.preventDefault();
               saveJournalMutation.mutate();
             }}
+            className='flex flex-col h-full max-h-[85vh] sm:max-h-[88vh] overflow-hidden min-w-0 w-full'
           >
-            <DialogHeader className='pb-4 border-b border-zinc-800'>
-              <DialogTitle className='text-lg font-bold text-zinc-100 flex items-center gap-2'>
-                <BookOpen className='h-5 w-5 text-emerald-500' />
-                {editingEntry ? 'Edit Catatan Jurnal' : 'Tambah Jurnal Harian Guru'}
+            <DialogHeader className='p-4 sm:p-6 pb-3 sm:pb-4 border-b border-slate-200 shrink-0 bg-white relative'>
+              <DialogTitle className='text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2 pr-8'>
+                <BookOpen className='h-5 w-5 text-emerald-600 shrink-0' />
+                <span>{editingEntry ? 'Edit Catatan Jurnal' : 'Tambah Jurnal Harian Guru'}</span>
               </DialogTitle>
-              <DialogDescription className='text-xs text-zinc-400'>
+              <DialogDescription className='text-xs text-slate-500 mt-0.5 pr-6'>
                 Isi rincian pertemuan, materi, kegiatan pembelajaran, dan absensi siswa.
               </DialogDescription>
             </DialogHeader>
 
-            <div className='space-y-5 py-5'>
+            <div className='flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 space-y-5 box-border min-w-0 w-full'>
               {/* Row 1: Tanggal & Pertemuan ke */}
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                <div className='space-y-1.5'>
-                  <Label className='text-zinc-300 text-xs font-semibold flex items-center justify-between'>
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-4 w-full min-w-0'>
+                <div className='space-y-1.5 w-full min-w-0'>
+                  <Label className='text-slate-700 text-xs font-semibold flex items-center justify-between'>
                     <span>Hari / Tanggal</span>
                     {isFetchingAttendance && (
-                      <span className='text-[10px] text-emerald-400 flex items-center gap-1'>
+                      <span className='text-[10px] text-emerald-600 flex items-center gap-1'>
                         <Loader2 className='h-3 w-3 animate-spin' /> Cek Absensi...
                       </span>
                     )}
@@ -757,86 +750,86 @@ export default function JurnalClient() {
                     required
                     value={formDate}
                     onChange={(e) => handleDateChange(e.target.value)}
-                    className='bg-zinc-950 border-zinc-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/40 focus-visible:border-emerald-500 focus-visible:ring-1 focus-visible:ring-emerald-500/40 text-white rounded-xl text-xs h-10 [color-scheme:dark] outline-none transition-all'
+                    className='w-full min-w-0 max-w-full bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-10 outline-none transition-all box-border'
                   />
                 </div>
 
-                <div className='space-y-1.5'>
-                  <Label className='text-zinc-300 text-xs font-semibold'>Pertemuan ke-</Label>
+                <div className='space-y-1.5 w-full min-w-0'>
+                  <Label className='text-slate-700 text-xs font-semibold'>Pertemuan ke-</Label>
                   <Input
                     type='number'
                     required
                     min={1}
                     value={meetingNo}
                     onChange={(e) => setMeetingNo(Number(e.target.value))}
-                    className='bg-zinc-950 border-zinc-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/40 focus-visible:border-emerald-500 focus-visible:ring-1 focus-visible:ring-emerald-500/40 text-white rounded-xl text-xs h-10 outline-none transition-all'
+                    className='w-full min-w-0 max-w-full bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-10 outline-none transition-all box-border'
                   />
                 </div>
               </div>
 
               {/* Row 2: Kompetensi Dasar & Materi Pembelajaran */}
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                <div className='space-y-1.5'>
-                  <Label className='text-zinc-300 text-xs font-semibold'>Kompetensi Dasar / Capaian Pembelajaran</Label>
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-4 w-full min-w-0'>
+                <div className='space-y-1.5 w-full min-w-0'>
+                  <Label className='text-slate-700 text-xs font-semibold'>Kompetensi Dasar / Capaian Pembelajaran</Label>
                   <textarea
                     rows={3}
                     required
                     placeholder='Contoh: 4.2. Merencanakan rangkaian penjumlahan dan Pengurangan dengan Gerbang logika'
                     value={basicCompetency}
                     onChange={(e) => setBasicCompetency(e.target.value)}
-                    className='w-full bg-zinc-950 border border-zinc-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/40 focus-visible:border-emerald-500 focus-visible:ring-1 focus-visible:ring-emerald-500/40 rounded-xl p-3 text-xs text-white outline-none transition-all'
+                    className='w-full min-w-0 max-w-full bg-slate-50 border border-slate-200 focus:border-emerald-500 rounded-xl p-3 text-xs text-slate-900 outline-none transition-all box-border'
                   />
                 </div>
 
-                <div className='space-y-1.5'>
-                  <Label className='text-zinc-300 text-xs font-semibold'>Materi Pembelajaran</Label>
+                <div className='space-y-1.5 w-full min-w-0'>
+                  <Label className='text-slate-700 text-xs font-semibold'>Materi Pembelajaran</Label>
                   <textarea
                     rows={3}
                     required
                     placeholder='Contoh: - Gerbang Logika / Half-full adder'
                     value={material}
                     onChange={(e) => setMaterial(e.target.value)}
-                    className='w-full bg-zinc-950 border border-zinc-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/40 focus-visible:border-emerald-500 focus-visible:ring-1 focus-visible:ring-emerald-500/40 rounded-xl p-3 text-xs text-white outline-none transition-all'
+                    className='w-full min-w-0 max-w-full bg-slate-50 border border-slate-200 focus:border-emerald-500 rounded-xl p-3 text-xs text-slate-900 outline-none transition-all box-border'
                   />
                 </div>
               </div>
 
               {/* Row 3: Kegiatan Belajar Mengajar */}
-              <div className='space-y-1.5'>
-                <Label className='text-zinc-300 text-xs font-semibold'>Kegiatan Belajar Mengajar (KBM)</Label>
+              <div className='space-y-1.5 w-full min-w-0'>
+                <Label className='text-slate-700 text-xs font-semibold'>Kegiatan Belajar Mengajar (KBM)</Label>
                 <textarea
                   rows={3}
                   required
                   placeholder='Contoh: - Guru menjelaskan materi&#10;- Siswa mengerjakan latihan soal LKPD'
                   value={learningActivity}
                   onChange={(e) => setLearningActivity(e.target.value)}
-                  className='w-full bg-zinc-950 border border-zinc-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/40 focus-visible:border-emerald-500 focus-visible:ring-1 focus-visible:ring-emerald-500/40 rounded-xl p-3 text-xs text-white outline-none transition-all'
+                  className='w-full min-w-0 max-w-full bg-slate-50 border border-slate-200 focus:border-emerald-500 rounded-xl p-3 text-xs text-slate-900 outline-none transition-all box-border'
                 />
               </div>
 
-              {/* Row 4: Input Absensi Siswa (Pilihan Siswa & Status Kehadiran) */}
-              <div className='border-t border-zinc-800 pt-5 space-y-4'>
-                <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-3'>
-                  <div>
-                    <Label className='text-zinc-200 text-sm font-bold flex items-center gap-2'>
-                      <UserCheck className='h-4 w-4 text-emerald-400' />
-                      Input Absensi Siswa
+              {/* Row 4: Input Absensi Siswa */}
+              <div className='border-t border-slate-200 pt-5 space-y-4 w-full min-w-0'>
+                <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0 w-full'>
+                  <div className='min-w-0'>
+                    <Label className='text-slate-900 text-sm font-bold flex items-center gap-2'>
+                      <UserCheck className='h-4 w-4 text-emerald-600 shrink-0' />
+                      <span>Input Absensi Siswa</span>
                     </Label>
-                    <p className='text-[11px] text-zinc-400 mt-0.5'>
+                    <p className='text-[11px] text-slate-500 mt-0.5'>
                       Pilih siswa dan tentukan status kehadirannya untuk tanggal ini.
                     </p>
                   </div>
 
-                  <div className='flex items-center gap-2 flex-wrap'>
+                  <div className='flex items-center gap-2 flex-wrap min-w-0'>
                     {/* Badge Counters */}
-                    <div className='flex items-center gap-2 bg-zinc-950 px-3 py-1.5 rounded-xl border border-zinc-800 text-[11px] font-semibold'>
-                      <span className='text-emerald-400'>Hadir: {currentCounts.hadir}</span>
-                      <span className='text-zinc-700'>|</span>
-                      <span className='text-amber-400'>Sakit: {currentCounts.sakit}</span>
-                      <span className='text-zinc-700'>|</span>
-                      <span className='text-blue-400'>Izin: {currentCounts.izin}</span>
-                      <span className='text-zinc-700'>|</span>
-                      <span className='text-rose-400'>Alfa: {currentCounts.alfa}</span>
+                    <div className='flex flex-wrap items-center gap-1.5 sm:gap-2 bg-slate-50 px-2.5 sm:px-3 py-1.5 rounded-xl border border-slate-200 text-[10px] sm:text-[11px] font-bold'>
+                      <span className='text-emerald-700'>Hadir: {currentCounts.hadir}</span>
+                      <span className='text-slate-300'>|</span>
+                      <span className='text-amber-700'>Sakit: {currentCounts.sakit}</span>
+                      <span className='text-slate-300'>|</span>
+                      <span className='text-blue-700'>Izin: {currentCounts.izin}</span>
+                      <span className='text-slate-300'>|</span>
+                      <span className='text-rose-700'>Alfa: {currentCounts.alfa}</span>
                     </div>
 
                     <Button
@@ -844,7 +837,7 @@ export default function JurnalClient() {
                       variant='outline'
                       size='sm'
                       onClick={handleMarkAllHadir}
-                      className='border-zinc-800 bg-zinc-950 hover:bg-zinc-800 text-emerald-400 hover:text-emerald-300 text-xs rounded-xl h-8 px-2.5 gap-1.5'
+                      className='border-slate-200 bg-white hover:bg-slate-100 text-emerald-700 text-xs font-semibold rounded-xl h-8 px-2.5 gap-1.5'
                     >
                       <CheckCircle2 className='h-3.5 w-3.5' />
                       Tandai Semua Hadir
@@ -853,56 +846,56 @@ export default function JurnalClient() {
                 </div>
 
                 {/* Filter / Search Siswa */}
-                <div className='flex items-center gap-3'>
-                  <div className='relative flex-1'>
-                    <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-500' />
+                <div className='flex items-center gap-3 w-full min-w-0'>
+                  <div className='relative flex-1 min-w-0'>
+                    <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400' />
                     <Input
                       placeholder='Cari nama siswa atau NIS...'
                       value={attendanceSearch}
                       onChange={(e) => setAttendanceSearch(e.target.value)}
-                      className='pl-9 bg-zinc-950 border-zinc-800 text-white text-xs h-8.5 rounded-xl focus:border-emerald-500'
+                      className='w-full min-w-0 max-w-full pl-9 bg-slate-50 border-slate-200 text-slate-900 text-xs h-8.5 rounded-xl focus:border-emerald-500 box-border'
                     />
                   </div>
                 </div>
 
                 {/* Student Attendance Selection List */}
-                <div className='bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden max-h-64 overflow-y-auto'>
+                <div className='bg-slate-50 border border-slate-200 rounded-xl overflow-hidden max-h-64 overflow-y-auto w-full min-w-0'>
                   {isFetchingAttendance ? (
-                    <div className='flex items-center justify-center py-8 text-zinc-400 text-xs gap-2'>
-                      <Loader2 className='h-4 w-4 animate-spin text-emerald-500' />
+                    <div className='flex items-center justify-center py-8 text-slate-500 text-xs gap-2'>
+                      <Loader2 className='h-4 w-4 animate-spin text-emerald-600' />
                       <span>Memuat data absensi siswa...</span>
                     </div>
                   ) : studentAttendanceList.length === 0 ? (
-                    <div className='text-center py-6 text-zinc-500 text-xs'>
+                    <div className='text-center py-6 text-slate-400 text-xs'>
                       Belum ada data siswa di kelas. Tambahkan siswa di menu Data Siswa.
                     </div>
                   ) : (
-                    <div className='divide-y divide-zinc-850'>
+                    <div className='divide-y divide-slate-200/80 w-full min-w-0'>
                       {filteredStudentList.map((st, idx) => (
                         <div
                           key={st.studentId}
-                          className='flex items-center justify-between p-2.5 hover:bg-zinc-900/60 transition-colors text-xs gap-2'
+                          className='flex flex-col sm:flex-row sm:items-center justify-between p-2.5 hover:bg-white transition-colors text-xs gap-2 w-full min-w-0'
                         >
-                          <div className='flex items-center gap-3 min-w-0 pr-2'>
-                            <span className='text-[10px] text-zinc-500 w-5 text-center font-semibold shrink-0'>
+                          <div className='flex items-center gap-2.5 min-w-0 pr-2'>
+                            <span className='text-[10px] text-slate-400 w-5 text-center font-semibold shrink-0'>
                               {idx + 1}
                             </span>
-                            <div className='truncate'>
-                              <p className='font-semibold text-zinc-200 truncate'>{st.name}</p>
-                              <p className='text-[10px] text-zinc-500 font-mono'>
+                            <div className='truncate min-w-0'>
+                              <p className='font-bold text-slate-900 truncate'>{st.name}</p>
+                              <p className='text-[10px] text-slate-500 font-mono truncate'>
                                 {st.nis ? `NIS: ${st.nis}` : st.className || ''}
                               </p>
                             </div>
                           </div>
 
                           {/* Attendance Status Buttons */}
-                          <div className='flex items-center gap-1 shrink-0'>
+                          <div className='flex items-center gap-1 shrink-0 self-start sm:self-auto'>
                             <button
                               type='button'
                               onClick={() => handleStudentStatusChange(st.studentId, 'Hadir')}
-                              className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all ${st.status === 'Hadir'
-                                  ? 'bg-emerald-600 text-white shadow-sm'
-                                  : 'bg-zinc-900 text-zinc-400 hover:text-zinc-200 border border-zinc-800'
+                              className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all cursor-pointer ${st.status === 'Hadir'
+                                ? 'bg-emerald-600 text-white shadow-xs'
+                                : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200'
                                 }`}
                             >
                               Hadir
@@ -910,9 +903,9 @@ export default function JurnalClient() {
                             <button
                               type='button'
                               onClick={() => handleStudentStatusChange(st.studentId, 'Sakit')}
-                              className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all ${st.status === 'Sakit'
-                                  ? 'bg-amber-600 text-white shadow-sm'
-                                  : 'bg-zinc-900 text-zinc-400 hover:text-zinc-200 border border-zinc-800'
+                              className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all cursor-pointer ${st.status === 'Sakit'
+                                ? 'bg-amber-600 text-white shadow-xs'
+                                : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200'
                                 }`}
                             >
                               Sakit
@@ -920,9 +913,9 @@ export default function JurnalClient() {
                             <button
                               type='button'
                               onClick={() => handleStudentStatusChange(st.studentId, 'Izin')}
-                              className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all ${st.status === 'Izin'
-                                  ? 'bg-blue-600 text-white shadow-sm'
-                                  : 'bg-zinc-900 text-zinc-400 hover:text-zinc-200 border border-zinc-800'
+                              className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all cursor-pointer ${st.status === 'Izin'
+                                ? 'bg-blue-600 text-white shadow-xs'
+                                : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200'
                                 }`}
                             >
                               Izin
@@ -930,9 +923,9 @@ export default function JurnalClient() {
                             <button
                               type='button'
                               onClick={() => handleStudentStatusChange(st.studentId, 'Alfa')}
-                              className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all ${st.status === 'Alfa'
-                                  ? 'bg-rose-600 text-white shadow-sm'
-                                  : 'bg-zinc-900 text-zinc-400 hover:text-zinc-200 border border-zinc-800'
+                              className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all cursor-pointer ${st.status === 'Alfa'
+                                ? 'bg-rose-600 text-white shadow-xs'
+                                : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200'
                                 }`}
                             >
                               Alfa
@@ -946,19 +939,19 @@ export default function JurnalClient() {
               </div>
             </div>
 
-            <DialogFooter className='pt-3 border-t border-zinc-800 gap-2 sm:gap-0'>
+            <DialogFooter className='p-4 sm:p-6 py-3 border-t border-slate-200 shrink-0 bg-slate-50/90 flex flex-col-reverse sm:flex-row sm:justify-end gap-2 w-full'>
               <Button
                 type='button'
                 variant='ghost'
                 onClick={() => setJournalModalOpen(false)}
-                className='text-zinc-400 hover:text-zinc-200 text-xs'
+                className='text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 text-xs w-full sm:w-auto'
               >
                 Batal
               </Button>
               <Button
                 type='submit'
                 disabled={saveJournalMutation.isPending}
-                className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium rounded-xl px-5 gap-2'
+                className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl px-5 gap-2 shadow-xs w-full sm:w-auto'
               >
                 {saveJournalMutation.isPending ? (
                   <Loader2 className='h-4 w-4 animate-spin' />
@@ -975,120 +968,120 @@ export default function JurnalClient() {
 
       {/* Modal Dialog: Settings Header Info */}
       <Dialog open={headerModalOpen} onOpenChange={setHeaderModalOpen}>
-        <DialogContent className='bg-zinc-900 border border-zinc-800 text-white rounded-2xl w-[calc(100%-2.5rem)] sm:w-full max-w-lg p-4 sm:p-6'>
+        <DialogContent className='bg-white border border-slate-200 text-slate-900 rounded-2xl w-[calc(100%-2.5rem)] sm:w-full max-w-lg p-4 sm:p-6 shadow-2xl'>
           <form
             onSubmit={(e) => {
               e.preventDefault();
               saveHeaderMutation.mutate(headerForm);
             }}
           >
-            <DialogHeader className='pb-4 border-b border-zinc-800'>
-              <DialogTitle className='text-lg font-bold text-zinc-100 flex items-center gap-2'>
-                <Settings2 className='h-5 w-5 text-emerald-500' />
+            <DialogHeader className='pb-4 border-b border-slate-200'>
+              <DialogTitle className='text-lg font-bold text-slate-900 flex items-center gap-2'>
+                <Settings2 className='h-5 w-5 text-emerald-600' />
                 Pengaturan Header Informasi Jurnal
               </DialogTitle>
-              <DialogDescription className='text-xs text-zinc-400'>
+              <DialogDescription className='text-xs text-slate-500'>
                 Sesuaikan metadata identitas jurnal harian guru untuk keperluan laporan dan cetak.
               </DialogDescription>
             </DialogHeader>
 
             <div className='space-y-3.5 py-4 text-xs'>
               <div className='space-y-1'>
-                <Label className='text-zinc-300 text-xs font-semibold'>Nama Sekolah</Label>
+                <Label className='text-slate-700 text-xs font-semibold'>Nama Sekolah</Label>
                 <Input
                   required
                   placeholder='Contoh: SMK 17 Seyegan'
                   value={headerForm.schoolName}
                   onChange={(e) => setHeaderForm({ ...headerForm, schoolName: e.target.value })}
-                  className='bg-zinc-950 border-zinc-800 focus:border-emerald-500 text-white rounded-xl text-xs h-9'
+                  className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-9'
                 />
               </div>
 
               <div className='grid grid-cols-2 gap-3'>
                 <div className='space-y-1'>
-                  <Label className='text-zinc-300 text-xs font-semibold'>Mata Pelajaran</Label>
+                  <Label className='text-slate-700 text-xs font-semibold'>Mata Pelajaran</Label>
                   <Input
                     required
                     placeholder='Contoh: Sistem Operasi'
                     value={headerForm.subject}
                     onChange={(e) => setHeaderForm({ ...headerForm, subject: e.target.value })}
-                    className='bg-zinc-950 border-zinc-800 focus:border-emerald-500 text-white rounded-xl text-xs h-9'
+                    className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-9'
                   />
                 </div>
 
                 <div className='space-y-1'>
-                  <Label className='text-zinc-300 text-xs font-semibold'>Kelas / Semester</Label>
+                  <Label className='text-slate-700 text-xs font-semibold'>Kelas / Semester</Label>
                   <Input
                     required
                     placeholder='Contoh: XTKJ/Genap'
                     value={headerForm.classNameSemester}
                     onChange={(e) => setHeaderForm({ ...headerForm, classNameSemester: e.target.value })}
-                    className='bg-zinc-950 border-zinc-800 focus:border-emerald-500 text-white rounded-xl text-xs h-9'
+                    className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-9'
                   />
                 </div>
               </div>
 
               <div className='grid grid-cols-2 gap-3'>
                 <div className='space-y-1'>
-                  <Label className='text-zinc-300 text-xs font-semibold'>Tahun Pelajaran</Label>
+                  <Label className='text-slate-700 text-xs font-semibold'>Tahun Pelajaran</Label>
                   <Input
                     required
                     placeholder='Contoh: 2022/2023'
                     value={headerForm.academicYear}
                     onChange={(e) => setHeaderForm({ ...headerForm, academicYear: e.target.value })}
-                    className='bg-zinc-950 border-zinc-800 focus:border-emerald-500 text-white rounded-xl text-xs h-9'
+                    className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-9'
                   />
                 </div>
 
                 <div className='space-y-1'>
-                  <Label className='text-zinc-300 text-xs font-semibold'>Kurikulum</Label>
+                  <Label className='text-slate-700 text-xs font-semibold'>Kurikulum</Label>
                   <Input
                     required
                     placeholder='Contoh: 2013 / Merdeka'
                     value={headerForm.curriculum}
                     onChange={(e) => setHeaderForm({ ...headerForm, curriculum: e.target.value })}
-                    className='bg-zinc-950 border-zinc-800 focus:border-emerald-500 text-white rounded-xl text-xs h-9'
+                    className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-9'
                   />
                 </div>
               </div>
 
               <div className='grid grid-cols-2 gap-3'>
                 <div className='space-y-1'>
-                  <Label className='text-zinc-300 text-xs font-semibold'>Nama Guru</Label>
+                  <Label className='text-slate-700 text-xs font-semibold'>Nama Guru</Label>
                   <Input
                     required
                     placeholder='Nama lengkap guru'
                     value={headerForm.teacherName}
                     onChange={(e) => setHeaderForm({ ...headerForm, teacherName: e.target.value })}
-                    className='bg-zinc-950 border-zinc-800 focus:border-emerald-500 text-white rounded-xl text-xs h-9'
+                    className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-9'
                   />
                 </div>
 
                 <div className='space-y-1'>
-                  <Label className='text-zinc-300 text-xs font-semibold'>NIP</Label>
+                  <Label className='text-slate-700 text-xs font-semibold'>NIP</Label>
                   <Input
                     placeholder='-'
                     value={headerForm.nip}
                     onChange={(e) => setHeaderForm({ ...headerForm, nip: e.target.value })}
-                    className='bg-zinc-950 border-zinc-800 focus:border-emerald-500 text-white rounded-xl text-xs h-9'
+                    className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-9'
                   />
                 </div>
               </div>
             </div>
 
-            <DialogFooter className='pt-3 border-t border-zinc-800 gap-2 sm:gap-0'>
+            <DialogFooter className='pt-3 border-t border-slate-200 gap-2 sm:gap-0'>
               <Button
                 type='button'
                 variant='ghost'
                 onClick={() => setHeaderModalOpen(false)}
-                className='text-zinc-400 hover:text-zinc-200 text-xs'
+                className='text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 text-xs'
               >
                 Batal
               </Button>
               <Button
                 type='submit'
                 disabled={saveHeaderMutation.isPending}
-                className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium rounded-xl px-5 gap-2'
+                className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl px-5 gap-2 shadow-xs'
               >
                 {saveHeaderMutation.isPending ? (
                   <Loader2 className='h-4 w-4 animate-spin' />

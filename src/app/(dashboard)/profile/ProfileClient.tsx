@@ -169,14 +169,14 @@ export default function ProfileClient() {
 
   if (isLoading || isReloading) {
     return (
-      <div className='flex flex-col items-center justify-center py-32 text-zinc-400 text-sm space-y-3 animate-fade-in'>
-        <div className='flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-950/80 border border-emerald-900/60 text-emerald-400 shadow-xl shadow-emerald-950/40'>
+      <div className='flex flex-col items-center justify-center py-32 text-slate-500 text-sm space-y-3 animate-fade-in'>
+        <div className='flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 shadow-xs'>
           <Loader2 className='h-6 w-6 animate-spin' />
         </div>
-        <span className='font-bold text-zinc-200 text-base'>
+        <span className='font-bold text-slate-800 text-base'>
           {isReloading ? 'Menyesuaikan susunan menu sidebar...' : 'Memuat data profil...'}
         </span>
-        <span className='text-xs text-zinc-500'>
+        <span className='text-xs text-slate-400'>
           {isReloading ? 'Memperbarui tampilan bilah navigasi Anda...' : 'Mohon tunggu sebentar'}
         </span>
       </div>
@@ -188,65 +188,67 @@ export default function ProfileClient() {
   return (
     <div className='space-y-6 max-w-4xl mx-auto animate-fade-in'>
       {/* Top Banner Header */}
-      <Card className='bg-zinc-900/50 border-zinc-800 shadow-xl rounded-2xl overflow-hidden relative'>
-        <div className='h-24 bg-gradient-to-r from-emerald-950 via-teal-950 to-zinc-950 border-b border-zinc-850/80 relative' />
-        <div className='px-6 pb-6 pt-0 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 -mt-10 relative z-10'>
-          <div className='flex items-end gap-4'>
-            <div className='h-20 w-20 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white font-extrabold text-3xl shadow-xl shadow-emerald-500/20 border-2 border-zinc-900'>
+      <Card className='bg-white border-slate-200/80 shadow-xs rounded-2xl overflow-hidden relative'>
+        <div className='h-24 sm:h-28 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 border-b border-emerald-500/20 relative' />
+        <div className='px-4 sm:px-6 pb-5 pt-0 flex flex-col sm:flex-row items-center sm:items-end justify-between gap-3 sm:gap-4 -mt-10 relative z-10 text-center sm:text-left'>
+          <div className='flex flex-col sm:flex-row items-center sm:items-end gap-3 sm:gap-4 w-full'>
+            <div className='h-20 w-20 shrink-0 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white font-extrabold text-3xl shadow-md border-4 border-white'>
               {initialName}
             </div>
-            <div className='pb-1'>
-              <h2 className='text-2xl font-bold text-white'>{profileForm.name || 'Guru Smart Class'}</h2>
-              <p className='text-xs text-zinc-400 flex items-center gap-2 mt-0.5'>
-                <span>{profileForm.email}</span>
+            <div className='pb-1 min-w-0 flex-1 w-full text-center sm:text-left'>
+              <h2 className='text-xl sm:text-2xl font-extrabold text-slate-900 truncate'>
+                {profileForm.name || 'Guru Smart Class'}
+              </h2>
+              <div className='text-xs text-slate-500 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mt-1 font-medium justify-center sm:justify-start'>
+                <span className='truncate'>{profileForm.email}</span>
                 {profileForm.schoolName && (
                   <>
-                    <span>•</span>
-                    <span className='text-emerald-400 font-medium'>{profileForm.schoolName}</span>
+                    <span className='hidden sm:inline text-slate-300'>•</span>
+                    <span className='text-emerald-700 font-bold truncate'>{profileForm.schoolName}</span>
                   </>
                 )}
-              </p>
+              </div>
             </div>
           </div>
         </div>
       </Card>
 
       {/* Tabs Switcher */}
-      <div className='flex items-center gap-2 border-b border-zinc-800 pb-3 overflow-x-auto'>
+      <div className='grid grid-cols-2 gap-2 sm:flex sm:items-center sm:gap-2 border-b border-slate-200 pb-3'>
         <Button
           onClick={() => setActiveTab('profile')}
           variant='ghost'
-          className={`rounded-xl text-xs font-semibold h-10 px-4 gap-2 transition-all ${activeTab === 'profile'
-            ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-900/60 shadow-md shadow-emerald-950/20'
-            : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'
+          className={`rounded-xl text-xs font-semibold h-10 px-3 sm:px-4 gap-1.5 sm:gap-2 transition-all cursor-pointer w-full sm:w-auto justify-center ${activeTab === 'profile'
+            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-xs'
+            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
         >
-          <User className='h-4 w-4' />
-          <span>Data Pribadi & Sekolah</span>
+          <User className='h-4 w-4 shrink-0' />
+          <span className='truncate'>Data Diri & Sekolah</span>
         </Button>
 
         <Button
           onClick={() => setActiveTab('security')}
           variant='ghost'
-          className={`rounded-xl text-xs font-semibold h-10 px-4 gap-2 transition-all ${activeTab === 'security'
-            ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-900/60 shadow-md shadow-emerald-950/20'
-            : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'
+          className={`rounded-xl text-xs font-semibold h-10 px-3 sm:px-4 gap-1.5 sm:gap-2 transition-all cursor-pointer w-full sm:w-auto justify-center ${activeTab === 'security'
+            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-xs'
+            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
         >
-          <ShieldCheck className='h-4 w-4' />
-          <span>Keamanan & Password</span>
+          <ShieldCheck className='h-4 w-4 shrink-0' />
+          <span className='truncate'>Keamanan & Password</span>
         </Button>
       </div>
 
       {/* TAB 1: DATA PRIBADI & SEKOLAH */}
       {activeTab === 'profile' && (
-        <Card className='bg-zinc-900/30 border-zinc-900 rounded-2xl shadow-xl p-6'>
-          <CardHeader className='p-0 pb-6 border-b border-zinc-800/80 mb-6'>
-            <CardTitle className='text-lg font-bold text-zinc-100 flex items-center gap-2'>
-              <User className='h-5 w-5 text-emerald-500' />
+        <Card className='bg-white border-slate-200/80 rounded-2xl shadow-xs p-6'>
+          <CardHeader className='p-0 pb-6 border-b border-slate-200 mb-6'>
+            <CardTitle className='text-lg font-bold text-slate-900 flex items-center gap-2'>
+              <User className='h-5 w-5 text-emerald-600' />
               Informasi Data Diri & Sekolah
             </CardTitle>
-            <CardDescription className='text-xs text-zinc-400 mt-1'>
+            <CardDescription className='text-xs text-slate-500 mt-1'>
               Kelola nama lengkap, email login, identitas sekolah, dan NIP Anda.
             </CardDescription>
           </CardHeader>
@@ -254,8 +256,8 @@ export default function ProfileClient() {
           <form onSubmit={handleProfileSubmit} className='space-y-4'>
             <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
               <div className='space-y-1.5'>
-                <Label className='text-zinc-300 text-xs font-semibold flex items-center gap-2'>
-                  <User className='h-3.5 w-3.5 text-zinc-500' />
+                <Label className='text-slate-700 text-xs font-semibold flex items-center gap-2'>
+                  <User className='h-3.5 w-3.5 text-slate-400' />
                   <span>Nama Lengkap Guru</span>
                 </Label>
                 <Input
@@ -263,13 +265,13 @@ export default function ProfileClient() {
                   placeholder='Masukkan nama lengkap Anda'
                   value={profileForm.name}
                   onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
-                  className='bg-zinc-950 border-zinc-800 focus:border-emerald-500 text-white rounded-xl text-xs h-10'
+                  className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-10'
                 />
               </div>
 
               <div className='space-y-1.5'>
-                <Label className='text-zinc-300 text-xs font-semibold flex items-center gap-2'>
-                  <Mail className='h-3.5 w-3.5 text-zinc-500' />
+                <Label className='text-slate-700 text-xs font-semibold flex items-center gap-2'>
+                  <Mail className='h-3.5 w-3.5 text-slate-400' />
                   <span>Email Akun Login</span>
                 </Label>
                 <Input
@@ -278,57 +280,57 @@ export default function ProfileClient() {
                   placeholder='contoh@sekolah.sch.id'
                   value={profileForm.email}
                   onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
-                  className='bg-zinc-950 border-zinc-800 focus:border-emerald-500 text-white rounded-xl text-xs h-10'
+                  className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-10'
                 />
               </div>
             </div>
 
             <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
               <div className='space-y-1.5'>
-                <Label className='text-zinc-300 text-xs font-semibold flex items-center gap-2'>
-                  <Building className='h-3.5 w-3.5 text-zinc-500' />
+                <Label className='text-slate-700 text-xs font-semibold flex items-center gap-2'>
+                  <Building className='h-3.5 w-3.5 text-slate-400' />
                   <span>Nama Sekolah</span>
                 </Label>
                 <Input
                   placeholder='Contoh: SMK 17 Seyegan'
                   value={profileForm.schoolName}
                   onChange={(e) => setProfileForm({ ...profileForm, schoolName: e.target.value })}
-                  className='bg-zinc-950 border-zinc-800 focus:border-emerald-500 text-white rounded-xl text-xs h-10'
+                  className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-10'
                 />
               </div>
 
               <div className='space-y-1.5'>
-                <Label className='text-zinc-300 text-xs font-semibold flex items-center gap-2'>
-                  <GraduationCap className='h-3.5 w-3.5 text-zinc-500' />
+                <Label className='text-slate-700 text-xs font-semibold flex items-center gap-2'>
+                  <GraduationCap className='h-3.5 w-3.5 text-slate-400' />
                   <span>Kelas yang Diampu (Kelas Wali)</span>
                 </Label>
                 <Input
                   placeholder='Contoh: X TKJ 1'
                   value={profileForm.className}
                   onChange={(e) => setProfileForm({ ...profileForm, className: e.target.value })}
-                  className='bg-zinc-950 border-zinc-800 focus:border-emerald-500 text-white rounded-xl text-xs h-10'
+                  className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-10'
                 />
               </div>
             </div>
 
-            <div className='space-y-1.5 sm:w-1/2'>
-              <Label className='text-zinc-300 text-xs font-semibold flex items-center gap-2'>
-                <FileCheck2 className='h-3.5 w-3.5 text-zinc-500' />
+            <div className='space-y-1.5 w-full sm:w-1/2'>
+              <Label className='text-slate-700 text-xs font-semibold flex items-center gap-2'>
+                <FileCheck2 className='h-3.5 w-3.5 text-slate-400' />
                 <span>NIP Guru</span>
               </Label>
               <Input
                 placeholder='-'
                 value={profileForm.nip}
                 onChange={(e) => setProfileForm({ ...profileForm, nip: e.target.value })}
-                className='bg-zinc-950 border-zinc-800 focus:border-emerald-500 text-white rounded-xl text-xs h-10'
+                className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-10'
               />
             </div>
 
-            <div className='pt-4 flex justify-end border-t border-zinc-800/80'>
+            <div className='pt-4 flex justify-end border-t border-slate-200'>
               <Button
                 type='submit'
                 disabled={updateProfileMutation.isPending}
-                className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl px-5 h-10 gap-2 shadow-lg shadow-emerald-950/30'
+                className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl px-5 h-10 gap-2 shadow-xs'
               >
                 {updateProfileMutation.isPending ? (
                   <Loader2 className='h-4 w-4 animate-spin' />
@@ -346,21 +348,21 @@ export default function ProfileClient() {
 
       {/* TAB 2: KEAMANAN & PASSWORD */}
       {activeTab === 'security' && (
-        <Card className='bg-zinc-900/30 border-zinc-900 rounded-2xl shadow-xl p-6'>
-          <CardHeader className='p-0 pb-6 border-b border-zinc-800/80 mb-6'>
-            <CardTitle className='text-lg font-bold text-zinc-100 flex items-center gap-2'>
-              <Lock className='h-5 w-5 text-emerald-500' />
+        <Card className='bg-white border-slate-200/80 rounded-2xl shadow-xs p-6'>
+          <CardHeader className='p-0 pb-6 border-b border-slate-200 mb-6'>
+            <CardTitle className='text-lg font-bold text-slate-900 flex items-center gap-2'>
+              <Lock className='h-5 w-5 text-emerald-600' />
               Ganti Kata Sandi
             </CardTitle>
-            <CardDescription className='text-xs text-zinc-400 mt-1'>
+            <CardDescription className='text-xs text-slate-500 mt-1'>
               Perbarui kata sandi akun Anda secara berkala demi keamanan data.
             </CardDescription>
           </CardHeader>
 
           <form onSubmit={handlePasswordSubmit} className='space-y-4 max-w-md'>
             <div className='space-y-1.5'>
-              <Label className='text-zinc-300 text-xs font-semibold flex items-center gap-2'>
-                <KeyRound className='h-3.5 w-3.5 text-zinc-500' />
+              <Label className='text-slate-700 text-xs font-semibold flex items-center gap-2'>
+                <KeyRound className='h-3.5 w-3.5 text-slate-400' />
                 <span>Password Saat Ini</span>
               </Label>
               <Input
@@ -369,13 +371,13 @@ export default function ProfileClient() {
                 placeholder='Masukkan password lama'
                 value={passwordForm.currentPassword}
                 onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
-                className='bg-zinc-950 border-zinc-800 focus:border-emerald-500 text-white rounded-xl text-xs h-10'
+                className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-10'
               />
             </div>
 
             <div className='space-y-1.5'>
-              <Label className='text-zinc-300 text-xs font-semibold flex items-center gap-2'>
-                <Lock className='h-3.5 w-3.5 text-zinc-500' />
+              <Label className='text-slate-700 text-xs font-semibold flex items-center gap-2'>
+                <Lock className='h-3.5 w-3.5 text-slate-400' />
                 <span>Password Baru (Minimal 6 Karakter)</span>
               </Label>
               <Input
@@ -384,13 +386,13 @@ export default function ProfileClient() {
                 placeholder='Masukkan password baru'
                 value={passwordForm.newPassword}
                 onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                className='bg-zinc-950 border-zinc-800 focus:border-emerald-500 text-white rounded-xl text-xs h-10'
+                className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-10'
               />
             </div>
 
             <div className='space-y-1.5'>
-              <Label className='text-zinc-300 text-xs font-semibold flex items-center gap-2'>
-                <Lock className='h-3.5 w-3.5 text-zinc-500' />
+              <Label className='text-slate-700 text-xs font-semibold flex items-center gap-2'>
+                <Lock className='h-3.5 w-3.5 text-slate-400' />
                 <span>Konfirmasi Password Baru</span>
               </Label>
               <Input
@@ -399,15 +401,15 @@ export default function ProfileClient() {
                 placeholder='Ulangi password baru'
                 value={passwordForm.confirmPassword}
                 onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-                className='bg-zinc-950 border-zinc-800 focus:border-emerald-500 text-white rounded-xl text-xs h-10'
+                className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-10'
               />
             </div>
 
-            <div className='pt-4 flex justify-start border-t border-zinc-800/80'>
+            <div className='pt-4 flex justify-start border-t border-slate-200'>
               <Button
                 type='submit'
                 disabled={changePasswordMutation.isPending}
-                className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl px-5 h-10 gap-2 shadow-lg shadow-emerald-950/30'
+                className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl px-5 h-10 gap-2 shadow-xs'
               >
                 {changePasswordMutation.isPending ? (
                   <Loader2 className='h-4 w-4 animate-spin' />

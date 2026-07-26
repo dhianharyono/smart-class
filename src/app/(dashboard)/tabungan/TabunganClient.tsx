@@ -180,20 +180,20 @@ export default function TabunganClient() {
       {/* Header */}
       <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
         <div>
-          <h2 className='text-3xl font-extrabold tracking-tight bg-gradient-to-r from-zinc-50 to-zinc-400 bg-clip-text text-transparent'>
+          <h2 className='text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900'>
             Tabungan Siswa
           </h2>
-          <p className='text-zinc-400 text-sm'>
+          <p className='text-slate-600 text-xs sm:text-sm mt-1'>
             Pantau tabungan siswa, catat setoran (Kredit), penarikan (Debit), dan
             riwayat mutasi dana.
           </p>
         </div>
 
-        <div className='flex items-center gap-3'>
+        <div className='flex flex-wrap items-center gap-2 sm:gap-3'>
           <Button
             onClick={handleExcelExport}
             variant='outline'
-            className='border-zinc-800 bg-zinc-900/50 hover:bg-zinc-900 text-zinc-300 font-medium rounded-xl h-10 px-4 gap-2'
+            className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs sm:text-sm font-semibold rounded-xl h-10 px-3.5 sm:px-4 gap-2 shadow-xs'
           >
             <Download className='h-4 w-4' />
             Ekspor Excel
@@ -206,7 +206,7 @@ export default function TabunganClient() {
                 toast.error('Tambahkan data siswa terlebih dahulu!');
               }
             }}
-            className='bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl h-10 px-4 gap-2'
+            className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold rounded-xl h-10 px-3.5 sm:px-4 gap-2 shadow-xs'
           >
             <Plus className='h-4 w-4' />
             Transaksi Baru
@@ -215,40 +215,40 @@ export default function TabunganClient() {
       </div>
 
       {/* Main Table */}
-      <Card className='bg-zinc-900/30 border-zinc-900 rounded-2xl overflow-hidden shadow-xl'>
+      <Card className='bg-white border-slate-200/80 rounded-2xl overflow-hidden shadow-xs'>
         <CardContent className='p-0'>
           {isSummaryLoading ? (
-            <div className='flex flex-col items-center justify-center py-20 text-zinc-500 text-sm'>
-              <Loader2 className='h-8 w-8 animate-spin text-emerald-500 mb-3' />
+            <div className='flex flex-col items-center justify-center py-20 text-slate-500 text-sm'>
+              <Loader2 className='h-8 w-8 animate-spin text-emerald-600 mb-3' />
               <span>Memuat ringkasan tabungan...</span>
             </div>
           ) : isError ? (
-            <div className='text-center py-20 text-red-400 text-sm'>
+            <div className='text-center py-20 text-rose-600 text-sm font-medium'>
               Gagal memuat ringkasan tabungan kelas.
             </div>
           ) : summaries && summaries.length > 0 ? (
             <Table>
-              <TableHeader className='bg-zinc-900/50 border-b border-zinc-800'>
-                <TableRow className='border-b border-zinc-800 hover:bg-transparent'>
-                  <TableHead className='w-12 text-center text-zinc-400 font-bold'>
+              <TableHeader className='bg-slate-50/80 border-b border-slate-200'>
+                <TableRow className='border-b border-slate-200 hover:bg-transparent'>
+                  <TableHead className='w-12 text-center text-slate-700 font-bold'>
                     No
                   </TableHead>
-                  <TableHead className='w-32 text-zinc-400 font-bold'>
+                  <TableHead className='w-32 text-slate-700 font-bold'>
                     NIS
                   </TableHead>
-                  <TableHead className='text-zinc-400 font-bold'>
+                  <TableHead className='text-slate-700 font-bold'>
                     Nama Lengkap
                   </TableHead>
-                  <TableHead className='w-24 text-zinc-400 font-bold'>
+                  <TableHead className='w-24 text-slate-700 font-bold'>
                     Kelas
                   </TableHead>
-                  <TableHead className='w-32 text-center text-zinc-400 font-bold'>
+                  <TableHead className='w-32 text-center text-slate-700 font-bold'>
                     Mutasi
                   </TableHead>
-                  <TableHead className='w-48 text-zinc-400 font-bold'>
+                  <TableHead className='w-48 text-slate-700 font-bold'>
                     Saldo Saat Ini
                   </TableHead>
-                  <TableHead className='w-40 text-center text-zinc-400 font-bold'>
+                  <TableHead className='w-40 text-center text-slate-700 font-bold'>
                     Aksi
                   </TableHead>
                 </TableRow>
@@ -257,24 +257,24 @@ export default function TabunganClient() {
                 {summaries.map((row, index) => (
                   <TableRow
                     key={row.studentId}
-                    className='border-b border-zinc-900 hover:bg-zinc-900/20 text-zinc-300'
+                    className='border-b border-slate-100 hover:bg-slate-50/80 text-slate-700 transition-colors'
                   >
                     <TableCell className='text-center font-medium'>
                       {index + 1}
                     </TableCell>
-                    <TableCell className='font-mono'>{row.nis}</TableCell>
-                    <TableCell className='font-semibold text-zinc-200'>
+                    <TableCell className='font-mono font-medium'>{row.nis}</TableCell>
+                    <TableCell className='font-bold text-slate-900'>
                       {row.name}
                     </TableCell>
-                    <TableCell>{row.className}</TableCell>
+                    <TableCell className='font-medium'>{row.className}</TableCell>
                     <TableCell className='text-center'>
-                      <span className='text-xs text-zinc-400 bg-zinc-900 border border-zinc-850 px-2 py-0.5 rounded-full'>
+                      <span className='text-xs font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full'>
                         {row.transactionsCount} kali
                       </span>
                     </TableCell>
                     <TableCell>
                       <span
-                        className={`font-bold ${row.balance > 0 ? 'text-emerald-400' : 'text-zinc-500'
+                        className={`font-bold ${row.balance > 0 ? 'text-emerald-700' : 'text-slate-400'
                           }`}
                       >
                         {formatIDR(row.balance)}
@@ -286,7 +286,7 @@ export default function TabunganClient() {
                           onClick={() => openLedgerDialog(row.studentId)}
                           variant='ghost'
                           size='sm'
-                          className='h-8 text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 border border-zinc-850 rounded-xl px-2.5 gap-1.5'
+                          className='h-8 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 rounded-xl px-2.5 gap-1.5'
                         >
                           <History className='h-3.5 w-3.5' />
                           Riwayat
@@ -295,7 +295,7 @@ export default function TabunganClient() {
                           onClick={() => openTxDialog(row.studentId)}
                           variant='ghost'
                           size='sm'
-                          className='h-8 text-xs font-semibold text-emerald-400 hover:text-white hover:bg-emerald-600 hover:border-emerald-600 border border-emerald-950/65 rounded-xl px-2.5 gap-1.5'
+                          className='h-8 text-xs font-semibold text-emerald-700 hover:text-white hover:bg-emerald-600 border border-emerald-200 rounded-xl px-2.5 gap-1.5'
                         >
                           <Plus className='h-3.5 w-3.5' />
                           Tambah
@@ -307,12 +307,12 @@ export default function TabunganClient() {
               </TableBody>
             </Table>
           ) : (
-            <div className='flex flex-col items-center justify-center py-20 text-zinc-500'>
-              <Wallet className='h-10 w-10 text-zinc-700 mb-2' />
-              <p className='text-sm font-semibold'>
+            <div className='flex flex-col items-center justify-center py-20 text-slate-500'>
+              <Wallet className='h-10 w-10 text-slate-300 mb-2' />
+              <p className='text-sm font-bold text-slate-700'>
                 Tidak ada siswa terdaftar di kelas.
               </p>
-              <p className='text-xs text-zinc-650'>
+              <p className='text-xs text-slate-400 mt-1'>
                 Silakan tambahkan siswa terlebih dahulu di halaman Data Siswa.
               </p>
             </div>
@@ -322,13 +322,13 @@ export default function TabunganClient() {
 
       {/* Transaction Dialog */}
       <Dialog open={txOpen} onOpenChange={setTxOpen}>
-        <DialogContent className='bg-zinc-900 border border-zinc-800 text-white rounded-2xl max-w-sm'>
+        <DialogContent className='bg-white border border-slate-200 text-slate-900 rounded-2xl max-w-sm p-5 sm:p-6 shadow-2xl'>
           <form onSubmit={handleTxSubmit}>
             <DialogHeader>
-              <DialogTitle className='text-lg font-bold text-zinc-100'>
+              <DialogTitle className='text-lg font-bold text-slate-900'>
                 Catat Transaksi Baru
               </DialogTitle>
-              <DialogDescription className='text-xs text-zinc-400'>
+              <DialogDescription className='text-xs text-slate-500'>
                 Log pencatatan tabungan siswa.
               </DialogDescription>
             </DialogHeader>
@@ -336,17 +336,17 @@ export default function TabunganClient() {
             <div className='space-y-4 py-4'>
               {/* Student name display */}
               <div className='space-y-1'>
-                <span className='text-[10px] text-zinc-500 font-bold uppercase tracking-wider block'>
+                <span className='text-[10px] text-slate-500 font-bold uppercase tracking-wider block'>
                   Siswa Penerima
                 </span>
-                <span className='text-sm font-semibold text-zinc-200 block bg-zinc-950 border border-zinc-850 px-3 py-2 rounded-xl'>
+                <span className='text-sm font-bold text-slate-800 block bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl'>
                   {activeStudentName}
                 </span>
               </div>
 
               {/* Transaction Type */}
               <div className='space-y-1.5'>
-                <Label className='text-zinc-300 text-sm font-semibold'>
+                <Label className='text-slate-700 text-sm font-semibold'>
                   Jenis Transaksi
                 </Label>
                 <Select
@@ -356,10 +356,10 @@ export default function TabunganClient() {
                     setTxForm({ ...txForm, type: val as 'Kredit' | 'Debit' })
                   }
                 >
-                  <SelectTrigger className='bg-zinc-950 border-zinc-800 text-white rounded-xl'>
+                  <SelectTrigger className='bg-slate-50 border-slate-200 text-slate-900 rounded-xl'>
                     <SelectValue placeholder='Pilih jenis' />
                   </SelectTrigger>
-                  <SelectContent className='bg-zinc-900 border-zinc-800 text-white rounded-xl'>
+                  <SelectContent className='bg-white border-slate-200 text-slate-900 rounded-xl'>
                     <SelectItem value='Kredit'>
                       Kredit / Kas Masuk (Setoran)
                     </SelectItem>
@@ -374,7 +374,7 @@ export default function TabunganClient() {
               <div className='space-y-1.5'>
                 <Label
                   htmlFor='amount'
-                  className='text-zinc-300 text-sm font-semibold'
+                  className='text-slate-700 text-sm font-semibold'
                 >
                   Nominal Uang (Rupiah)
                 </Label>
@@ -387,7 +387,7 @@ export default function TabunganClient() {
                   onChange={(e) =>
                     setTxForm({ ...txForm, amount: e.target.value })
                   }
-                  className='bg-zinc-950 border-zinc-800 focus:border-emerald-500 text-white rounded-xl'
+                  className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl'
                 />
               </div>
 
@@ -395,7 +395,7 @@ export default function TabunganClient() {
               <div className='space-y-1.5'>
                 <Label
                   htmlFor='description'
-                  className='text-zinc-300 text-sm font-semibold'
+                  className='text-slate-700 text-sm font-semibold'
                 >
                   Keterangan / Catatan
                 </Label>
@@ -406,7 +406,7 @@ export default function TabunganClient() {
                   onChange={(e) =>
                     setTxForm({ ...txForm, description: e.target.value })
                   }
-                  className='bg-zinc-950 border-zinc-800 focus:border-emerald-500 text-white rounded-xl'
+                  className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl'
                 />
               </div>
             </div>
@@ -416,14 +416,14 @@ export default function TabunganClient() {
                 type='button'
                 variant='ghost'
                 onClick={() => setTxOpen(false)}
-                className='text-zinc-400 hover:text-zinc-200'
+                className='text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200'
               >
                 Batal
               </Button>
               <Button
                 type='submit'
                 disabled={isPending}
-                className='bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl px-4 gap-2'
+                className='bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl px-4 gap-2 shadow-xs'
               >
                 {isPending ? (
                   <Loader2 className='h-4 w-4 animate-spin' />
@@ -438,13 +438,13 @@ export default function TabunganClient() {
 
       {/* Ledger History Dialog */}
       <Dialog open={ledgerOpen} onOpenChange={setLedgerOpen}>
-        <DialogContent className='bg-zinc-900 border border-zinc-800 text-white rounded-2xl max-w-lg max-h-[85vh] flex flex-col p-6'>
-          <DialogHeader className='pb-4 border-b border-zinc-800'>
-            <DialogTitle className='text-lg font-bold text-zinc-100 flex items-center gap-2'>
-              <History className='h-5 w-5 text-emerald-500' />
+        <DialogContent className='bg-white border border-slate-200 text-slate-900 rounded-2xl max-w-lg max-h-[85vh] flex flex-col p-6 shadow-2xl'>
+          <DialogHeader className='pb-4 border-b border-slate-200'>
+            <DialogTitle className='text-lg font-bold text-slate-900 flex items-center gap-2'>
+              <History className='h-5 w-5 text-emerald-600' />
               Riwayat Tabungan Siswa
             </DialogTitle>
-            <DialogDescription className='text-xs text-zinc-400'>
+            <DialogDescription className='text-xs text-slate-500'>
               {ledgerData
                 ? `${ledgerData.studentName} (NIS: ${ledgerData.studentNis})`
                 : 'Memuat data siswa...'}
@@ -454,8 +454,8 @@ export default function TabunganClient() {
           {/* Ledger Content */}
           <div className='flex-1 overflow-y-auto py-4 space-y-3'>
             {isLedgerLoading ? (
-              <div className='flex flex-col items-center justify-center py-12 text-zinc-500'>
-                <Loader2 className='h-6 w-6 animate-spin text-emerald-500 mb-2' />
+              <div className='flex flex-col items-center justify-center py-12 text-slate-500'>
+                <Loader2 className='h-6 w-6 animate-spin text-emerald-600 mb-2' />
                 <span className='text-xs'>Memuat mutasi kas...</span>
               </div>
             ) : ledgerData && ledgerData.ledger.length > 0 ? (
@@ -465,13 +465,13 @@ export default function TabunganClient() {
                   return (
                     <div
                       key={tx._id}
-                      className='flex items-center justify-between p-3 bg-zinc-950 border border-zinc-900 rounded-xl'
+                      className='flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-xl'
                     >
                       <div className='flex items-center gap-3'>
                         <div
                           className={`p-2 rounded-xl border ${isKredit
-                              ? 'bg-emerald-950/40 text-emerald-400 border-emerald-900/40'
-                              : 'bg-rose-950/40 text-rose-400 border-rose-900/40'
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                              : 'bg-rose-50 text-rose-700 border-rose-200'
                             }`}
                         >
                           {isKredit ? (
@@ -481,12 +481,12 @@ export default function TabunganClient() {
                           )}
                         </div>
                         <div>
-                          <span className='text-xs font-bold text-zinc-300 block'>
+                          <span className='text-xs font-bold text-slate-800 block'>
                             {isKredit
                               ? 'Setoran (Kredit)'
                               : 'Penarikan (Debit)'}
                           </span>
-                          <span className='text-[10px] text-zinc-500 block'>
+                          <span className='text-[10px] text-slate-500 block'>
                             {new Date(tx.date).toLocaleDateString('id-ID', {
                               day: 'numeric',
                               month: 'long',
@@ -496,7 +496,7 @@ export default function TabunganClient() {
                             })}
                           </span>
                           {tx.description && (
-                            <span className='text-[10px] italic text-zinc-400 block mt-1'>
+                            <span className='text-[10px] italic text-slate-500 block mt-1'>
                               "{tx.description}"
                             </span>
                           )}
@@ -504,7 +504,7 @@ export default function TabunganClient() {
                       </div>
                       <div className='text-right'>
                         <span
-                          className={`text-sm font-extrabold ${isKredit ? 'text-emerald-400' : 'text-rose-400'
+                          className={`text-sm font-extrabold ${isKredit ? 'text-emerald-700' : 'text-rose-700'
                             }`}
                         >
                           {isKredit ? '+' : '-'} {formatIDR(tx.amount)}
@@ -515,18 +515,18 @@ export default function TabunganClient() {
                 })}
               </div>
             ) : (
-              <div className='text-center py-12 text-zinc-650 text-xs'>
+              <div className='text-center py-12 text-slate-400 text-xs'>
                 Siswa ini belum memiliki transaksi tabungan.
               </div>
             )}
           </div>
 
-          <DialogFooter className='pt-4 border-t border-zinc-800'>
+          <DialogFooter className='pt-4 border-t border-slate-200'>
             <Button
               type='button'
               variant='outline'
               onClick={() => setLedgerOpen(false)}
-              className='border-zinc-850 hover:bg-zinc-850 hover:text-white rounded-xl w-full'
+              className='border-slate-200 hover:bg-slate-100 text-slate-700 font-semibold rounded-xl w-full'
             >
               Tutup
             </Button>

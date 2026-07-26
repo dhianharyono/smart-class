@@ -19,7 +19,7 @@ export default function AdminDashboardLoading() {
       {/* Grid Stats Skeleton */}
       <div className="grid gap-4 sm:grid-cols-2">
         {[...Array(2)].map((_, i) => (
-          <div key={i} className="bg-zinc-900/20 border border-zinc-900/60 p-6 rounded-2xl relative overflow-hidden flex flex-col justify-between h-[120px]">
+          <div key={i} className="bg-white border border-slate-200/80 p-6 rounded-2xl relative overflow-hidden flex flex-col justify-between h-[120px] shadow-xs">
             <div className="flex items-center justify-between">
               <Skeleton className="h-3 w-28" />
               <Skeleton className="h-8 w-8 rounded-xl" />
@@ -35,7 +35,7 @@ export default function AdminDashboardLoading() {
       {/* Columns: Sekolah & Pengguna Online */}
       <div className="grid gap-6 md:grid-cols-2">
         {/* Sekolah Stats */}
-        <div className="bg-zinc-900/20 border border-zinc-900/60 p-6 rounded-2xl flex flex-col justify-between h-[350px]">
+        <div className="bg-white border border-slate-200/80 p-6 rounded-2xl flex flex-col justify-between h-[350px] shadow-xs">
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <div className="space-y-1.5 flex-1 min-w-0">
@@ -47,7 +47,7 @@ export default function AdminDashboardLoading() {
             <div className="overflow-x-auto w-full">
               <div className="space-y-3 min-w-[300px]">
                 {[...Array(4)].map((_, i) => (
-                  <div key={i} className="flex justify-between items-center py-2 border-b border-zinc-900/20 last:border-b-0">
+                  <div key={i} className="flex justify-between items-center py-2 border-b border-slate-100 last:border-b-0">
                     <Skeleton className="h-4 w-40" />
                     <Skeleton className="h-4 w-16" />
                     <Skeleton className="h-4 w-16" />
@@ -59,7 +59,7 @@ export default function AdminDashboardLoading() {
         </div>
 
         {/* Pengguna Online */}
-        <div className="bg-zinc-900/20 border border-zinc-900/60 p-6 rounded-2xl flex flex-col justify-between h-[350px]">
+        <div className="bg-white border border-slate-200/80 p-6 rounded-2xl flex flex-col justify-between h-[350px] shadow-xs">
           <div className="space-y-4">
             <div className="space-y-1.5">
               <Skeleton className="h-5 w-44 max-w-full" />
@@ -67,7 +67,7 @@ export default function AdminDashboardLoading() {
             </div>
             <div className="space-y-2.5 max-h-[220px] overflow-hidden">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="flex items-center justify-between p-2.5 bg-zinc-900/30 border border-zinc-900 rounded-xl">
+                <div key={i} className="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
                   <div className="space-y-1.5 flex-1 min-w-0">
                     <Skeleton className="h-3.5 w-full max-w-[128px]" />
                     <Skeleton className="h-2.5 w-full max-w-[176px]" />
@@ -81,7 +81,7 @@ export default function AdminDashboardLoading() {
       </div>
 
       {/* Detail Guru */}
-      <div className="bg-zinc-900/20 border border-zinc-900/60 p-6 rounded-2xl space-y-4">
+      <div className="bg-white border border-slate-200/80 p-6 rounded-2xl space-y-4 shadow-xs">
         <div className="flex justify-between items-center pb-2">
           <div className="space-y-1.5 flex-1 min-w-0">
             <Skeleton className="h-5 w-48 max-w-full" />
@@ -92,7 +92,7 @@ export default function AdminDashboardLoading() {
         <div className="overflow-x-auto w-full">
           <div className="space-y-3 min-w-[600px]">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="flex justify-between items-center py-3 border-t border-zinc-900/40">
+              <div key={i} className="flex justify-between items-center py-3 border-t border-slate-100">
                 <div className="space-y-1.5 flex-1">
                   <Skeleton className="h-4.5 w-36 rounded-md" />
                   <div className="flex gap-2 items-center">

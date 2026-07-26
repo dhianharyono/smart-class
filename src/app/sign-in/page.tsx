@@ -93,44 +93,44 @@ export default function SignInPage() {
 
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-4 py-16 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-16 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Back to Landing Page Button */}
       <div className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-zinc-100 transition-all text-xs font-semibold backdrop-blur-md shadow-lg"
+          className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition-all text-xs font-semibold shadow-xs"
         >
-          <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-400" />
+          <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-600" />
           <span>Kembali ke Beranda</span>
         </Link>
       </div>
       {/* Background radial glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="w-full max-w-md space-y-8 relative z-10 animate-fade-in">
         {/* Brand Logo & Header */}
         <div className="flex flex-col items-center text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-xl shadow-emerald-500/20 mb-4 animate-bounce-slow">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-lg shadow-emerald-500/20 mb-4 animate-bounce-slow">
             <BookOpen className="h-6 w-6" />
           </div>
-          <h2 className="text-3xl font-extrabold tracking-tight text-white bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+          <h2 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
             Smart Class
           </h2>
-          <p className="mt-2 text-sm text-zinc-400">
+          <p className="mt-2 text-sm text-slate-600 font-medium">
             Masuk ke Command Center Wali Kelas Anda
           </p>
         </div>
 
         {/* Card Form */}
-        <div className="bg-zinc-900/50 backdrop-blur-md border border-zinc-800/80 shadow-2xl rounded-2xl p-6 sm:p-8">
+        <div className="bg-white border border-slate-200/80 shadow-xl shadow-slate-200/50 rounded-2xl p-6 sm:p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email Field */}
             <div className="space-y-2">
-              <label htmlFor="email" className="text-xs font-semibold text-zinc-400 tracking-wider uppercase block">
+              <label htmlFor="email" className="text-xs font-bold text-slate-700 tracking-wider uppercase block">
                 Email / Username Wali Kelas
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                   <Mail className="h-4.5 w-4.5" />
                 </div>
                 <input
@@ -142,18 +142,18 @@ export default function SignInPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={loading}
-                  className="w-full pl-10 pr-4 py-3 bg-zinc-950/60 border border-zinc-800 text-zinc-100 placeholder-zinc-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-sm transition-all duration-200 disabled:opacity-50"
+                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-sm transition-all duration-200 disabled:opacity-50"
                 />
               </div>
             </div>
 
             {/* Password Field */}
             <div className="space-y-2">
-              <label htmlFor="password" className="text-xs font-semibold text-zinc-400 tracking-wider uppercase block">
+              <label htmlFor="password" className="text-xs font-bold text-slate-700 tracking-wider uppercase block">
                 Kata Sandi
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                   <Lock className="h-4.5 w-4.5" />
                 </div>
                 <input
@@ -165,12 +165,12 @@ export default function SignInPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={loading}
-                  className="w-full pl-10 pr-10 py-3 bg-zinc-950/60 border border-zinc-800 text-zinc-100 placeholder-zinc-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-sm transition-all duration-200 disabled:opacity-50"
+                  className="w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-sm transition-all duration-200 disabled:opacity-50"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-zinc-500 hover:text-zinc-300 focus:outline-none cursor-pointer"
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer"
                 >
                   {showPassword ? (
                     <EyeOff className="h-4.5 w-4.5" />
@@ -196,7 +196,7 @@ export default function SignInPage() {
             <Button
               type="submit"
               disabled={loading || (isCaptchaRequired && !!process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && !recaptchaToken)}
-              className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold py-3 px-4 rounded-xl shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20 transition-all duration-200 flex items-center justify-center gap-2 text-sm cursor-pointer disabled:opacity-50"
+              className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold py-3 px-4 rounded-xl shadow-lg shadow-emerald-600/20 transition-all duration-200 flex items-center justify-center gap-2 text-sm cursor-pointer disabled:opacity-50"
             >
               {loading ? (
                 <>
@@ -212,9 +212,9 @@ export default function SignInPage() {
           </form>
 
           {/* Registration link */}
-          <div className="mt-6 text-center text-sm border-t border-zinc-800/60 pt-6">
-            <span className="text-zinc-500">Belum memiliki akun? </span>
-            <Link href="/sign-up" className="text-emerald-400 hover:text-emerald-300 font-semibold transition-colors duration-150">
+          <div className="mt-6 text-center text-sm border-t border-slate-200 pt-6">
+            <span className="text-slate-500">Belum memiliki akun? </span>
+            <Link href="/sign-up" className="text-emerald-600 hover:text-emerald-700 font-semibold transition-colors duration-150">
               Daftar Baru
             </Link>
           </div>

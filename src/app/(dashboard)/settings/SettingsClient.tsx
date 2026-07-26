@@ -134,16 +134,16 @@ export default function SettingsClient() {
 
   if (isLoading || isReloading) {
     return (
-      <div className="flex flex-col items-center justify-center py-32 text-zinc-400 text-sm space-y-3 animate-fade-in">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-950/80 border border-emerald-900/60 text-emerald-400 shadow-xl shadow-emerald-950/40">
+      <div className="flex flex-col items-center justify-center py-32 text-slate-500 text-sm space-y-3 animate-fade-in">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 shadow-xs">
           <Loader2 className="h-6 w-6 animate-spin" />
         </div>
-        <span className="font-bold text-zinc-200 text-base">
+        <span className="font-bold text-slate-800 text-base">
           {isReloading
             ? 'Menyesuaikan bilah navigasi Anda...'
             : 'Memuat pengaturan aplikasi...'}
         </span>
-        <span className="text-xs text-zinc-500">
+        <span className="text-xs text-slate-400">
           {isReloading
             ? 'Halaman akan diperbarui otomatis...'
             : 'Mohon tunggu sebentar'}
@@ -155,26 +155,26 @@ export default function SettingsClient() {
   return (
     <div className="space-y-8 max-w-4xl mx-auto animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between border-b border-zinc-850 pb-5">
+      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between border-b border-slate-200 pb-5">
         <div>
-          <h2 className="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-zinc-50 to-zinc-400 bg-clip-text text-transparent">
+          <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">
             Pengaturan Aplikasi
           </h2>
-          <p className="text-zinc-400 text-xs mt-1">
+          <p className="text-slate-600 text-xs mt-1">
             Kelola visibilitas menu navigasi sidebar dan preferensi tampilan dashboard Anda.
           </p>
         </div>
       </div>
 
       {/* Main Settings Card: Pengaturan Menu Sidebar */}
-      <Card className="bg-zinc-900/30 border-zinc-900 rounded-2xl shadow-xl">
-        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-zinc-850 pb-5">
+      <Card className="bg-white border-slate-200/80 rounded-2xl shadow-xs">
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-5">
           <div>
-            <CardTitle className="text-md font-bold text-zinc-100 flex items-center gap-2">
-              <Sliders className="h-5 w-5 text-emerald-400" />
+            <CardTitle className="text-md font-bold text-slate-900 flex items-center gap-2">
+              <Sliders className="h-5 w-5 text-emerald-600" />
               <span>Kustomisasi Menu Sidebar</span>
             </CardTitle>
-            <CardDescription className="text-xs text-zinc-400 mt-1">
+            <CardDescription className="text-xs text-slate-500 mt-1">
               Pilih menu modul mana saja yang ingin Anda tampilkan pada bilah navigasi utama.
             </CardDescription>
           </div>
@@ -184,7 +184,7 @@ export default function SettingsClient() {
               type="button"
               variant="outline"
               onClick={handleResetDefault}
-              className="bg-zinc-900 border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-800 rounded-xl text-xs h-9 gap-1.5"
+              className="bg-white border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-xl text-xs h-9 gap-1.5 shadow-xs font-semibold"
             >
               <RotateCcw className="h-3.5 w-3.5" />
               <span>Reset</span>
@@ -193,7 +193,7 @@ export default function SettingsClient() {
               type="button"
               variant="ghost"
               onClick={handleSelectAll}
-              className="text-xs text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/30 rounded-lg h-8 px-2.5 font-medium"
+              className="text-xs text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 rounded-lg h-8 px-2.5 font-bold cursor-pointer"
             >
               Aktifkan Semua
             </Button>
@@ -203,21 +203,21 @@ export default function SettingsClient() {
         <CardContent className="pt-6 space-y-4">
           <div className="grid gap-3.5">
             {/* Always Visible Menus Info */}
-            <div className="p-3 bg-zinc-950/60 border border-zinc-850 rounded-xl flex items-center justify-between opacity-80">
+            <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-zinc-900 text-zinc-400 border border-zinc-800">
+                <div className="p-2.5 rounded-xl bg-white text-slate-500 border border-slate-200">
                   <LayoutDashboard className="h-5 w-5" />
                 </div>
                 <div>
-                  <span className="text-xs font-bold text-zinc-200 block">
+                  <span className="text-xs font-bold text-slate-800 block">
                     Dashboard Utama & Profil
                   </span>
-                  <span className="text-[11px] text-zinc-500 block">
+                  <span className="text-[11px] text-slate-500 block">
                     Menu wajib sistem (selalu ditampilkan)
                   </span>
                 </div>
               </div>
-              <span className="px-2.5 py-1 text-[10px] font-semibold bg-emerald-950/40 text-emerald-400 border border-emerald-900/40 rounded-md uppercase tracking-wider">
+              <span className="px-2.5 py-1 text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-md uppercase tracking-wider">
                 Wajib
               </span>
             </div>
@@ -231,8 +231,8 @@ export default function SettingsClient() {
                   key={menu.href}
                   onClick={() => handleToggleMenu(menu.href)}
                   className={`flex items-start justify-between p-4 rounded-xl border transition-all cursor-pointer group ${isChecked
-                    ? 'bg-emerald-950/30 border-emerald-900/50 text-emerald-300 shadow-md shadow-emerald-950/10'
-                    : 'bg-zinc-950/50 border-zinc-850 text-zinc-400 hover:border-zinc-800 hover:bg-zinc-900/30'
+                    ? 'bg-emerald-50/70 border-emerald-200/80 text-emerald-900 shadow-xs'
+                    : 'bg-slate-50/60 border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-100/80'
                     }`}
                 >
                   <div className="flex items-start gap-3.5">
@@ -240,10 +240,10 @@ export default function SettingsClient() {
                       <MenuIcon className="h-5 w-5" />
                     </div>
                     <div>
-                      <span className="text-sm font-bold text-zinc-100 block group-hover:text-white transition-colors">
+                      <span className="text-sm font-bold text-slate-900 block group-hover:text-emerald-800 transition-colors">
                         {menu.label}
                       </span>
-                      <span className="text-xs text-zinc-400 block mt-0.5">
+                      <span className="text-xs text-slate-500 block mt-0.5 font-medium">
                         {menu.desc}
                       </span>
                     </div>
@@ -251,8 +251,8 @@ export default function SettingsClient() {
 
                   <div
                     className={`h-6 w-6 rounded-lg border flex items-center justify-center transition-colors shrink-0 mt-0.5 ${isChecked
-                      ? 'bg-emerald-600 border-emerald-500 text-white'
-                      : 'border-zinc-700 bg-zinc-900 group-hover:border-zinc-600'
+                      ? 'bg-emerald-600 border-emerald-500 text-white shadow-xs'
+                      : 'border-slate-300 bg-white group-hover:border-slate-400'
                       }`}
                   >
                     {isChecked && <Check className="h-4 w-4 stroke-[3]" />}
@@ -263,11 +263,11 @@ export default function SettingsClient() {
           </div>
 
           {/* Bottom Save Action Footer */}
-          <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-zinc-850 mt-6">
-            <span className="text-xs text-zinc-400 flex items-center gap-1.5">
-              <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+          <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-200 mt-6">
+            <span className="text-xs text-slate-600 flex items-center gap-1.5 font-medium">
+              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
               <span>
-                <strong>{selectedMenus.length}</strong> dari {CONFIGURABLE_MENUS.length} menu tambahan diaktifkan
+                <strong className="text-slate-900">{selectedMenus.length}</strong> dari {CONFIGURABLE_MENUS.length} menu tambahan diaktifkan
               </span>
             </span>
 
@@ -275,7 +275,7 @@ export default function SettingsClient() {
               type="button"
               onClick={handleSave}
               disabled={updateMenusMutation.isPending}
-              className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-xs h-10 px-6 gap-2 shadow-lg shadow-emerald-950/40"
+              className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-xs h-10 px-6 gap-2 shadow-xs"
             >
               {updateMenusMutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

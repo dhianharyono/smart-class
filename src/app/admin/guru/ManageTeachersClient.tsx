@@ -15,6 +15,7 @@ import {
   School,
   X,
   AlertTriangle,
+  AlertCircle,
   Loader2,
   Calendar,
   Plus,
@@ -227,17 +228,17 @@ export default function ManageTeachersClient({
       {/* Header */}
       <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
         <div>
-          <h2 className='text-3xl font-extrabold tracking-tight bg-gradient-to-r from-zinc-50 to-zinc-400 bg-clip-text text-transparent'>
+          <h2 className='text-3xl font-extrabold tracking-tight text-slate-900'>
             Kelola Wali Kelas
           </h2>
-          <p className='text-zinc-400 text-sm mt-1'>
+          <p className='text-slate-600 text-sm mt-1'>
             Daftar, tambah, edit profil kelas/sekolah, dan hapus akun guru
             beserta data mereka di database.
           </p>
         </div>
         <Button
           onClick={openCreateModal}
-          className='bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl cursor-pointer text-xs font-semibold py-2.5 px-4 flex items-center gap-2 self-start sm:self-auto shadow-lg shadow-indigo-500/10 hover:shadow-indigo-500/20 transition-all duration-200'
+          className='bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl cursor-pointer text-xs font-semibold py-2.5 px-4 flex items-center gap-2 self-start sm:self-auto shadow-xs transition-all duration-200'
         >
           <Plus className='h-4 w-4' />
           <span>Tambah Wali Kelas</span>
@@ -245,11 +246,11 @@ export default function ManageTeachersClient({
       </div>
 
       {/* Control Bar (Search & Filter) */}
-      <div className='flex flex-col md:flex-row gap-4 justify-between items-center bg-zinc-900/20 p-4 border border-zinc-900 rounded-2xl backdrop-blur-sm shadow-md w-full'>
+      <div className='flex flex-col md:flex-row gap-4 justify-between items-center bg-white p-4 border border-slate-200/80 rounded-2xl shadow-xs w-full'>
         <div className='flex flex-col sm:flex-row gap-3 w-full md:w-auto'>
           {/* Search Input */}
           <div className='relative w-full sm:w-64'>
-            <div className='absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500'>
+            <div className='absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400'>
               <Search className='h-4.5 w-4.5' />
             </div>
             <input
@@ -257,7 +258,7 @@ export default function ManageTeachersClient({
               placeholder='Cari guru, email, kelas...'
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className='w-full pl-10 pr-4 py-2.5 bg-zinc-950/60 border border-zinc-800 text-zinc-100 placeholder-zinc-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none rounded-xl text-sm transition-all duration-200'
+              className='w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none rounded-xl text-sm transition-all duration-200'
             />
           </div>
 
@@ -266,16 +267,16 @@ export default function ManageTeachersClient({
             <select
               value={selectedSchoolFilter}
               onChange={(e) => setSelectedSchoolFilter(e.target.value)}
-              className='w-full px-3 py-2.5 bg-zinc-950/60 border border-zinc-800 text-zinc-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none rounded-xl text-sm transition-all duration-200 cursor-pointer'
+              className='w-full px-3 py-2.5 bg-slate-50 border border-slate-200 text-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none rounded-xl text-sm transition-all duration-200 cursor-pointer font-medium'
             >
-              <option value='' className='bg-zinc-900 text-zinc-300'>
+              <option value='' className='bg-white text-slate-700'>
                 Semua Sekolah
               </option>
               {schools.map((s) => (
                 <option
                   key={s._id}
                   value={s.name}
-                  className='bg-zinc-900 text-zinc-300'
+                  className='bg-white text-slate-700'
                 >
                   {s.name}
                 </option>
@@ -284,19 +285,19 @@ export default function ManageTeachersClient({
           </div>
         </div>
 
-        <div className='text-xs text-zinc-500 font-medium'>
+        <div className='text-xs text-slate-500 font-medium'>
           Menampilkan {filteredTeachers.length} dari {teachers.length} Guru
         </div>
       </div>
 
       {/* Grid / Table */}
-      <Card className='bg-zinc-900/30 border-zinc-900 rounded-2xl shadow-xl'>
+      <Card className='bg-white border-slate-200/80 rounded-2xl shadow-xs'>
         <CardContent className='p-0'>
           {filteredTeachers.length > 0 ? (
             <div className='overflow-x-auto'>
-              <table className='w-full text-left text-sm text-zinc-300 border-collapse'>
+              <table className='w-full text-left text-sm text-slate-700 border-collapse'>
                 <thead>
-                  <tr className='border-b border-zinc-800 text-zinc-400 text-xs font-semibold uppercase tracking-wider'>
+                  <tr className='border-b border-slate-200 text-slate-700 text-xs font-bold uppercase tracking-wider bg-slate-50'>
                     <th className='py-3.5 px-6'>Nama Guru / Email</th>
                     <th className='py-3.5 px-6'>Sekolah</th>
                     <th className='py-3.5 px-6'>Kelas</th>
@@ -304,26 +305,26 @@ export default function ManageTeachersClient({
                     <th className='py-3.5 px-6 text-center'>Aksi</th>
                   </tr>
                 </thead>
-                <tbody className='divide-y divide-zinc-900'>
+                <tbody className='divide-y divide-slate-100'>
                   {filteredTeachers.map((teacher) => (
                     <tr
                       key={teacher._id}
-                      className='hover:bg-zinc-900/10 transition-colors group'
+                      className='hover:bg-slate-50/80 transition-colors group'
                     >
                       <td className='py-4 px-6'>
                         <div className='flex flex-col'>
-                          <span className='font-semibold text-zinc-200 group-hover:text-white transition-colors'>
+                          <span className='font-bold text-slate-900 group-hover:text-indigo-700 transition-colors'>
                             {teacher.name}
                           </span>
                           <div className='flex items-center gap-2 mt-0.5'>
-                            <span className='text-xs text-zinc-500'>
+                            <span className='text-xs text-slate-500 font-medium'>
                               {teacher.email}
                             </span>
                             <span
-                              className={`px-1.5 py-0.5 border text-[9px] font-semibold rounded-md uppercase tracking-wider ${
+                              className={`px-2 py-0.5 border text-[9px] font-bold rounded-md uppercase tracking-wider ${
                                 teacher.role === 'Kepala Sekolah'
-                                  ? 'bg-violet-950/40 text-violet-400 border-violet-900/30'
-                                  : 'bg-emerald-950/40 text-emerald-400 border-emerald-900/30'
+                                  ? 'bg-violet-50 text-violet-700 border-violet-200'
+                                  : 'bg-emerald-50 text-emerald-700 border-emerald-200'
                               }`}
                             >
                               {teacher.role || 'Wali Kelas'}
@@ -331,18 +332,18 @@ export default function ManageTeachersClient({
                           </div>
                         </div>
                       </td>
-                      <td className='py-4 px-6 text-zinc-300'>
+                      <td className='py-4 px-6 text-slate-800 font-medium'>
                         <div className='flex items-center gap-2'>
-                          <School className='h-4 w-4 text-zinc-500' />
+                          <School className='h-4 w-4 text-slate-400' />
                           <span>{teacher.schoolName || '-'}</span>
                         </div>
                       </td>
                       <td className='py-4 px-6'>
-                        <span className='bg-zinc-850 border border-zinc-800 text-zinc-300 px-2.5 py-0.5 rounded-lg text-xs font-semibold'>
+                        <span className='bg-slate-100 border border-slate-200 text-slate-700 px-2.5 py-0.5 rounded-lg text-xs font-bold font-mono'>
                           {teacher.className || '-'}
                         </span>
                       </td>
-                      <td className='py-4 px-6 text-zinc-500 text-xs'>
+                      <td className='py-4 px-6 text-slate-500 text-xs font-medium'>
                         <div className='flex items-center gap-1.5'>
                           <Calendar className='h-3.5 w-3.5' />
                           <span>
@@ -363,7 +364,7 @@ export default function ManageTeachersClient({
                             variant='ghost'
                             size='icon'
                             onClick={() => openEditModal(teacher)}
-                            className='h-8 w-8 text-zinc-400 hover:text-indigo-400 hover:bg-indigo-950/20 border border-transparent hover:border-indigo-950/30 rounded-xl cursor-pointer'
+                            className='h-8 w-8 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 rounded-xl cursor-pointer'
                           >
                             <Edit2 className='h-3.5 w-3.5' />
                           </Button>
@@ -371,7 +372,7 @@ export default function ManageTeachersClient({
                             variant='ghost'
                             size='icon'
                             onClick={() => openDeleteModal(teacher)}
-                            className='h-8 w-8 text-zinc-400 hover:text-rose-400 hover:bg-rose-950/20 border border-transparent hover:border-rose-950/30 rounded-xl cursor-pointer'
+                            className='h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 rounded-xl cursor-pointer'
                           >
                             <Trash2 className='h-3.5 w-3.5' />
                           </Button>
@@ -383,9 +384,9 @@ export default function ManageTeachersClient({
               </table>
             </div>
           ) : (
-            <div className='flex flex-col items-center justify-center py-16 text-zinc-600 text-xs gap-1'>
-              <GraduationCap className='h-8 w-8 text-zinc-700' />
-              <span>Tidak ada data guru yang cocok.</span>
+            <div className='flex flex-col items-center justify-center py-16 text-slate-400 text-xs gap-1 px-6'>
+              <AlertCircle className='h-8 w-8 text-slate-300' />
+              <span className='font-bold text-slate-700'>Tidak ada wali kelas ditemukan.</span>
             </div>
           )}
         </CardContent>
@@ -393,20 +394,20 @@ export default function ManageTeachersClient({
 
       {/* Edit Modal Custom Overlay */}
       {isEditOpen && selectedTeacher && (
-        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4'>
-          <div className='bg-zinc-900 border border-zinc-800 w-full max-w-md rounded-2xl shadow-2xl p-6 relative animate-in zoom-in-95 duration-200'>
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4'>
+          <div className='bg-white border border-slate-200 w-full max-w-md rounded-2xl shadow-2xl p-6 relative animate-in zoom-in-95 duration-200 text-slate-900'>
             <button
               onClick={() => setIsEditOpen(false)}
-              className='absolute top-4 right-4 text-zinc-500 hover:text-zinc-300'
+              className='absolute top-4 right-4 text-slate-400 hover:text-slate-600 cursor-pointer'
             >
               <X className='h-5 w-5' />
             </button>
-            <h3 className='text-lg font-bold text-white mb-4'>
+            <h3 className='text-lg font-bold text-slate-900 mb-4'>
               Edit Profil Wali Kelas
             </h3>
             <form onSubmit={handleEditSubmit} className='space-y-4'>
               <div className='space-y-1'>
-                <label className='text-[10px] font-semibold text-zinc-500 tracking-wider uppercase'>
+                <label className='text-[10px] font-bold text-slate-500 tracking-wider uppercase'>
                   Nama Lengkap
                 </label>
                 <input
@@ -415,11 +416,11 @@ export default function ManageTeachersClient({
                   onChange={(e) => setEditName(e.target.value)}
                   required
                   disabled={loading}
-                  className='w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-zinc-100 disabled:opacity-50'
+                  className='w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-slate-900 disabled:opacity-50'
                 />
               </div>
               <div className='space-y-1'>
-                <label className='text-[10px] font-semibold text-zinc-500 tracking-wider uppercase'>
+                <label className='text-[10px] font-bold text-slate-500 tracking-wider uppercase'>
                   Email
                 </label>
                 <input
@@ -428,11 +429,11 @@ export default function ManageTeachersClient({
                   onChange={(e) => setEditEmail(e.target.value)}
                   required
                   disabled={loading}
-                  className='w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-zinc-100 disabled:opacity-50'
+                  className='w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-slate-900 disabled:opacity-50'
                 />
               </div>
               <div className='space-y-1'>
-                <label className='text-[10px] font-semibold text-zinc-500 tracking-wider uppercase'>
+                <label className='text-[10px] font-bold text-slate-500 tracking-wider uppercase'>
                   Peran (Role)
                 </label>
                 <select
@@ -440,17 +441,17 @@ export default function ManageTeachersClient({
                   onChange={(e) => setEditRole(e.target.value as any)}
                   required
                   disabled={loading}
-                  className='w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-zinc-100 disabled:opacity-50 cursor-pointer'
+                  className='w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-slate-900 disabled:opacity-50 cursor-pointer font-medium'
                 >
                   <option
                     value='Wali Kelas'
-                    className='bg-zinc-900 text-zinc-300'
+                    className='bg-white text-slate-900'
                   >
                     Wali Kelas
                   </option>
                   <option
                     value='Kepala Sekolah'
-                    className='bg-zinc-900 text-zinc-300'
+                    className='bg-white text-slate-900'
                   >
                     Kepala Sekolah
                   </option>
@@ -458,7 +459,7 @@ export default function ManageTeachersClient({
               </div>
               <div className='grid grid-cols-2 gap-4'>
                 <div className='space-y-1'>
-                  <label className='text-[10px] font-semibold text-zinc-500 tracking-wider uppercase'>
+                  <label className='text-[10px] font-bold text-slate-500 tracking-wider uppercase'>
                     Sekolah
                   </label>
                   <select
@@ -466,7 +467,7 @@ export default function ManageTeachersClient({
                     onChange={(e) => setEditSchool(e.target.value)}
                     required
                     disabled={loading}
-                    className='w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-zinc-100 disabled:opacity-50 cursor-pointer'
+                    className='w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-slate-900 disabled:opacity-50 cursor-pointer font-medium'
                   >
                     <option value='' disabled>
                       Pilih Sekolah
@@ -475,7 +476,7 @@ export default function ManageTeachersClient({
                       <option
                         key={s._id}
                         value={s.name}
-                        className='bg-zinc-900'
+                        className='bg-white text-slate-900'
                       >
                         {s.name}
                       </option>
@@ -483,7 +484,7 @@ export default function ManageTeachersClient({
                   </select>
                 </div>
                 <div className='space-y-1'>
-                  <label className='text-[10px] font-semibold text-zinc-500 tracking-wider uppercase'>
+                  <label className='text-[10px] font-bold text-slate-500 tracking-wider uppercase'>
                     Kelas Diajar
                   </label>
                   <input
@@ -491,7 +492,7 @@ export default function ManageTeachersClient({
                     value={editClass}
                     onChange={(e) => setEditClass(e.target.value)}
                     disabled={loading}
-                    className='w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-zinc-100 disabled:opacity-50'
+                    className='w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-slate-900 disabled:opacity-50'
                   />
                 </div>
               </div>
@@ -502,14 +503,14 @@ export default function ManageTeachersClient({
                   variant='ghost'
                   onClick={() => setIsEditOpen(false)}
                   disabled={loading}
-                  className='rounded-xl border border-transparent hover:bg-zinc-800 cursor-pointer text-xs'
+                  className='rounded-xl border border-slate-200 hover:bg-slate-100 cursor-pointer text-xs font-semibold'
                 >
                   Batal
                 </Button>
                 <Button
                   type='submit'
                   disabled={loading}
-                  className='bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl cursor-pointer text-xs flex items-center gap-1.5'
+                  className='bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl cursor-pointer text-xs font-semibold flex items-center gap-1.5 shadow-xs'
                 >
                   {loading ? (
                     <>
@@ -528,36 +529,36 @@ export default function ManageTeachersClient({
 
       {/* Delete Modal Custom Overlay */}
       {isDeleteOpen && selectedTeacher && (
-        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4'>
-          <div className='bg-zinc-900 border border-zinc-800 w-full max-w-md rounded-2xl shadow-2xl p-6 relative animate-in zoom-in-95 duration-200'>
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4'>
+          <div className='bg-white border border-slate-200 w-full max-w-md rounded-2xl shadow-2xl p-6 relative animate-in zoom-in-95 duration-200 text-slate-900'>
             <button
               onClick={() => setIsDeleteOpen(false)}
-              className='absolute top-4 right-4 text-zinc-500 hover:text-zinc-300'
+              className='absolute top-4 right-4 text-slate-400 hover:text-slate-600 cursor-pointer'
             >
               <X className='h-5 w-5' />
             </button>
 
-            <div className='flex items-center gap-3 text-rose-500 mb-4'>
-              <div className='p-2 rounded-xl bg-rose-500/10 border border-rose-500/20'>
+            <div className='flex items-center gap-3 text-rose-600 mb-4'>
+              <div className='p-2 rounded-xl bg-rose-50 border border-rose-200'>
                 <AlertTriangle className='h-5 w-5' />
               </div>
-              <h3 className='text-lg font-bold text-white'>Hapus Akun Guru?</h3>
+              <h3 className='text-lg font-bold text-slate-900'>Hapus Akun Guru?</h3>
             </div>
 
             <div className='space-y-3 mb-6'>
-              <p className='text-sm text-zinc-300'>
+              <p className='text-sm text-slate-700'>
                 Apakah Anda yakin ingin menghapus akun guru{' '}
-                <strong className='text-white'>{selectedTeacher.name}</strong>?
+                <strong className='text-slate-900'>{selectedTeacher.name}</strong>?
               </p>
-              <div className='p-3 bg-rose-950/20 border border-rose-950/40 rounded-xl text-xs text-rose-300 space-y-1'>
-                <p className='font-semibold text-rose-200'>
+              <div className='p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 space-y-1'>
+                <p className='font-bold text-rose-800'>
                   ⚠️ PENTING: Tindakan ini bersifat permanen!
                 </p>
                 <p>
                   Menghapus akun ini juga akan menghapus secara bersih data
                   berikut dari database:
                 </p>
-                <ul className='list-disc list-inside mt-1 space-y-0.5 text-zinc-400'>
+                <ul className='list-disc list-inside mt-1 space-y-0.5 text-slate-600 font-medium'>
                   <li>Semua data Siswa di kelas tersebut</li>
                   <li>Semua histori Absensi Kelas</li>
                   <li>Semua rekam Nilai Akademik</li>
@@ -572,14 +573,14 @@ export default function ManageTeachersClient({
                 variant='ghost'
                 onClick={() => setIsDeleteOpen(false)}
                 disabled={loading}
-                className='rounded-xl border border-transparent hover:bg-zinc-800 cursor-pointer text-xs'
+                className='rounded-xl border border-slate-200 hover:bg-slate-100 cursor-pointer text-xs font-semibold'
               >
                 Batal
               </Button>
               <Button
                 onClick={handleDeleteConfirm}
                 disabled={loading}
-                className='bg-rose-600 hover:bg-rose-500 text-white rounded-xl cursor-pointer text-xs flex items-center gap-1.5'
+                className='bg-rose-600 hover:bg-rose-700 text-white rounded-xl cursor-pointer text-xs font-semibold flex items-center gap-1.5 shadow-xs'
               >
                 {loading ? (
                   <>
@@ -596,28 +597,28 @@ export default function ManageTeachersClient({
       )}
       {/* Create Modal Custom Overlay */}
       {isCreateOpen && (
-        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4'>
-          <div className='bg-zinc-900 border border-zinc-800 w-full max-w-md rounded-2xl shadow-2xl p-6 relative animate-in zoom-in-95 duration-200'>
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4'>
+          <div className='bg-white border border-slate-200 w-full max-w-md rounded-2xl shadow-2xl p-6 relative animate-in zoom-in-95 duration-200 text-slate-900'>
             <button
               onClick={() => setIsCreateOpen(false)}
-              className='absolute top-4 right-4 text-zinc-500 hover:text-zinc-300 cursor-pointer'
+              className='absolute top-4 right-4 text-slate-400 hover:text-slate-600 cursor-pointer'
             >
               <X className='h-5 w-5' />
             </button>
-            <h3 className='text-lg font-bold text-white mb-4 bg-gradient-to-r from-indigo-200 to-violet-200 bg-clip-text text-transparent'>
+            <h3 className='text-lg font-bold text-slate-900 mb-4'>
               Tambah Wali Kelas Baru
             </h3>
 
             {schools.length === 0 ? (
-              <div className='text-center py-6 text-zinc-400 text-sm space-y-3'>
+              <div className='text-center py-6 text-slate-600 text-sm space-y-3'>
                 <p>⚠️ Tidak ada sekolah terdaftar di sistem.</p>
-                <p className='text-xs'>
+                <p className='text-xs text-slate-500'>
                   Harap tambahkan sekolah terlebih dahulu di halaman Kelola
                   Sekolah sebelum membuat wali kelas.
                 </p>
                 <Button
                   onClick={() => setIsCreateOpen(false)}
-                  className='bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-xl text-xs py-2 px-4 cursor-pointer'
+                  className='bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs py-2 px-4 cursor-pointer font-semibold'
                 >
                   Tutup
                 </Button>
@@ -625,7 +626,7 @@ export default function ManageTeachersClient({
             ) : (
               <form onSubmit={handleCreateSubmit} className='space-y-4'>
                 <div className='space-y-1'>
-                  <label className='text-[10px] font-semibold text-zinc-500 tracking-wider uppercase'>
+                  <label className='text-[10px] font-bold text-slate-500 tracking-wider uppercase'>
                     Nama Lengkap
                   </label>
                   <input
@@ -635,12 +636,12 @@ export default function ManageTeachersClient({
                     required
                     placeholder='Nama Lengkap & Gelar'
                     disabled={loading}
-                    className='w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-zinc-100 placeholder-zinc-750 disabled:opacity-50'
+                    className='w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-slate-900 placeholder-slate-400 disabled:opacity-50'
                   />
                 </div>
 
                 <div className='space-y-1'>
-                  <label className='text-[10px] font-semibold text-zinc-500 tracking-wider uppercase'>
+                  <label className='text-[10px] font-bold text-slate-500 tracking-wider uppercase'>
                     Email / Username
                   </label>
                   <input
@@ -650,12 +651,12 @@ export default function ManageTeachersClient({
                     required
                     placeholder='Email atau Username wali kelas'
                     disabled={loading}
-                    className='w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-zinc-100 placeholder-zinc-750 disabled:opacity-50'
+                    className='w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-slate-900 placeholder-slate-400 disabled:opacity-50'
                   />
                 </div>
 
                 <div className='space-y-1'>
-                  <label className='text-[10px] font-semibold text-zinc-500 tracking-wider uppercase'>
+                  <label className='text-[10px] font-bold text-slate-500 tracking-wider uppercase'>
                     Peran (Role)
                   </label>
                   <select
@@ -663,17 +664,17 @@ export default function ManageTeachersClient({
                     onChange={(e) => setNewRole(e.target.value as any)}
                     required
                     disabled={loading}
-                    className='w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-zinc-100 disabled:opacity-50 cursor-pointer'
+                    className='w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-slate-900 disabled:opacity-50 cursor-pointer font-medium'
                   >
                     <option
                       value='Wali Kelas'
-                      className='bg-zinc-900 text-zinc-300'
+                      className='bg-white text-slate-900'
                     >
                       Wali Kelas
                     </option>
                     <option
                       value='Kepala Sekolah'
-                      className='bg-zinc-900 text-zinc-300'
+                      className='bg-white text-slate-900'
                     >
                       Kepala Sekolah
                     </option>
@@ -681,7 +682,7 @@ export default function ManageTeachersClient({
                 </div>
 
                 <div className='space-y-1'>
-                  <label className='text-[10px] font-semibold text-zinc-500 tracking-wider uppercase'>
+                  <label className='text-[10px] font-bold text-slate-500 tracking-wider uppercase'>
                     Kata Sandi
                   </label>
                   <div className='relative'>
@@ -691,12 +692,12 @@ export default function ManageTeachersClient({
                       onChange={(e) => setNewPassword(e.target.value)}
                       placeholder='Kosongkan untuk default: Gurusmart123!'
                       disabled={loading}
-                      className='w-full pl-3 pr-10 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-zinc-100 placeholder-zinc-750 disabled:opacity-50'
+                      className='w-full pl-3 pr-10 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-slate-900 placeholder-slate-400 disabled:opacity-50'
                     />
                     <button
                       type='button'
                       onClick={() => setShowNewPassword(!showNewPassword)}
-                      className='absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-500 hover:text-zinc-300 focus:outline-none cursor-pointer'
+                      className='absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer'
                     >
                       {showNewPassword ? (
                         <EyeOff className='h-4 w-4' />
@@ -709,7 +710,7 @@ export default function ManageTeachersClient({
 
                 <div className='grid grid-cols-2 gap-4'>
                   <div className='space-y-1'>
-                    <label className='text-[10px] font-semibold text-zinc-500 tracking-wider uppercase'>
+                    <label className='text-[10px] font-bold text-slate-500 tracking-wider uppercase'>
                       Sekolah
                     </label>
                     <select
@@ -717,13 +718,13 @@ export default function ManageTeachersClient({
                       onChange={(e) => setNewSchool(e.target.value)}
                       required
                       disabled={loading}
-                      className='w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-zinc-100 disabled:opacity-50 cursor-pointer'
+                      className='w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-slate-900 disabled:opacity-50 cursor-pointer font-medium'
                     >
                       {schools.map((s) => (
                         <option
                           key={s._id}
                           value={s.name}
-                          className='bg-zinc-900'
+                          className='bg-white text-slate-900'
                         >
                           {s.name}
                         </option>
@@ -731,7 +732,7 @@ export default function ManageTeachersClient({
                     </select>
                   </div>
                   <div className='space-y-1'>
-                    <label className='text-[10px] font-semibold text-zinc-500 tracking-wider uppercase'>
+                    <label className='text-[10px] font-bold text-slate-500 tracking-wider uppercase'>
                       Kelas Diajar
                     </label>
                     <input
@@ -741,7 +742,7 @@ export default function ManageTeachersClient({
                       required
                       placeholder='Contoh: Kelas 5B'
                       disabled={loading}
-                      className='w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-zinc-100 placeholder-zinc-750 disabled:opacity-50'
+                      className='w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-slate-900 placeholder-slate-400 disabled:opacity-50'
                     />
                   </div>
                 </div>
@@ -752,14 +753,14 @@ export default function ManageTeachersClient({
                     variant='ghost'
                     onClick={() => setIsCreateOpen(false)}
                     disabled={loading}
-                    className='rounded-xl border border-transparent hover:bg-zinc-800 cursor-pointer text-xs'
+                    className='rounded-xl border border-slate-200 hover:bg-slate-100 cursor-pointer text-xs font-semibold'
                   >
                     Batal
                   </Button>
                   <Button
                     type='submit'
                     disabled={loading}
-                    className='bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl cursor-pointer text-xs flex items-center gap-1.5'
+                    className='bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl cursor-pointer text-xs font-semibold flex items-center gap-1.5 shadow-xs'
                   >
                     {loading ? (
                       <>

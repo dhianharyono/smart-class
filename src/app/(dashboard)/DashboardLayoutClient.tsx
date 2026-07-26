@@ -152,15 +152,15 @@ export default function DashboardLayoutClient({
     <div className='flex h-full flex-col justify-between p-4'>
       <div>
         {/* Brand Header */}
-        <div className='flex items-center gap-3 px-2 py-4 mb-6 border-b border-zinc-900'>
-          <div className='flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-lg shadow-emerald-500/20'>
+        <div className='flex items-center gap-3 px-2 py-4 mb-6 border-b border-slate-200/80'>
+          <div className='flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-md shadow-emerald-500/20'>
             <BookOpen className='h-5 w-5' />
           </div>
           <div>
-            <h1 className='text-lg font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent'>
+            <h1 className='text-lg font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent'>
               Smart Class
             </h1>
-            <p className='text-xs text-zinc-500'>Dashboard Wali Kelas</p>
+            <p className='text-xs text-slate-500 font-medium'>Dashboard Wali Kelas</p>
           </div>
         </div>
 
@@ -175,19 +175,19 @@ export default function DashboardLayoutClient({
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group ${isActive
-                  ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-900/50 shadow-md shadow-emerald-950/20'
-                  : 'text-zinc-400 hover:bg-zinc-900/60 hover:text-zinc-200 border border-transparent'
+                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/70 shadow-xs font-semibold'
+                  : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 border border-transparent'
                   }`}
               >
                 <Icon
                   className={`h-5 w-5 transition-transform duration-200 group-hover:scale-110 ${isActive
-                    ? 'text-emerald-400'
-                    : 'text-zinc-500 group-hover:text-zinc-300'
+                    ? 'text-emerald-600'
+                    : 'text-slate-400 group-hover:text-slate-600'
                     }`}
                 />
                 <span>{item.name}</span>
                 {isActive && (
-                  <span className='ml-auto h-1.5 w-1.5 rounded-full bg-emerald-400' />
+                  <span className='ml-auto h-1.5 w-1.5 rounded-full bg-emerald-600' />
                 )}
               </Link>
             );
@@ -196,51 +196,55 @@ export default function DashboardLayoutClient({
       </div>
 
       {/* Footer / User Profile section */}
-      <div className='border-t border-zinc-900 pt-4 flex flex-col gap-3 px-2'>
-        <Link
-          href='/profile'
-          onClick={() => setMobileOpen(false)}
-          className='flex items-center gap-3 p-2 rounded-xl hover:bg-zinc-900/80 transition-colors group cursor-pointer border border-transparent hover:border-zinc-800'
-        >
-          {/* Custom Avatar with Emerald gradient */}
-          <div className='h-9 w-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-emerald-500/20 border border-emerald-500/30 group-hover:scale-105 transition-transform'>
-            {initialName}
-          </div>
-          <div className='flex flex-col max-w-[130px] flex-1'>
-            <span className='text-xs font-semibold text-zinc-300 truncate group-hover:text-emerald-400 transition-colors'>
-              {teacher.name || 'Guru Smart Class'}
-            </span>
-            <span className='text-[10px] text-zinc-500 truncate'>
-              {teacher.email || ''}
-            </span>
-          </div>
-        </Link>
-        <Button
-          variant='ghost'
-          onClick={() => setShowLogoutConfirm(true)}
-          className='w-full text-zinc-400 hover:text-rose-400 hover:bg-rose-950/20 rounded-xl h-9 text-xs justify-start gap-2 px-3 border border-transparent hover:border-rose-950/30 cursor-pointer'
-        >
-          <LogOut className='h-4 w-4' />
-          <span>Keluar Aplikasi</span>
-        </Button>
+      <div className='border-t border-slate-200/80 pt-4 px-1'>
+        <div className='flex items-center justify-between p-2 rounded-2xl bg-slate-50 border border-slate-200/80 hover:bg-slate-100/60 transition-colors group'>
+          <Link
+            href='/profile'
+            onClick={() => setMobileOpen(false)}
+            className='flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer'
+          >
+            {/* Custom Avatar with Emerald gradient */}
+            <div className='h-9 w-9 shrink-0 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white font-bold text-sm shadow-xs border border-emerald-500/30 group-hover:scale-105 transition-transform'>
+              {initialName}
+            </div>
+            <div className='flex flex-col min-w-0 flex-1'>
+              <span className='text-xs font-bold text-slate-800 truncate group-hover:text-emerald-700 transition-colors'>
+                {teacher.name || 'Guru Smart Class'}
+              </span>
+              <span className='text-[10px] text-slate-500 truncate font-medium'>
+                {teacher.email || ''}
+              </span>
+            </div>
+          </Link>
+          <Button
+            variant='ghost'
+            size='icon'
+            onClick={() => setShowLogoutConfirm(true)}
+            title='Keluar Aplikasi'
+            className='h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 rounded-xl cursor-pointer shrink-0 transition-colors ml-1'
+          >
+            <LogOut className='h-4 w-4' />
+            <span className='sr-only'>Keluar Aplikasi</span>
+          </Button>
+        </div>
       </div>
     </div>
   );
 
   return (
-    <div className='flex min-h-screen bg-zinc-950 text-zinc-100'>
+    <div className='flex min-h-screen bg-slate-50 text-slate-900'>
       {/* Desktop Sidebar */}
-      <aside className='hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-zinc-950/80 backdrop-blur-md border-r border-zinc-900'>
+      <aside className='hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-white border-r border-slate-200/80 shadow-xs'>
         {sidebarContent}
       </aside>
 
       {/* Main Content Area */}
-      <div className='flex-1 md:pl-64 flex flex-col'>
+      <div className='flex-1 md:pl-64 flex flex-col min-w-0 max-w-full'>
         {/* Mobile Top Header */}
-        <header className='flex h-16 items-center justify-between border-b border-zinc-900 px-4 md:hidden bg-zinc-950/80 backdrop-blur-md sticky top-0 z-40'>
+        <header className='flex h-16 items-center justify-between border-b border-slate-200/80 px-4 md:hidden bg-white/90 backdrop-blur-md sticky top-0 z-40'>
           <div className='flex items-center gap-2'>
-            <BookOpen className='h-5 w-5 text-emerald-500' />
-            <span className='font-bold text-emerald-400 text-sm'>
+            <BookOpen className='h-5 w-5 text-emerald-600' />
+            <span className='font-bold text-emerald-700 text-sm'>
               Smart Class
             </span>
           </div>
@@ -248,7 +252,7 @@ export default function DashboardLayoutClient({
             variant='ghost'
             size='icon'
             onClick={toggleSidebar}
-            className='text-zinc-400 hover:text-zinc-200'
+            className='text-slate-600 hover:text-slate-900'
           >
             {mobileOpen ? (
               <X className='h-6 w-6' />
@@ -263,18 +267,18 @@ export default function DashboardLayoutClient({
           <div className='fixed inset-0 z-50 md:hidden flex'>
             {/* Backdrop overlay */}
             <div
-              className='fixed inset-0 bg-black/60 backdrop-blur-sm'
+              className='fixed inset-0 bg-slate-900/40 backdrop-blur-sm'
               onClick={toggleSidebar}
             />
             {/* Drawer */}
-            <aside className='relative flex w-64 max-w-xs flex-col bg-zinc-950 border-r border-zinc-900 animate-in slide-in-from-left duration-200'>
+            <aside className='relative flex w-64 max-w-xs flex-col bg-white border-r border-slate-200 animate-in slide-in-from-left duration-200 shadow-xl'>
               {sidebarContent}
             </aside>
           </div>
         )}
 
         {/* Workspace content */}
-        <main className='flex-1 p-4 md:p-8 max-w-7xl w-full mx-auto animate-fade-in'>
+        <main className='flex-1 p-4 md:p-8 max-w-7xl w-full mx-auto animate-fade-in min-w-0 max-w-full overflow-hidden'>
           {children}
         </main>
       </div>
@@ -293,16 +297,16 @@ export default function DashboardLayoutClient({
 
       {/* First-Login Menu Selector Onboarding Modal */}
       <Dialog open={onboardingOpen} onOpenChange={setOnboardingOpen}>
-        <DialogContent className='bg-zinc-900 border border-zinc-800 text-white rounded-2xl max-w-lg p-6'>
-          <DialogHeader className='pb-4 border-b border-zinc-800'>
-            <div className='flex items-center gap-2 text-emerald-400 mb-1'>
+        <DialogContent className='bg-white border border-slate-200 text-slate-900 rounded-2xl max-w-lg p-6 shadow-2xl'>
+          <DialogHeader className='pb-4 border-b border-slate-200'>
+            <div className='flex items-center gap-2 text-emerald-600 mb-1'>
               <Sparkles className='h-5 w-5' />
               <span className='text-xs font-bold uppercase tracking-wider'>Selamat Datang</span>
             </div>
-            <DialogTitle className='text-xl font-bold text-zinc-100'>
+            <DialogTitle className='text-xl font-bold text-slate-900'>
               Pilih Menu Fitur Utama Anda
             </DialogTitle>
-            <DialogDescription className='text-xs text-zinc-400 mt-1'>
+            <DialogDescription className='text-xs text-slate-500 mt-1'>
               Halo <strong>{teacher.name}</strong>! Pilih menu fitur apa saja yang ingin ditampilkan pada bilah navigasi Anda. Pengaturan ini dapat diubah kapan saja di menu <strong>Profil Saya</strong>.
             </DialogDescription>
           </DialogHeader>
@@ -327,23 +331,23 @@ export default function DashboardLayoutClient({
                     }
                   }}
                   className={`flex items-start gap-3.5 p-3.5 rounded-xl border transition-all cursor-pointer ${isChecked
-                    ? 'bg-emerald-950/40 border-emerald-900/60 text-emerald-300 shadow-md shadow-emerald-950/20'
-                    : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-700'
+                    ? 'bg-emerald-50 border-emerald-200 text-emerald-900 shadow-xs'
+                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300'
                     }`}
                 >
                   <div
                     className={`mt-0.5 h-5 w-5 rounded-md border flex items-center justify-center transition-colors ${isChecked
                       ? 'bg-emerald-600 border-emerald-500 text-white'
-                      : 'border-zinc-700 bg-zinc-900'
+                      : 'border-slate-300 bg-white'
                       }`}
                   >
                     {isChecked && <Check className='h-3.5 w-3.5 stroke-[3]' />}
                   </div>
                   <div>
-                    <span className='text-xs font-bold text-zinc-200 block'>
+                    <span className='text-xs font-bold text-slate-800 block'>
                       {menu.label}
                     </span>
-                    <span className='text-[10px] text-zinc-500 block mt-0.5'>
+                    <span className='text-[10px] text-slate-500 block mt-0.5'>
                       {menu.desc}
                     </span>
                   </div>
@@ -352,15 +356,15 @@ export default function DashboardLayoutClient({
             })}
           </div>
 
-          <DialogFooter className='pt-3 border-t border-zinc-800 flex items-center justify-between sm:justify-between w-full'>
-            <span className='text-[10px] text-zinc-500'>
+          <DialogFooter className='pt-3 border-t border-slate-200 flex items-center justify-between sm:justify-between w-full'>
+            <span className='text-[10px] text-slate-500'>
               {selectedOnboardingMenus.length} menu terpilih
             </span>
             <Button
               type='button'
               onClick={handleSaveOnboarding}
               disabled={isSavingOnboarding}
-              className='bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-xs px-5 h-9 gap-2'
+              className='bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-xs px-5 h-9 gap-2 shadow-xs'
             >
               {isSavingOnboarding ? (
                 <span>Menyimpan...</span>

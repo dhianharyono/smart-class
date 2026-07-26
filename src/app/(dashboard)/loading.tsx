@@ -5,7 +5,7 @@ export default function DashboardLoading() {
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Header Skeleton */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-zinc-900/50 pb-5">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-slate-200/80 pb-5">
         <div className="space-y-2">
           <Skeleton className="h-9 w-64 max-w-full rounded-xl" />
           <Skeleton className="h-4 w-full max-w-sm rounded-lg" />
@@ -16,7 +16,7 @@ export default function DashboardLoading() {
       {/* Grid Stats Skeleton */}
       <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="bg-zinc-900/20 border border-zinc-900/60 p-6 rounded-2xl relative overflow-hidden flex flex-col justify-between h-[120px]">
+          <div key={i} className="bg-white border border-slate-200/80 p-6 rounded-2xl relative overflow-hidden flex flex-col justify-between h-[120px] shadow-xs">
             <div className="flex items-center justify-between">
               <Skeleton className="h-3 w-24" />
               <Skeleton className="h-8 w-8 rounded-xl" />
@@ -32,7 +32,7 @@ export default function DashboardLoading() {
       {/* Charts Section Skeleton */}
       <div className="grid gap-6 md:grid-cols-3">
         {/* Chart 1 (Large) */}
-        <div className="bg-zinc-900/20 border border-zinc-900/60 p-6 rounded-2xl h-[380px] md:col-span-2 flex flex-col justify-between">
+        <div className="bg-white border border-slate-200/80 p-6 rounded-2xl h-[380px] md:col-span-2 flex flex-col justify-between shadow-xs">
           <div className="space-y-2">
             <Skeleton className="h-5 w-40" />
             <Skeleton className="h-3 w-64" />
@@ -41,7 +41,7 @@ export default function DashboardLoading() {
         </div>
 
         {/* Chart 2 */}
-        <div className="bg-zinc-900/20 border border-zinc-900/60 p-6 rounded-2xl h-[380px] flex flex-col justify-between">
+        <div className="bg-white border border-slate-200/80 p-6 rounded-2xl h-[380px] flex flex-col justify-between shadow-xs">
           <div className="space-y-2">
             <Skeleton className="h-5 w-40" />
             <Skeleton className="h-3 w-48" />
@@ -56,7 +56,7 @@ export default function DashboardLoading() {
       </div>
 
       {/* Alert Center Skeleton */}
-      <div className="bg-zinc-900/20 border border-zinc-900/60 p-6 rounded-2xl space-y-4">
+      <div className="bg-white border border-slate-200/80 p-6 rounded-2xl space-y-4 shadow-xs">
         <div className="flex items-center gap-3">
           <Skeleton className="h-10 w-10 rounded-xl" />
           <div className="space-y-1.5 flex-1 min-w-0">
@@ -66,7 +66,7 @@ export default function DashboardLoading() {
         </div>
         <div className="space-y-3 pt-2">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="flex justify-between items-center py-3 border-t border-zinc-900/40">
+            <div key={i} className="flex justify-between items-center py-3 border-t border-slate-100">
               <div className="space-y-1.5">
                 <Skeleton className="h-4.5 w-48" />
                 <Skeleton className="h-3 w-32" />

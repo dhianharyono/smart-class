@@ -129,19 +129,19 @@ export default function AbsensiClient() {
       {/* Header */}
       <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
         <div>
-          <h2 className='text-3xl font-extrabold tracking-tight bg-gradient-to-r from-zinc-50 to-zinc-400 bg-clip-text text-transparent'>
+          <h2 className='text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900'>
             Absensi Siswa
           </h2>
-          <p className='text-zinc-400 text-sm'>
+          <p className='text-slate-600 text-xs sm:text-sm mt-1'>
             Catat dan perbarui absensi harian kelas secara massal dan cepat.
           </p>
         </div>
 
-        <div className='flex items-center gap-3'>
+        <div className='flex flex-wrap items-center gap-2 sm:gap-3'>
           <Button
             onClick={handleExcelExport}
             variant='outline'
-            className='border-zinc-800 bg-zinc-900/50 hover:bg-zinc-900 text-zinc-300 font-medium rounded-xl h-10 px-4 gap-2'
+            className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs sm:text-sm font-semibold rounded-xl h-10 px-3.5 sm:px-4 gap-2 shadow-xs'
           >
             <Download className='h-4 w-4' />
             Ekspor Excel
@@ -149,7 +149,7 @@ export default function AbsensiClient() {
           <Button
             onClick={handleSave}
             disabled={isPending || isLoading}
-            className='bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl h-10 px-6 gap-2 shadow-lg shadow-emerald-500/10'
+            className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold rounded-xl h-10 px-4 sm:px-6 gap-2 shadow-xs'
           >
             {isPending ? (
               <Loader2 className='h-4 w-4 animate-spin' />
@@ -162,32 +162,32 @@ export default function AbsensiClient() {
       </div>
 
       {/* Date Select & Mass Toggles */}
-      <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-zinc-900/30 border border-zinc-900/80 rounded-2xl p-4'>
+      <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white border border-slate-200/80 rounded-2xl p-4 shadow-xs'>
         {/* Date Selector Popover */}
-        <div className='flex items-center gap-3'>
+        <div className='flex items-center gap-3 w-full sm:w-auto'>
           <Popover>
-            <PopoverTrigger className='w-[240px] justify-start text-left font-medium border border-zinc-800 bg-zinc-950 hover:bg-zinc-900 text-zinc-200 rounded-xl h-10 gap-2 flex items-center px-4 cursor-pointer'>
-              <CalendarIcon className='h-4 w-4 text-emerald-500' />
+            <PopoverTrigger className='w-full sm:w-[240px] justify-start text-left font-medium border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-900 rounded-xl h-10 gap-2 flex items-center px-4 cursor-pointer text-xs sm:text-sm'>
+              <CalendarIcon className='h-4 w-4 text-emerald-600' />
               {selectedDate ? (
                 format(selectedDate, 'PPP')
               ) : (
                 <span>Pilih Tanggal</span>
               )}
             </PopoverTrigger>
-            <PopoverContent className='w-auto p-0 bg-zinc-900 border-zinc-800 rounded-xl'>
+            <PopoverContent className='w-auto p-0 bg-white border-slate-200 rounded-xl shadow-xl'>
               <Calendar
                 mode='single'
                 selected={selectedDate}
                 onSelect={(date) => date && setSelectedDate(date)}
-                className='bg-zinc-900 text-white rounded-xl'
+                className='bg-white text-slate-900 rounded-xl'
               />
             </PopoverContent>
           </Popover>
         </div>
 
         {/* Mass Status Markers */}
-        <div className='flex items-center gap-2'>
-          <span className='text-xs text-zinc-500 font-semibold mr-1'>
+        <div className='flex flex-wrap items-center gap-1.5 sm:gap-2'>
+          <span className='text-xs text-slate-500 font-bold mr-1 w-full sm:w-auto'>
             Tandai Semua:
           </span>
           {(['Hadir', 'Sakit', 'Izin', 'Alfa'] as AttendanceStatus[]).map(
@@ -198,14 +198,14 @@ export default function AbsensiClient() {
                 variant='outline'
                 size='sm'
                 disabled={isLoading || localRecords.length === 0}
-                className={`rounded-xl px-3 py-1 text-xs border ${
+                className={`rounded-xl px-2.5 sm:px-3 py-1 text-xs border font-semibold ${
                   status === 'Hadir'
-                    ? 'border-emerald-950/60 bg-emerald-950/10 text-emerald-400 hover:bg-emerald-950/30'
+                    ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
                     : status === 'Sakit'
-                      ? 'border-blue-950/60 bg-blue-950/10 text-blue-400 hover:bg-blue-950/30'
+                      ? 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100'
                       : status === 'Izin'
-                        ? 'border-amber-950/60 bg-amber-950/10 text-amber-400 hover:bg-amber-950/30'
-                        : 'border-red-950/60 bg-red-950/10 text-red-400 hover:bg-red-950/30'
+                        ? 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100'
+                        : 'border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100'
                 }`}
               >
                 {status}
@@ -216,34 +216,34 @@ export default function AbsensiClient() {
       </div>
 
       {/* Main Absensi Table */}
-      <Card className='bg-zinc-900/30 border-zinc-900 rounded-2xl overflow-hidden shadow-xl'>
+      <Card className='bg-white border-slate-200/80 rounded-2xl overflow-hidden shadow-xs'>
         <CardContent className='p-0'>
           {isLoading ? (
-            <div className='flex flex-col items-center justify-center py-20 text-zinc-500 text-sm'>
-              <Loader2 className='h-8 w-8 animate-spin text-emerald-500 mb-3' />
+            <div className='flex flex-col items-center justify-center py-20 text-slate-500 text-sm'>
+              <Loader2 className='h-8 w-8 animate-spin text-emerald-600 mb-3' />
               <span>Memuat daftar absensi...</span>
             </div>
           ) : isError ? (
-            <div className='text-center py-20 text-red-400 text-sm'>
+            <div className='text-center py-20 text-rose-600 text-sm font-medium'>
               Gagal memuat daftar siswa. Pastikan koneksi server aman.
             </div>
           ) : localRecords.length > 0 ? (
             <Table>
-              <TableHeader className='bg-zinc-900/50 border-b border-zinc-800'>
-                <TableRow className='border-b border-zinc-800 hover:bg-transparent'>
-                  <TableHead className='w-12 text-center text-zinc-400 font-bold'>
+              <TableHeader className='bg-slate-50/80 border-b border-slate-200'>
+                <TableRow className='border-b border-slate-200 hover:bg-transparent'>
+                  <TableHead className='w-12 text-center text-slate-700 font-bold'>
                     No
                   </TableHead>
-                  <TableHead className='w-32 text-zinc-400 font-bold'>
+                  <TableHead className='w-32 text-slate-700 font-bold'>
                     NIS
                   </TableHead>
-                  <TableHead className='text-zinc-400 font-bold'>
+                  <TableHead className='text-slate-700 font-bold'>
                     Nama Lengkap
                   </TableHead>
-                  <TableHead className='w-32 text-zinc-400 font-bold'>
+                  <TableHead className='w-32 text-slate-700 font-bold'>
                     Kelas
                   </TableHead>
-                  <TableHead className='w-[380px] text-center text-zinc-400 font-bold'>
+                  <TableHead className='w-[380px] text-center text-slate-700 font-bold'>
                     Status Kehadiran
                   </TableHead>
                 </TableRow>
@@ -252,16 +252,16 @@ export default function AbsensiClient() {
                 {localRecords.map((row, index) => (
                   <TableRow
                     key={row.studentId}
-                    className='border-b border-zinc-900 hover:bg-zinc-900/20 text-zinc-300'
+                    className='border-b border-slate-100 hover:bg-slate-50/80 text-slate-700 transition-colors'
                   >
                     <TableCell className='text-center font-medium'>
                       {index + 1}
                     </TableCell>
-                    <TableCell className='font-mono'>{row.nis}</TableCell>
-                    <TableCell className='font-semibold text-zinc-200'>
+                    <TableCell className='font-mono font-medium'>{row.nis}</TableCell>
+                    <TableCell className='font-bold text-slate-900'>
                       {row.name}
                     </TableCell>
-                    <TableCell>{row.className}</TableCell>
+                    <TableCell className='font-medium'>{row.className}</TableCell>
                     <TableCell>
                       <div className='flex items-center justify-center gap-1.5'>
                         {(
@@ -280,22 +280,22 @@ export default function AbsensiClient() {
                                 handleStatusChange(row.studentId, status)
                               }
                               type='button'
-                              className={`flex-1 rounded-xl py-1 px-3 text-xs font-semibold border transition-all duration-150 ${
+                              className={`flex-1 rounded-xl py-1 px-3 text-xs font-semibold border transition-all duration-150 cursor-pointer ${
                                 status === 'Hadir'
                                   ? isActive
-                                    ? 'bg-emerald-600 text-white border-emerald-500 shadow-md shadow-emerald-950/40'
-                                    : 'bg-zinc-950/40 border-zinc-850 text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'
+                                    ? 'bg-emerald-600 text-white border-emerald-500 shadow-xs'
+                                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                                   : status === 'Sakit'
                                     ? isActive
-                                      ? 'bg-blue-600 text-white border-blue-500 shadow-md shadow-blue-950/40'
-                                      : 'bg-zinc-950/40 border-zinc-850 text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'
+                                      ? 'bg-blue-600 text-white border-blue-500 shadow-xs'
+                                      : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                                     : status === 'Izin'
                                       ? isActive
-                                        ? 'bg-amber-600 text-white border-amber-500 shadow-md shadow-amber-950/40'
-                                        : 'bg-zinc-950/40 border-zinc-850 text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'
+                                        ? 'bg-amber-600 text-white border-amber-500 shadow-xs'
+                                        : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                                       : isActive
-                                        ? 'bg-red-600 text-white border-red-500 shadow-md shadow-red-950/40'
-                                        : 'bg-zinc-950/40 border-zinc-850 text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'
+                                        ? 'bg-rose-600 text-white border-rose-500 shadow-xs'
+                                        : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                               }`}
                             >
                               {status}
@@ -309,12 +309,12 @@ export default function AbsensiClient() {
               </TableBody>
             </Table>
           ) : (
-            <div className='flex flex-col items-center justify-center py-20 text-zinc-500'>
-              <UserCheck className='h-10 w-10 text-zinc-700 mb-2' />
-              <p className='text-sm font-semibold'>
+            <div className='flex flex-col items-center justify-center py-20 text-slate-500'>
+              <UserCheck className='h-10 w-10 text-slate-300 mb-2' />
+              <p className='text-sm font-bold text-slate-700'>
                 Tidak ada siswa terdaftar di kelas.
               </p>
-              <p className='text-xs text-zinc-650'>
+              <p className='text-xs text-slate-400 mt-1'>
                 Silakan tambahkan siswa terlebih dahulu di halaman Data Siswa.
               </p>
             </div>

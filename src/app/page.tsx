@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   BookOpen,
   Users,
@@ -10,78 +11,29 @@ import {
   Wallet,
   BookMarked,
   Sparkles,
-  ShieldCheck,
   CheckCircle2,
   ArrowRight,
   ArrowUp,
   ChevronDown,
   Menu,
   X,
-  Layers,
-  TrendingUp,
-  BarChart3,
   Zap,
-  Award,
-  Star,
   Smartphone,
-  Lock,
+  Tablet,
+  Monitor,
   Settings,
-  MousePointerClick,
-  FileSpreadsheet,
   Check,
-  Plus,
   LayoutDashboard,
   LogOut,
+  TrendingUp,
+  ShieldCheck,
+  FileSpreadsheet,
+  Award,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getCurrentUserSession, logoutTeacher } from '@/actions/authActions';
 import { toast } from 'sonner';
 import ConfirmDialog from '@/components/ConfirmDialog';
-
-function ScrollReveal({
-  children,
-  className = '',
-  delay = 0,
-}: {
-  children: React.ReactNode;
-  className?: string;
-  delay?: number;
-}) {
-  const [isVisible, setIsVisible] = useState(false);
-  const ref = React.useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.unobserve(entry.target);
-        }
-      },
-      { threshold: 0.1, rootMargin: '0px 0px -30px 0px' },
-    );
-
-    if (ref.current) {
-      observer.observe(ref.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div
-      ref={ref}
-      style={{ transitionDelay: `${delay}ms` }}
-      className={`transition-all duration-700 ease-out transform ${
-        isVisible
-          ? 'opacity-100 translate-y-0 scale-100'
-          : 'opacity-0 translate-y-8 scale-[0.98]'
-      } ${className}`}
-    >
-      {children}
-    </div>
-  );
-}
 
 export default function LandingPage() {
   const [currentUser, setCurrentUser] = useState<{
@@ -156,62 +108,67 @@ export default function LandingPage() {
   };
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100 font-sans selection:bg-emerald-500 selection:text-zinc-950 relative overflow-x-hidden'>
+    <div className='min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-emerald-500 selection:text-white relative overflow-x-hidden'>
       {/* Background Ambient Glow Effects */}
       <div className='fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[600px] bg-gradient-to-b from-emerald-500/10 via-teal-500/5 to-transparent blur-[140px] pointer-events-none z-0' />
       <div className='fixed top-1/3 -right-48 w-[500px] h-[500px] bg-teal-500/10 rounded-full blur-[160px] pointer-events-none z-0' />
       <div className='fixed bottom-10 -left-48 w-[500px] h-[500px] bg-emerald-600/10 rounded-full blur-[160px] pointer-events-none z-0' />
 
       {/* ==================== HEADER / NAVBAR ==================== */}
-      <header className='sticky top-0 z-50 backdrop-blur-xl bg-zinc-950/80 border-b border-zinc-800/80 transition-all'>
+      <motion.header
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
+        className='sticky top-0 z-50 backdrop-blur-xl bg-white/90 border-b border-slate-200/80 transition-all shadow-xs'
+      >
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between'>
           {/* Brand Logo */}
           <Link
             href='/'
             className='flex items-center gap-3 group cursor-pointer'
           >
-            <div className='flex h-9 w-9 lg:h-11 lg:w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-xl shadow-emerald-500/20 group-hover:scale-105 transition-transform duration-300'>
+            <div className='flex h-9 w-9 lg:h-11 lg:w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-md group-hover:scale-105 transition-transform duration-300'>
               <BookOpen className='h-4 w-4 lg:h-6 lg:w-6' />
             </div>
             <div>
               <div className='flex items-center gap-2'>
-                <span className='text-sm lg:text-xl font-extrabold tracking-tight bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent'>
+                <span className='text-sm lg:text-xl font-extrabold tracking-tight text-slate-900'>
                   Smart Class
                 </span>
               </div>
-              <p className='text-xs lg:text-[11px] text-zinc-400 font-medium'>
+              <p className='text-xs lg:text-[11px] text-slate-500 font-bold'>
                 Dashboard Wali Kelas
               </p>
             </div>
           </Link>
 
           {/* Quick Anchor Links (Desktop) */}
-          <nav className='hidden md:flex items-center gap-8 text-sm font-medium text-zinc-400'>
+          <nav className='hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600'>
             <a
               href='#fitur'
               onClick={(e) => scrollToSection(e, 'fitur')}
-              className='hover:text-emerald-400 transition-colors'
+              className='hover:text-emerald-600 transition-colors'
             >
               Fitur Unggulan
             </a>
             <a
               href='#modul'
               onClick={(e) => scrollToSection(e, 'modul')}
-              className='hover:text-emerald-400 transition-colors'
+              className='hover:text-emerald-600 transition-colors'
             >
               Modul
             </a>
             <a
               href='#manfaat'
               onClick={(e) => scrollToSection(e, 'manfaat')}
-              className='hover:text-emerald-400 transition-colors'
+              className='hover:text-emerald-600 transition-colors'
             >
               Mengapa Kami
             </a>
             <a
               href='#faq'
               onClick={(e) => scrollToSection(e, 'faq')}
-              className='hover:text-emerald-400 transition-colors'
+              className='hover:text-emerald-600 transition-colors'
             >
               FAQ
             </a>
@@ -222,7 +179,7 @@ export default function LandingPage() {
             {currentUser ? (
               <div className='flex items-center gap-2.5'>
                 <Link href={dashboardHref}>
-                  <Button className='bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all duration-300 flex items-center gap-2 cursor-pointer'>
+                  <Button className='bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-5 py-2.5 rounded-xl shadow-xs transition-all duration-300 flex items-center gap-2 cursor-pointer'>
                     <LayoutDashboard className='h-4 w-4' />
                     <span>Dashboard</span>
                   </Button>
@@ -230,7 +187,7 @@ export default function LandingPage() {
                 <Button
                   variant='outline'
                   onClick={() => setShowLogoutConfirm(true)}
-                  className='border-zinc-800 bg-zinc-900/60 hover:bg-rose-950/40 text-zinc-300 hover:text-rose-400 hover:border-rose-900/50 rounded-xl text-sm font-semibold px-4 py-2.5 flex items-center gap-2 cursor-pointer transition-all'
+                  className='border-slate-200 bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-600 hover:border-rose-200 rounded-xl text-sm font-semibold px-4 py-2.5 flex items-center gap-2 cursor-pointer transition-all shadow-xs'
                 >
                   <LogOut className='h-4 w-4' />
                   <span>Keluar</span>
@@ -241,13 +198,13 @@ export default function LandingPage() {
                 <Link href='/sign-in'>
                   <Button
                     variant='ghost'
-                    className='text-zinc-300 hover:text-white hover:bg-zinc-900 rounded-xl text-sm font-semibold px-4 cursor-pointer'
+                    className='text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-xl text-sm font-semibold px-4 cursor-pointer'
                   >
                     Masuk
                   </Button>
                 </Link>
                 <Link href='/sign-up'>
-                  <Button className='bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all duration-300 flex items-center gap-2 cursor-pointer'>
+                  <Button className='bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-5 py-2.5 rounded-xl shadow-xs transition-all duration-300 flex items-center gap-2 cursor-pointer'>
                     <span>Mulai Sekarang</span>
                   </Button>
                 </Link>
@@ -259,10 +216,10 @@ export default function LandingPage() {
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label='Toggle Mobile Menu'
-            className='md:hidden p-2.5 rounded-xl text-zinc-300 hover:text-white hover:bg-zinc-900 border border-zinc-800 transition-colors cursor-pointer'
+            className='md:hidden p-2.5 rounded-xl text-slate-700 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer'
           >
             {mobileMenuOpen ? (
-              <X className='h-6 w-6 text-emerald-400' />
+              <X className='h-6 w-6 text-emerald-600' />
             ) : (
               <Menu className='h-6 w-6' />
             )}
@@ -270,239 +227,325 @@ export default function LandingPage() {
         </div>
 
         {/* Mobile Dropdown Drawer */}
-        {mobileMenuOpen && (
-          <div className='md:hidden bg-zinc-950/95 border-b border-zinc-800/80 backdrop-blur-2xl px-4 pt-3 pb-6 space-y-2 animate-fade-in'>
-            <a
-              href='#fitur'
-              onClick={(e) => {
-                scrollToSection(e, 'fitur');
-                setMobileMenuOpen(false);
-              }}
-              className='block px-4 py-2.5 rounded-xl text-sm font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-emerald-400 transition-colors'
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className='md:hidden bg-white/95 border-b border-slate-200 backdrop-blur-2xl px-4 pt-3 pb-6 space-y-2 overflow-hidden shadow-md'
             >
-              Fitur Unggulan
-            </a>
-            <a
-              href='#modul'
-              onClick={(e) => {
-                scrollToSection(e, 'modul');
-                setMobileMenuOpen(false);
-              }}
-              className='block px-4 py-2.5 rounded-xl text-sm font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-emerald-400 transition-colors'
-            >
-              Modul KBM
-            </a>
-            <a
-              href='#manfaat'
-              onClick={(e) => {
-                scrollToSection(e, 'manfaat');
-                setMobileMenuOpen(false);
-              }}
-              className='block px-4 py-2.5 rounded-xl text-sm font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-emerald-400 transition-colors'
-            >
-              Mengapa Kami
-            </a>
-            <a
-              href='#faq'
-              onClick={(e) => {
-                scrollToSection(e, 'faq');
-                setMobileMenuOpen(false);
-              }}
-              className='block px-4 py-2.5 rounded-xl text-sm font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-emerald-400 transition-colors'
-            >
-              FAQ
-            </a>
-            <div className='pt-3 border-t border-zinc-800/80 flex flex-col gap-2.5'>
-              {currentUser ? (
-                <>
-                  <Link
-                    href={dashboardHref}
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <Button className='w-full justify-center bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-xl py-3 flex items-center gap-2 cursor-pointer'>
-                      <LayoutDashboard className='h-4 w-4' />
-                      <span>Dashboard</span>
-                    </Button>
-                  </Link>
-                  <Button
-                    variant='outline'
-                    onClick={() => {
-                      setMobileMenuOpen(false);
-                      setShowLogoutConfirm(true);
-                    }}
-                    className='w-full justify-center border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:text-rose-400 hover:bg-rose-950/40 rounded-xl font-semibold py-3 flex items-center gap-2 cursor-pointer'
-                  >
-                    <LogOut className='h-4 w-4' />
-                    <span>Keluar</span>
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href='/sign-in'
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <Button
-                      variant='ghost'
-                      className='w-full justify-center text-zinc-300 hover:bg-zinc-900 rounded-xl font-semibold cursor-pointer'
+              <a
+                href='#fitur'
+                onClick={(e) => {
+                  scrollToSection(e, 'fitur');
+                  setMobileMenuOpen(false);
+                }}
+                className='block px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-100 hover:text-emerald-700 transition-colors'
+              >
+                Fitur Unggulan
+              </a>
+              <a
+                href='#modul'
+                onClick={(e) => {
+                  scrollToSection(e, 'modul');
+                  setMobileMenuOpen(false);
+                }}
+                className='block px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-100 hover:text-emerald-700 transition-colors'
+              >
+                Modul KBM
+              </a>
+              <a
+                href='#manfaat'
+                onClick={(e) => {
+                  scrollToSection(e, 'manfaat');
+                  setMobileMenuOpen(false);
+                }}
+                className='block px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-100 hover:text-emerald-700 transition-colors'
+              >
+                Mengapa Kami
+              </a>
+              <a
+                href='#faq'
+                onClick={(e) => {
+                  scrollToSection(e, 'faq');
+                  setMobileMenuOpen(false);
+                }}
+                className='block px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-100 hover:text-emerald-700 transition-colors'
+              >
+                FAQ
+              </a>
+              <div className='pt-3 border-t border-slate-200 flex flex-col gap-2.5'>
+                {currentUser ? (
+                  <>
+                    <Link
+                      href={dashboardHref}
+                      onClick={() => setMobileMenuOpen(false)}
                     >
-                      Masuk Aplikasi
+                      <Button className='w-full justify-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl py-3 flex items-center gap-2 cursor-pointer shadow-xs'>
+                        <LayoutDashboard className='h-4 w-4' />
+                        <span>Dashboard</span>
+                      </Button>
+                    </Link>
+                    <Button
+                      variant='outline'
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        setShowLogoutConfirm(true);
+                      }}
+                      className='w-full justify-center border-slate-200 bg-white text-slate-700 hover:text-rose-600 hover:bg-rose-50 rounded-xl font-semibold py-3 flex items-center gap-2 cursor-pointer shadow-xs'
+                    >
+                      <LogOut className='h-4 w-4' />
+                      <span>Keluar</span>
                     </Button>
-                  </Link>
-                  <Link
-                    href='/sign-up'
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <Button className='w-full justify-center bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-xl cursor-pointer'>
-                      Mulai Sekarang
-                    </Button>
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-        )}
-      </header>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href='/sign-in'
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Button
+                        variant='ghost'
+                        className='w-full justify-center text-slate-700 hover:bg-slate-100 rounded-xl font-semibold cursor-pointer'
+                      >
+                        Masuk Aplikasi
+                      </Button>
+                    </Link>
+                    <Link
+                      href='/sign-up'
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Button className='w-full justify-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl cursor-pointer shadow-xs'>
+                        Mulai Sekarang
+                      </Button>
+                    </Link>
+                  </>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.header>
 
       <main className='relative z-10'>
         {/* ==================== HERO SECTION ==================== */}
-        <section className='relative min-h-[70vh] sm:min-h-[80vh] py-8 sm:py-20 md:py-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center flex flex-col items-center justify-center'>
-          <ScrollReveal>
-            {/* Main Title H1 */}
-            <h1 className='text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-white max-w-5xl mx-auto leading-snug sm:leading-[1.15]'>
-              Smart Class
-              <br />
-              <span className='bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent'>
-                Dashboard Wali Kelas Cerdas
-              </span>
-            </h1>
+        <section className='relative pt-12 sm:pt-20 lg:pt-24 pb-16 sm:pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center flex flex-col items-center justify-center'>
+          {/* Main Title H1 */}
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className='text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 max-w-4xl mx-auto leading-tight sm:leading-[1.12]'
+          >
+            Kelola Administrasi Kelas
+            <span className='block mt-1 sm:mt-2 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 bg-clip-text text-transparent'>
+              Lebih Cepat, Cerdas & Tanpa Kertas
+            </span>
+          </motion.h1>
 
-            {/* Subtitle */}
-            <p className='mt-4 sm:mt-6 text-sm sm:text-lg md:text-xl text-zinc-400 max-w-2xl sm:max-w-3xl mx-auto leading-relaxed font-normal px-2'>
-              Platform terpadu untuk pencatatan presensi siswa real-time,
-              pengelolaan nilai akademik, buku tabungan digital, agenda jurnal
-              harian, dan analisis perkembangan kelas tanpa ribet.
-            </p>
+          {/* Subtitle */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className='mt-5 sm:mt-6 text-base sm:text-lg md:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed font-normal px-2'
+          >
+            Satu sistem terpadu untuk pencatatan presensi siswa, penilaian KKM,
+            buku tabungan digital, agenda jurnal KBM harian, dan laporan kelas otomatis.
+          </motion.p>
 
-            {/* CTA Buttons */}
-            <div className='mt-6 sm:mt-10 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto max-w-xs sm:max-w-none mx-auto'>
-              {currentUser ? (
-                <>
-                  <Link href={dashboardHref} className='w-full sm:w-auto'>
-                    <Button className='w-full sm:w-auto h-12 sm:h-14 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm sm:text-base px-6 sm:px-8 rounded-xl sm:rounded-2xl shadow-xl shadow-emerald-600/25 hover:shadow-emerald-500/40 transition-all duration-300 flex items-center justify-center gap-2.5 cursor-pointer'>
+          {/* CTA Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className='mt-8 sm:mt-10 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3.5 sm:gap-4 w-full sm:w-auto max-w-xs sm:max-w-none mx-auto'
+          >
+            {currentUser ? (
+              <>
+                <Link href={dashboardHref} className='w-full sm:w-auto'>
+                  <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                    <Button className='w-full sm:w-auto h-12 sm:h-14 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm sm:text-base px-7 sm:px-9 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2.5 cursor-pointer'>
                       <LayoutDashboard className='h-5 w-5' />
                       <span>Buka Dashboard Saya</span>
                     </Button>
-                  </Link>
-                  <a
-                    href='#fitur'
-                    onClick={(e) => scrollToSection(e, 'fitur')}
-                    className='w-full sm:w-auto'
+                  </motion.div>
+                </Link>
+                <a
+                  href='#modul'
+                  onClick={(e) => scrollToSection(e, 'modul')}
+                  className='w-full sm:w-auto'
+                >
+                  <Button
+                    variant='outline'
+                    className='w-full sm:w-auto h-12 sm:h-14 border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold text-sm sm:text-base px-6 sm:px-8 rounded-2xl transition-all flex items-center justify-center cursor-pointer shadow-xs'
                   >
-                    <Button
-                      variant='outline'
-                      className='w-full sm:w-auto h-12 sm:h-14 border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-200 font-semibold text-sm sm:text-base px-6 sm:px-8 rounded-xl sm:rounded-2xl backdrop-blur-md transition-all flex items-center justify-center cursor-pointer'
-                    >
-                      <span>Jelajahi Fitur</span>
+                    <span>Lihat Modul KBM</span>
+                  </Button>
+                </a>
+              </>
+            ) : (
+              <>
+                <Link href='/sign-up' className='w-full sm:w-auto'>
+                  <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                    <Button className='w-full sm:w-auto h-12 sm:h-14 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm sm:text-base px-7 sm:px-9 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2.5 cursor-pointer'>
+                      <span>Mulai Sekarang</span>
                     </Button>
-                  </a>
-                </>
-              ) : (
-                <>
-                  <Link href='/sign-up' className='w-full sm:w-auto'>
-                    <Button className='w-full sm:w-auto h-12 sm:h-14 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm sm:text-base px-6 sm:px-8 rounded-xl sm:rounded-2xl shadow-xl shadow-emerald-600/25 hover:shadow-emerald-500/40 transition-all duration-300 flex items-center justify-center gap-2.5 cursor-pointer'>
-                      <span>Daftar Smart Class</span>
-                    </Button>
-                  </Link>
-                  <Link href='/sign-in' className='w-full sm:w-auto'>
-                    <Button
-                      variant='outline'
-                      className='w-full sm:w-auto h-12 sm:h-14 border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-200 font-semibold text-sm sm:text-base px-6 sm:px-8 rounded-xl sm:rounded-2xl backdrop-blur-md transition-all flex items-center justify-center cursor-pointer'
-                    >
-                      <span>Masuk ke Dashboard</span>
-                    </Button>
-                  </Link>
-                </>
-              )}
+                  </motion.div>
+                </Link>
+                <Link href='/sign-in' className='w-full sm:w-auto'>
+                  <Button
+                    variant='outline'
+                    className='w-full sm:w-auto h-12 sm:h-14 border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold text-sm sm:text-base px-6 sm:px-8 rounded-2xl transition-all flex items-center justify-center cursor-pointer shadow-xs'
+                  >
+                    <span>Masuk ke Dashboard</span>
+                  </Button>
+                </Link>
+              </>
+            )}
+          </motion.div>
+
+          {/* Feature Micro-Badges & Multi-Device Branding */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className='mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-2.5 sm:gap-4 text-xs sm:text-sm text-slate-600 font-semibold px-2'
+          >
+            <div className='flex items-center gap-2 bg-white px-3.5 py-1.5 rounded-full border border-slate-200/80 shadow-xs'>
+              <Smartphone className='h-4 w-4 text-emerald-600 shrink-0' />
+              <span>HP</span>
+            </div>
+            <div className='flex items-center gap-2 bg-white px-3.5 py-1.5 rounded-full border border-slate-200/80 shadow-xs'>
+              <Tablet className='h-4 w-4 text-teal-600 shrink-0' />
+              <span>Tablet</span>
+            </div>
+            <div className='flex items-center gap-2 bg-white px-3.5 py-1.5 rounded-full border border-slate-200/80 shadow-xs'>
+              <Monitor className='h-4 w-4 text-indigo-600 shrink-0' />
+              <span>Laptop & PC</span>
+            </div>
+            <div className='flex items-center gap-2 bg-white px-3.5 py-1.5 rounded-full border border-slate-200/80 shadow-xs'>
+              <CheckCircle2 className='h-4 w-4 text-emerald-600 shrink-0' />
+              <span>100% Paperless</span>
+            </div>
+          </motion.div>
+
+          {/* Hero Interactive Showcase Mockup Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 30, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.7, delay: 0.5, ease: 'easeOut' }}
+            className='mt-12 sm:mt-14 w-full max-w-4xl rounded-3xl bg-white border border-slate-200/90 shadow-lg p-4 sm:p-6 overflow-hidden text-left'
+          >
+            {/* Top Bar Fake App Shell */}
+            <div className='flex items-center justify-between border-b border-slate-200 pb-3 mb-4 flex-wrap gap-2'>
+              <div className='flex items-center gap-3 min-w-0'>
+                <div className='flex gap-1.5 shrink-0'>
+                  <div className='w-3 h-3 rounded-full bg-slate-300' />
+                  <div className='w-3 h-3 rounded-full bg-slate-300' />
+                  <div className='w-3 h-3 rounded-full bg-slate-300' />
+                </div>
+                <span className='text-xs font-bold text-slate-700 truncate'>
+                  Smart Class — Dashboard Multi-Perangkat
+                </span>
+              </div>
+              <div className='flex items-center gap-2 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 shrink-0'>
+                <span className='w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse' />
+                <span>Responsive Sync</span>
+              </div>
             </div>
 
-            {/* Feature Micro-Badges */}
-            <div className='mt-8 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-6 text-xs sm:text-sm text-zinc-400 font-medium'>
-              <div className='flex items-center gap-2'>
-                <CheckCircle2 className='h-4 w-4 text-emerald-400 shrink-0' />
-                <span>Tanpa Instalasi Aplikasi</span>
+            {/* Fake Dashboard Grid Preview */}
+            <div className='grid grid-cols-1 sm:grid-cols-3 gap-3.5'>
+              {/* Card 1: Presensi Live */}
+              <div className='p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5'>
+                <div className='flex items-center justify-between'>
+                  <span className='text-xs font-bold text-slate-800 flex items-center gap-1.5'>
+                    <CalendarCheck2 className='h-3.5 w-3.5 text-emerald-600' />
+                    Presensi Harian
+                  </span>
+                  <span className='text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full'>
+                    96.5% Hadir
+                  </span>
+                </div>
+                <div className='space-y-1 text-xs'>
+                  <div className='flex justify-between p-2 rounded-xl bg-white border border-slate-200/80 font-medium'>
+                    <span>Hadir: 28 Siswa</span>
+                    <span className='text-emerald-600 font-bold'>✓</span>
+                  </div>
+                </div>
               </div>
-              <div className='flex items-center gap-2'>
-                <CheckCircle2 className='h-4 w-4 text-emerald-400 shrink-0' />
-                <span>100% Bebas Kertas (Paperless)</span>
+
+              {/* Card 2: Tabungan Kelas */}
+              <div className='p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5'>
+                <div className='flex items-center justify-between'>
+                  <span className='text-xs font-bold text-slate-800 flex items-center gap-1.5'>
+                    <Wallet className='h-3.5 w-3.5 text-teal-600' />
+                    Kas Tabungan
+                  </span>
+                  <span className='text-[10px] bg-teal-100 text-teal-800 font-bold px-2 py-0.5 rounded-full'>
+                    Real-time
+                  </span>
+                </div>
+                <div className='p-2 rounded-xl bg-white border border-slate-200/80'>
+                  <div className='text-base font-extrabold text-teal-700 font-mono'>Rp 4.850.000</div>
+                </div>
               </div>
-              <div className='flex items-center gap-2'>
-                <CheckCircle2 className='h-4 w-4 text-emerald-400 shrink-0' />
-                <span>Akses HP, Tablet & Laptop</span>
+
+              {/* Card 3: Evaluasi Akademik */}
+              <div className='p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5'>
+                <div className='flex items-center justify-between'>
+                  <span className='text-xs font-bold text-slate-800 flex items-center gap-1.5'>
+                    <GraduationCap className='h-3.5 w-3.5 text-indigo-600' />
+                    Nilai Kelas
+                  </span>
+                  <span className='text-[10px] bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded-full'>
+                    KKM: 75
+                  </span>
+                </div>
+                <div className='p-2 rounded-xl bg-white border border-slate-200/80'>
+                  <div className='text-base font-extrabold text-indigo-700 font-mono'>85.4 / 100</div>
+                </div>
               </div>
             </div>
-          </ScrollReveal>
+          </motion.div>
         </section>
 
         {/* ==================== STATS / IMPACT SECTION ==================== */}
         <section
           id='fitur'
-          className='py-16 bg-zinc-900/40 border-y border-zinc-800/80 backdrop-blur-md'
+          className='py-16 bg-white border-y border-slate-200/80 shadow-xs'
         >
           <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
             <div className='grid grid-cols-2 lg:grid-cols-4 gap-8 text-center'>
-              <ScrollReveal delay={0}>
-                <div className='space-y-2 p-4'>
-                  <div className='text-3xl sm:text-4xl font-extrabold text-emerald-400 tracking-tight'>
-                    100%
+              {[
+                { num: '100%', title: 'Paperless System', desc: 'Bebas buku fisik & kertas rekap manual', color: 'text-emerald-600' },
+                { num: '5+ Modul', title: 'Terintegrasi Sempurna', desc: 'Absensi, Nilai, Tabungan, Jurnal & Siswa', color: 'text-teal-600' },
+                { num: '80% Efisien', title: 'Efisiensi Administrasi', desc: 'Rekap bulanan/semester serba otomatis', color: 'text-indigo-600' },
+                { num: 'Safe Auth', title: 'Perlindungan Data', desc: 'Privasi data siswa tersimpan aman', color: 'text-emerald-600' },
+              ].map((stat, idx) => (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, y: 25 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-40px' }}
+                  transition={{ duration: 0.5, delay: idx * 0.1 }}
+                  whileHover={{ y: -4 }}
+                  className='space-y-2 p-4 rounded-2xl transition-all'
+                >
+                  <div className={`text-3xl sm:text-4xl font-extrabold tracking-tight ${stat.color}`}>
+                    {stat.num}
                   </div>
-                  <div className='text-sm font-semibold text-zinc-200'>
-                    Paperless System
+                  <div className='text-sm font-bold text-slate-900'>
+                    {stat.title}
                   </div>
-                  <div className='text-xs text-zinc-500'>
-                    Bebas buku fisik & kertas rekap manual
+                  <div className='text-xs text-slate-500 font-medium'>
+                    {stat.desc}
                   </div>
-                </div>
-              </ScrollReveal>
-              <ScrollReveal delay={100}>
-                <div className='space-y-2 p-4'>
-                  <div className='text-3xl sm:text-4xl font-extrabold text-teal-400 tracking-tight'>
-                    5+ Modul
-                  </div>
-                  <div className='text-sm font-semibold text-zinc-200'>
-                    Terintegrasi Sempurna
-                  </div>
-                  <div className='text-xs text-zinc-500'>
-                    Absensi, Nilai, Tabungan, Jurnal & Siswa
-                  </div>
-                </div>
-              </ScrollReveal>
-              <ScrollReveal delay={200}>
-                <div className='space-y-2 p-4'>
-                  <div className='text-3xl sm:text-4xl font-extrabold text-cyan-400 tracking-tight'>
-                    80% Effisien
-                  </div>
-                  <div className='text-sm font-semibold text-zinc-200'>
-                    Efisiensi Administrasi
-                  </div>
-                  <div className='text-xs text-zinc-500'>
-                    Rekap bulanan/semester serba otomatis
-                  </div>
-                </div>
-              </ScrollReveal>
-              <ScrollReveal delay={300}>
-                <div className='space-y-2 p-4'>
-                  <div className='text-3xl sm:text-4xl font-extrabold text-emerald-400 tracking-tight'>
-                    Safe Auth
-                  </div>
-                  <div className='text-sm font-semibold text-zinc-200'>
-                    Perlindungan Data
-                  </div>
-                  <div className='text-xs text-zinc-500'>
-                    Privasi data siswa tersimpan aman
-                  </div>
-                </div>
-              </ScrollReveal>
+                </motion.div>
+              ))}
             </div>
           </div>
         </section>
@@ -512,118 +555,99 @@ export default function LandingPage() {
           id='modul'
           className='py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto'
         >
-          <ScrollReveal>
-            <div className='text-center space-y-4 max-w-3xl mx-auto mb-16'>
-              <h2 className='text-xs uppercase font-bold tracking-widest text-emerald-400'>
-                Modul Utama Wali Kelas
-              </h2>
-              <p className='text-3xl sm:text-4xl font-extrabold text-white tracking-tight'>
-                Semua Kebutuhan Wali Kelas Dalam Satu Genggaman
-              </p>
-              <p className='text-base text-zinc-400'>
-                Pilih modul di bawah ini untuk melihat simulasi antarmuka dan
-                kemudahan penggunaannya.
-              </p>
-            </div>
-          </ScrollReveal>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-50px' }}
+            transition={{ duration: 0.5 }}
+            className='text-center space-y-4 max-w-3xl mx-auto mb-16'
+          >
+            <h2 className='text-xs uppercase font-bold tracking-widest text-emerald-700'>
+              Modul Utama Wali Kelas
+            </h2>
+            <p className='text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight'>
+              Semua Kebutuhan Wali Kelas Dalam Satu Genggaman
+            </p>
+            <p className='text-base text-slate-600 font-medium'>
+              Pilih modul di bawah ini untuk melihat simulasi antarmuka dan
+              kemudahan penggunaannya.
+            </p>
+          </motion.div>
 
           {/* Module Tabs */}
-          <ScrollReveal delay={100}>
-            <div className='flex items-center justify-start sm:justify-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar pb-3 sm:pb-0 mb-8 sm:mb-10 max-w-full px-1'>
-              <button
-                onClick={() => setActiveTab('absensi')}
-                className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border ${
-                  activeTab === 'absensi'
-                    ? 'bg-emerald-600 text-white border-emerald-500 shadow-lg shadow-emerald-600/30'
-                    : 'bg-zinc-900/60 text-zinc-400 hover:bg-zinc-800 border-zinc-800'
-                }`}
-              >
-                <CalendarCheck2 className='h-4 w-4' />
-                <span>Absensi Kelas</span>
-              </button>
-              <button
-                onClick={() => setActiveTab('nilai')}
-                className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border ${
-                  activeTab === 'nilai'
-                    ? 'bg-emerald-600 text-white border-emerald-500 shadow-lg shadow-emerald-600/30'
-                    : 'bg-zinc-900/60 text-zinc-400 hover:bg-zinc-800 border-zinc-800'
-                }`}
-              >
-                <GraduationCap className='h-4 w-4' />
-                <span>Nilai Akademik</span>
-              </button>
-              <button
-                onClick={() => setActiveTab('tabungan')}
-                className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border ${
-                  activeTab === 'tabungan'
-                    ? 'bg-emerald-600 text-white border-emerald-500 shadow-lg shadow-emerald-600/30'
-                    : 'bg-zinc-900/60 text-zinc-400 hover:bg-zinc-800 border-zinc-800'
-                }`}
-              >
-                <Wallet className='h-4 w-4' />
-                <span>Tabungan Siswa</span>
-              </button>
-              <button
-                onClick={() => setActiveTab('jurnal')}
-                className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border ${
-                  activeTab === 'jurnal'
-                    ? 'bg-emerald-600 text-white border-emerald-500 shadow-lg shadow-emerald-600/30'
-                    : 'bg-zinc-900/60 text-zinc-400 hover:bg-zinc-800 border-zinc-800'
-                }`}
-              >
-                <BookMarked className='h-4 w-4' />
-                <span>Jurnal KBM</span>
-              </button>
-              <button
-                onClick={() => setActiveTab('siswa')}
-                className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border ${
-                  activeTab === 'siswa'
-                    ? 'bg-emerald-600 text-white border-emerald-500 shadow-lg shadow-emerald-600/30'
-                    : 'bg-zinc-900/60 text-zinc-400 hover:bg-zinc-800 border-zinc-800'
-                }`}
-              >
-                <Users className='h-4 w-4' />
-                <span>Data Siswa</span>
-              </button>
-            </div>
-          </ScrollReveal>
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className='flex items-center justify-start sm:justify-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar pb-3 sm:pb-0 mb-8 sm:mb-10 max-w-full px-1'
+          >
+            {[
+              { id: 'absensi', label: 'Absensi Kelas', icon: CalendarCheck2 },
+              { id: 'nilai', label: 'Nilai Akademik', icon: GraduationCap },
+              { id: 'tabungan', label: 'Tabungan Siswa', icon: Wallet },
+              { id: 'jurnal', label: 'Jurnal KBM', icon: BookMarked },
+              { id: 'siswa', label: 'Data Siswa', icon: Users },
+            ].map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <motion.button
+                  key={tab.id}
+                  whileTap={{ scale: 0.96 }}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer border ${isActive
+                    ? 'bg-emerald-600 text-white border-emerald-500 shadow-xs'
+                    : 'bg-white text-slate-600 hover:bg-slate-100 border-slate-200'
+                    }`}
+                >
+                  <Icon className='h-4 w-4' />
+                  <span>{tab.label}</span>
+                </motion.button>
+              );
+            })}
+          </motion.div>
 
-          {/* Active Tab Content Card */}
-          <ScrollReveal delay={200}>
-            <div
+          {/* Active Tab Content Card with AnimatePresence */}
+          <AnimatePresence mode='wait'>
+            <motion.div
               key={activeTab}
-              className='bg-zinc-900/60 border border-zinc-800/80 rounded-3xl p-6 sm:p-10 backdrop-blur-xl shadow-2xl transition-all animate-fade-in'
+              initial={{ opacity: 0, y: 15, scale: 0.99 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -15, scale: 0.99 }}
+              transition={{ duration: 0.35, ease: 'easeOut' }}
+              className='bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-10 shadow-xs'
             >
               {activeTab === 'absensi' && (
                 <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 items-center'>
                   <div className='space-y-6'>
-                    <div className='inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-semibold border border-emerald-500/20'>
+                    <div className='inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200'>
                       <CalendarCheck2 className='h-3.5 w-3.5' />
                       <span>Presensi & Absensi Harian</span>
                     </div>
-                    <h3 className='text-2xl sm:text-3xl font-extrabold text-white'>
+                    <h3 className='text-2xl sm:text-3xl font-extrabold text-slate-900'>
                       Pencatatan Presensi Cepat Tanpa Ribet
                     </h3>
-                    <p className='text-zinc-400 text-sm leading-relaxed'>
+                    <p className='text-slate-600 text-sm leading-relaxed font-medium'>
                       Input kehadiran siswa harian (Hadir, Sakit, Izin, Alpa)
                       secara praktis. Sistem akan mengalkulasi persentase
                       kehadiran bulanan dan semesteran secara otomatis.
                     </p>
-                    <ul className='space-y-3 text-sm text-zinc-300'>
+                    <ul className='space-y-3 text-sm text-slate-700 font-medium'>
                       <li className='flex items-center gap-3'>
-                        <Check className='h-4 w-4 text-emerald-400' />
+                        <Check className='h-4 w-4 text-emerald-600' />
                         <span>
                           Input presensi cepat per kelas atau mata pelajaran
                         </span>
                       </li>
                       <li className='flex items-center gap-3'>
-                        <Check className='h-4 w-4 text-emerald-400' />
+                        <Check className='h-4 w-4 text-emerald-600' />
                         <span>
                           Ringkasan status Hadir, Izin, Sakit, Alpa per siswa
                         </span>
                       </li>
                       <li className='flex items-center gap-3'>
-                        <Check className='h-4 w-4 text-emerald-400' />
+                        <Check className='h-4 w-4 text-emerald-600' />
                         <span>
                           Rekapitulasi otomatis untuk laporan wali kelas
                         </span>
@@ -631,37 +655,37 @@ export default function LandingPage() {
                     </ul>
                   </div>
                   {/* Visual Card */}
-                  <div className='bg-zinc-950 border border-zinc-800 rounded-2xl p-5 space-y-4 shadow-xl'>
-                    <div className='flex items-center justify-between border-b border-zinc-800 pb-3'>
-                      <span className='text-xs font-bold text-white'>
+                  <div className='bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4 shadow-xs'>
+                    <div className='flex items-center justify-between border-b border-slate-200 pb-3'>
+                      <span className='text-xs font-extrabold text-slate-900'>
                         Presensi Hari Ini - Kelas 5A
                       </span>
-                      <span className='text-[11px] text-emerald-400 font-semibold'>
+                      <span className='text-[11px] text-emerald-700 font-bold'>
                         24 Juli 2026
                       </span>
                     </div>
                     <div className='space-y-2.5'>
-                      <div className='flex items-center justify-between p-3 rounded-xl bg-zinc-900/80 border border-zinc-800 text-xs'>
-                        <span className='font-semibold text-zinc-200'>
+                      <div className='flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200 text-xs shadow-xs'>
+                        <span className='font-bold text-slate-800'>
                           Ahmad Fauzi (NIS: 1021)
                         </span>
-                        <span className='px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-bold'>
+                        <span className='px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 font-extrabold border border-emerald-200'>
                           HADIR
                         </span>
                       </div>
-                      <div className='flex items-center justify-between p-3 rounded-xl bg-zinc-900/80 border border-zinc-800 text-xs'>
-                        <span className='font-semibold text-zinc-200'>
+                      <div className='flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200 text-xs shadow-xs'>
+                        <span className='font-bold text-slate-800'>
                           Budi Santoso (NIS: 1022)
                         </span>
-                        <span className='px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-400 font-bold'>
+                        <span className='px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 font-extrabold border border-amber-200'>
                           IZIN
                         </span>
                       </div>
-                      <div className='flex items-center justify-between p-3 rounded-xl bg-zinc-900/80 border border-zinc-800 text-xs'>
-                        <span className='font-semibold text-zinc-200'>
+                      <div className='flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200 text-xs shadow-xs'>
+                        <span className='font-bold text-slate-800'>
                           Citra Kirana (NIS: 1023)
                         </span>
-                        <span className='px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-bold'>
+                        <span className='px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 font-extrabold border border-emerald-200'>
                           HADIR
                         </span>
                       </div>
@@ -673,59 +697,59 @@ export default function LandingPage() {
               {activeTab === 'nilai' && (
                 <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 items-center'>
                   <div className='space-y-6'>
-                    <div className='inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/10 text-teal-400 text-xs font-semibold border border-teal-500/20'>
+                    <div className='inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-50 text-teal-700 text-xs font-bold border border-teal-200'>
                       <GraduationCap className='h-3.5 w-3.5' />
                       <span>Rekap & Penilaian Akademik</span>
                     </div>
-                    <h3 className='text-2xl sm:text-3xl font-extrabold text-white'>
+                    <h3 className='text-2xl sm:text-3xl font-extrabold text-slate-900'>
                       Kelola Nilai Tugas, UTS, & UAS Otomatis
                     </h3>
-                    <p className='text-zinc-400 text-sm leading-relaxed'>
+                    <p className='text-slate-600 text-sm leading-relaxed font-medium'>
                       Input nilai per mata pelajaran, set nilai KKM standar, dan
                       biarkan Smart Class mengalkulasi rata-rata serta
                       memberikan notifikasi siswa yang perlu perhatian khusus.
                     </p>
-                    <ul className='space-y-3 text-sm text-zinc-300'>
+                    <ul className='space-y-3 text-sm text-slate-700 font-medium'>
                       <li className='flex items-center gap-3'>
-                        <Check className='h-4 w-4 text-teal-400' />
+                        <Check className='h-4 w-4 text-teal-600' />
                         <span>Kalkulasi rata-rata akhir nilai otomatis</span>
                       </li>
                       <li className='flex items-center gap-3'>
-                        <Check className='h-4 w-4 text-teal-400' />
+                        <Check className='h-4 w-4 text-teal-600' />
                         <span>
                           Indikator peringatan batas KKM mata pelajaran
                         </span>
                       </li>
                       <li className='flex items-center gap-3'>
-                        <Check className='h-4 w-4 text-teal-400' />
+                        <Check className='h-4 w-4 text-teal-600' />
                         <span>Export laporan nilai kelas dengan rapi</span>
                       </li>
                     </ul>
                   </div>
                   {/* Visual Card */}
-                  <div className='bg-zinc-950 border border-zinc-800 rounded-2xl p-5 space-y-4 shadow-xl'>
-                    <div className='flex items-center justify-between border-b border-zinc-800 pb-3'>
-                      <span className='text-xs font-bold text-white'>
+                  <div className='bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4 shadow-xs'>
+                    <div className='flex items-center justify-between border-b border-slate-200 pb-3'>
+                      <span className='text-xs font-extrabold text-slate-900'>
                         Nilai Matematika - KKM: 75
                       </span>
-                      <span className='text-[11px] text-teal-400 font-semibold'>
+                      <span className='text-[11px] text-teal-700 font-bold'>
                         Tugas 1
                       </span>
                     </div>
                     <div className='space-y-2.5'>
-                      <div className='flex items-center justify-between p-3 rounded-xl bg-zinc-900/80 border border-zinc-800 text-xs'>
-                        <span className='font-semibold text-zinc-200'>
+                      <div className='flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200 text-xs shadow-xs'>
+                        <span className='font-bold text-slate-800'>
                           Ahmad Fauzi
                         </span>
-                        <span className='font-mono font-extrabold text-emerald-400 text-sm'>
+                        <span className='font-mono font-extrabold text-emerald-700 text-sm'>
                           92
                         </span>
                       </div>
-                      <div className='flex items-center justify-between p-3 rounded-xl bg-zinc-900/80 border border-zinc-800 text-xs'>
-                        <span className='font-semibold text-zinc-200'>
+                      <div className='flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200 text-xs shadow-xs'>
+                        <span className='font-bold text-slate-800'>
                           Dewi Sartika
                         </span>
-                        <span className='font-mono font-extrabold text-rose-400 text-sm'>
+                        <span className='font-mono font-extrabold text-rose-600 text-sm'>
                           68 (Perlu Remedial)
                         </span>
                       </div>
@@ -737,69 +761,69 @@ export default function LandingPage() {
               {activeTab === 'tabungan' && (
                 <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 items-center'>
                   <div className='space-y-6'>
-                    <div className='inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-xs font-semibold border border-cyan-500/20'>
+                    <div className='inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-50 text-cyan-700 text-xs font-bold border border-cyan-200'>
                       <Wallet className='h-3.5 w-3.5' />
                       <span>Buku Tabungan Digital</span>
                     </div>
-                    <h3 className='text-2xl sm:text-3xl font-extrabold text-white'>
+                    <h3 className='text-2xl sm:text-3xl font-extrabold text-slate-900'>
                       Pencatatan Kas & Tabungan Siswa Transparan
                     </h3>
-                    <p className='text-zinc-400 text-sm leading-relaxed'>
+                    <p className='text-slate-600 text-sm leading-relaxed font-medium'>
                       Pencatatan transaksi setoran dan penarikan tabungan siswa
                       secara akurat. Bebas kesalahan hitung manual dengan
                       pencatatan saldo real-time.
                     </p>
-                    <ul className='space-y-3 text-sm text-zinc-300'>
+                    <ul className='space-y-3 text-sm text-slate-700 font-medium'>
                       <li className='flex items-center gap-3'>
-                        <Check className='h-4 w-4 text-cyan-400' />
+                        <Check className='h-4 w-4 text-teal-600' />
                         <span>
                           Catat setoran & penarikan kas tabungan kelas
                         </span>
                       </li>
                       <li className='flex items-center gap-3'>
-                        <Check className='h-4 w-4 text-cyan-400' />
+                        <Check className='h-4 w-4 text-teal-600' />
                         <span>Histori mutasi saldo lengkap per siswa</span>
                       </li>
                       <li className='flex items-center gap-3'>
-                        <Check className='h-4 w-4 text-cyan-400' />
+                        <Check className='h-4 w-4 text-teal-600' />
                         <span>Laporan keuangan kelas yang transparan</span>
                       </li>
                     </ul>
                   </div>
                   {/* Visual Card */}
-                  <div className='bg-zinc-950 border border-zinc-800 rounded-2xl p-5 space-y-4 shadow-xl'>
-                    <div className='flex items-center justify-between border-b border-zinc-800 pb-3'>
-                      <span className='text-xs font-bold text-white'>
+                  <div className='bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4 shadow-xs'>
+                    <div className='flex items-center justify-between border-b border-slate-200 pb-3'>
+                      <span className='text-xs font-extrabold text-slate-900'>
                         Saldo Tabungan Kelas
                       </span>
-                      <span className='text-xs font-bold text-cyan-400'>
+                      <span className='text-xs font-extrabold text-teal-700'>
                         Rp 4.850.000
                       </span>
                     </div>
                     <div className='space-y-2.5'>
-                      <div className='flex items-center justify-between p-3 rounded-xl bg-zinc-900/80 border border-zinc-800 text-xs'>
+                      <div className='flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200 text-xs shadow-xs'>
                         <div>
-                          <div className='font-semibold text-zinc-200'>
+                          <div className='font-bold text-slate-800'>
                             Setoran - Ahmad Fauzi
                           </div>
-                          <div className='text-[10px] text-zinc-500'>
+                          <div className='text-[10px] text-slate-500 font-medium'>
                             24 Jul 2026
                           </div>
                         </div>
-                        <span className='font-mono font-bold text-emerald-400'>
+                        <span className='font-mono font-extrabold text-emerald-700'>
                           + Rp 50.000
                         </span>
                       </div>
-                      <div className='flex items-center justify-between p-3 rounded-xl bg-zinc-900/80 border border-zinc-800 text-xs'>
+                      <div className='flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200 text-xs shadow-xs'>
                         <div>
-                          <div className='font-semibold text-zinc-200'>
+                          <div className='font-bold text-slate-800'>
                             Penarikan - Budi Santoso
                           </div>
-                          <div className='text-[10px] text-zinc-500'>
+                          <div className='text-[10px] text-slate-500 font-medium'>
                             23 Jul 2026
                           </div>
                         </div>
-                        <span className='font-mono font-bold text-rose-400'>
+                        <span className='font-mono font-extrabold text-rose-600'>
                           - Rp 20.000
                         </span>
                       </div>
@@ -811,50 +835,50 @@ export default function LandingPage() {
               {activeTab === 'jurnal' && (
                 <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 items-center'>
                   <div className='space-y-6'>
-                    <div className='inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-semibold border border-emerald-500/20'>
+                    <div className='inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200'>
                       <BookMarked className='h-3.5 w-3.5' />
                       <span>Jurnal Harian Wali Kelas</span>
                     </div>
-                    <h3 className='text-2xl sm:text-3xl font-extrabold text-white'>
+                    <h3 className='text-2xl sm:text-3xl font-extrabold text-slate-900'>
                       Agenda KBM Harian Terintegrasi Presensi
                     </h3>
-                    <p className='text-zinc-400 text-sm leading-relaxed'>
+                    <p className='text-slate-600 text-sm leading-relaxed font-medium'>
                       Dokumentasikan agenda kegiatan mengajar harian, materi
                       pembelajaran, serta absensi per siswa secara langsung
                       dalam satu formulir jurnal.
                     </p>
-                    <ul className='space-y-3 text-sm text-zinc-300'>
+                    <ul className='space-y-3 text-sm text-slate-700 font-medium'>
                       <li className='flex items-center gap-3'>
-                        <Check className='h-4 w-4 text-emerald-400' />
+                        <Check className='h-4 w-4 text-emerald-600' />
                         <span>
                           Input jam pelajaran, mata pelajaran, & topik KBM
                         </span>
                       </li>
                       <li className='flex items-center gap-3'>
-                        <Check className='h-4 w-4 text-emerald-400' />
+                        <Check className='h-4 w-4 text-emerald-600' />
                         <span>Input presensi per siswa langsung di jurnal</span>
                       </li>
                       <li className='flex items-center gap-3'>
-                        <Check className='h-4 w-4 text-emerald-400' />
+                        <Check className='h-4 w-4 text-emerald-600' />
                         <span>Arsip agenda harian wali kelas terorganisir</span>
                       </li>
                     </ul>
                   </div>
                   {/* Visual Card */}
-                  <div className='bg-zinc-950 border border-zinc-800 rounded-2xl p-5 space-y-4 shadow-xl'>
-                    <div className='flex items-center justify-between border-b border-zinc-800 pb-3'>
-                      <span className='text-xs font-bold text-white'>
+                  <div className='bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4 shadow-xs'>
+                    <div className='flex items-center justify-between border-b border-slate-200 pb-3'>
+                      <span className='text-xs font-extrabold text-slate-900'>
                         Jurnal KBM - Jam 1-2
                       </span>
-                      <span className='text-[11px] text-emerald-400 font-semibold'>
+                      <span className='text-[11px] text-emerald-700 font-bold'>
                         Bahasa Indonesia
                       </span>
                     </div>
-                    <div className='p-3.5 rounded-xl bg-zinc-900/80 border border-zinc-800 text-xs space-y-2'>
-                      <div className='font-semibold text-zinc-200'>
+                    <div className='p-3.5 rounded-xl bg-white border border-slate-200 text-xs space-y-2 shadow-xs'>
+                      <div className='font-bold text-slate-900'>
                         Materi: Membaca Puisi & Struktur Bait
                       </div>
-                      <div className='text-[11px] text-zinc-400'>
+                      <div className='text-[11px] text-slate-600 font-medium'>
                         Catatan: Siswa antusias mengikuti latihan membaca depan
                         kelas.
                       </div>
@@ -866,126 +890,129 @@ export default function LandingPage() {
               {activeTab === 'siswa' && (
                 <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 items-center'>
                   <div className='space-y-6'>
-                    <div className='inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/10 text-teal-400 text-xs font-semibold border border-teal-500/20'>
+                    <div className='inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-50 text-teal-700 text-xs font-bold border border-teal-200'>
                       <Users className='h-3.5 w-3.5' />
                       <span>Database Siswa Terpusat</span>
                     </div>
-                    <h3 className='text-2xl sm:text-3xl font-extrabold text-white'>
+                    <h3 className='text-2xl sm:text-3xl font-extrabold text-slate-900'>
                       Kelola Profil & Informasi Siswa Terstruktur
                     </h3>
-                    <p className='text-zinc-400 text-sm leading-relaxed'>
+                    <p className='text-slate-600 text-sm leading-relaxed font-medium'>
                       Database profil siswa lengkap mencakup NIS/NISN, jenis
                       kelamin, alamat, data kontak orang tua/wali, serta status
                       keaktifan siswa.
                     </p>
-                    <ul className='space-y-3 text-sm text-zinc-300'>
+                    <ul className='space-y-3 text-sm text-slate-700 font-medium'>
                       <li className='flex items-center gap-3'>
-                        <Check className='h-4 w-4 text-teal-400' />
+                        <Check className='h-4 w-4 text-teal-600' />
                         <span>Pencarian & filter data siswa cepat</span>
                       </li>
                       <li className='flex items-center gap-3'>
-                        <Check className='h-4 w-4 text-teal-400' />
+                        <Check className='h-4 w-4 text-teal-600' />
                         <span>Kontak orang tua/wali tercatat rapi</span>
                       </li>
                       <li className='flex items-center gap-3'>
-                        <Check className='h-4 w-4 text-teal-400' />
+                        <Check className='h-4 w-4 text-teal-600' />
                         <span>Ekspor daftar siswa ke Excel/PDF</span>
                       </li>
                     </ul>
                   </div>
                   {/* Visual Card */}
-                  <div className='bg-zinc-950 border border-zinc-800 rounded-2xl p-5 space-y-4 shadow-xl'>
-                    <div className='flex items-center justify-between border-b border-zinc-800 pb-3'>
-                      <span className='text-xs font-bold text-white'>
+                  <div className='bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4 shadow-xs'>
+                    <div className='flex items-center justify-between border-b border-slate-200 pb-3'>
+                      <span className='text-xs font-extrabold text-slate-900'>
                         Profil Siswa - Class 5A
                       </span>
-                      <span className='text-[11px] text-teal-400 font-semibold'>
+                      <span className='text-[11px] text-teal-700 font-bold uppercase'>
                         Active
                       </span>
                     </div>
-                    <div className='p-3.5 rounded-xl bg-zinc-900/80 border border-zinc-800 text-xs space-y-1.5'>
-                      <div className='font-bold text-white'>
+                    <div className='p-3.5 rounded-xl bg-white border border-slate-200 text-xs space-y-1.5 shadow-xs'>
+                      <div className='font-extrabold text-slate-900'>
                         Ahmad Fauzi Rahmat
                       </div>
-                      <div className='text-zinc-400'>
+                      <div className='text-slate-600 font-medium'>
                         NISN: 0081234567 • Laki-laki
                       </div>
-                      <div className='text-zinc-500 text-[11px]'>
+                      <div className='text-slate-500 text-[11px] font-medium'>
                         Wali: Bpk. Rahmat (0812-3456-7890)
                       </div>
                     </div>
                   </div>
                 </div>
               )}
-            </div>
-          </ScrollReveal>
+            </motion.div>
+          </AnimatePresence>
         </section>
 
         {/* ==================== KEY BENEFITS SECTION ==================== */}
         <section
           id='manfaat'
-          className='py-24 bg-zinc-900/30 border-y border-zinc-800/80 relative'
+          className='py-24 bg-white border-y border-slate-200/80 relative shadow-xs'
         >
           <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-            <ScrollReveal>
-              <div className='text-center space-y-4 max-w-3xl mx-auto mb-16'>
-                <h2 className='text-xs uppercase font-bold tracking-widest text-emerald-400'>
-                  Mengapa Memilih Smart Class
-                </h2>
-                <p className='text-3xl sm:text-4xl font-extrabold text-white tracking-tight'>
-                  Dirancang Khusus Untuk Memudahkan Tugas Wali Kelas
-                </p>
-              </div>
-            </ScrollReveal>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-50px' }}
+              transition={{ duration: 0.5 }}
+              className='text-center space-y-4 max-w-3xl mx-auto mb-16'
+            >
+              <h2 className='text-xs uppercase font-bold tracking-widest text-emerald-700'>
+                Mengapa Memilih Smart Class
+              </h2>
+              <p className='text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight'>
+                Dirancang Khusus Untuk Memudahkan Tugas Wali Kelas
+              </p>
+            </motion.div>
 
             <div className='grid grid-cols-1 md:grid-cols-3 gap-8'>
-              {/* Card 1 */}
-              <ScrollReveal delay={0}>
-                <div className='p-8 rounded-3xl bg-zinc-950/80 border border-zinc-800/80 hover:border-emerald-500/50 transition-all duration-300 space-y-4 group h-full'>
-                  <div className='flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-400 group-hover:scale-110 transition-transform'>
-                    <Zap className='h-6 w-6' />
-                  </div>
-                  <h3 className='text-xl font-bold text-white'>
-                    Hemat Waktu Administrasi
-                  </h3>
-                  <p className='text-sm text-zinc-400 leading-relaxed'>
-                    Tidak ada lagi kalkulasi manual nilai atau rekap absensi
-                    berjam-jam. Semuanya terakumulasi secara otomatis real-time.
-                  </p>
-                </div>
-              </ScrollReveal>
-
-              {/* Card 2 */}
-              <ScrollReveal delay={150}>
-                <div className='p-8 rounded-3xl bg-zinc-950/80 border border-zinc-800/80 hover:border-teal-500/50 transition-all duration-300 space-y-4 group h-full'>
-                  <div className='flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-500/10 text-teal-400 group-hover:scale-110 transition-transform'>
-                    <Smartphone className='h-6 w-6' />
-                  </div>
-                  <h3 className='text-xl font-bold text-white'>
-                    Responsif Di Mana Saja
-                  </h3>
-                  <p className='text-sm text-zinc-400 leading-relaxed'>
-                    Akses langsung dari HP di dalam ruang kelas, dari tablet,
-                    atau laptop di rumah. Tampilan menyesuaikan secara optimal.
-                  </p>
-                </div>
-              </ScrollReveal>
-
-              {/* Card 3 */}
-              <ScrollReveal delay={300}>
-                <div className='p-8 rounded-3xl bg-zinc-950/80 border border-zinc-800/80 hover:border-cyan-500/50 transition-all duration-300 space-y-4 group h-full'>
-                  <div className='flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-400 group-hover:scale-110 transition-transform'>
-                    <Settings className='h-6 w-6' />
-                  </div>
-                  <h3 className='text-xl font-bold text-white'>
-                    Fleksibel & Fleksibel Menu
-                  </h3>
-                  <p className='text-sm text-zinc-400 leading-relaxed'>
-                    Bebas mengaktifkan atau menyembunyikan modul sidebar sesuai
-                    kebutuhan spesifik wali kelas dan kebijakan sekolah.
-                  </p>
-                </div>
-              </ScrollReveal>
+              {[
+                {
+                  icon: Zap,
+                  title: 'Hemat Waktu Administrasi',
+                  desc: 'Tidak ada lagi kalkulasi manual nilai atau rekap absensi berjam-jam. Semuanya terakumulasi secara otomatis real-time.',
+                  color: 'bg-emerald-100 text-emerald-700',
+                  hoverBorder: 'hover:border-emerald-500/50',
+                },
+                {
+                  icon: Smartphone,
+                  title: 'Responsif Di Mana Saja',
+                  desc: 'Akses langsung dari HP di dalam ruang kelas, dari tablet, atau laptop di rumah. Tampilan menyesuaikan secara optimal.',
+                  color: 'bg-teal-100 text-teal-700',
+                  hoverBorder: 'hover:border-teal-500/50',
+                },
+                {
+                  icon: Settings,
+                  title: 'Fleksibel & Kustom Menu',
+                  desc: 'Bebas mengaktifkan atau menyembunyikan modul sidebar sesuai kebutuhan spesifik wali kelas dan kebijakan sekolah.',
+                  color: 'bg-indigo-100 text-indigo-700',
+                  hoverBorder: 'hover:border-indigo-500/50',
+                },
+              ].map((card, idx) => {
+                const Icon = card.icon;
+                return (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: '-40px' }}
+                    transition={{ duration: 0.5, delay: idx * 0.15 }}
+                    whileHover={{ y: -8, transition: { duration: 0.25, ease: 'easeOut' } }}
+                    className={`p-8 rounded-3xl bg-slate-50 border border-slate-200 ${card.hoverBorder} transition-colors space-y-4 group h-full shadow-xs`}
+                  >
+                    <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${card.color} group-hover:scale-110 transition-transform`}>
+                      <Icon className='h-6 w-6' />
+                    </div>
+                    <h3 className='text-xl font-extrabold text-slate-900'>
+                      {card.title}
+                    </h3>
+                    <p className='text-sm text-slate-600 leading-relaxed font-medium'>
+                      {card.desc}
+                    </p>
+                  </motion.div>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -995,16 +1022,20 @@ export default function LandingPage() {
           id='faq'
           className='py-24 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto'
         >
-          <ScrollReveal>
-            <div className='text-center space-y-4 mb-16'>
-              <h2 className='text-xs uppercase font-bold tracking-widest text-emerald-400'>
-                FAQ
-              </h2>
-              <p className='text-3xl sm:text-4xl font-extrabold text-white tracking-tight'>
-                Pertanyaan yang Sering Diajukan
-              </p>
-            </div>
-          </ScrollReveal>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className='text-center space-y-4 mb-16'
+          >
+            <h2 className='text-xs uppercase font-bold tracking-widest text-emerald-700'>
+              FAQ
+            </h2>
+            <p className='text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight'>
+              Pertanyaan yang Sering Diajukan
+            </p>
+          </motion.div>
 
           <div className='space-y-4'>
             {[
@@ -1025,26 +1056,40 @@ export default function LandingPage() {
                 a: 'Semua data disimpan dalam basis data terenkripsi dengan sesi autentikasi terproteksi tinggi. Hanya Anda sebagai wali kelas yang berhak mengelola data kelas Anda.',
               },
             ].map((item, idx) => (
-              <ScrollReveal key={idx} delay={idx * 100}>
-                <div className='bg-zinc-900/60 border border-zinc-800/80 rounded-2xl overflow-hidden backdrop-blur-md transition-all'>
-                  <button
-                    onClick={() => toggleFaq(idx)}
-                    className='w-full p-6 text-left flex items-center justify-between gap-4 font-bold text-white text-base hover:text-emerald-400 transition-colors cursor-pointer'
-                  >
-                    <span>{item.q}</span>
-                    <ChevronDown
-                      className={`h-5 w-5 text-zinc-400 transition-transform duration-300 flex-shrink-0 ${
-                        openFaq === idx ? 'rotate-180 text-emerald-400' : ''
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: idx * 0.08 }}
+                className='bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-xs'
+              >
+                <button
+                  onClick={() => toggleFaq(idx)}
+                  className='w-full p-6 text-left flex items-center justify-between gap-4 font-bold text-slate-900 text-base hover:text-emerald-700 transition-colors cursor-pointer'
+                >
+                  <span>{item.q}</span>
+                  <ChevronDown
+                    className={`h-5 w-5 text-slate-400 transition-transform duration-300 flex-shrink-0 ${openFaq === idx ? 'rotate-180 text-emerald-600' : ''
                       }`}
-                    />
-                  </button>
+                  />
+                </button>
+                <AnimatePresence>
                   {openFaq === idx && (
-                    <div className='px-6 pb-6 text-sm text-zinc-400 leading-relaxed border-t border-zinc-800/50 pt-4'>
-                      {item.a}
-                    </div>
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: 'easeInOut' }}
+                      className='overflow-hidden'
+                    >
+                      <div className='px-6 pb-6 text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-4 font-medium'>
+                        {item.a}
+                      </div>
+                    </motion.div>
                   )}
-                </div>
-              </ScrollReveal>
+                </AnimatePresence>
+              </motion.div>
             ))}
           </div>
         </section>
@@ -1054,96 +1099,106 @@ export default function LandingPage() {
           id='cta'
           className='py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto'
         >
-          <ScrollReveal>
-            <div className='relative rounded-3xl bg-gradient-to-r from-emerald-950 via-zinc-900 to-teal-950 border border-emerald-500/30 p-8 sm:p-14 text-center overflow-hidden shadow-2xl'>
-              <div className='absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none' />
-              <div className='relative z-10 space-y-6 max-w-3xl mx-auto'>
-                <h2 className='text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight'>
-                  Siap Tingkatkan Produktivitas Kelas Anda Hari Ini?
-                </h2>
-                <p className='text-base sm:text-lg text-zinc-300 font-normal'>
-                  Bergabunglah dengan wali kelas modern lainnya dalam mengelola
-                  administrasi kelas lebih cepat, akurat, dan paperless.
-                </p>
-                <div className='pt-4 flex flex-col sm:flex-row items-center justify-center gap-4'>
-                  {currentUser ? (
-                    <Link href={dashboardHref} className='w-full sm:w-auto'>
-                      <Button className='w-full sm:w-auto bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-base px-8 py-6 rounded-2xl shadow-xl shadow-emerald-500/20 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer'>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.97, y: 20 }}
+            whileInView={{ opacity: 1, scale: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, ease: 'easeOut' }}
+            className='relative rounded-3xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 border border-emerald-500/30 p-8 sm:p-14 text-center overflow-hidden shadow-xl text-white'
+          >
+            <div className='relative z-10 space-y-6 max-w-3xl mx-auto'>
+              <h2 className='text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight'>
+                Siap Tingkatkan Produktivitas Kelas Anda Hari Ini?
+              </h2>
+              <p className='text-base sm:text-lg text-emerald-50 font-medium'>
+                Bergabunglah dengan wali kelas modern lainnya dalam mengelola
+                administrasi kelas lebih cepat, akurat, dan paperless.
+              </p>
+              <div className='pt-4 flex flex-col sm:flex-row items-center justify-center gap-4'>
+                {currentUser ? (
+                  <Link href={dashboardHref} className='w-full sm:w-auto'>
+                    <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+                      <Button className='w-full sm:w-auto bg-white text-emerald-800 hover:bg-emerald-50 font-bold text-base px-8 py-6 rounded-2xl shadow-md transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer'>
                         <LayoutDashboard className='h-5 w-5' />
                         <span>Buka Dashboard</span>
                       </Button>
-                    </Link>
-                  ) : (
-                    <>
-                      <Link href='/sign-up' className='w-full sm:w-auto'>
-                        <Button className='w-full sm:w-auto bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-base px-8 py-6 rounded-2xl shadow-xl shadow-emerald-500/20 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer'>
+                    </motion.div>
+                  </Link>
+                ) : (
+                  <>
+                    <Link href='/sign-up' className='w-full sm:w-auto'>
+                      <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+                        <Button className='w-full sm:w-auto bg-white text-emerald-800 hover:bg-emerald-50 font-bold text-base px-8 py-6 rounded-2xl shadow-md transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer'>
                           <span>Daftar Akun Wali Kelas</span>
                         </Button>
-                      </Link>
-                      <Link href='/sign-in' className='w-full sm:w-auto'>
-                        <Button
-                          variant='outline'
-                          className='w-full sm:w-auto border-zinc-700 bg-zinc-950/60 hover:bg-zinc-900 text-zinc-200 font-semibold text-base px-8 py-6 rounded-2xl transition-all cursor-pointer'
-                        >
-                          <span>Masuk Aplikasi</span>
-                        </Button>
-                      </Link>
-                    </>
-                  )}
-                </div>
+                      </motion.div>
+                    </Link>
+                    <Link href='/sign-in' className='w-full sm:w-auto'>
+                      <Button
+                        variant='outline'
+                        className='w-full sm:w-auto border-white/40 bg-emerald-700/50 hover:bg-emerald-700 text-white font-bold text-base px-8 py-6 rounded-2xl transition-all cursor-pointer'
+                      >
+                        <span>Masuk Aplikasi</span>
+                      </Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
-          </ScrollReveal>
+          </motion.div>
         </section>
       </main>
 
       {/* ==================== FOOTER ==================== */}
-      <footer className='border-t border-zinc-800/80 bg-zinc-950/90 py-12 relative z-10'>
-        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-zinc-400'>
-          <div className='flex items-center gap-3'>
-            <div className='flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-md'>
-              <BookOpen className='h-4 w-4' />
+      <footer className='border-t border-slate-200 bg-white py-8 sm:py-12 relative z-10'>
+        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6 text-sm text-slate-600 text-center md:text-left'>
+          <div className='flex flex-col sm:flex-row items-center gap-2 sm:gap-3'>
+            <div className='flex items-center gap-2.5'>
+              <div className='flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-xs shrink-0'>
+                <BookOpen className='h-4 w-4' />
+              </div>
+              <span className='font-extrabold text-slate-900 tracking-tight text-base whitespace-nowrap'>
+                Smart Class
+              </span>
             </div>
-            <span className='font-extrabold text-white tracking-tight text-base'>
-              Smart Class
-            </span>
-            <span className='text-xs text-zinc-500'>
+            <span className='hidden sm:inline text-slate-300'>•</span>
+            <span className='text-xs text-slate-500 font-medium whitespace-nowrap'>
               © 2026 Smart Class. All rights reserved.
             </span>
           </div>
 
-          <div className='flex items-center gap-6 text-xs text-zinc-400'>
+          <div className='flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs text-slate-600 font-semibold'>
             <a
               href='#fitur'
               onClick={(e) => scrollToSection(e, 'fitur')}
-              className='hover:text-emerald-400 transition-colors'
+              className='hover:text-emerald-700 transition-colors'
             >
               Fitur
             </a>
             <a
               href='#modul'
               onClick={(e) => scrollToSection(e, 'modul')}
-              className='hover:text-emerald-400 transition-colors'
+              className='hover:text-emerald-700 transition-colors'
             >
               Modul
             </a>
             <a
               href='#manfaat'
               onClick={(e) => scrollToSection(e, 'manfaat')}
-              className='hover:text-emerald-400 transition-colors'
+              className='hover:text-emerald-700 transition-colors'
             >
               Manfaat
             </a>
             <a
               href='#faq'
               onClick={(e) => scrollToSection(e, 'faq')}
-              className='hover:text-emerald-400 transition-colors'
+              className='hover:text-emerald-700 transition-colors'
             >
               FAQ
             </a>
             <Link
               href={currentUser ? dashboardHref : '/sign-in'}
-              className='hover:text-emerald-400 transition-colors'
+              className='hover:text-emerald-700 transition-colors'
             >
               {currentUser ? 'Dashboard' : 'Masuk'}
             </Link>
@@ -1152,15 +1207,22 @@ export default function LandingPage() {
       </footer>
 
       {/* ==================== SCROLL TO TOP BUTTON ==================== */}
-      {showScrollTop && (
-        <button
-          onClick={scrollToTop}
-          aria-label='Scroll to top'
-          className='fixed bottom-6 right-6 z-50 p-3.5 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-2xl shadow-emerald-500/40 hover:scale-110 active:scale-95 transition-all duration-300 border border-emerald-400/40 cursor-pointer animate-bounce-slow'
-        >
-          <ArrowUp className='h-5 w-5' />
-        </button>
-      )}
+      <AnimatePresence>
+        {showScrollTop && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0, y: 20 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={scrollToTop}
+            aria-label='Scroll to top'
+            className='fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 p-3 sm:p-3.5 rounded-2xl bg-emerald-600 text-white shadow-xl hover:bg-emerald-700 transition-all duration-300 cursor-pointer'
+          >
+            <ArrowUp className='h-5 w-5' />
+          </motion.button>
+        )}
+      </AnimatePresence>
 
       {/* ==================== LOGOUT CONFIRMATION DIALOG ==================== */}
       <ConfirmDialog
