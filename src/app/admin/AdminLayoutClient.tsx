@@ -148,7 +148,7 @@ export default function AdminLayoutClient({ children, admin }: AdminLayoutClient
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 md:pl-64 flex flex-col">
+      <div className="flex-1 md:pl-64 flex flex-col min-w-0 max-w-full">
         {/* Mobile Top Header */}
         <header className="flex h-16 items-center justify-between border-b border-slate-200 px-4 md:hidden bg-white/90 backdrop-blur-md sticky top-0 z-40">
           <div className="flex items-center gap-2">
@@ -181,7 +181,7 @@ export default function AdminLayoutClient({ children, admin }: AdminLayoutClient
         )}
 
         {/* Workspace content */}
-        <main className="flex-1 p-4 md:p-8 max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-4 md:p-8 max-w-7xl w-full mx-auto min-w-0 max-w-full overflow-hidden">
           {children}
         </main>
       </div>

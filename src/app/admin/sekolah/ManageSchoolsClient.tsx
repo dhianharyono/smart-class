@@ -77,10 +77,10 @@ export default function ManageSchoolsClient({ initialSchools }: ManageSchoolsCli
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-3xl font-extrabold tracking-tight text-slate-900">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900">
           Kelola Daftar Sekolah
         </h2>
-        <p className="text-slate-600 text-sm mt-1">
+        <p className="text-slate-600 text-xs sm:text-sm mt-1">
           Tambahkan sekolah baru agar dapat dipilih saat registrasi wali kelas, atau hapus sekolah yang tidak digunakan.
         </p>
       </div>

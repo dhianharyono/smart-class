@@ -228,17 +228,17 @@ export default function ManageTeachersClient({
       {/* Header */}
       <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
         <div>
-          <h2 className='text-3xl font-extrabold tracking-tight text-slate-900'>
+          <h2 className='text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900'>
             Kelola Wali Kelas
           </h2>
-          <p className='text-slate-600 text-sm mt-1'>
+          <p className='text-slate-600 text-xs sm:text-sm mt-1'>
             Daftar, tambah, edit profil kelas/sekolah, dan hapus akun guru
             beserta data mereka di database.
           </p>
         </div>
         <Button
           onClick={openCreateModal}
-          className='bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl cursor-pointer text-xs font-semibold py-2.5 px-4 flex items-center gap-2 self-start sm:self-auto shadow-xs transition-all duration-200'
+          className='bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl cursor-pointer text-xs font-semibold py-2.5 px-4 flex items-center justify-center gap-2 w-full sm:w-auto shadow-xs transition-all duration-200'
         >
           <Plus className='h-4 w-4' />
           <span>Tambah Wali Kelas</span>
@@ -294,8 +294,8 @@ export default function ManageTeachersClient({
       <Card className='bg-white border-slate-200/80 rounded-2xl shadow-xs'>
         <CardContent className='p-0'>
           {filteredTeachers.length > 0 ? (
-            <div className='overflow-x-auto'>
-              <table className='w-full text-left text-sm text-slate-700 border-collapse'>
+            <div className='overflow-x-auto min-w-0 max-w-full'>
+              <table className='w-full min-w-[650px] text-left text-sm text-slate-700 border-collapse'>
                 <thead>
                   <tr className='border-b border-slate-200 text-slate-700 text-xs font-bold uppercase tracking-wider bg-slate-50'>
                     <th className='py-3.5 px-6'>Nama Guru / Email</th>

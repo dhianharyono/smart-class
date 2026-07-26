@@ -117,22 +117,22 @@ export default function AdminDashboardClient({ stats, schools }: AdminDashboardC
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <ShieldCheck className="h-5 w-5 text-indigo-600" />
+            <ShieldCheck className="h-5 w-5 text-indigo-600 shrink-0" />
             <span className="text-xs font-bold text-indigo-700 tracking-wider uppercase block">
               Ringkasan Sistem
             </span>
           </div>
-          <h2 className="text-3xl font-extrabold tracking-tight text-slate-900">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900">
             Admin Command Center
           </h2>
-          <p className="text-slate-600 text-sm mt-1">
+          <p className="text-slate-600 text-xs sm:text-sm mt-1">
             Ikhtisar operasional, statistik guru, dan sekolah terdaftar di seluruh sistem.
           </p>
         </div>
-        <Link href="/">
+        <Link href="/" className="w-full sm:w-auto">
           <Button
             variant="outline"
-            className="border-slate-200 bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 self-start sm:self-auto cursor-pointer shadow-xs"
+            className="w-full sm:w-auto border-slate-200 bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-xs"
           >
             <Home className="h-4 w-4 text-indigo-600" />
             <span>Kembali Ke Halaman Utama</span>
@@ -170,20 +170,20 @@ export default function AdminDashboardClient({ stats, schools }: AdminDashboardC
         {/* Statistik Sekolah */}
         <Card className="bg-white border-slate-200/80 rounded-2xl shadow-xs flex flex-col justify-between">
           <div>
-            <CardHeader className="flex flex-row items-center justify-between">
+            <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div>
                 <CardTitle className="text-md font-bold text-slate-900">Statistik Sekolah</CardTitle>
                 <CardDescription className="text-xs text-slate-500">Jumlah guru dan siswa per sekolah.</CardDescription>
               </div>
-              <Link href="/admin/sekolah" className="flex items-center gap-1.5 text-xs text-indigo-700 hover:text-indigo-800 font-bold transition-colors">
+              <Link href="/admin/sekolah" className="flex items-center gap-1.5 text-xs text-indigo-700 hover:text-indigo-800 font-bold transition-colors shrink-0">
                 <span>Kelola Sekolah</span>
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </CardHeader>
             <CardContent>
               {schools.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm text-slate-700 border-collapse">
+                <div className="overflow-x-auto min-w-0 max-w-full">
+                  <table className="w-full min-w-[400px] text-left text-sm text-slate-700 border-collapse">
                     <thead>
                       <tr className="border-b border-slate-200 text-slate-700 text-xs font-bold uppercase tracking-wider bg-slate-50">
                         <th className="py-3 px-3">Nama Sekolah</th>
@@ -331,8 +331,8 @@ export default function AdminDashboardClient({ stats, schools }: AdminDashboardC
 
           {/* Tabel Statistik Wali Kelas */}
           {stats.teacherStats.length > 0 ? (
-            <div className="overflow-x-auto rounded-xl border border-slate-200">
-              <table className="w-full text-left text-sm text-slate-700 border-collapse">
+            <div className="overflow-x-auto min-w-0 max-w-full rounded-xl border border-slate-200">
+              <table className="w-full min-w-[650px] text-left text-sm text-slate-700 border-collapse">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200 text-slate-700 text-[11px] font-bold uppercase tracking-wider">
                     <th className="py-3 px-4">Nama Guru</th>
