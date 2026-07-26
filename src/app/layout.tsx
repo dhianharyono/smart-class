@@ -11,9 +11,66 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: 'Smart Class - Command Center Wali Kelas',
+  title: {
+    default: 'Smart Class - Command Center Wali Kelas',
+    template: '%s | Smart Class',
+  },
   description:
-    'Aplikasi produktivitas mandiri wali kelas (Smart Class) untuk pengelolaan siswa, absensi, nilai, tabungan, dan jurnal wali kelas.',
+    'Aplikasi produktivitas dan pengelolaan kelas terpadu untuk wali kelas: absensi siswa, jurnal harian guru, rekap nilai, dan buku tabungan kelas.',
+  keywords: [
+    'Smart Class',
+    'Dashboard Wali Kelas',
+    'Jurnal Guru Harian',
+    'Absensi Siswa Online',
+    'Tabungan Kelas',
+    'Rekap Nilai Siswa',
+    'Aplikasi Sekolah',
+    'Manajemen Kelas',
+  ],
+  authors: [{ name: 'Smart Class Team' }],
+  creator: 'Smart Class',
+  publisher: 'Smart Class',
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || 'https://smart-class.vercel.app'
+  ),
+  alternates: {
+    canonical: '/',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  openGraph: {
+    title: 'Smart Class - Command Center Wali Kelas',
+    description:
+      'Aplikasi produktivitas dan pengelolaan kelas terpadu untuk wali kelas: absensi siswa, jurnal harian guru, rekap nilai, dan buku tabungan kelas.',
+    url: '/',
+    siteName: 'Smart Class',
+    locale: 'id_ID',
+    type: 'website',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Smart Class - Command Center Wali Kelas',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Smart Class - Command Center Wali Kelas',
+    description:
+      'Aplikasi produktivitas dan pengelolaan kelas terpadu untuk wali kelas: absensi siswa, jurnal harian guru, rekap nilai, dan buku tabungan kelas.',
+    images: ['/og-image.png'],
+  },
 };
 
 export default function RootLayout({
@@ -22,7 +79,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang='en' className={`${outfit.variable} h-full antialiased`}>
+    <html lang='id' className={`${outfit.variable} h-full antialiased`}>
       <body className='font-sans min-h-full flex flex-col bg-slate-50 text-slate-900'>
         <QueryProvider>
           {children}
