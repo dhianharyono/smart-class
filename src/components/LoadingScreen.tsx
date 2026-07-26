@@ -8,14 +8,27 @@ interface LoadingScreenProps {
   variant?: 'teacher' | 'admin';
 }
 
-export default function LoadingScreen({ message, variant = 'teacher' }: LoadingScreenProps) {
+export default function LoadingScreen({
+  message,
+  variant = 'teacher',
+}: LoadingScreenProps) {
   const defaultMessages = useMemo(() => {
     return variant === 'admin'
-      ? ['Memverifikasi hak akses admin...', 'Membuka Command Center...', 'Memuat data sistem...']
-      : ['Memverifikasi sesi wali kelas...', 'Menghubungkan ke kelas...', 'Mempersiapkan dasbor Anda...'];
+      ? [
+          'Memverifikasi hak akses admin...',
+          'Membuka Dashboard...',
+          'Memuat data sistem...',
+        ]
+      : [
+          'Memverifikasi sesi wali kelas...',
+          'Menghubungkan ke kelas...',
+          'Mempersiapkan Dashboard Anda...',
+        ];
   }, [variant]);
 
-  const [displayMessage, setDisplayMessage] = useState(message || defaultMessages[0]);
+  const [displayMessage, setDisplayMessage] = useState(
+    message || defaultMessages[0],
+  );
   const [msgIdx, setMsgIdx] = useState(0);
 
   useEffect(() => {
@@ -32,35 +45,50 @@ export default function LoadingScreen({ message, variant = 'teacher' }: LoadingS
     return () => clearInterval(interval);
   }, [message, defaultMessages]);
 
-  const glowColor = variant === 'admin' ? 'bg-indigo-500/10' : 'bg-emerald-500/10';
-  const logoBg = variant === 'admin' ? 'from-indigo-600 to-violet-600' : 'from-emerald-600 to-teal-600';
-  const textGradient = variant === 'admin' ? 'from-indigo-600 to-violet-600' : 'from-emerald-600 to-teal-600';
+  const glowColor =
+    variant === 'admin' ? 'bg-indigo-500/10' : 'bg-emerald-500/10';
+  const logoBg =
+    variant === 'admin'
+      ? 'from-indigo-600 to-violet-600'
+      : 'from-emerald-600 to-teal-600';
+  const textGradient =
+    variant === 'admin'
+      ? 'from-indigo-600 to-violet-600'
+      : 'from-emerald-600 to-teal-600';
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-50 transition-all duration-300">
+    <div className='fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-50 transition-all duration-300'>
       {/* Background radial glow */}
-      <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] ${glowColor} rounded-full blur-[120px] pointer-events-none`} />
+      <div
+        className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] ${glowColor} rounded-full blur-[120px] pointer-events-none`}
+      />
 
-      <div className="flex flex-col items-center text-center space-y-6 relative z-10">
+      <div className='flex flex-col items-center text-center space-y-6 relative z-10'>
         {/* Brand Logo */}
-        <div className={`flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-tr ${logoBg} text-white shadow-xl shadow-slate-200 mb-2`}>
-          <BookOpen className="h-8 w-8" />
+        <div
+          className={`flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-tr ${logoBg} text-white shadow-xl shadow-slate-200 mb-2`}
+        >
+          <BookOpen className='h-8 w-8' />
         </div>
 
         {/* Title */}
-        <div className="space-y-1">
-          <h2 className={`text-3xl font-extrabold tracking-tight bg-gradient-to-r ${textGradient} bg-clip-text text-transparent`}>
+        <div className='space-y-1'>
+          <h2
+            className={`text-3xl font-extrabold tracking-tight bg-gradient-to-r ${textGradient} bg-clip-text text-transparent`}
+          >
             Smart Class
           </h2>
-          <p className="text-slate-500 text-xs tracking-wider uppercase font-semibold">
+          <p className='text-slate-500 text-xs tracking-wider uppercase font-semibold'>
             {variant === 'admin' ? 'Admin Portal' : 'Wali Kelas'}
           </p>
         </div>
 
         {/* Spinner & Message */}
-        <div className="flex flex-col items-center space-y-3 pt-4">
-          <Loader2 className={`h-6 w-6 animate-spin ${variant === 'admin' ? 'text-indigo-600' : 'text-emerald-600'}`} />
-          <p className="text-slate-700 text-sm font-medium animate-pulse">
+        <div className='flex flex-col items-center space-y-3 pt-4'>
+          <Loader2
+            className={`h-6 w-6 animate-spin ${variant === 'admin' ? 'text-indigo-600' : 'text-emerald-600'}`}
+          />
+          <p className='text-slate-700 text-sm font-medium animate-pulse'>
             {displayMessage}
           </p>
         </div>

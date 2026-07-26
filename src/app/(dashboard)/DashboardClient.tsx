@@ -1,6 +1,14 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useSyncExternalStore } from 'react';
+
+const emptySubscribe = () => () => {};
+const getSnapshot = () => true;
+const getServerSnapshot = () => false;
+
+function useIsMounted() {
+  return useSyncExternalStore(emptySubscribe, getSnapshot, getServerSnapshot);
+}
 import Link from 'next/link';
 import {
   Users,
@@ -76,12 +84,8 @@ interface DashboardClientProps {
 }
 
 export default function DashboardClient({ stats }: DashboardClientProps) {
-  const [mounted, setMounted] = useState(false);
+  const mounted = useIsMounted();
   const [kkm] = useState<number>(stats.kkm);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   if (!mounted) {
     return (

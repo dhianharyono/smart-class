@@ -12,7 +12,7 @@ const outfit = Outfit({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Smart Class - Command Center Wali Kelas',
+    default: 'Smart Class - Dashboard Wali Kelas',
     template: '%s | Smart Class',
   },
   description:
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   creator: 'Smart Class',
   publisher: 'Smart Class',
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || 'https://smart-class.vercel.app'
+    process.env.NEXT_PUBLIC_APP_URL || 'https://smart-class.vercel.app',
   ),
   alternates: {
     canonical: '/',
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: 'Smart Class - Command Center Wali Kelas',
+    title: 'Smart Class - Dashboard Wali Kelas',
     description:
       'Aplikasi produktivitas dan pengelolaan kelas terpadu untuk wali kelas: absensi siswa, jurnal harian guru, rekap nilai, dan buku tabungan kelas.',
     url: '/',
@@ -60,16 +60,24 @@ export const metadata: Metadata = {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Smart Class - Command Center Wali Kelas',
+        alt: 'Smart Class - Dashboard Wali Kelas',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Smart Class - Command Center Wali Kelas',
+    title: 'Smart Class - Dashboard Wali Kelas',
     description:
       'Aplikasi produktivitas dan pengelolaan kelas terpadu untuk wali kelas: absensi siswa, jurnal harian guru, rekap nilai, dan buku tabungan kelas.',
     images: ['/og-image.png'],
+  },
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/icon.png', type: 'image/png' },
+    ],
+    shortcut: '/icon.svg',
+    apple: '/apple-icon.png',
   },
 };
 

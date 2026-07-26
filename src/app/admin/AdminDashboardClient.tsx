@@ -1,6 +1,14 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useSyncExternalStore } from 'react';
+
+const emptySubscribe = () => () => {};
+const getSnapshot = () => true;
+const getServerSnapshot = () => false;
+
+function useIsMounted() {
+  return useSyncExternalStore(emptySubscribe, getSnapshot, getServerSnapshot);
+}
 import {
   Users,
   School,
@@ -64,11 +72,7 @@ interface AdminDashboardClientProps {
 }
 
 export default function AdminDashboardClient({ stats, schools }: AdminDashboardClientProps) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useIsMounted();
 
   if (!mounted) {
     return (
@@ -123,7 +127,7 @@ export default function AdminDashboardClient({ stats, schools }: AdminDashboardC
             </span>
           </div>
           <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900">
-            Admin Command Center
+            Dashboard Admin
           </h2>
           <p className="text-slate-600 text-xs sm:text-sm mt-1">
             Ikhtisar operasional, statistik guru, dan sekolah terdaftar di seluruh sistem.

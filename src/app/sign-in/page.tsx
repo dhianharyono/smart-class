@@ -5,7 +5,15 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { loginTeacher, logoutTeacher } from '@/actions/authActions';
 import { toast } from 'sonner';
-import { Mail, Lock, BookOpen, Loader2, ArrowRight, ArrowLeft, Eye, EyeOff, AlertTriangle } from 'lucide-react';
+import {
+  Mail,
+  Lock,
+  BookOpen,
+  Loader2,
+  ArrowLeft,
+  Eye,
+  EyeOff,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import LoadingScreen from '@/components/LoadingScreen';
 import ReCaptcha from '@/components/ReCaptcha';
@@ -17,10 +25,20 @@ export default function SignInPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
-  const [redirectVariant, setRedirectVariant] = useState<'teacher' | 'admin'>('teacher');
+  const [redirectVariant, setRedirectVariant] = useState<'teacher' | 'admin'>(
+    'teacher',
+  );
   const [recaptchaToken, setRecaptchaToken] = useState<string>('');
   const [resetCaptcha, setResetCaptcha] = useState<number>(0);
-  const [failedAttempts, setFailedAttempts] = useState<number>(0);
+  const [failedAttempts, setFailedAttempts] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('login_failed_attempts');
+      if (saved) {
+        return parseInt(saved, 10) || 0;
+      }
+    }
+    return 0;
+  });
 
   const CAPTCHA_THRESHOLD = 2; // Show reCAPTCHA after 2 failed attempts
   const isCaptchaRequired = failedAttempts >= CAPTCHA_THRESHOLD;
@@ -28,12 +46,6 @@ export default function SignInPage() {
   useEffect(() => {
     // Clear stale session cookie to prevent redirect loops
     logoutTeacher();
-
-    // Retrieve saved failed login attempts from sessionStorage
-    const saved = sessionStorage.getItem('login_failed_attempts');
-    if (saved) {
-      setFailedAttempts(parseInt(saved, 10) || 0);
-    }
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -43,7 +55,11 @@ export default function SignInPage() {
       return;
     }
 
-    if (isCaptchaRequired && !!process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && !recaptchaToken) {
+    if (
+      isCaptchaRequired &&
+      !!process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY &&
+      !recaptchaToken
+    ) {
       toast.error('Harap selesaikan verifikasi reCAPTCHA terlebih dahulu.');
       return;
     }
@@ -71,7 +87,10 @@ export default function SignInPage() {
         toast.error(res.error || 'Email/username atau password salah.');
         const nextAttempts = failedAttempts + 1;
         setFailedAttempts(nextAttempts);
-        sessionStorage.setItem('login_failed_attempts', nextAttempts.toString());
+        sessionStorage.setItem(
+          'login_failed_attempts',
+          nextAttempts.toString(),
+        );
         setResetCaptcha((prev) => prev + 1);
         setRecaptchaToken('');
         setLoading(false);
@@ -91,91 +110,96 @@ export default function SignInPage() {
     return <LoadingScreen variant={redirectVariant} />;
   }
 
-
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-16 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className='flex min-h-screen items-center justify-center bg-slate-50 px-4 py-16 sm:px-6 lg:px-8 relative overflow-hidden'>
       {/* Back to Landing Page Button */}
-      <div className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20">
+      <div className='absolute top-4 left-4 sm:top-6 sm:left-6 z-20'>
         <Link
-          href="/"
-          className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition-all text-xs font-semibold shadow-xs"
+          href='/'
+          className='inline-flex items-center gap-2 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition-all text-xs font-semibold shadow-xs'
         >
-          <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-600" />
+          <ArrowLeft className='h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-600' />
           <span>Kembali ke Beranda</span>
         </Link>
       </div>
       {/* Background radial glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none' />
 
-      <div className="w-full max-w-md space-y-8 relative z-10 animate-fade-in">
+      <div className='w-full max-w-md space-y-8 relative z-10 animate-fade-in'>
         {/* Brand Logo & Header */}
-        <div className="flex flex-col items-center text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-lg shadow-emerald-500/20 mb-4 animate-bounce-slow">
-            <BookOpen className="h-6 w-6" />
+        <div className='flex flex-col items-center text-center'>
+          <div className='flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-lg shadow-emerald-500/20 mb-4 animate-bounce-slow'>
+            <BookOpen className='h-6 w-6' />
           </div>
-          <h2 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+          <h2 className='text-3xl font-extrabold tracking-tight bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent'>
             Smart Class
           </h2>
-          <p className="mt-2 text-sm text-slate-600 font-medium">
-            Masuk ke Command Center Wali Kelas Anda
+          <p className='mt-2 text-sm text-slate-600 font-medium'>
+            Masuk ke Dashboard Wali Kelas Anda
           </p>
         </div>
 
         {/* Card Form */}
-        <div className="bg-white border border-slate-200/80 shadow-xl shadow-slate-200/50 rounded-2xl p-6 sm:p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <div className='bg-white border border-slate-200/80 shadow-xl shadow-slate-200/50 rounded-2xl p-6 sm:p-8'>
+          <form onSubmit={handleSubmit} className='space-y-6'>
             {/* Email Field */}
-            <div className="space-y-2">
-              <label htmlFor="email" className="text-xs font-bold text-slate-700 tracking-wider uppercase block">
+            <div className='space-y-2'>
+              <label
+                htmlFor='email'
+                className='text-xs font-bold text-slate-700 tracking-wider uppercase block'
+              >
                 Email / Username Wali Kelas
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <Mail className="h-4.5 w-4.5" />
+              <div className='relative'>
+                <div className='absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400'>
+                  <Mail className='h-4.5 w-4.5' />
                 </div>
                 <input
-                  id="email"
-                  name="email"
-                  type="text"
+                  id='email'
+                  name='email'
+                  type='text'
                   required
-                  placeholder="Email atau Username"
+                  placeholder='Email atau Username'
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={loading}
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-sm transition-all duration-200 disabled:opacity-50"
+                  className='w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-sm transition-all duration-200 disabled:opacity-50'
                 />
               </div>
             </div>
 
             {/* Password Field */}
-            <div className="space-y-2">
-              <label htmlFor="password" className="text-xs font-bold text-slate-700 tracking-wider uppercase block">
+            <div className='space-y-2'>
+              <label
+                htmlFor='password'
+                className='text-xs font-bold text-slate-700 tracking-wider uppercase block'
+              >
                 Kata Sandi
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <Lock className="h-4.5 w-4.5" />
+              <div className='relative'>
+                <div className='absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400'>
+                  <Lock className='h-4.5 w-4.5' />
                 </div>
                 <input
-                  id="password"
-                  name="password"
+                  id='password'
+                  name='password'
                   type={showPassword ? 'text' : 'password'}
                   required
-                  placeholder="••••••••"
+                  placeholder='••••••••'
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={loading}
-                  className="w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-sm transition-all duration-200 disabled:opacity-50"
+                  className='w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-sm transition-all duration-200 disabled:opacity-50'
                 />
                 <button
-                  type="button"
+                  type='button'
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer"
+                  className='absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer'
                 >
                   {showPassword ? (
-                    <EyeOff className="h-4.5 w-4.5" />
+                    <EyeOff className='h-4.5 w-4.5' />
                   ) : (
-                    <Eye className="h-4.5 w-4.5" />
+                    <Eye className='h-4.5 w-4.5' />
                   )}
                 </button>
               </div>
@@ -183,7 +207,7 @@ export default function SignInPage() {
 
             {/* Google reCAPTCHA Protection (Conditional) */}
             {isCaptchaRequired && (
-              <div className="space-y-2 pt-1 animate-fade-in">
+              <div className='space-y-2 pt-1 animate-fade-in'>
                 <ReCaptcha
                   onVerify={(token) => setRecaptchaToken(token)}
                   onExpire={() => setRecaptchaToken('')}
@@ -194,13 +218,18 @@ export default function SignInPage() {
 
             {/* Submit Button */}
             <Button
-              type="submit"
-              disabled={loading || (isCaptchaRequired && !!process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && !recaptchaToken)}
-              className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold py-3 px-4 rounded-xl shadow-lg shadow-emerald-600/20 transition-all duration-200 flex items-center justify-center gap-2 text-sm cursor-pointer disabled:opacity-50"
+              type='submit'
+              disabled={
+                loading ||
+                (isCaptchaRequired &&
+                  !!process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY &&
+                  !recaptchaToken)
+              }
+              className='w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold py-3 px-4 rounded-xl shadow-lg shadow-emerald-600/20 transition-all duration-200 flex items-center justify-center gap-2 text-sm cursor-pointer disabled:opacity-50'
             >
               {loading ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className='h-4 w-4 animate-spin' />
                   <span>Memverifikasi...</span>
                 </>
               ) : (
@@ -212,9 +241,12 @@ export default function SignInPage() {
           </form>
 
           {/* Registration link */}
-          <div className="mt-6 text-center text-sm border-t border-slate-200 pt-6">
-            <span className="text-slate-500">Belum memiliki akun? </span>
-            <Link href="/sign-up" className="text-emerald-600 hover:text-emerald-700 font-semibold transition-colors duration-150">
+          <div className='mt-6 text-center text-sm border-t border-slate-200 pt-6'>
+            <span className='text-slate-500'>Belum memiliki akun? </span>
+            <Link
+              href='/sign-up'
+              className='text-emerald-600 hover:text-emerald-700 font-semibold transition-colors duration-150'
+            >
               Daftar Baru
             </Link>
           </div>
