@@ -10,9 +10,7 @@ import {
   GraduationCap,
   Wallet,
   BookMarked,
-  Sparkles,
   CheckCircle2,
-  ArrowRight,
   ArrowUp,
   ChevronDown,
   Menu,
@@ -25,10 +23,6 @@ import {
   Check,
   LayoutDashboard,
   LogOut,
-  TrendingUp,
-  ShieldCheck,
-  FileSpreadsheet,
-  Award,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getCurrentUserSession, logoutTeacher } from '@/actions/authActions';
@@ -77,7 +71,10 @@ export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'scrollRestoration' in window.history) {
+    if (
+      typeof window !== 'undefined' &&
+      'scrollRestoration' in window.history
+    ) {
       window.history.scrollRestoration = 'manual';
     }
     const handleScroll = () => {
@@ -154,7 +151,7 @@ export default function LandingPage() {
               onClick={(e) => scrollToSection(e, 'modul')}
               className='hover:text-emerald-600 transition-colors'
             >
-              Modul
+              Modul KBM
             </a>
             <a
               href='#manfaat'
@@ -203,7 +200,7 @@ export default function LandingPage() {
                 </Link>
                 <Link href='/sign-up'>
                   <Button className='bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-5 py-2.5 rounded-xl shadow-xs transition-all duration-300 flex items-center gap-2 cursor-pointer'>
-                    <span>Mulai Sekarang</span>
+                    <span>Daftar Sekarang</span>
                   </Button>
                 </Link>
               </>
@@ -316,7 +313,7 @@ export default function LandingPage() {
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <Button className='w-full justify-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl cursor-pointer shadow-xs'>
-                        Mulai Sekarang
+                        Daftar Sekarang
                       </Button>
                     </Link>
                   </>
@@ -351,7 +348,8 @@ export default function LandingPage() {
             className='mt-5 sm:mt-6 text-base sm:text-lg md:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed font-normal px-2'
           >
             Satu sistem terpadu untuk pencatatan presensi siswa, penilaian KKM,
-            buku tabungan digital, agenda jurnal KBM harian, dan laporan kelas otomatis.
+            buku tabungan digital, agenda jurnal KBM harian, dan laporan kelas
+            otomatis.
           </motion.p>
 
           {/* CTA Buttons */}
@@ -364,7 +362,10 @@ export default function LandingPage() {
             {currentUser ? (
               <>
                 <Link href={dashboardHref} className='w-full sm:w-auto'>
-                  <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                  <motion.div
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                  >
                     <Button className='w-full sm:w-auto h-12 sm:h-14 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm sm:text-base px-7 sm:px-9 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2.5 cursor-pointer'>
                       <LayoutDashboard className='h-5 w-5' />
                       <span>Buka Dashboard Saya</span>
@@ -387,18 +388,21 @@ export default function LandingPage() {
             ) : (
               <>
                 <Link href='/sign-up' className='w-full sm:w-auto'>
-                  <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                  <motion.div
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                  >
                     <Button className='w-full sm:w-auto h-12 sm:h-14 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm sm:text-base px-7 sm:px-9 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2.5 cursor-pointer'>
-                      <span>Mulai Sekarang</span>
+                      <span>Daftar Sekarang</span>
                     </Button>
                   </motion.div>
                 </Link>
-                <Link href='/sign-in' className='w-full sm:w-auto'>
+                <Link href='#modul' className='w-full sm:w-auto'>
                   <Button
                     variant='outline'
                     className='w-full sm:w-auto h-12 sm:h-14 border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold text-sm sm:text-base px-6 sm:px-8 rounded-2xl transition-all flex items-center justify-center cursor-pointer shadow-xs'
                   >
-                    <span>Masuk ke Dashboard</span>
+                    <span>Lihat Modul Wali Kelas</span>
                   </Button>
                 </Link>
               </>
@@ -488,7 +492,9 @@ export default function LandingPage() {
                   </span>
                 </div>
                 <div className='p-2 rounded-xl bg-white border border-slate-200/80'>
-                  <div className='text-base font-extrabold text-teal-700 font-mono'>Rp 4.850.000</div>
+                  <div className='text-base font-extrabold text-teal-700 font-mono'>
+                    Rp 4.850.000
+                  </div>
                 </div>
               </div>
 
@@ -504,7 +510,9 @@ export default function LandingPage() {
                   </span>
                 </div>
                 <div className='p-2 rounded-xl bg-white border border-slate-200/80'>
-                  <div className='text-base font-extrabold text-indigo-700 font-mono'>85.4 / 100</div>
+                  <div className='text-base font-extrabold text-indigo-700 font-mono'>
+                    85.4 / 100
+                  </div>
                 </div>
               </div>
             </div>
@@ -519,10 +527,30 @@ export default function LandingPage() {
           <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
             <div className='grid grid-cols-2 lg:grid-cols-4 gap-8 text-center'>
               {[
-                { num: '100%', title: 'Paperless System', desc: 'Bebas buku fisik & kertas rekap manual', color: 'text-emerald-600' },
-                { num: '5+ Modul', title: 'Terintegrasi Sempurna', desc: 'Absensi, Nilai, Tabungan, Jurnal & Siswa', color: 'text-teal-600' },
-                { num: '80% Efisien', title: 'Efisiensi Administrasi', desc: 'Rekap bulanan/semester serba otomatis', color: 'text-indigo-600' },
-                { num: 'Safe Auth', title: 'Perlindungan Data', desc: 'Privasi data siswa tersimpan aman', color: 'text-emerald-600' },
+                {
+                  num: '100%',
+                  title: 'Paperless System',
+                  desc: 'Bebas buku fisik & kertas rekap manual',
+                  color: 'text-emerald-600',
+                },
+                {
+                  num: '5+ Modul',
+                  title: 'Terintegrasi Sempurna',
+                  desc: 'Absensi, Nilai, Tabungan, Jurnal & Siswa',
+                  color: 'text-teal-600',
+                },
+                {
+                  num: '80% Efisien',
+                  title: 'Efisiensi Administrasi',
+                  desc: 'Rekap bulanan/semester serba otomatis',
+                  color: 'text-indigo-600',
+                },
+                {
+                  num: 'Safe Auth',
+                  title: 'Perlindungan Data',
+                  desc: 'Privasi data siswa tersimpan aman',
+                  color: 'text-emerald-600',
+                },
               ].map((stat, idx) => (
                 <motion.div
                   key={idx}
@@ -533,7 +561,9 @@ export default function LandingPage() {
                   whileHover={{ y: -4 }}
                   className='space-y-2 p-4 rounded-2xl transition-all'
                 >
-                  <div className={`text-3xl sm:text-4xl font-extrabold tracking-tight ${stat.color}`}>
+                  <div
+                    className={`text-3xl sm:text-4xl font-extrabold tracking-tight ${stat.color}`}
+                  >
                     {stat.num}
                   </div>
                   <div className='text-sm font-bold text-slate-900'>
@@ -594,10 +624,11 @@ export default function LandingPage() {
                   key={tab.id}
                   whileTap={{ scale: 0.96 }}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer border ${isActive
-                    ? 'bg-emerald-600 text-white border-emerald-500 shadow-xs'
-                    : 'bg-white text-slate-600 hover:bg-slate-100 border-slate-200'
-                    }`}
+                  className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer border ${
+                    isActive
+                      ? 'bg-emerald-600 text-white border-emerald-500 shadow-xs'
+                      : 'bg-white text-slate-600 hover:bg-slate-100 border-slate-200'
+                  }`}
                 >
                   <Icon className='h-4 w-4' />
                   <span>{tab.label}</span>
@@ -996,10 +1027,15 @@ export default function LandingPage() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: '-40px' }}
                     transition={{ duration: 0.5, delay: idx * 0.15 }}
-                    whileHover={{ y: -8, transition: { duration: 0.25, ease: 'easeOut' } }}
+                    whileHover={{
+                      y: -8,
+                      transition: { duration: 0.25, ease: 'easeOut' },
+                    }}
                     className={`p-8 rounded-3xl bg-slate-50 border border-slate-200 ${card.hoverBorder} transition-colors space-y-4 group h-full shadow-xs`}
                   >
-                    <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${card.color} group-hover:scale-110 transition-transform`}>
+                    <div
+                      className={`flex h-12 w-12 items-center justify-center rounded-2xl ${card.color} group-hover:scale-110 transition-transform`}
+                    >
                       <Icon className='h-6 w-6' />
                     </div>
                     <h3 className='text-xl font-extrabold text-slate-900'>
@@ -1047,11 +1083,11 @@ export default function LandingPage() {
               },
               {
                 q: 'Bagaimana cara mendaftar dan mulai menggunakan aplikasi?',
-                a: 'Cukup klik tombol "Mulai Gratis" atau "Daftar Baru", isi nama lengkap, email, nama sekolah, dan kata sandi. Akun Anda akan langsung aktif dan siap digunakan seketika.',
+                a: 'Cukup klik tombol "Daftar Sekarang", isi nama lengkap, email, nama sekolah, dan kata sandi. Akun Anda akan langsung aktif dan siap digunakan.',
               },
               {
                 q: 'Apakah data absensi dan nilai siswa saya aman?',
-                a: 'Semua data disimpan dalam basis data terenkripsi dengan sesi autentikasi terproteksi tinggi. Hanya Anda sebagai wali kelas yang berhak mengelola data kelas Anda.',
+                a: 'Semua data disimpan dalam basis data terenkripsi dengan sesi autentikasi terproteksi. Hanya Anda sebagai wali kelas yang berhak mengelola data kelas Anda.',
               },
             ].map((item, idx) => (
               <motion.div
@@ -1068,8 +1104,9 @@ export default function LandingPage() {
                 >
                   <span>{item.q}</span>
                   <ChevronDown
-                    className={`h-5 w-5 text-slate-400 transition-transform duration-300 flex-shrink-0 ${openFaq === idx ? 'rotate-180 text-emerald-600' : ''
-                      }`}
+                    className={`h-5 w-5 text-slate-400 transition-transform duration-300 flex-shrink-0 ${
+                      openFaq === idx ? 'rotate-180 text-emerald-600' : ''
+                    }`}
                   />
                 </button>
                 <AnimatePresence>
@@ -1115,7 +1152,10 @@ export default function LandingPage() {
               <div className='pt-4 flex flex-col sm:flex-row items-center justify-center gap-4'>
                 {currentUser ? (
                   <Link href={dashboardHref} className='w-full sm:w-auto'>
-                    <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+                    <motion.div
+                      whileHover={{ scale: 1.04 }}
+                      whileTap={{ scale: 0.96 }}
+                    >
                       <Button className='w-full sm:w-auto bg-white text-emerald-800 hover:bg-emerald-50 font-bold text-base px-8 py-6 rounded-2xl shadow-md transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer'>
                         <LayoutDashboard className='h-5 w-5' />
                         <span>Buka Dashboard</span>
@@ -1125,19 +1165,14 @@ export default function LandingPage() {
                 ) : (
                   <>
                     <Link href='/sign-up' className='w-full sm:w-auto'>
-                      <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+                      <motion.div
+                        whileHover={{ scale: 1.04 }}
+                        whileTap={{ scale: 0.96 }}
+                      >
                         <Button className='w-full sm:w-auto bg-white text-emerald-800 hover:bg-emerald-50 font-bold text-base px-8 py-6 rounded-2xl shadow-md transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer'>
-                          <span>Daftar Akun Wali Kelas</span>
+                          <span>Daftar Sekarang</span>
                         </Button>
                       </motion.div>
-                    </Link>
-                    <Link href='/sign-in' className='w-full sm:w-auto'>
-                      <Button
-                        variant='outline'
-                        className='w-full sm:w-auto border-white/40 bg-emerald-700/50 hover:bg-emerald-700 text-white font-bold text-base px-8 py-6 rounded-2xl transition-all cursor-pointer'
-                      >
-                        <span>Masuk Aplikasi</span>
-                      </Button>
                     </Link>
                   </>
                 )}
