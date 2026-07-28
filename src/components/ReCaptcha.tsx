@@ -15,9 +15,10 @@ interface ReCaptchaProps {
   onVerify: (token: string) => void;
   onExpire?: () => void;
   resetTrigger?: number;
+  theme?: 'light' | 'dark';
 }
 
-export default function ReCaptcha({ onVerify, onExpire, resetTrigger }: ReCaptchaProps) {
+export default function ReCaptcha({ onVerify, onExpire, resetTrigger, theme = 'light' }: ReCaptchaProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<number | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -43,7 +44,7 @@ export default function ReCaptcha({ onVerify, onExpire, resetTrigger }: ReCaptch
 
       const widgetId = window.grecaptcha.render(containerRef.current, {
         sitekey: siteKey,
-        theme: 'dark',
+        theme: theme,
         callback: (token: string) => {
           setError(null);
           onVerify(token);
