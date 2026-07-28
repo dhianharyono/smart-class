@@ -334,9 +334,9 @@ export default function LandingPage() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className='text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 max-w-4xl mx-auto leading-tight sm:leading-[1.12]'
           >
-            Kelola Administrasi Kelas
+            Smart Class
             <span className='block mt-1 sm:mt-2 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 bg-clip-text text-transparent'>
-              Lebih Cepat, Cerdas & Tanpa Kertas
+              Dashboard Wali Kelas
             </span>
           </motion.h1>
 
@@ -594,7 +594,7 @@ export default function LandingPage() {
               Modul Utama Wali Kelas
             </h2>
             <p className='text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight'>
-              Semua Kebutuhan Wali Kelas Dalam Satu Genggaman
+              Kebutuhan Kelas Dalam Satu Genggaman
             </p>
             <p className='text-base text-slate-600 font-medium'>
               Pilih modul di bawah ini untuk melihat simulasi antarmuka dan
@@ -991,7 +991,7 @@ export default function LandingPage() {
                 Mengapa Memilih Smart Class
               </h2>
               <p className='text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight'>
-                Dirancang Khusus Untuk Memudahkan Tugas Wali Kelas
+                Memudahkan Tugas Wali Kelas
               </p>
             </motion.div>
 
@@ -1143,11 +1143,13 @@ export default function LandingPage() {
           >
             <div className='relative z-10 space-y-6 max-w-3xl mx-auto'>
               <h2 className='text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight'>
-                Siap Tingkatkan Produktivitas Kelas Anda Hari Ini?
+                Siap Tingkatkan Produktivitas <br /> Anda Hari Ini?
               </h2>
               <p className='text-base sm:text-lg text-emerald-50 font-medium'>
                 Bergabunglah dengan wali kelas modern lainnya dalam mengelola
-                administrasi kelas lebih cepat, akurat, dan paperless.
+                administrasi kelas lebih cepat, akurat, dan paperless. Hanya
+                dengan beberapa klik, semua kebutuhan kelas ada di genggaman
+                Anda.
               </p>
               <div className='pt-4 flex flex-col sm:flex-row items-center justify-center gap-4'>
                 {currentUser ? (
