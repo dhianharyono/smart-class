@@ -34,22 +34,60 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card';
 
 const ALL_MENUS = [
-  { href: '/siswa', label: 'Data Siswa', desc: 'Manajemen profil, data diri, dan direktori siswa', icon: Users },
-  { href: '/absensi', label: 'Absensi Kelas', desc: 'Pencatatan rekap kehadiran dan statistik kelas', icon: CalendarCheck2 },
-  { href: '/nilai', label: 'Nilai Akademik', desc: 'Penginputan nilai mata pelajaran & standar KKM', icon: GraduationCap },
-  { href: '/tabungan', label: 'Tabungan Siswa', desc: 'Pencatatan setoran & penarikan kas tabungan', icon: Wallet },
-  { href: '/jadwal', label: 'Jadwal & Alokasi', desc: 'Plotting jadwal pelajaran mingguan kelas & piket', icon: Calendar },
-  { href: '/jurnal', label: 'Jurnal Wali Kelas', desc: 'Agenda harian mengajar guru & KBM', icon: BookMarked },
+  {
+    href: '/siswa',
+    label: 'Data Siswa',
+    desc: 'Manajemen profil, data diri, dan direktori siswa',
+    icon: Users,
+  },
+  {
+    href: '/absensi',
+    label: 'Absensi Kelas',
+    desc: 'Pencatatan rekap kehadiran dan statistik kelas',
+    icon: CalendarCheck2,
+  },
+  {
+    href: '/nilai',
+    label: 'Nilai Akademik',
+    desc: 'Penginputan nilai mata pelajaran & standar KKM',
+    icon: GraduationCap,
+  },
+  {
+    href: '/tabungan',
+    label: 'Tabungan Siswa',
+    desc: 'Pencatatan setoran & penarikan kas tabungan',
+    icon: Wallet,
+  },
+  {
+    href: '/jadwal',
+    label: 'Jadwal & Alokasi',
+    desc: 'Plotting jadwal pelajaran mingguan kelas & piket',
+    icon: Calendar,
+  },
+  {
+    href: '/jurnal',
+    label: 'Jurnal Wali Kelas',
+    desc: 'Agenda harian mengajar guru & KBM',
+    icon: BookMarked,
+  },
 ];
 
 export default function ProfileClient() {
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'menus'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'menus'>(
+    'profile',
+  );
 
   // Query Profile Data
   const { data: profile, isLoading } = useQuery({
@@ -86,7 +124,17 @@ export default function ProfileClient() {
         className: profile.className || '',
         nip: profile.nip || '-',
       });
-      setSelectedMenus(profile.enabledMenus || ['/', '/siswa', '/absensi', '/nilai', '/tabungan', '/jadwal', '/jurnal']);
+      setSelectedMenus(
+        profile.enabledMenus || [
+          '/',
+          '/siswa',
+          '/absensi',
+          '/nilai',
+          '/tabungan',
+          '/jadwal',
+          '/jurnal',
+        ],
+      );
     }
   }, [profile]);
 
@@ -176,16 +224,22 @@ export default function ProfileClient() {
           <Loader2 className='h-6 w-6 animate-spin' />
         </div>
         <span className='font-bold text-slate-800 text-base'>
-          {isReloading ? 'Menyesuaikan susunan menu sidebar...' : 'Memuat data profil...'}
+          {isReloading
+            ? 'Menyesuaikan susunan menu sidebar...'
+            : 'Memuat data profil...'}
         </span>
         <span className='text-xs text-slate-400'>
-          {isReloading ? 'Memperbarui tampilan bilah navigasi Anda...' : 'Mohon tunggu sebentar'}
+          {isReloading
+            ? 'Memperbarui tampilan bilah navigasi Anda...'
+            : 'Mohon tunggu sebentar'}
         </span>
       </div>
     );
   }
 
-  const initialName = profileForm.name ? profileForm.name.charAt(0).toUpperCase() : 'G';
+  const initialName = profileForm.name
+    ? profileForm.name.charAt(0).toUpperCase()
+    : 'G';
 
   return (
     <div className='space-y-6 max-w-4xl mx-auto animate-fade-in'>
@@ -206,7 +260,9 @@ export default function ProfileClient() {
                 {profileForm.schoolName && (
                   <>
                     <span className='hidden sm:inline text-slate-300'>•</span>
-                    <span className='text-emerald-700 font-bold truncate'>{profileForm.schoolName}</span>
+                    <span className='text-emerald-700 font-bold truncate'>
+                      {profileForm.schoolName}
+                    </span>
                   </>
                 )}
               </div>
@@ -220,10 +276,11 @@ export default function ProfileClient() {
         <Button
           onClick={() => setActiveTab('profile')}
           variant='ghost'
-          className={`rounded-xl text-xs font-semibold h-10 px-3 sm:px-4 gap-1.5 sm:gap-2 transition-all cursor-pointer w-full sm:w-auto justify-center ${activeTab === 'profile'
-            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-xs'
-            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-            }`}
+          className={`rounded-xl text-xs font-semibold h-10 px-3 sm:px-4 gap-1.5 sm:gap-2 transition-all cursor-pointer w-full sm:w-auto justify-center ${
+            activeTab === 'profile'
+              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-xs'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+          }`}
         >
           <User className='h-4 w-4 shrink-0' />
           <span className='truncate'>Data Diri & Sekolah</span>
@@ -232,10 +289,11 @@ export default function ProfileClient() {
         <Button
           onClick={() => setActiveTab('security')}
           variant='ghost'
-          className={`rounded-xl text-xs font-semibold h-10 px-3 sm:px-4 gap-1.5 sm:gap-2 transition-all cursor-pointer w-full sm:w-auto justify-center ${activeTab === 'security'
-            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-xs'
-            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-            }`}
+          className={`rounded-xl text-xs font-semibold h-10 px-3 sm:px-4 gap-1.5 sm:gap-2 transition-all cursor-pointer w-full sm:w-auto justify-center ${
+            activeTab === 'security'
+              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-xs'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+          }`}
         >
           <ShieldCheck className='h-4 w-4 shrink-0' />
           <span className='truncate'>Keamanan & Password</span>
@@ -245,7 +303,7 @@ export default function ProfileClient() {
       {/* TAB 1: DATA PRIBADI & SEKOLAH */}
       {activeTab === 'profile' && (
         <Card className='bg-white border-slate-200/80 rounded-2xl shadow-xs p-6'>
-          <CardHeader className='p-0 pb-6 border-b border-slate-200 mb-6'>
+          <CardHeader className='p-0 pb-6 border-b border-slate-200 mb-2'>
             <CardTitle className='text-lg font-bold text-slate-900 flex items-center gap-2'>
               <User className='h-5 w-5 text-emerald-600' />
               Informasi Data Diri & Sekolah
@@ -255,7 +313,7 @@ export default function ProfileClient() {
             </CardDescription>
           </CardHeader>
 
-          <form onSubmit={handleProfileSubmit} className='space-y-4'>
+          <form onSubmit={handleProfileSubmit} className='space-y-2'>
             <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
               <div className='space-y-1.5'>
                 <Label className='text-slate-700 text-xs font-semibold flex items-center gap-2'>
@@ -266,7 +324,9 @@ export default function ProfileClient() {
                   required
                   placeholder='Masukkan nama lengkap Anda'
                   value={profileForm.name}
-                  onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
+                  onChange={(e) =>
+                    setProfileForm({ ...profileForm, name: e.target.value })
+                  }
                   className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-10'
                 />
               </div>
@@ -281,7 +341,9 @@ export default function ProfileClient() {
                   required
                   placeholder='contoh@sekolah.sch.id'
                   value={profileForm.email}
-                  onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
+                  onChange={(e) =>
+                    setProfileForm({ ...profileForm, email: e.target.value })
+                  }
                   className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-10'
                 />
               </div>
@@ -296,7 +358,12 @@ export default function ProfileClient() {
                 <Input
                   placeholder='Contoh: SMK 17 Seyegan'
                   value={profileForm.schoolName}
-                  onChange={(e) => setProfileForm({ ...profileForm, schoolName: e.target.value })}
+                  onChange={(e) =>
+                    setProfileForm({
+                      ...profileForm,
+                      schoolName: e.target.value,
+                    })
+                  }
                   className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-10'
                 />
               </div>
@@ -309,7 +376,12 @@ export default function ProfileClient() {
                 <Input
                   placeholder='Contoh: X TKJ 1'
                   value={profileForm.className}
-                  onChange={(e) => setProfileForm({ ...profileForm, className: e.target.value })}
+                  onChange={(e) =>
+                    setProfileForm({
+                      ...profileForm,
+                      className: e.target.value,
+                    })
+                  }
                   className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-10'
                 />
               </div>
@@ -323,7 +395,9 @@ export default function ProfileClient() {
               <Input
                 placeholder='-'
                 value={profileForm.nip}
-                onChange={(e) => setProfileForm({ ...profileForm, nip: e.target.value })}
+                onChange={(e) =>
+                  setProfileForm({ ...profileForm, nip: e.target.value })
+                }
                 className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-10'
               />
             </div>
@@ -351,7 +425,7 @@ export default function ProfileClient() {
       {/* TAB 2: KEAMANAN & PASSWORD */}
       {activeTab === 'security' && (
         <Card className='bg-white border-slate-200/80 rounded-2xl shadow-xs p-6'>
-          <CardHeader className='p-0 pb-6 border-b border-slate-200 mb-6'>
+          <CardHeader className='p-0 pb-6 border-b border-slate-200 mb-2'>
             <CardTitle className='text-lg font-bold text-slate-900 flex items-center gap-2'>
               <Lock className='h-5 w-5 text-emerald-600' />
               Ganti Kata Sandi
@@ -372,7 +446,12 @@ export default function ProfileClient() {
                 required
                 placeholder='Masukkan password lama'
                 value={passwordForm.currentPassword}
-                onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                onChange={(e) =>
+                  setPasswordForm({
+                    ...passwordForm,
+                    currentPassword: e.target.value,
+                  })
+                }
                 className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-10'
               />
             </div>
@@ -387,7 +466,12 @@ export default function ProfileClient() {
                 required
                 placeholder='Masukkan password baru'
                 value={passwordForm.newPassword}
-                onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                onChange={(e) =>
+                  setPasswordForm({
+                    ...passwordForm,
+                    newPassword: e.target.value,
+                  })
+                }
                 className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-10'
               />
             </div>
@@ -402,7 +486,12 @@ export default function ProfileClient() {
                 required
                 placeholder='Ulangi password baru'
                 value={passwordForm.confirmPassword}
-                onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                onChange={(e) =>
+                  setPasswordForm({
+                    ...passwordForm,
+                    confirmPassword: e.target.value,
+                  })
+                }
                 className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-10'
               />
             </div>
