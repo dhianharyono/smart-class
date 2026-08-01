@@ -67,6 +67,13 @@ const CONFIGURABLE_MENUS = [
     color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
   },
   {
+    href: '/piket',
+    label: 'Piket Kelas',
+    desc: 'Pengaturan kelompok petugas piket harian siswa',
+    icon: CheckCircle2,
+    color: 'text-orange-400 bg-orange-500/10 border-orange-500/20',
+  },
+  {
     href: '/jurnal',
     label: 'Jurnal Wali Kelas',
     desc: 'Agenda harian mengajar guru & rekaman kegiatan KBM',
@@ -92,7 +99,9 @@ export default function SettingsClient() {
   React.useEffect(() => {
     if (profile) {
       setSelectedMenus(
-        profile.enabledMenus || ['/', '/siswa', '/absensi', '/nilai', '/tabungan', '/jadwal', '/jurnal']
+        profile.enabledMenus && profile.enabledMenus.length > 0
+          ? profile.enabledMenus
+          : ['/dashboard', '/siswa', '/absensi', '/nilai', '/tabungan', '/jadwal', '/piket', '/jurnal', '/profile', '/settings']
       );
     }
   }, [profile]);
@@ -112,8 +121,10 @@ export default function SettingsClient() {
   });
 
   const handleToggleMenu = (href: string) => {
+    const configurableHrefs = CONFIGURABLE_MENUS.map((m) => m.href);
+    const activeConfigurable = selectedMenus.filter((m) => configurableHrefs.includes(m));
     if (selectedMenus.includes(href)) {
-      if (selectedMenus.length <= 1) {
+      if (activeConfigurable.length <= 1) {
         toast.error('Pilih setidaknya 1 menu fitur utama.');
         return;
       }
@@ -123,13 +134,22 @@ export default function SettingsClient() {
     }
   };
 
-  const handleSelectAll = () => {
-    setSelectedMenus(['/siswa', '/absensi', '/nilai', '/tabungan', '/jadwal', '/jurnal']);
-    toast.info('Seluruh menu dipilih');
+  const ALL_CONFIGURABLE_HREFS = CONFIGURABLE_MENUS.map((m) => m.href);
+  const isAllSelected = ALL_CONFIGURABLE_HREFS.every((href) => selectedMenus.includes(href));
+
+  const handleToggleAll = () => {
+    if (isAllSelected) {
+      // Nonaktifkan semua → sisakan 1 item minimal
+      setSelectedMenus([ALL_CONFIGURABLE_HREFS[0]]);
+      toast.info('Semua menu dinonaktifkan');
+    } else {
+      setSelectedMenus(ALL_CONFIGURABLE_HREFS);
+      toast.info('Seluruh menu diaktifkan');
+    }
   };
 
   const handleResetDefault = () => {
-    setSelectedMenus(['/siswa', '/absensi', '/nilai', '/tabungan', '/jadwal', '/jurnal']);
+    setSelectedMenus(['/siswa', '/absensi', '/nilai', '/tabungan', '/jadwal', '/piket', '/jurnal']);
     toast.info('Pengaturan dikembalikan ke standar');
   };
 
@@ -200,10 +220,14 @@ export default function SettingsClient() {
             <Button
               type="button"
               variant="ghost"
-              onClick={handleSelectAll}
-              className="text-xs text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 rounded-lg h-8 px-2.5 font-bold cursor-pointer"
+              onClick={handleToggleAll}
+              className={`text-xs rounded-lg h-8 px-2.5 font-bold cursor-pointer transition-colors ${
+                isAllSelected
+                  ? 'text-rose-600 hover:text-rose-700 hover:bg-rose-50'
+                  : 'text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50'
+              }`}
             >
-              Aktifkan Semua
+              {isAllSelected ? 'Nonaktifkan Semua' : 'Aktifkan Semua'}
             </Button>
           </div>
         </CardHeader>

@@ -133,25 +133,17 @@ export default function DashboardLayoutClient({
   const [mobileOpen, setMobileOpen] = useState(false);
 
   // Menu Preferences state (auto-includes /jadwal and /piket for existing profiles)
-  const [enabledMenus, setEnabledMenus] = useState<string[]>(() => {
-    const list =
-      teacher.enabledMenus && teacher.enabledMenus.length > 0
-        ? teacher.enabledMenus
-        : ['/dashboard', '/siswa', '/absensi', '/nilai', '/tabungan', '/jadwal', '/piket', '/jurnal', '/settings'];
-    let result = list.includes('/jadwal') ? list : [...list, '/jadwal'];
-    return result.includes('/piket') ? result : [...result, '/piket'];
-  });
+  const [enabledMenus, setEnabledMenus] = useState<string[]>(
+    teacher.enabledMenus && teacher.enabledMenus.length > 0
+      ? teacher.enabledMenus
+      : ['/dashboard', '/siswa', '/absensi', '/nilai', '/tabungan', '/jadwal', '/piket', '/jurnal', '/profile', '/settings']
+  );
+
 
   // Sync state if teacher prop changes
   React.useEffect(() => {
     if (teacher.enabledMenus && teacher.enabledMenus.length > 0) {
-      let list = teacher.enabledMenus.includes('/jadwal')
-        ? teacher.enabledMenus
-        : [...teacher.enabledMenus, '/jadwal'];
-      if (!list.includes('/piket')) {
-        list = [...list, '/piket'];
-      }
-      setEnabledMenus(list);
+      setEnabledMenus(teacher.enabledMenus);
     }
   }, [teacher.enabledMenus]);
 
@@ -332,8 +324,6 @@ export default function DashboardLayoutClient({
                 if (
                   item.href === '/dashboard' ||
                   item.href === '/' ||
-                  item.href === '/profile' ||
-                  item.href === '/settings' ||
                   (item.href && enabledMenus.includes(item.href))
                 ) {
                   return item;

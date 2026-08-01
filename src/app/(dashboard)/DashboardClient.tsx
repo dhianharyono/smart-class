@@ -192,6 +192,27 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
         </Link>
       </div>
 
+      {/* Empty State – when no modules are active */}
+      {statCards.length === 0 && !isTabunganEnabled && !isAbsensiEnabled && !isJurnalEnabled && !isNilaiEnabled && (
+        <div className='flex flex-col items-center justify-center py-20 text-center gap-5 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50'>
+          <div className='flex h-20 w-20 items-center justify-center rounded-2xl bg-white border border-slate-200 shadow-xs text-slate-300'>
+            <LayoutGrid className='h-10 w-10' />
+          </div>
+          <div className='space-y-1.5 max-w-sm'>
+            <h3 className='text-base font-extrabold text-slate-800'>Belum Ada Modul Aktif</h3>
+            <p className='text-sm text-slate-500 leading-relaxed'>
+              Anda belum mengaktifkan modul apapun pada dashboard. Aktifkan modul yang ingin ditampilkan melalui halaman pengaturan.
+            </p>
+          </div>
+          <Link href='/settings'>
+            <Button className='bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold gap-2 shadow-xs'>
+              <Sparkles className='h-4 w-4' />
+              Kelola Menu Modul
+            </Button>
+          </Link>
+        </div>
+      )}
+
       {/* Grid Stats */}
       {statCards.length > 0 && (
         <div className={`grid gap-4 sm:grid-cols-2 md:grid-cols-${statCards.length}`}>
