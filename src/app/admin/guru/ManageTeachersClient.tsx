@@ -179,13 +179,13 @@ export default function ManageTeachersClient({
           prev.map((t) =>
             t._id === selectedTeacher._id
               ? {
-                  ...t,
-                  name: editName,
-                  email: editEmail,
-                  schoolName: editSchool,
-                  className: editClass,
-                  role: editRole,
-                }
+                ...t,
+                name: editName,
+                email: editEmail,
+                schoolName: editSchool,
+                className: editClass,
+                role: editRole,
+              }
               : t,
           ),
         );
@@ -321,11 +321,10 @@ export default function ManageTeachersClient({
                               {teacher.email}
                             </span>
                             <span
-                              className={`px-2 py-0.5 border text-[9px] font-bold rounded-md uppercase tracking-wider ${
-                                teacher.role === 'Kepala Sekolah'
+                              className={`px-2 py-0.5 border text-[9px] font-bold rounded-md uppercase tracking-wider ${teacher.role === 'Kepala Sekolah'
                                   ? 'bg-violet-50 text-violet-700 border-violet-200'
                                   : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                              }`}
+                                }`}
                             >
                               {teacher.role || 'Wali Kelas'}
                             </span>
@@ -627,7 +626,7 @@ export default function ManageTeachersClient({
               <form onSubmit={handleCreateSubmit} className='space-y-4'>
                 <div className='space-y-1'>
                   <label className='text-[10px] font-bold text-slate-500 tracking-wider uppercase'>
-                    Nama Lengkap
+                    Nama Lengkap & Gelar
                   </label>
                   <input
                     type='text'

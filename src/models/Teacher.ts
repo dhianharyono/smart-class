@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface ITeacher extends Document {
+  username?: string;
   email: string;
   password: string;
   name: string;
@@ -11,6 +12,9 @@ export interface ITeacher extends Document {
   kkm: number;
   isFirstLogin?: boolean;
   enabledMenus?: string[];
+  isEmailVerified?: boolean;
+  emailVerificationToken?: string;
+  emailVerificationExpires?: Date;
   lastActiveAt?: Date;
   createdAt: Date;
 }
@@ -25,6 +29,7 @@ const DEFAULT_MENUS = [
 ];
 
 const TeacherSchema = new Schema<ITeacher>({
+  username: { type: String, sparse: true, index: true },
   email: { type: String, required: true, unique: true, index: true },
   password: { type: String, required: true },
   name: { type: String, required: true },
@@ -35,6 +40,9 @@ const TeacherSchema = new Schema<ITeacher>({
   kkm: { type: Number, default: 70, min: 0, max: 100 },
   isFirstLogin: { type: Boolean, default: true },
   enabledMenus: { type: [String], default: DEFAULT_MENUS },
+  isEmailVerified: { type: Boolean, default: false },
+  emailVerificationToken: { type: String },
+  emailVerificationExpires: { type: Date },
   lastActiveAt: { type: Date, default: Date.now },
   createdAt: { type: Date, default: Date.now },
 });

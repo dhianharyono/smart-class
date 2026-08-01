@@ -11,6 +11,10 @@ import { escapeRegExp } from '@/lib/utils';
 import { checkRateLimit } from '@/lib/rateLimit';
 import { verifyRecaptchaToken } from '@/lib/recaptcha';
 
+import { sendVerificationEmail } from '@/lib/email';
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export async function loginTeacher(data: { email: string; password: string; recaptchaToken?: string }) {
   try {
     // 1. Rate Limiting Check (Max 5 attempts per minute)
@@ -28,25 +32,32 @@ export async function loginTeacher(data: { email: string; password: string; reca
     }
 
     await dbConnect();
-    const { email, password } = data;
+    const { email: loginInput, password } = data;
 
-    if (!email || !password) {
-      throw new Error('Email dan password wajib diisi.');
+    if (!loginInput || !password) {
+      throw new Error('Username/email dan password wajib diisi.');
     }
 
-    const normalizedEmail = email.toLowerCase().trim();
-    const teacher = await Teacher.findOne({ email: normalizedEmail });
+    const normalizedInput = loginInput.toLowerCase().trim();
+
+    // Query teacher by either email OR username
+    const teacher = await Teacher.findOne({
+      $or: [{ email: normalizedInput }, { username: normalizedInput }],
+    });
+
     if (!teacher) {
-      throw new Error('Email atau password salah.');
+      throw new Error('Username/email atau password salah.');
     }
 
     const isPasswordValid = verifyPassword(password, teacher.password);
     if (!isPasswordValid) {
-      throw new Error('Email atau password salah.');
+      throw new Error('Username/email atau password salah.');
     }
 
     // Check if user is an admin
-    const isAdminUser = await AdminUser.exists({ username: normalizedEmail });
+    const isAdminUser = await AdminUser.exists({
+      $or: [{ username: teacher.email }, { username: teacher.username || '' }],
+    });
 
     // Sign session token
     const token = await signSession({
@@ -74,6 +85,7 @@ export async function loginTeacher(data: { email: string; password: string; reca
 
 export async function registerTeacher(data: {
   name: string;
+  username: string;
   email: string;
   password: string;
   schoolName?: string;
@@ -94,27 +106,42 @@ export async function registerTeacher(data: {
     }
 
     await dbConnect();
-    const { name, email, password, schoolName, className } = data;
+    const { name, username, email, password, schoolName, className } = data;
 
-    if (!name || !email || !password) {
-      throw new Error('Nama, email, dan password wajib diisi.');
+    if (!name || !username || !email || !password) {
+      throw new Error('Nama, username, email, dan password wajib diisi.');
+    }
+
+    const normalizedUsername = username.toLowerCase().trim();
+    const USERNAME_REGEX = /^[a-zA-Z0-9_]{3,20}$/;
+    if (!USERNAME_REGEX.test(normalizedUsername)) {
+      throw new Error('Username hanya boleh berisi huruf, angka, dan garis bawah (_) minimal 3-20 karakter.');
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+    if (!EMAIL_REGEX.test(normalizedEmail)) {
+      throw new Error('Format email tidak valid. Silakan gunakan alamat email yang aktif (misal: nama@gmail.com).');
     }
 
     if (password.length < 6) {
       throw new Error('Password minimal harus 6 karakter.');
     }
 
-    const normalizedEmail = email.toLowerCase().trim();
-    const existing = await Teacher.findOne({ email: normalizedEmail });
-    if (existing) {
-      throw new Error('Email sudah terdaftar. Silakan login.');
+    // Check if username is already taken by another teacher
+    const usernameExists = await Teacher.findOne({ username: normalizedUsername });
+    if (usernameExists) {
+      throw new Error('Username ini sudah digunakan. Silakan pilih username lain.');
+    }
+
+    const existingEmail = await Teacher.findOne({ email: normalizedEmail });
+    if (existingEmail) {
+      throw new Error('Email ini sudah terdaftar. Silakan login.');
     }
 
     const hashedPassword = hashPassword(password);
 
     let trimmedSchoolName = schoolName?.trim();
     if (trimmedSchoolName) {
-      // Check if school already exists (case-insensitive)
       const safePattern = escapeRegExp(trimmedSchoolName);
       const schoolExists = await School.findOne({ name: { $regex: new RegExp(`^${safePattern}$`, 'i') } });
       if (!schoolExists) {
@@ -126,6 +153,7 @@ export async function registerTeacher(data: {
 
     const newTeacher = new Teacher({
       name: name.trim(),
+      username: normalizedUsername,
       email: normalizedEmail,
       password: hashedPassword,
       schoolName: trimmedSchoolName,
@@ -133,13 +161,14 @@ export async function registerTeacher(data: {
       isFirstLogin: true,
       enabledMenus: ['/dashboard', '/siswa', '/absensi', '/nilai', '/tabungan', '/jurnal'],
     });
-
     await newTeacher.save();
 
     // Check if user is an admin
-    const isAdminUser = await AdminUser.exists({ username: normalizedEmail });
+    const isAdminUser = await AdminUser.exists({
+      $or: [{ username: normalizedEmail }, { username: normalizedUsername }],
+    });
 
-    // Sign session token
+    // Sign session token & log user in
     const token = await signSession({
       userId: newTeacher._id.toString(),
       email: newTeacher.email,
@@ -147,7 +176,68 @@ export async function registerTeacher(data: {
       isAdmin: !!isAdminUser,
     });
 
-    // Set cookie
+    const cookieStore = await cookies();
+    cookieStore.set('session', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 7 * 24 * 60 * 60, // 7 days
+    });
+
+    return {
+      success: true,
+      isAdmin: !!isAdminUser,
+    };
+  } catch (error: any) {
+    return { success: false, error: error.message || 'Gagal mendaftar.' };
+  }
+}
+
+export async function verifyEmailOTP(data: { email: string; otp: string }) {
+  try {
+    await dbConnect();
+    const normalizedInput = data.email.toLowerCase().trim();
+    const teacher = await Teacher.findOne({
+      $or: [{ email: normalizedInput }, { username: normalizedInput }],
+    });
+
+    if (!teacher) {
+      throw new Error('Pengguna tidak ditemukan. Silakan periksa kembali email atau username Anda.');
+    }
+
+    if (!teacher.isEmailVerified) {
+      const dbOtp = String(teacher.emailVerificationToken || '').trim();
+      const userOtp = String(data.otp || '').trim();
+
+      if (!dbOtp || dbOtp !== userOtp) {
+        throw new Error('Kode OTP verifikasi tidak cocok. Periksa kembali email Anda.');
+      }
+
+      if (teacher.emailVerificationExpires && new Date(teacher.emailVerificationExpires) < new Date()) {
+        throw new Error('Kode OTP telah kadaluarsa. Silakan minta kode verifikasi baru.');
+      }
+
+      // Mark as verified
+      teacher.isEmailVerified = true;
+      teacher.emailVerificationToken = undefined;
+      teacher.emailVerificationExpires = undefined;
+      await teacher.save();
+    }
+
+    // Check if user is an admin
+    const isAdminUser = await AdminUser.exists({
+      $or: [{ username: teacher.email }, { username: teacher.username || '' }],
+    });
+
+    // Sign session token & log user in
+    const token = await signSession({
+      userId: teacher._id.toString(),
+      email: teacher.email,
+      name: teacher.name,
+      isAdmin: !!isAdminUser,
+    });
+
     const cookieStore = await cookies();
     cookieStore.set('session', token, {
       httpOnly: true,
@@ -159,7 +249,36 @@ export async function registerTeacher(data: {
 
     return { success: true, isAdmin: !!isAdminUser };
   } catch (error: any) {
-    return { success: false, error: error.message || 'Gagal mendaftar.' };
+    return { success: false, error: error.message || 'Gagal memverifikasi OTP.' };
+  }
+}
+
+export async function resendVerificationOTP(data: { email: string }) {
+  try {
+    await dbConnect();
+    const normalizedInput = data.email.toLowerCase().trim();
+    const teacher = await Teacher.findOne({
+      $or: [{ email: normalizedInput }, { username: normalizedInput }],
+    });
+
+    if (!teacher) {
+      throw new Error('Pengguna tidak ditemukan.');
+    }
+
+    if (teacher.isEmailVerified) {
+      throw new Error('Email Anda sudah terverifikasi.');
+    }
+
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    teacher.emailVerificationToken = otpCode;
+    teacher.emailVerificationExpires = new Date(Date.now() + 15 * 60 * 1000);
+    await teacher.save();
+
+    await sendVerificationEmail({ to: teacher.email, name: teacher.name, otp: otpCode });
+
+    return { success: true, demoOtp: otpCode };
+  } catch (error: any) {
+    return { success: false, error: error.message || 'Gagal mengirim ulang kode OTP.' };
   }
 }
 

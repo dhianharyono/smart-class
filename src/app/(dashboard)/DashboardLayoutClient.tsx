@@ -27,6 +27,9 @@ import {
   ChevronRight,
   Calendar,
   School,
+  ArrowRight,
+  ArrowLeft,
+  IdCard,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -38,7 +41,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import ConfirmDialog from '@/components/ConfirmDialog';
-import { updateMenuPreferences } from '@/actions/profileActions';
+import { updateMenuPreferences, updateProfile } from '@/actions/profileActions';
+import { getSchools } from '@/actions/adminActions';
 
 interface SidebarSubItem {
   name: string;
@@ -152,13 +156,45 @@ export default function DashboardLayoutClient({
   }, [teacher.enabledMenus]);
 
   // Onboarding Modal state
+  const ALL_CONFIGURABLE_HREFS = CONFIGURABLE_MENUS.map((m) => m.href);
   const [onboardingOpen, setOnboardingOpen] = useState<boolean>(
     !!teacher.isFirstLogin
   );
+  const [onboardingStep, setOnboardingStep] = useState<1 | 2>(1);
+  const [onboardingName, setOnboardingName] = useState(teacher.name || '');
+  const [onboardingSchool, setOnboardingSchool] = useState(teacher.schoolName || '');
+  const [onboardingCustomSchool, setOnboardingCustomSchool] = useState('');
+  const [onboardingClass, setOnboardingClass] = useState(teacher.className || '');
+  const [onboardingNip, setOnboardingNip] = useState(
+    teacher.nip && teacher.nip !== '-' ? teacher.nip : ''
+  );
+  const [schoolsList, setSchoolsList] = useState<any[]>([]);
+  const [loadingSchools, setLoadingSchools] = useState(false);
+
   const [selectedOnboardingMenus, setSelectedOnboardingMenus] = useState<string[]>(
-    ['/siswa', '/absensi', '/nilai', '/tabungan', '/jadwal', '/jurnal']
+    ALL_CONFIGURABLE_HREFS
   );
   const [isSavingOnboarding, setIsSavingOnboarding] = useState(false);
+
+  React.useEffect(() => {
+    if (onboardingOpen) {
+      async function loadSchoolOptions() {
+        setLoadingSchools(true);
+        try {
+          const list = await getSchools();
+          setSchoolsList(list);
+          if (!teacher.schoolName && list.length > 0) {
+            setOnboardingSchool(list[0].name);
+          }
+        } catch (err) {
+          console.error('Gagal memuat daftar sekolah:', err);
+        } finally {
+          setLoadingSchools(false);
+        }
+      }
+      loadSchoolOptions();
+    }
+  }, [onboardingOpen, teacher.schoolName]);
 
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({
     'Kelola Siswa': true,
@@ -184,17 +220,81 @@ export default function DashboardLayoutClient({
     }
   };
 
+  const handleNextStep = () => {
+    const finalSchoolName =
+      onboardingSchool === '__NEW_SCHOOL__'
+        ? onboardingCustomSchool.trim()
+        : onboardingSchool.trim();
+
+    if (!onboardingName.trim()) {
+      toast.error('Nama lengkap & gelar wajib diisi.');
+      return;
+    }
+
+    if (!finalSchoolName) {
+      toast.error('Nama sekolah wajib diisi.');
+      return;
+    }
+
+    if (!onboardingClass.trim()) {
+      toast.error('Kelas diajar wajib diisi.');
+      return;
+    }
+
+    setOnboardingStep(2);
+  };
+
   const handleSaveOnboarding = async () => {
+    const finalSchoolName =
+      onboardingSchool === '__NEW_SCHOOL__'
+        ? onboardingCustomSchool.trim()
+        : onboardingSchool.trim();
+
+    if (!onboardingName.trim()) {
+      toast.error('Nama lengkap & gelar wajib diisi.');
+      setOnboardingStep(1);
+      return;
+    }
+
+    if (!finalSchoolName) {
+      toast.error('Nama sekolah wajib diisi.');
+      setOnboardingStep(1);
+      return;
+    }
+
+    if (!onboardingClass.trim()) {
+      toast.error('Kelas diajar wajib diisi.');
+      setOnboardingStep(1);
+      return;
+    }
+
+    if (selectedOnboardingMenus.length === 0) {
+      toast.error('Pilih setidaknya 1 menu fitur.');
+      setOnboardingStep(2);
+      return;
+    }
+
     setIsSavingOnboarding(true);
     try {
+      // 1. Update Profile (Nama, Sekolah, Kelas, NIP)
+      await updateProfile({
+        name: onboardingName.trim(),
+        email: teacher.email,
+        schoolName: finalSchoolName,
+        className: onboardingClass.trim(),
+        nip: onboardingNip.trim() || '-',
+      });
+
+      // 2. Update Menu Preferences & mark first login done
       const finalMenus = ['/dashboard', ...selectedOnboardingMenus, '/profile', '/settings'];
       await updateMenuPreferences(finalMenus, true);
+
       setEnabledMenus(finalMenus);
       setOnboardingOpen(false);
-      toast.success('Pengaturan menu aplikasi berhasil disimpan!');
+      toast.success('Profil dan kustomisasi menu berhasil disimpan!');
       window.location.reload();
     } catch (err: any) {
-      toast.error(err.message || 'Gagal menyimpan pengaturan menu.');
+      toast.error(err.message || 'Gagal menyimpan pengaturan.');
       setIsSavingOnboarding(false);
     }
   };
@@ -450,86 +550,301 @@ export default function DashboardLayoutClient({
         onConfirm={handleLogoutSubmit}
       />
 
-      {/* First-Login Menu Selector Onboarding Modal */}
-      <Dialog open={onboardingOpen} onOpenChange={setOnboardingOpen}>
-        <DialogContent className='bg-white border border-slate-200 text-slate-900 rounded-2xl max-w-lg p-6 shadow-2xl'>
-          <DialogHeader className='pb-4 border-b border-slate-200'>
-            <div className='flex items-center gap-2 text-emerald-600 mb-1'>
-              <Sparkles className='h-5 w-5' />
-              <span className='text-xs font-bold uppercase tracking-wider'>Selamat Datang</span>
+      {/* First-Login Mandatory Profile & Menu Customization Modal */}
+      <Dialog
+        open={onboardingOpen}
+        onOpenChange={(open) => {
+          if (teacher.isFirstLogin) return; // Prevent closing on first login
+          setOnboardingOpen(open);
+        }}
+      >
+        <DialogContent showCloseButton={false} className='bg-white border border-slate-200 text-slate-900 rounded-3xl max-w-2xl sm:max-w-2xl p-5 sm:p-7 shadow-2xl overflow-hidden'>
+          <DialogHeader className='pb-3 border-b border-slate-100'>
+            {/* Top Bar with Badge & Logout Option */}
+            <div className='flex items-center justify-between gap-2 pb-1 flex-wrap'>
+              <div className='flex items-center gap-1.5 text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200/80 shadow-2xs shrink-0'>
+                <Sparkles className='h-3.5 w-3.5 text-emerald-600 shrink-0' />
+                <span className='text-[11px] font-extrabold uppercase tracking-wide whitespace-nowrap'>Aktivasi Akun Wali Kelas</span>
+              </div>
+              <Button
+                type='button'
+                variant='ghost'
+                onClick={() => setShowLogoutConfirm(true)}
+                className='text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl px-3 py-1.5 h-8 gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap'
+              >
+                <LogOut className='h-3.5 w-3.5 shrink-0' />
+                <span>Keluar</span>
+              </Button>
             </div>
-            <DialogTitle className='text-xl font-bold text-slate-900'>
-              Pilih Menu Fitur Utama Anda
-            </DialogTitle>
-            <DialogDescription className='text-xs text-slate-500 mt-1'>
-              Halo <strong>{teacher.name}</strong>! Pilih menu fitur apa saja yang ingin ditampilkan pada bilah navigasi Anda. Pengaturan ini dapat diubah kapan saja di menu <strong>Profil Saya</strong>.
-            </DialogDescription>
+
+            <div className='pt-2 space-y-1 text-left'>
+              <DialogTitle className='text-xl sm:text-2xl font-black text-slate-900 tracking-tight'>
+                {onboardingStep === 1
+                  ? 'Lengkapi Informasi Diri & Sekolah'
+                  : 'Pilih Menu Fitur Utama Sidebar'}
+              </DialogTitle>
+              <DialogDescription className='text-xs sm:text-sm text-slate-500 font-medium leading-relaxed'>
+                {onboardingStep === 1
+                  ? 'Harap melengkapi data profil dan sekolah Anda. Data ini wajib diisi sebelum Anda dapat mengakses dashboard utama.'
+                  : 'Pilih menu fitur yang ingin Anda tampilkan pada sidebar navigasi. Anda dapat mengubah pilihan ini kapan saja melalui menu Profil.'}
+              </DialogDescription>
+            </div>
+
+            {/* Step Wizard Tabs */}
+            <div className='flex items-center gap-2 pt-3 pb-0.5'>
+              <button
+                type='button'
+                onClick={() => setOnboardingStep(1)}
+                className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer min-w-0 ${
+                  onboardingStep === 1
+                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                    : 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
+                }`}
+              >
+                <span
+                  className={`h-5 w-5 rounded-lg flex items-center justify-center font-black text-[11px] shrink-0 ${
+                    onboardingStep === 1 ? 'bg-white/25 text-white' : 'bg-emerald-600 text-white'
+                  }`}
+                >
+                  1
+                </span>
+                <span className='whitespace-nowrap'>Data Profil & Sekolah</span>
+              </button>
+              <ChevronRight className='h-3.5 w-3.5 text-slate-300 shrink-0' />
+              <button
+                type='button'
+                onClick={() => handleNextStep()}
+                className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer min-w-0 ${
+                  onboardingStep === 2
+                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                    : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100 hover:text-slate-600'
+                }`}
+              >
+                <span
+                  className={`h-5 w-5 rounded-lg flex items-center justify-center font-black text-[11px] shrink-0 ${
+                    onboardingStep === 2 ? 'bg-white/25 text-white' : 'bg-slate-200 text-slate-500'
+                  }`}
+                >
+                  2
+                </span>
+                <span className='whitespace-nowrap'>Kustomisasi Sidebar</span>
+              </button>
+            </div>
           </DialogHeader>
 
-          <div className='space-y-3 py-4'>
-            {CONFIGURABLE_MENUS.map((menu) => {
-              const isChecked = selectedOnboardingMenus.includes(menu.href);
-              return (
-                <div
-                  key={menu.href}
-                  onClick={() => {
-                    if (isChecked) {
-                      if (selectedOnboardingMenus.length <= 1) {
-                        toast.error('Pilih setidaknya 1 menu fitur.');
-                        return;
-                      }
-                      setSelectedOnboardingMenus(
-                        selectedOnboardingMenus.filter((m) => m !== menu.href)
-                      );
-                    } else {
-                      setSelectedOnboardingMenus([...selectedOnboardingMenus, menu.href]);
-                    }
-                  }}
-                  className={`flex items-start gap-3.5 p-3.5 rounded-xl border transition-all cursor-pointer ${isChecked
-                    ? 'bg-emerald-50 border-emerald-200 text-emerald-900 shadow-xs'
-                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300'
-                    }`}
-                >
-                  <div
-                    className={`mt-0.5 h-5 w-5 rounded-md border flex items-center justify-center transition-colors ${isChecked
-                      ? 'bg-emerald-600 border-emerald-500 text-white'
-                      : 'border-slate-300 bg-white'
-                      }`}
-                  >
-                    {isChecked && <Check className='h-3.5 w-3.5 stroke-[3]' />}
+          {/* STEP 1: INFORMASI DIRI & SEKOLAH */}
+          {onboardingStep === 1 && (
+            <div className='space-y-4 py-4 max-h-[55vh] overflow-y-auto pr-1 text-left'>
+              {/* Nama Lengkap */}
+              <div className='space-y-1.5'>
+                <label className='text-xs font-bold uppercase tracking-wider text-slate-700 block'>
+                  NAMA LENGKAP & GELAR <span className='text-rose-500'>*</span>
+                </label>
+                <div className='relative'>
+                  <div className='absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400'>
+                    <User className='h-4 w-4' />
                   </div>
-                  <div>
-                    <span className='text-xs font-bold text-slate-800 block'>
-                      {menu.label}
-                    </span>
-                    <span className='text-[10px] text-slate-500 block mt-0.5'>
-                      {menu.desc}
-                    </span>
+                  <input
+                    type='text'
+                    required
+                    placeholder='Contoh: Drs. Ahmad Dahlan, M.Pd'
+                    value={onboardingName}
+                    onChange={(e) => setOnboardingName(e.target.value)}
+                    className='w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:outline-none rounded-xl text-sm font-medium transition-all'
+                  />
+                </div>
+              </div>
+
+              {/* NIP */}
+              <div className='space-y-1.5'>
+                <label className='text-xs font-bold uppercase tracking-wider text-slate-700 block'>
+                  NIP (Nomor Induk Pegawai)
+                </label>
+                <div className='relative'>
+                  <div className='absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400'>
+                    <IdCard className='h-4 w-4' />
+                  </div>
+                  <input
+                    type='text'
+                    placeholder='Misal: 19850101 201001 1 001 (opsional)'
+                    value={onboardingNip}
+                    onChange={(e) => setOnboardingNip(e.target.value)}
+                    className='w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:outline-none rounded-xl text-sm font-medium transition-all'
+                  />
+                </div>
+              </div>
+
+              {/* Sekolah & Kelas – 2 column grid */}
+              <div className='grid grid-cols-2 gap-3'>
+                <div className='space-y-1.5'>
+                  <label className='text-xs font-bold uppercase tracking-wider text-slate-700 block'>
+                    SEKOLAH <span className='text-rose-500'>*</span>
+                  </label>
+                  <div className='relative'>
+                    <div className='absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400'>
+                      <School className='h-4 w-4' />
+                    </div>
+                    <select
+                      value={onboardingSchool}
+                      onChange={(e) => setOnboardingSchool(e.target.value)}
+                      disabled={loadingSchools}
+                      className='w-full pl-10 pr-8 py-2.5 bg-slate-50/50 border border-slate-200 text-slate-900 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:outline-none rounded-xl text-sm font-medium appearance-none cursor-pointer transition-all'
+                    >
+                      {loadingSchools ? (
+                        <option value=''>Memuat...</option>
+                      ) : (
+                        <>
+                          {schoolsList.map((s) => (
+                            <option key={s._id} value={s.name}>
+                              {s.name}
+                            </option>
+                          ))}
+                          <option value='__NEW_SCHOOL__'>+ Tambah Baru...</option>
+                        </>
+                      )}
+                    </select>
+                    <div className='absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400'>
+                      <ChevronDown className='h-4 w-4' />
+                    </div>
                   </div>
                 </div>
-              );
-            })}
-          </div>
 
-          <DialogFooter className='pt-3 border-t border-slate-200 flex items-center justify-between sm:justify-between w-full'>
-            <span className='text-[10px] text-slate-500'>
-              {selectedOnboardingMenus.length} menu terpilih
-            </span>
-            <Button
-              type='button'
-              onClick={handleSaveOnboarding}
-              disabled={isSavingOnboarding}
-              className='bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-xs px-5 h-9 gap-2 shadow-xs'
-            >
-              {isSavingOnboarding ? (
-                <span>Menyimpan...</span>
-              ) : (
-                <>
-                  <span>Simpan & Lanjutkan</span>
-                  <Sliders className='h-3.5 w-3.5' />
-                </>
+                <div className='space-y-1.5'>
+                  <label className='text-xs font-bold uppercase tracking-wider text-slate-700 block'>
+                    KELAS DIAJAR <span className='text-rose-500'>*</span>
+                  </label>
+                  <div className='relative'>
+                    <div className='absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400'>
+                      <GraduationCap className='h-4 w-4' />
+                    </div>
+                    <input
+                      type='text'
+                      required
+                      placeholder='Misal: 5A / VI B'
+                      value={onboardingClass}
+                      onChange={(e) => setOnboardingClass(e.target.value)}
+                      className='w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:outline-none rounded-xl text-sm font-medium transition-all'
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Sekolah Baru (conditional) */}
+              {onboardingSchool === '__NEW_SCHOOL__' && (
+                <div className='space-y-1.5'>
+                  <label className='text-xs font-bold uppercase tracking-wider text-slate-700 block'>
+                    NAMA SEKOLAH BARU <span className='text-rose-500'>*</span>
+                  </label>
+                  <input
+                    type='text'
+                    required
+                    placeholder='Masukkan nama sekolah lengkap Anda'
+                    value={onboardingCustomSchool}
+                    onChange={(e) => setOnboardingCustomSchool(e.target.value)}
+                    className='w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:outline-none rounded-xl text-sm font-medium transition-all'
+                  />
+                </div>
               )}
-            </Button>
+            </div>
+          )}
+
+          {/* STEP 2: KUSTOMISASI SIDEBAR */}
+          {onboardingStep === 2 && (
+            <div className='py-4 max-h-[55vh] overflow-y-auto pr-1 text-left'>
+              <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+                {CONFIGURABLE_MENUS.map((menu) => {
+                  const isChecked = selectedOnboardingMenus.includes(menu.href);
+                  return (
+                    <div
+                      key={menu.href}
+                      onClick={() => {
+                        if (isChecked) {
+                          if (selectedOnboardingMenus.length <= 1) {
+                            toast.error('Pilih setidaknya 1 menu fitur.');
+                            return;
+                          }
+                          setSelectedOnboardingMenus(
+                            selectedOnboardingMenus.filter((m) => m !== menu.href)
+                          );
+                        } else {
+                          setSelectedOnboardingMenus([...selectedOnboardingMenus, menu.href]);
+                        }
+                      }}
+                      className={`flex items-start gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer select-none ${
+                        isChecked
+                          ? 'bg-emerald-50/80 border-emerald-300 text-emerald-950 shadow-2xs'
+                          : 'bg-slate-50/60 border-slate-200 text-slate-600 hover:border-slate-300'
+                      }`}
+                    >
+                      <div
+                        className={`mt-0.5 h-5 w-5 rounded-lg border flex items-center justify-center shrink-0 transition-colors ${
+                          isChecked
+                            ? 'bg-emerald-600 border-emerald-600 text-white shadow-2xs'
+                            : 'border-slate-300 bg-white'
+                        }`}
+                      >
+                        {isChecked && <Check className='h-3.5 w-3.5 stroke-[3]' />}
+                      </div>
+                      <div>
+                        <span className='text-xs font-bold text-slate-900 block'>
+                          {menu.label}
+                        </span>
+                        <span className='text-[11px] text-slate-500 block mt-0.5 leading-snug'>
+                          {menu.desc}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* FOOTER BUTTONS */}
+          <DialogFooter className='pt-4 border-t border-slate-100 flex items-center justify-between sm:justify-between w-full gap-3'>
+            {onboardingStep === 1 ? (
+              <>
+                <div className='text-[11px] text-slate-400 font-medium flex items-center gap-1'>
+                  <span className='text-rose-500'>*</span>
+                  <span>Wajib diisi sebelum masuk dashboard</span>
+                </div>
+                <Button
+                  type='button'
+                  onClick={handleNextStep}
+                  className='bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs sm:text-sm px-6 h-10 gap-2 shadow-md shadow-emerald-600/20 cursor-pointer transition-all'
+                >
+                  <span>Pilih Menu Fitur</span>
+                  <ArrowRight className='h-4 w-4' />
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  type='button'
+                  variant='outline'
+                  onClick={() => setOnboardingStep(1)}
+                  className='rounded-xl text-xs sm:text-sm px-5 h-10 gap-2 cursor-pointer border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold'
+                >
+                  <ArrowLeft className='h-4 w-4' />
+                  <span>Kembali</span>
+                </Button>
+                <Button
+                  type='button'
+                  onClick={handleSaveOnboarding}
+                  disabled={isSavingOnboarding}
+                  className='bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs sm:text-sm px-6 h-10 gap-2 shadow-md shadow-emerald-600/20 cursor-pointer transition-all disabled:opacity-50'
+                >
+                  {isSavingOnboarding ? (
+                    <span>Menyimpan Data...</span>
+                  ) : (
+                    <>
+                      <span>Simpan & Masuk Dashboard</span>
+                      <Sliders className='h-4 w-4' />
+                    </>
+                  )}
+                </Button>
+              </>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

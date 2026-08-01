@@ -22,6 +22,7 @@ import {
   ArrowLeft,
   Eye,
   EyeOff,
+  AtSign,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import LoadingScreen from '@/components/LoadingScreen';
@@ -46,6 +47,7 @@ export default function AuthSlider({
   const [recaptchaToken, setRecaptchaToken] = useState<string>('');
   const [resetCaptcha, setResetCaptcha] = useState<number>(0);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Sign In States
   const [signInEmail, setSignInEmail] = useState('');
@@ -62,38 +64,14 @@ export default function AuthSlider({
 
   // Sign Up States
   const [signUpName, setSignUpName] = useState('');
+  const [signUpUsername, setSignUpUsername] = useState('');
   const [signUpEmail, setSignUpEmail] = useState('');
   const [signUpPassword, setSignUpPassword] = useState('');
-  const [signUpSchoolName, setSignUpSchoolName] = useState('');
-  const [signUpCustomSchoolName, setSignUpCustomSchoolName] = useState('');
-  const [signUpClassName, setSignUpClassName] = useState('');
-  const [schools, setSchools] = useState<any[]>([]);
-  const [loadingSchools, setLoadingSchools] = useState(true);
+  const [signUpConfirmPassword, setSignUpConfirmPassword] = useState('');
 
   // Logout stale sessions on mount
   useEffect(() => {
     logoutTeacher();
-  }, []);
-
-  // Fetch school list for register form
-  useEffect(() => {
-    async function loadSchools() {
-      try {
-        const schoolList = await getSchools();
-        setSchools(schoolList);
-        if (schoolList.length > 0) {
-          setSignUpSchoolName(schoolList[0].name);
-        } else {
-          setSignUpSchoolName('__NEW_SCHOOL__');
-        }
-      } catch (err) {
-        console.error('Gagal memuat daftar sekolah:', err);
-        setSignUpSchoolName('__NEW_SCHOOL__');
-      } finally {
-        setLoadingSchools(false);
-      }
-    }
-    loadSchools();
   }, []);
 
   // Toggle Mode & sync URL without hard page reload
@@ -112,7 +90,7 @@ export default function AuthSlider({
   const handleSignInSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!signInEmail || !signInPassword) {
-      toast.error('Email atau username dan password wajib diisi.');
+      toast.error('Username/email dan password wajib diisi.');
       return;
     }
 
@@ -145,7 +123,7 @@ export default function AuthSlider({
         }
         router.refresh();
       } else {
-        toast.error(res.error || 'Email/username atau password salah.');
+        toast.error(res.error || 'Username/email atau password salah.');
         const nextAttempts = failedAttempts + 1;
         setFailedAttempts(nextAttempts);
         sessionStorage.setItem(
@@ -173,13 +151,14 @@ export default function AuthSlider({
   // Sign Up Handler
   const handleSignUpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const finalSchoolName =
-      signUpSchoolName === '__NEW_SCHOOL__'
-        ? signUpCustomSchoolName.trim()
-        : signUpSchoolName;
 
-    if (!signUpName || !signUpEmail || !signUpPassword || !finalSchoolName) {
-      toast.error('Nama, email, password, dan sekolah wajib diisi.');
+    if (!signUpName || !signUpUsername || !signUpEmail || !signUpPassword || !signUpConfirmPassword) {
+      toast.error('Nama, username, email, password, dan konfirmasi password wajib diisi.');
+      return;
+    }
+
+    if (signUpUsername.length < 3) {
+      toast.error('Username minimal 3 karakter.');
       return;
     }
 
@@ -188,22 +167,27 @@ export default function AuthSlider({
       return;
     }
 
+    if (signUpPassword !== signUpConfirmPassword) {
+      toast.error('Password dan konfirmasi password tidak cocok.');
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await registerTeacher({
         name: signUpName,
+        username: signUpUsername,
         email: signUpEmail,
         password: signUpPassword,
-        schoolName: finalSchoolName || undefined,
-        className: signUpClassName || undefined,
         recaptchaToken,
       });
 
       if (res.success) {
         toast.success('Pendaftaran berhasil! Selamat datang.');
-        setRedirectVariant(res.isAdmin ? 'admin' : 'teacher');
+        const isAdmin = !!(res as any).isAdmin;
+        setRedirectVariant(isAdmin ? 'admin' : 'teacher');
         setIsRedirecting(true);
-        if (res.isAdmin) {
+        if (isAdmin) {
           router.push('/admin');
         } else {
           router.push('/dashboard');
@@ -326,7 +310,7 @@ export default function AuthSlider({
                   <input
                     type='text'
                     required
-                    placeholder='Masukkan username atau email Anda'
+                    placeholder='Username atau email Anda'
                     value={signInEmail}
                     onChange={(e) => setSignInEmail(e.target.value)}
                     disabled={loading}
@@ -451,7 +435,7 @@ export default function AuthSlider({
               {/* Full Name */}
               <div className='space-y-1'>
                 <label className='text-[11px] font-bold uppercase tracking-wider text-slate-500 block'>
-                  NAMA LENGKAP
+                  NAMA LENGKAP & GELAR
                 </label>
                 <div className='relative'>
                   <div className='absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400'>
@@ -469,19 +453,40 @@ export default function AuthSlider({
                 </div>
               </div>
 
-              {/* Email / Username */}
+              {/* Username */}
               <div className='space-y-1'>
                 <label className='text-[11px] font-bold uppercase tracking-wider text-slate-500 block'>
-                  EMAIL / USERNAME
+                  USERNAME
+                </label>
+                <div className='relative'>
+                  <div className='absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400'>
+                    <AtSign className='h-4 w-4' />
+                  </div>
+                  <input
+                    type='text'
+                    required
+                    placeholder='username_anda (min. 3 karakter)'
+                    value={signUpUsername}
+                    onChange={(e) => setSignUpUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                    disabled={loading}
+                    className='w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-xs sm:text-sm transition-all shadow-2xs'
+                  />
+                </div>
+              </div>
+
+              {/* Email */}
+              <div className='space-y-1'>
+                <label className='text-[11px] font-bold uppercase tracking-wider text-slate-500 block'>
+                  ALAMAT EMAIL
                 </label>
                 <div className='relative'>
                   <div className='absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400'>
                     <Mail className='h-4 w-4' />
                   </div>
                   <input
-                    type='text'
+                    type='email'
                     required
-                    placeholder='Alamat email atau username'
+                    placeholder='nama@gmail.com'
                     value={signUpEmail}
                     onChange={(e) => setSignUpEmail(e.target.value)}
                     disabled={loading}
@@ -490,118 +495,68 @@ export default function AuthSlider({
                 </div>
               </div>
 
-              {/* School & Class */}
-              <div className='grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3'>
+              {/* Password & Confirm Password */}
+              <div className='space-y-3 sm:space-y-3.5'>
                 <div className='space-y-1'>
                   <label className='text-[11px] font-bold uppercase tracking-wider text-slate-500 block'>
-                    SEKOLAH
+                    PASSWORD
                   </label>
                   <div className='relative'>
-                    <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400'>
-                      <School className='h-4 w-4' />
-                    </div>
-                    <select
-                      value={signUpSchoolName}
-                      onChange={(e) => setSignUpSchoolName(e.target.value)}
-                      disabled={loading || loadingSchools}
-                      className='w-full pl-9 pr-7 py-2.5 bg-white border border-slate-200 text-slate-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-xs sm:text-sm transition-all appearance-none cursor-pointer shadow-2xs'
-                    >
-                      {loadingSchools ? (
-                        <option value=''>Memuat...</option>
-                      ) : (
-                        <>
-                          {schools.map((school) => (
-                            <option key={school._id} value={school.name}>
-                              {school.name}
-                            </option>
-                          ))}
-                          <option
-                            value='__NEW_SCHOOL__'
-                            className='text-emerald-600 font-semibold'
-                          >
-                            + Tambah Sekolah Baru...
-                          </option>
-                        </>
-                      )}
-                    </select>
-                    <div className='absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none text-slate-400'>
-                      <svg
-                        className='h-3.5 w-3.5 fill-current'
-                        viewBox='0 0 20 20'
-                      >
-                        <path d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-
-                <div className='space-y-1'>
-                  <label className='text-[11px] font-bold uppercase tracking-wider text-slate-500 block'>
-                    KELAS DIAJAR
-                  </label>
-                  <div className='relative'>
-                    <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400'>
-                      <GraduationCap className='h-4 w-4' />
+                    <div className='absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400'>
+                      <Lock className='h-4 w-4' />
                     </div>
                     <input
-                      type='text'
-                      placeholder='Misal: 5A'
-                      value={signUpClassName}
-                      onChange={(e) => setSignUpClassName(e.target.value)}
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      placeholder='Buat password kuat (min. 6 karakter)'
+                      value={signUpPassword}
+                      onChange={(e) => setSignUpPassword(e.target.value)}
                       disabled={loading}
-                      className='w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-xs sm:text-sm transition-all shadow-2xs'
+                      className='w-full pl-10 pr-10 py-2.5 bg-white border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-xs sm:text-sm transition-all shadow-2xs'
                     />
+                    <button
+                      type='button'
+                      onClick={() => setShowPassword(!showPassword)}
+                      className='absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600'
+                    >
+                      {showPassword ? (
+                        <EyeOff className='h-4 w-4' />
+                      ) : (
+                        <Eye className='h-4 w-4' />
+                      )}
+                    </button>
                   </div>
                 </div>
-              </div>
 
-              {/* Custom School Input if selected __NEW_SCHOOL__ */}
-              {signUpSchoolName === '__NEW_SCHOOL__' && (
                 <div className='space-y-1'>
                   <label className='text-[11px] font-bold uppercase tracking-wider text-slate-500 block'>
-                    NAMA SEKOLAH BARU
+                    KONFIRMASI PASSWORD
                   </label>
-                  <input
-                    type='text'
-                    required
-                    placeholder='Nama Sekolah Baru'
-                    value={signUpCustomSchoolName}
-                    onChange={(e) => setSignUpCustomSchoolName(e.target.value)}
-                    disabled={loading}
-                    className='w-full px-3.5 py-2.5 bg-white border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-xs sm:text-sm transition-all shadow-2xs'
-                  />
-                </div>
-              )}
-
-              {/* Password */}
-              <div className='space-y-1'>
-                <label className='text-[11px] font-bold uppercase tracking-wider text-slate-500 block'>
-                  PASSWORD
-                </label>
-                <div className='relative'>
-                  <div className='absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400'>
-                    <Lock className='h-4 w-4' />
+                  <div className='relative'>
+                    <div className='absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400'>
+                      <Lock className='h-4 w-4' />
+                    </div>
+                    <input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      required
+                      placeholder='Ulangi password Anda'
+                      value={signUpConfirmPassword}
+                      onChange={(e) => setSignUpConfirmPassword(e.target.value)}
+                      disabled={loading}
+                      className='w-full pl-10 pr-10 py-2.5 bg-white border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-xs sm:text-sm transition-all shadow-2xs'
+                    />
+                    <button
+                      type='button'
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className='absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600'
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className='h-4 w-4' />
+                      ) : (
+                        <Eye className='h-4 w-4' />
+                      )}
+                    </button>
                   </div>
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    placeholder='Buat password kuat (min. 6 karakter)'
-                    value={signUpPassword}
-                    onChange={(e) => setSignUpPassword(e.target.value)}
-                    disabled={loading}
-                    className='w-full pl-10 pr-10 py-2.5 bg-white border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-xs sm:text-sm transition-all shadow-2xs'
-                  />
-                  <button
-                    type='button'
-                    onClick={() => setShowPassword(!showPassword)}
-                    className='absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600'
-                  >
-                    {showPassword ? (
-                      <EyeOff className='h-4 w-4' />
-                    ) : (
-                      <Eye className='h-4 w-4' />
-                    )}
-                  </button>
                 </div>
               </div>
 
