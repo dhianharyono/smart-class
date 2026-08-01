@@ -45,7 +45,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
         nip: teacher.nip || '-',
         isAdmin: !!session.isAdmin,
         isFirstLogin: teacher.isFirstLogin ?? false,
-        enabledMenus: teacher.enabledMenus || ['/', '/siswa', '/absensi', '/nilai', '/tabungan', '/jurnal'],
+        enabledMenus: (() => {
+          const list =
+            teacher.enabledMenus && teacher.enabledMenus.length > 0
+              ? teacher.enabledMenus
+              : ['/', '/siswa', '/absensi', '/nilai', '/tabungan', '/jadwal', '/piket', '/jurnal'];
+          let res = list.includes('/jadwal') ? list : [...list, '/jadwal'];
+          return res.includes('/piket') ? res : [...res, '/piket'];
+        })(),
       }}
     >
       {children}

@@ -41,10 +41,32 @@ export async function getStudents() {
   }
 }
 
-export async function createStudent(data: { nis: string; name: string; className: string; gender: 'L' | 'P' }) {
+export async function getStudentById(id: string) {
   try {
     await dbConnect();
     const teacherId = await requireAuth();
+    const student = await Student.findOne({ _id: id, teacherId }).lean();
+    if (!student) {
+      throw new Error('Siswa tidak ditemukan.');
+    }
+    return JSON.parse(JSON.stringify(student));
+  } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+    console.error('Error fetching student by ID:', error);
+    throw new Error(error.message || 'Failed to fetch student details.');
+  }
+}
+
+export async function createStudent(data: Partial<IStudent>) {
+  try {
+    await dbConnect();
+    const teacherId = await requireAuth();
+
+    if (!data.nis || !data.name || !data.className || !data.gender) {
+      throw new Error('Nama, NIS, Kelas, dan Jenis Kelamin wajib diisi.');
+    }
 
     // Check for NIS duplicate for this teacher
     const existing = await Student.findOne({ teacherId, nis: data.nis });
@@ -60,7 +82,7 @@ export async function createStudent(data: { nis: string; name: string; className
     await newStudent.save();
     revalidatePath('/siswa');
     revalidatePath('/');
-    return { success: true };
+    return { success: true, id: newStudent._id.toString() };
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -70,7 +92,7 @@ export async function createStudent(data: { nis: string; name: string; className
   }
 }
 
-export async function updateStudent(id: string, data: { nis: string; name: string; className: string; gender: 'L' | 'P' }) {
+export async function updateStudent(id: string, data: Partial<IStudent>) {
   try {
     await dbConnect();
     const teacherId = await requireAuth();
@@ -81,16 +103,15 @@ export async function updateStudent(id: string, data: { nis: string; name: strin
       throw new Error('Siswa tidak ditemukan atau Anda tidak memiliki akses.');
     }
 
-    // Check for NIS duplicate on other students
-    const existing = await Student.findOne({ teacherId, nis: data.nis, _id: { $ne: id } });
-    if (existing) {
-      throw new Error(`NIS ${data.nis} sudah digunakan oleh siswa lain.`);
+    if (data.nis) {
+      // Check for NIS duplicate on other students
+      const existing = await Student.findOne({ teacherId, nis: data.nis, _id: { $ne: id } });
+      if (existing) {
+        throw new Error(`NIS ${data.nis} sudah digunakan oleh siswa lain.`);
+      }
     }
 
-    student.nis = data.nis;
-    student.name = data.name;
-    student.className = data.className;
-    student.gender = data.gender;
+    Object.assign(student, data);
 
     await student.save();
     revalidatePath('/siswa');

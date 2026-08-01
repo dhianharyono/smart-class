@@ -2,7 +2,7 @@
 
 import React, { useState, useSyncExternalStore } from 'react';
 
-const emptySubscribe = () => () => {};
+const emptySubscribe = () => () => { };
 const getSnapshot = () => true;
 const getServerSnapshot = () => false;
 
@@ -22,6 +22,12 @@ import {
   BarChart3,
   BookMarked,
   Home,
+  CalendarCheck2,
+  CheckSquare,
+  GraduationCap,
+  Sparkles,
+  ArrowRight,
+  LayoutGrid,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -116,13 +122,15 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
     }).format(num);
   };
 
-  const enabled = stats.enabledMenus || ['/', '/siswa', '/absensi', '/nilai', '/tabungan', '/jurnal'];
+  const enabled = stats.enabledMenus || ['/', '/siswa', '/absensi', '/nilai', '/tabungan', '/jadwal', '/piket', '/jurnal'];
 
   const isSiswaEnabled = enabled.includes('/siswa');
-  const isAbsensiEnabled = enabled.includes('/absensi');
+  const isAbsensiEnabled = enabled.includes('/siswa') || enabled.includes('/absensi');
   const isTabunganEnabled = enabled.includes('/tabungan');
   const isNilaiEnabled = enabled.includes('/nilai');
   const isJurnalEnabled = enabled.includes('/jurnal');
+  const isJadwalEnabled = enabled.includes('/jadwal');
+  const isPiketEnabled = enabled.includes('/piket');
 
   const statCards = [
     {
@@ -138,7 +146,7 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
       title: 'Rata-rata Kehadiran',
       value: `${stats.monthlyAttendanceRate}%`,
       description: 'Kehadiran bulan ini',
-      icon: Calendar,
+      icon: CalendarCheck2,
       color: 'from-blue-50 to-indigo-50/30 text-blue-700 border-blue-200/70',
       visible: isAbsensiEnabled,
     },
@@ -154,7 +162,7 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
     {
       title: 'Evaluasi Nilai',
       value: stats.lowGradeCount,
-      description: 'Siswa di bawah standar KKM',
+      description: `Siswa di bawah KKM < ${kkm}`,
       icon: AlertTriangle,
       color: 'from-rose-50 to-red-50/30 text-rose-700 border-rose-200/70',
       visible: isNilaiEnabled,
@@ -170,7 +178,7 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
             Dashboard Utama
           </h2>
           <p className='text-slate-600 text-sm mt-1'>
-            Ringkasan performa akademik, kehadiran, dan tabungan kelas Anda.
+            Ringkasan performa akademik, jadwal mengajar, presensi, dan tabungan kelas Anda.
           </p>
         </div>
         <Link href='/'>

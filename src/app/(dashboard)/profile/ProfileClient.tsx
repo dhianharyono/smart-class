@@ -29,6 +29,7 @@ import {
   Wallet,
   BookMarked,
   LayoutDashboard,
+  Calendar,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,6 +41,7 @@ const ALL_MENUS = [
   { href: '/absensi', label: 'Absensi Kelas', desc: 'Pencatatan rekap kehadiran dan statistik kelas', icon: CalendarCheck2 },
   { href: '/nilai', label: 'Nilai Akademik', desc: 'Penginputan nilai mata pelajaran & standar KKM', icon: GraduationCap },
   { href: '/tabungan', label: 'Tabungan Siswa', desc: 'Pencatatan setoran & penarikan kas tabungan', icon: Wallet },
+  { href: '/jadwal', label: 'Jadwal & Alokasi', desc: 'Plotting jadwal pelajaran mingguan kelas & piket', icon: Calendar },
   { href: '/jurnal', label: 'Jurnal Wali Kelas', desc: 'Agenda harian mengajar guru & KBM', icon: BookMarked },
 ];
 
@@ -84,7 +86,7 @@ export default function ProfileClient() {
         className: profile.className || '',
         nip: profile.nip || '-',
       });
-      setSelectedMenus(profile.enabledMenus || ['/', '/siswa', '/absensi', '/nilai', '/tabungan', '/jurnal']);
+      setSelectedMenus(profile.enabledMenus || ['/', '/siswa', '/absensi', '/nilai', '/tabungan', '/jadwal', '/jurnal']);
     }
   }, [profile]);
 

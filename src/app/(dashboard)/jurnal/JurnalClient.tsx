@@ -404,7 +404,6 @@ export default function JurnalClient() {
       <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between print:hidden'>
         <div>
           <h2 className='text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2.5 sm:gap-3'>
-            <BookMarked className='h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 text-emerald-600 shrink-0' />
             <span>Jurnal Wali Kelas</span>
           </h2>
           <p className='text-slate-600 text-xs sm:text-sm mt-1'>

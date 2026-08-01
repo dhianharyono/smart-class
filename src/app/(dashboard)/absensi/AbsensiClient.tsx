@@ -44,7 +44,11 @@ interface StudentAttendanceRow {
   status: AttendanceStatus;
 }
 
-export default function AbsensiClient() {
+interface AbsensiClientProps {
+  hideHeader?: boolean;
+}
+
+export default function AbsensiClient({ hideHeader = false }: AbsensiClientProps) {
   const queryClient = useQueryClient();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [localRecords, setLocalRecords] = useState<StudentAttendanceRow[]>([]);
@@ -127,39 +131,41 @@ export default function AbsensiClient() {
   return (
     <div className='space-y-6 animate-fade-in'>
       {/* Header */}
-      <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
-        <div>
-          <h2 className='text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900'>
-            Absensi Siswa
-          </h2>
-          <p className='text-slate-600 text-xs sm:text-sm mt-1'>
-            Catat dan perbarui absensi harian kelas secara massal dan cepat.
-          </p>
-        </div>
+      {!hideHeader && (
+        <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
+          <div>
+            <h2 className='text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900'>
+              Absensi Siswa
+            </h2>
+            <p className='text-slate-600 text-xs sm:text-sm mt-1'>
+              Catat dan perbarui absensi harian kelas secara massal dan cepat.
+            </p>
+          </div>
 
-        <div className='flex flex-wrap items-center gap-2 sm:gap-3'>
-          <Button
-            onClick={handleExcelExport}
-            variant='outline'
-            className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs sm:text-sm font-semibold rounded-xl h-10 px-3.5 sm:px-4 gap-2 shadow-xs'
-          >
-            <Download className='h-4 w-4' />
-            Ekspor Excel
-          </Button>
-          <Button
-            onClick={handleSave}
-            disabled={isPending || isLoading}
-            className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold rounded-xl h-10 px-4 sm:px-6 gap-2 shadow-xs'
-          >
-            {isPending ? (
-              <Loader2 className='h-4 w-4 animate-spin' />
-            ) : (
-              <Check className='h-4 w-4' />
-            )}
-            Simpan Absensi
-          </Button>
+          <div className='flex flex-wrap items-center gap-2 sm:gap-3'>
+            <Button
+              onClick={handleExcelExport}
+              variant='outline'
+              className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs sm:text-sm font-semibold rounded-xl h-10 px-3.5 sm:px-4 gap-2 shadow-xs'
+            >
+              <Download className='h-4 w-4' />
+              Ekspor Excel
+            </Button>
+            <Button
+              onClick={handleSave}
+              disabled={isPending || isLoading}
+              className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold rounded-xl h-10 px-4 sm:px-6 gap-2 shadow-xs'
+            >
+              {isPending ? (
+                <Loader2 className='h-4 w-4 animate-spin' />
+              ) : (
+                <Check className='h-4 w-4' />
+              )}
+              Simpan Absensi
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Date Select & Mass Toggles */}
       <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white border border-slate-200/80 rounded-2xl p-4 shadow-xs'>

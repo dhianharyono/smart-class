@@ -25,6 +25,8 @@ import {
   LayoutDashboard,
   LogOut,
   Loader2,
+  Calendar,
+  CheckSquare,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getCurrentUserSession, logoutTeacher } from '@/actions/authActions';
@@ -73,8 +75,8 @@ export default function LandingPage() {
   };
 
   const [activeTab, setActiveTab] = useState<
-    'absensi' | 'nilai' | 'tabungan' | 'jurnal' | 'siswa'
-  >('absensi');
+    'jadwal' | 'piket' | 'absensi' | 'nilai' | 'tabungan' | 'jurnal' | 'siswa'
+  >('jadwal');
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -650,6 +652,8 @@ export default function LandingPage() {
             className='flex items-center justify-start sm:justify-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar pb-3 sm:pb-0 mb-8 sm:mb-10 max-w-full px-1'
           >
             {[
+              { id: 'jadwal', label: 'Jadwal & Alokasi', icon: Calendar },
+              { id: 'piket', label: 'Piket Kelas', icon: CheckSquare },
               { id: 'absensi', label: 'Absensi Kelas', icon: CalendarCheck2 },
               { id: 'nilai', label: 'Nilai Akademik', icon: GraduationCap },
               { id: 'tabungan', label: 'Tabungan Siswa', icon: Wallet },
@@ -685,6 +689,112 @@ export default function LandingPage() {
               transition={{ duration: 0.35, ease: 'easeOut' }}
               className='bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-10 shadow-xs'
             >
+              {activeTab === 'jadwal' && (
+                <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 items-center'>
+                  <div className='space-y-6'>
+                    <div className='inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200'>
+                      <Calendar className='h-3.5 w-3.5' />
+                      <span>Jadwal & Alokasi Pelajaran AI</span>
+                    </div>
+                    <h3 className='text-2xl sm:text-3xl font-extrabold text-slate-900'>
+                      Plotting Jam Mengajar & AI Generator Schedule
+                    </h3>
+                    <p className='text-slate-600 text-sm leading-relaxed font-medium'>
+                      Atur alokasi jam mingguan per mata pelajaran, gunakan generator AI untuk memplot jadwal otomatis tanpa bentrok, dan cetak jadwal dinding kelas siap tempel.
+                    </p>
+                    <ul className='space-y-3 text-sm text-slate-700 font-medium'>
+                      <li className='flex items-center gap-3'>
+                        <Check className='h-4 w-4 text-emerald-600' />
+                        <span>Generator Jadwal Pelajaran AI Otomatis</span>
+                      </li>
+                      <li className='flex items-center gap-3'>
+                        <Check className='h-4 w-4 text-emerald-600' />
+                        <span>Tracker alokasi baseline jam mengajar mingguan</span>
+                      </li>
+                      <li className='flex items-center gap-3'>
+                        <Check className='h-4 w-4 text-emerald-600' />
+                        <span>Toggle jam istirahat interaktif & cetak poster dinding</span>
+                      </li>
+                    </ul>
+                  </div>
+                  {/* Visual Card */}
+                  <div className='bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4 shadow-xs'>
+                    <div className='flex items-center justify-between border-b border-slate-200 pb-3'>
+                      <span className='text-xs font-extrabold text-slate-900'>
+                        Preview Plotting Jadwal Mingguan
+                      </span>
+                      <span className='text-[11px] text-emerald-700 font-bold bg-emerald-100/70 px-2 py-0.5 rounded-full'>
+                        AI Auto-Plot
+                      </span>
+                    </div>
+                    <div className='space-y-2 text-xs'>
+                      <div className='flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 shadow-xs'>
+                        <span className='font-bold text-slate-800'>Jam 1-2 (07.00 - 08.20)</span>
+                        <span className='text-emerald-700 font-extrabold'>Matematika</span>
+                      </div>
+                      <div className='flex items-center justify-between p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 shadow-xs font-bold'>
+                        <span>Jam 3 (08.20 - 08.40)</span>
+                        <span>☕ Istirahat Pertama</span>
+                      </div>
+                      <div className='flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 shadow-xs'>
+                        <span className='font-bold text-slate-800'>Jam 4-5 (08.40 - 10.00)</span>
+                        <span className='text-teal-700 font-extrabold'>IPA & Eksperimen</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'piket' && (
+                <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 items-center'>
+                  <div className='space-y-6'>
+                    <div className='inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold border border-indigo-200'>
+                      <CheckSquare className='h-3.5 w-3.5' />
+                      <span>Manajemen Piket Kebersihan</span>
+                    </div>
+                    <h3 className='text-2xl sm:text-3xl font-extrabold text-slate-900'>
+                      Pembagian Petugas Piket Harian Teratur
+                    </h3>
+                    <p className='text-slate-600 text-sm leading-relaxed font-medium'>
+                      Bagi kelompok piket kebersihan harian (Senin - Sabtu) secara adil. Cetak jadwal poster piket dengan format visual menarik untuk papan kelas.
+                    </p>
+                    <ul className='space-y-3 text-sm text-slate-700 font-medium'>
+                      <li className='flex items-center gap-3'>
+                        <Check className='h-4 w-4 text-indigo-600' />
+                        <span>Visualisasi avatar tag petugas per hari</span>
+                      </li>
+                      <li className='flex items-center gap-3'>
+                        <Check className='h-4 w-4 text-indigo-600' />
+                        <span>Pengeditan nama petugas piket cepat & fleksibel</span>
+                      </li>
+                      <li className='flex items-center gap-3'>
+                        <Check className='h-4 w-4 text-indigo-600' />
+                        <span>Format cetak siap tempel di papan informasi kelas</span>
+                      </li>
+                    </ul>
+                  </div>
+                  {/* Visual Card */}
+                  <div className='bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4 shadow-xs'>
+                    <div className='flex items-center justify-between border-b border-slate-200 pb-3'>
+                      <span className='text-xs font-extrabold text-slate-900'>
+                        Petugas Piket Hari Senin
+                      </span>
+                      <span className='text-[11px] text-indigo-700 font-bold bg-indigo-100/70 px-2 py-0.5 rounded-full'>
+                        4 Petugas
+                      </span>
+                    </div>
+                    <div className='flex flex-wrap gap-2 py-1'>
+                      {['Ahmad Supriyadi', 'Budi Santoso', 'Citra Lestari', 'Dewi Anggraini'].map((n, i) => (
+                        <span key={i} className='px-3 py-1.5 bg-white border border-indigo-200 text-indigo-900 font-bold text-xs rounded-xl shadow-xs flex items-center gap-1.5'>
+                          <span className='w-2 h-2 rounded-full bg-indigo-500' />
+                          {n}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {activeTab === 'absensi' && (
                 <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 items-center'>
                   <div className='space-y-6'>

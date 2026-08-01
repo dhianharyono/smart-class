@@ -6,6 +6,32 @@ export interface IStudent extends Document {
   className: string;
   gender: 'L' | 'P';
   teacherId: string;
+
+  // Identity & Photo
+  nisn?: string;
+  photo?: string;
+
+  // Personal Biodata
+  birthPlace?: string;
+  birthDate?: Date;
+  religion?: string;
+  address?: string;
+
+  // Parents / Guardian
+  fatherName?: string;
+  fatherJob?: string;
+  motherName?: string;
+  motherJob?: string;
+  guardianName?: string;
+  guardianJob?: string;
+
+  // Entry History & Status
+  entryDate?: Date;
+  entryClass?: string;
+  entryAcademicYear?: string;
+  previousSchool?: string;
+  status?: 'Aktif' | 'Mutasi' | 'Lulus' | 'Non-Aktif';
+
   createdAt: Date;
 }
 
@@ -15,6 +41,36 @@ const StudentSchema = new Schema<IStudent>({
   className: { type: String, required: true },
   gender: { type: String, enum: ['L', 'P'], required: true },
   teacherId: { type: String, required: true, index: true },
+
+  // Identity & Photo
+  nisn: { type: String },
+  photo: { type: String },
+
+  // Personal Biodata
+  birthPlace: { type: String },
+  birthDate: { type: Date },
+  religion: { type: String },
+  address: { type: String },
+
+  // Parents / Guardian
+  fatherName: { type: String },
+  fatherJob: { type: String },
+  motherName: { type: String },
+  motherJob: { type: String },
+  guardianName: { type: String },
+  guardianJob: { type: String },
+
+  // Entry History & Status
+  entryDate: { type: Date },
+  entryClass: { type: String },
+  entryAcademicYear: { type: String },
+  previousSchool: { type: String },
+  status: {
+    type: String,
+    enum: ['Aktif', 'Mutasi', 'Lulus', 'Non-Aktif'],
+    default: 'Aktif',
+  },
+
   createdAt: { type: Date, default: Date.now },
 });
 

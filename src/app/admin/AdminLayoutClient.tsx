@@ -24,10 +24,23 @@ interface SidebarItem {
   icon: React.ComponentType<any>;
 }
 
-const adminSidebarItems: SidebarItem[] = [
-  { name: 'Ringkasan', href: '/admin', icon: LayoutDashboard },
-  { name: 'Kelola Wali Kelas', href: '/admin/guru', icon: Users },
-  { name: 'Kelola Sekolah', href: '/admin/sekolah', icon: School },
+interface SidebarGroup {
+  category: string;
+  items: SidebarItem[];
+}
+
+const adminMenuGroups: SidebarGroup[] = [
+  {
+    category: 'MENU UTAMA',
+    items: [{ name: 'Ringkasan', href: '/admin', icon: LayoutDashboard }],
+  },
+  {
+    category: 'MANAJEMEN MASTER',
+    items: [
+      { name: 'Kelola Wali Kelas', href: '/admin/guru', icon: Users },
+      { name: 'Kelola Sekolah', href: '/admin/sekolah', icon: School },
+    ],
+  },
 ];
 
 interface AdminLayoutClientProps {
@@ -80,32 +93,44 @@ export default function AdminLayoutClient({ children, admin }: AdminLayoutClient
           </div>
         </div>
 
-        {/* Navigation Items */}
-        <nav className="space-y-1.5">
-          {adminSidebarItems.map((item) => {
-            const isActive = pathname === item.href;
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setMobileOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 group ${isActive
-                  ? 'bg-indigo-50 text-indigo-700 border border-indigo-200/70 shadow-xs font-bold'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-transparent'
-                  }`}
-              >
-                <Icon
-                  className={`h-5 w-5 transition-transform duration-200 group-hover:scale-110 ${isActive ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-700'
-                    }`}
-                />
-                <span>{item.name}</span>
-                {isActive && (
-                  <span className="ml-auto h-1.5 w-1.5 rounded-full bg-indigo-600" />
-                )}
-              </Link>
-            );
-          })}
+        {/* Grouped Navigation Items */}
+        <nav className="space-y-5">
+          {adminMenuGroups.map((group) => (
+            <div key={group.category} className="space-y-1.5">
+              <div className="px-3 text-[10px] font-black uppercase tracking-wider text-slate-400">
+                {group.category}
+              </div>
+
+              <div className="space-y-1">
+                {group.items.map((item) => {
+                  const isActive = pathname === item.href;
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMobileOpen(false)}
+                      className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group ${
+                        isActive
+                          ? 'bg-indigo-50 text-indigo-700 border border-indigo-200/70 shadow-xs font-bold'
+                          : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-transparent'
+                      }`}
+                    >
+                      <Icon
+                        className={`h-4.5 w-4.5 transition-transform duration-200 group-hover:scale-110 ${
+                          isActive ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-700'
+                        }`}
+                      />
+                      <span>{item.name}</span>
+                      {isActive && (
+                        <span className="ml-auto h-1.5 w-1.5 rounded-full bg-indigo-600" />
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
       </div>
 

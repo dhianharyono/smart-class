@@ -23,6 +23,10 @@ import {
   Check,
   Settings,
   Home,
+  ChevronDown,
+  ChevronRight,
+  Calendar,
+  School,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -36,28 +40,69 @@ import {
 import ConfirmDialog from '@/components/ConfirmDialog';
 import { updateMenuPreferences } from '@/actions/profileActions';
 
-interface SidebarItem {
+interface SidebarSubItem {
   name: string;
   href: string;
   icon: React.ComponentType<any>;
 }
 
-const allSidebarItems: SidebarItem[] = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Data Siswa', href: '/siswa', icon: Users },
-  { name: 'Absensi Kelas', href: '/absensi', icon: CalendarCheck2 },
-  { name: 'Nilai Akademik', href: '/nilai', icon: GraduationCap },
-  { name: 'Tabungan Siswa', href: '/tabungan', icon: Wallet },
-  { name: 'Jurnal Wali Kelas', href: '/jurnal', icon: BookMarked },
-  { name: 'Profil Saya', href: '/profile', icon: User },
-  { name: 'Pengaturan', href: '/settings', icon: Settings },
+interface SidebarItem {
+  name: string;
+  href?: string;
+  icon: React.ComponentType<any>;
+  children?: SidebarSubItem[];
+}
+
+interface SidebarGroup {
+  category: string;
+  items: SidebarItem[];
+}
+
+const sidebarMenuGroups: SidebarGroup[] = [
+  {
+    category: 'MENU UTAMA',
+    items: [{ name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }],
+  },
+  {
+    category: 'AKADEMIK & KELAS',
+    items: [
+      {
+        name: 'Kelola Siswa',
+        icon: Users,
+        children: [
+          { name: 'Data Siswa', href: '/siswa', icon: Users },
+          { name: 'Absensi Kelas', href: '/absensi', icon: CalendarCheck2 },
+          { name: 'Nilai Akademik', href: '/nilai', icon: GraduationCap },
+          { name: 'Tabungan Siswa', href: '/tabungan', icon: Wallet },
+        ],
+      },
+      {
+        name: 'Kelola Kelas',
+        icon: School,
+        children: [
+          { name: 'Jadwal & Alokasi', href: '/jadwal', icon: Calendar },
+          { name: 'Piket Kelas', href: '/piket', icon: CheckSquare },
+        ],
+      },
+      { name: 'Jurnal Wali Kelas', href: '/jurnal', icon: BookMarked },
+    ],
+  },
+  {
+    category: 'PENGATURAN',
+    items: [
+      { name: 'Profil Saya', href: '/profile', icon: User },
+      { name: 'Pengaturan', href: '/settings', icon: Settings },
+    ],
+  },
 ];
 
 const CONFIGURABLE_MENUS = [
   { href: '/siswa', label: 'Data Siswa', desc: 'Manajemen data profil dan informasi siswa' },
-  { href: '/absensi', label: 'Absensi Kelas', desc: 'Pencatatan daftar hadir & rekap absensi' },
+  { href: '/absensi', label: 'Absensi Kelas', desc: 'Pencatatan daftar hadir harian & rekap presensi kelas' },
   { href: '/nilai', label: 'Nilai Akademik', desc: 'Penginputan nilai mata pelajaran & KKM' },
   { href: '/tabungan', label: 'Tabungan Siswa', desc: 'Pencatatan setoran & penarikan kas siswa' },
+  { href: '/jadwal', label: 'Jadwal & Alokasi', desc: 'Plotting jadwal pelajaran mingguan kelas' },
+  { href: '/piket', label: 'Piket Kelas', desc: 'Pengaturan kelompok petugas piket harian siswa' },
   { href: '/jurnal', label: 'Jurnal Wali Kelas', desc: 'Agenda harian mengajar guru & KBM' },
 ];
 
@@ -83,17 +128,26 @@ export default function DashboardLayoutClient({
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Menu Preferences state
-  const [enabledMenus, setEnabledMenus] = useState<string[]>(
-    teacher.enabledMenus && teacher.enabledMenus.length > 0
-      ? teacher.enabledMenus
-      : ['/dashboard', '/siswa', '/absensi', '/nilai', '/tabungan', '/jurnal', '/settings']
-  );
+  // Menu Preferences state (auto-includes /jadwal and /piket for existing profiles)
+  const [enabledMenus, setEnabledMenus] = useState<string[]>(() => {
+    const list =
+      teacher.enabledMenus && teacher.enabledMenus.length > 0
+        ? teacher.enabledMenus
+        : ['/dashboard', '/siswa', '/absensi', '/nilai', '/tabungan', '/jadwal', '/piket', '/jurnal', '/settings'];
+    let result = list.includes('/jadwal') ? list : [...list, '/jadwal'];
+    return result.includes('/piket') ? result : [...result, '/piket'];
+  });
 
   // Sync state if teacher prop changes
   React.useEffect(() => {
     if (teacher.enabledMenus && teacher.enabledMenus.length > 0) {
-      setEnabledMenus(teacher.enabledMenus);
+      let list = teacher.enabledMenus.includes('/jadwal')
+        ? teacher.enabledMenus
+        : [...teacher.enabledMenus, '/jadwal'];
+      if (!list.includes('/piket')) {
+        list = [...list, '/piket'];
+      }
+      setEnabledMenus(list);
     }
   }, [teacher.enabledMenus]);
 
@@ -102,9 +156,14 @@ export default function DashboardLayoutClient({
     !!teacher.isFirstLogin
   );
   const [selectedOnboardingMenus, setSelectedOnboardingMenus] = useState<string[]>(
-    ['/siswa', '/absensi', '/nilai', '/tabungan', '/jurnal']
+    ['/siswa', '/absensi', '/nilai', '/tabungan', '/jadwal', '/jurnal']
   );
   const [isSavingOnboarding, setIsSavingOnboarding] = useState(false);
+
+  const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({
+    'Kelola Siswa': true,
+    'Kelola Kelas': true,
+  });
 
   const toggleSidebar = () => setMobileOpen(!mobileOpen);
 
@@ -142,17 +201,11 @@ export default function DashboardLayoutClient({
 
   const initialName = teacher.name ? teacher.name.charAt(0).toUpperCase() : 'G';
 
-  // Filter visible sidebar items
-  const visibleSidebarItems = allSidebarItems.filter((item) => {
-    if (item.href === '/dashboard' || item.href === '/' || item.href === '/profile' || item.href === '/settings') return true;
-    return enabledMenus.includes(item.href);
-  });
-
   const sidebarContent = (
     <div className='flex h-full flex-col justify-between p-4'>
-      <div>
+      <div className='overflow-y-auto pr-1'>
         {/* Brand Header */}
-        <div className='flex items-center gap-3 px-2 py-4 mb-6 border-b border-slate-200/80'>
+        <div className='flex items-center gap-3 px-2 py-4 mb-5 border-b border-slate-200/80'>
           <div className='flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-md shadow-emerald-500/20'>
             <BookOpen className='h-5 w-5' />
           </div>
@@ -164,32 +217,134 @@ export default function DashboardLayoutClient({
           </div>
         </div>
 
-        {/* Navigation Items */}
-        <nav className='space-y-1.5'>
-          {visibleSidebarItems.map((item) => {
-            const isActive = pathname === item.href;
-            const Icon = item.icon;
+        {/* Grouped Navigation Items */}
+        <nav className='space-y-5'>
+          {sidebarMenuGroups.map((group) => {
+            const visibleItemsInGroup = group.items
+              .map((item) => {
+                if (item.children) {
+                  const visibleChildren = item.children.filter((child) =>
+                    enabledMenus.includes(child.href)
+                  );
+                  if (visibleChildren.length === 0) return null;
+                  return { ...item, children: visibleChildren };
+                }
+                if (
+                  item.href === '/dashboard' ||
+                  item.href === '/' ||
+                  item.href === '/profile' ||
+                  item.href === '/settings' ||
+                  (item.href && enabledMenus.includes(item.href))
+                ) {
+                  return item;
+                }
+                return null;
+              })
+              .filter(Boolean) as SidebarItem[];
+
+            if (visibleItemsInGroup.length === 0) return null;
+
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setMobileOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group ${isActive
-                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/70 shadow-xs font-semibold'
-                  : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 border border-transparent'
-                  }`}
-              >
-                <Icon
-                  className={`h-5 w-5 transition-transform duration-200 group-hover:scale-110 ${isActive
-                    ? 'text-emerald-600'
-                    : 'text-slate-400 group-hover:text-slate-600'
-                    }`}
-                />
-                <span>{item.name}</span>
-                {isActive && (
-                  <span className='ml-auto h-1.5 w-1.5 rounded-full bg-emerald-600' />
-                )}
-              </Link>
+              <div key={group.category} className='space-y-1.5'>
+                <div className='px-3 text-[10px] font-black uppercase tracking-wider text-slate-400/90'>
+                  {group.category}
+                </div>
+
+                <div className='space-y-1'>
+                  {visibleItemsInGroup.map((item) => {
+                    if (item.children && item.children.length > 0) {
+                      const isChildActive = item.children.some(
+                        (child) => pathname === child.href
+                      );
+                      const isOpen = openMenus[item.name] ?? isChildActive;
+                      const Icon = item.icon;
+
+                      return (
+                        <div key={item.name} className='space-y-1'>
+                          <button
+                            onClick={() =>
+                              setOpenMenus((prev) => ({
+                                ...prev,
+                                [item.name]: !isOpen,
+                              }))
+                            }
+                            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer ${
+                              isChildActive
+                                ? 'bg-emerald-50/70 text-emerald-900 border border-emerald-200/80 font-bold'
+                                : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 border border-transparent'
+                            }`}
+                          >
+                            <div className='flex items-center gap-3'>
+                              <Icon
+                                className={`h-4.5 w-4.5 transition-transform duration-200 ${
+                                  isChildActive ? 'text-emerald-600' : 'text-slate-400'
+                                }`}
+                              />
+                              <span>{item.name}</span>
+                            </div>
+                            {isOpen ? (
+                              <ChevronDown className='h-3.5 w-3.5 text-slate-400' />
+                            ) : (
+                              <ChevronRight className='h-3.5 w-3.5 text-slate-400' />
+                            )}
+                          </button>
+
+                          {isOpen && (
+                            <div className='pl-3.5 space-y-1 border-l-2 border-slate-200/80 ml-5 my-1'>
+                              {item.children.map((child) => {
+                                const isSubActive = pathname === child.href;
+                                const SubIcon = child.icon;
+                                return (
+                                  <Link
+                                    key={child.href}
+                                    href={child.href}
+                                    onClick={() => setMobileOpen(false)}
+                                    className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all duration-200 ${
+                                      isSubActive
+                                        ? 'bg-emerald-600 text-white font-bold shadow-xs'
+                                        : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium'
+                                    }`}
+                                  >
+                                    <SubIcon
+                                      className={`h-4 w-4 ${
+                                        isSubActive ? 'text-white' : 'text-slate-400'
+                                      }`}
+                                    />
+                                    <span>{child.name}</span>
+                                  </Link>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    }
+
+                    const isActive = pathname === item.href;
+                    const Icon = item.icon;
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href!}
+                        onClick={() => setMobileOpen(false)}
+                        className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group ${
+                          isActive
+                            ? 'bg-emerald-50/90 text-emerald-800 border border-emerald-200/80 shadow-xs font-bold'
+                            : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 border border-transparent'
+                        }`}
+                      >
+                        <Icon
+                          className={`h-4.5 w-4.5 transition-transform duration-200 group-hover:scale-110 ${
+                            isActive ? 'text-emerald-600' : 'text-slate-400 group-hover:text-slate-600'
+                          }`}
+                        />
+                        <span>{item.name}</span>
+                        {isActive && <span className='ml-auto h-1.5 w-1.5 rounded-full bg-emerald-600' />}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
             );
           })}
         </nav>

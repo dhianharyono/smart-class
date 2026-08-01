@@ -24,6 +24,7 @@ import {
   CheckCircle2,
   ArrowRight,
   Monitor,
+  Calendar,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -59,6 +60,13 @@ const CONFIGURABLE_MENUS = [
     color: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
   },
   {
+    href: '/jadwal',
+    label: 'Jadwal & Alokasi Pelajaran',
+    desc: 'Plotting jadwal pelajaran mingguan kelas & jadwal piket',
+    icon: Calendar,
+    color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+  },
+  {
     href: '/jurnal',
     label: 'Jurnal Wali Kelas',
     desc: 'Agenda harian mengajar guru & rekaman kegiatan KBM',
@@ -84,7 +92,7 @@ export default function SettingsClient() {
   React.useEffect(() => {
     if (profile) {
       setSelectedMenus(
-        profile.enabledMenus || ['/', '/siswa', '/absensi', '/nilai', '/tabungan', '/jurnal']
+        profile.enabledMenus || ['/', '/siswa', '/absensi', '/nilai', '/tabungan', '/jadwal', '/jurnal']
       );
     }
   }, [profile]);
@@ -116,12 +124,12 @@ export default function SettingsClient() {
   };
 
   const handleSelectAll = () => {
-    setSelectedMenus(['/siswa', '/absensi', '/nilai', '/tabungan', '/jurnal']);
+    setSelectedMenus(['/siswa', '/absensi', '/nilai', '/tabungan', '/jadwal', '/jurnal']);
     toast.info('Seluruh menu dipilih');
   };
 
   const handleResetDefault = () => {
-    setSelectedMenus(['/siswa', '/absensi', '/nilai', '/tabungan', '/jurnal']);
+    setSelectedMenus(['/siswa', '/absensi', '/nilai', '/tabungan', '/jadwal', '/jurnal']);
     toast.info('Pengaturan dikembalikan ke standar');
   };
 
