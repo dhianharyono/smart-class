@@ -32,25 +32,26 @@ export async function getDashboardStats() {
     await dbConnect();
     const teacherId = await requireAuth();
 
-    // Get teacher's KKM & enabled menus
-    const teacher = await Teacher.findById(teacherId).select('kkm enabledMenus').lean();
-    const kkm = teacher?.kkm ?? 70;
-    const enabledMenus = teacher?.enabledMenus && teacher.enabledMenus.length > 0
-      ? teacher.enabledMenus
-      : ['/', '/siswa', '/absensi', '/nilai', '/tabungan', '/jurnal'];
-
-    // 1. Total Students count
-    const studentCount = await Student.countDocuments({ teacherId });
-
-    // 2. Attendance stats (Current Month)
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
 
-    const monthlyAttendance = await Attendance.find({
-      teacherId,
-      date: { $gte: startOfMonth, $lte: endOfMonth },
-    }).lean();
+    // Parallelize DB queries to cut down database response latency drastically
+    const [teacher, studentCount, monthlyAttendance, savingsTx, journals] = await Promise.all([
+      Teacher.findById(teacherId).select('kkm enabledMenus').lean(),
+      Student.countDocuments({ teacherId }),
+      Attendance.find({
+        teacherId,
+        date: { $gte: startOfMonth, $lte: endOfMonth },
+      }).lean(),
+      Saving.find({ teacherId }).sort({ date: 1 }).lean(),
+      Journal.find({ teacherId }).sort({ date: 1 }).lean(),
+    ]);
+
+    const kkm = teacher?.kkm ?? 70;
+    const enabledMenus = teacher?.enabledMenus && teacher.enabledMenus.length > 0
+      ? teacher.enabledMenus
+      : ['/', '/siswa', '/absensi', '/nilai', '/tabungan', '/jurnal'];
 
     const attendanceBreakdown = {
       Hadir: 0,
@@ -72,7 +73,6 @@ export async function getDashboardStats() {
         : 100; // default to 100% if no logs
 
     // 3. Savings total balance
-    const savingsTx = await Saving.find({ teacherId }).sort({ date: 1 }).lean();
     let totalSavingsBalance = 0;
     
     // Accumulate trend data points
@@ -134,7 +134,6 @@ export async function getDashboardStats() {
     }
 
     // 6. Journal monthly meeting and attendance stats
-    const journals = await Journal.find({ teacherId }).sort({ date: 1 }).lean();
     const journalMap = new Map<
       string,
       { month: string; Pertemuan: number; Sakit: number; Izin: number; Alpha: number }

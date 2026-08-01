@@ -67,8 +67,8 @@ async function dbConnect() {
 
   try {
     cached.conn = await cached.promise;
-    // Seed initial admin & schools
-    await seedInitialData();
+    // Seed initial admin & schools in background without blocking connection readiness
+    seedInitialData().catch((err) => console.error('[SEED] Failed background seed:', err));
   } catch (e) {
     cached.promise = null;
     throw e;

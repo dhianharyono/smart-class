@@ -93,7 +93,7 @@ export async function updateProfile(data: {
           nip: data.nip?.trim() || '-',
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     // Sync teacher name & NIP to JournalHeader as well if it exists

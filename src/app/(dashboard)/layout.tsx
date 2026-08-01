@@ -25,8 +25,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   await dbConnect();
-  await Teacher.findByIdAndUpdate(session.userId, { lastActiveAt: new Date() });
-  const teacher = await Teacher.findById(session.userId).lean();
+  const teacher = await Teacher.findByIdAndUpdate(
+    session.userId,
+    { lastActiveAt: new Date() },
+    { returnDocument: 'after' }
+  ).lean();
 
   if (!teacher) {
     redirect('/sign-in?clear=1');

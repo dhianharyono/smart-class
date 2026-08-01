@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   BookOpen,
@@ -23,6 +24,7 @@ import {
   Check,
   LayoutDashboard,
   LogOut,
+  Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getCurrentUserSession, logoutTeacher } from '@/actions/authActions';
@@ -30,20 +32,27 @@ import { toast } from 'sonner';
 import ConfirmDialog from '@/components/ConfirmDialog';
 
 export default function LandingPage() {
+  const router = useRouter();
   const [currentUser, setCurrentUser] = useState<{
     userId: string;
     name: string;
     email: string;
     isAdmin: boolean;
   } | null>(null);
+  const [navigatingButton, setNavigatingButton] = useState<string | null>(null);
 
   useEffect(() => {
+    // Prefetch dashboard route preemptively for logged in session
+    router.prefetch('/dashboard');
+    router.prefetch('/admin');
+
     getCurrentUserSession().then((user) => {
       if (user) {
         setCurrentUser(user);
+        router.prefetch(user.isAdmin ? '/admin' : '/dashboard');
       }
     });
-  }, []);
+  }, [router]);
 
   const dashboardHref = currentUser?.isAdmin ? '/admin' : '/dashboard';
 
@@ -173,10 +182,19 @@ export default function LandingPage() {
           <div className='hidden md:flex items-center gap-3'>
             {currentUser ? (
               <div className='flex items-center gap-2.5'>
-                <Link href={dashboardHref}>
-                  <Button className='bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-5 py-2.5 rounded-xl shadow-xs transition-all duration-300 flex items-center gap-2 cursor-pointer'>
-                    <LayoutDashboard className='h-4 w-4' />
-                    <span>Dashboard</span>
+                <Link href={dashboardHref} onClick={() => setNavigatingButton('header')}>
+                  <Button disabled={navigatingButton !== null} className='bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-5 py-2.5 rounded-xl shadow-xs transition-all duration-300 flex items-center gap-2 cursor-pointer'>
+                    {navigatingButton === 'header' ? (
+                      <>
+                        <Loader2 className='h-4 w-4 animate-spin' />
+                        <span>Membuka...</span>
+                      </>
+                    ) : (
+                      <>
+                        <LayoutDashboard className='h-4 w-4' />
+                        <span>Dashboard</span>
+                      </>
+                    )}
                   </Button>
                 </Link>
                 <Button
@@ -276,11 +294,23 @@ export default function LandingPage() {
                   <>
                     <Link
                       href={dashboardHref}
-                      onClick={() => setMobileMenuOpen(false)}
+                      onClick={() => {
+                        setNavigatingButton('mobile');
+                        setMobileMenuOpen(false);
+                      }}
                     >
-                      <Button className='w-full justify-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl py-3 flex items-center gap-2 cursor-pointer shadow-xs'>
-                        <LayoutDashboard className='h-4 w-4' />
-                        <span>Dashboard</span>
+                      <Button disabled={navigatingButton !== null} className='w-full justify-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl py-3 flex items-center gap-2 cursor-pointer shadow-xs'>
+                        {navigatingButton === 'mobile' ? (
+                          <>
+                            <Loader2 className='h-4 w-4 animate-spin' />
+                            <span>Membuka...</span>
+                          </>
+                        ) : (
+                          <>
+                            <LayoutDashboard className='h-4 w-4' />
+                            <span>Dashboard</span>
+                          </>
+                        )}
                       </Button>
                     </Link>
                     <Button
@@ -361,14 +391,23 @@ export default function LandingPage() {
           >
             {currentUser ? (
               <>
-                <Link href={dashboardHref} className='w-full sm:w-auto'>
+                <Link href={dashboardHref} onClick={() => setNavigatingButton('hero')} className='w-full sm:w-auto'>
                   <motion.div
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
                   >
-                    <Button className='w-full sm:w-auto h-12 sm:h-14 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm sm:text-base px-7 sm:px-9 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2.5 cursor-pointer'>
-                      <LayoutDashboard className='h-5 w-5' />
-                      <span>Buka Dashboard Saya</span>
+                    <Button disabled={navigatingButton !== null} className='w-full sm:w-auto h-12 sm:h-14 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm sm:text-base px-7 sm:px-9 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2.5 cursor-pointer'>
+                      {navigatingButton === 'hero' ? (
+                        <>
+                          <Loader2 className='h-5 w-5 animate-spin' />
+                          <span>Membuka Dashboard...</span>
+                        </>
+                      ) : (
+                        <>
+                          <LayoutDashboard className='h-5 w-5' />
+                          <span>Buka Dashboard</span>
+                        </>
+                      )}
                     </Button>
                   </motion.div>
                 </Link>
@@ -624,11 +663,10 @@ export default function LandingPage() {
                   key={tab.id}
                   whileTap={{ scale: 0.96 }}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer border ${
-                    isActive
+                  className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer border ${isActive
                       ? 'bg-emerald-600 text-white border-emerald-500 shadow-xs'
                       : 'bg-white text-slate-600 hover:bg-slate-100 border-slate-200'
-                  }`}
+                    }`}
                 >
                   <Icon className='h-4 w-4' />
                   <span>{tab.label}</span>
@@ -1104,9 +1142,8 @@ export default function LandingPage() {
                 >
                   <span>{item.q}</span>
                   <ChevronDown
-                    className={`h-5 w-5 text-slate-400 transition-transform duration-300 flex-shrink-0 ${
-                      openFaq === idx ? 'rotate-180 text-emerald-600' : ''
-                    }`}
+                    className={`h-5 w-5 text-slate-400 transition-transform duration-300 flex-shrink-0 ${openFaq === idx ? 'rotate-180 text-emerald-600' : ''
+                      }`}
                   />
                 </button>
                 <AnimatePresence>

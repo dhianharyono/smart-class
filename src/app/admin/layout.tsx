@@ -23,8 +23,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
 
   await dbConnect();
-  await Teacher.findByIdAndUpdate(session.userId, { lastActiveAt: new Date() });
-  const adminUser = await Teacher.findById(session.userId).lean();
+  const adminUser = await Teacher.findByIdAndUpdate(
+    session.userId,
+    { lastActiveAt: new Date() },
+    { returnDocument: 'after' }
+  ).lean();
 
   if (!adminUser) {
     redirect('/sign-in?clear=1');

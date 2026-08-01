@@ -77,7 +77,7 @@ export async function saveJournalHeader(data: {
     const header = await JournalHeader.findOneAndUpdate(
       { teacherId },
       { $set: { ...data, teacherId } },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
 
     revalidatePath('/jurnal');
@@ -348,7 +348,7 @@ export async function updateJournal(
           notes: data.notes || '',
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!updated) {
