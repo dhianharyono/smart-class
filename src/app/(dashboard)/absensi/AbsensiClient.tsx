@@ -182,6 +182,8 @@ export default function AbsensiClient({
         ...prev,
         teacherName: headerInfo.teacherName || prev.teacherName,
         teacherNip: activeNip,
+        supervisorName: headerInfo.principalName || prev.supervisorName,
+        supervisorNip: (headerInfo.principalNip && headerInfo.principalNip.trim() !== '') ? headerInfo.principalNip : prev.supervisorNip,
       }));
     }
   }, [headerInfo]);
@@ -409,8 +411,8 @@ export default function AbsensiClient({
         <button
           onClick={() => setViewMode('input')}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${viewMode === 'input'
-              ? 'bg-white text-emerald-700 shadow-xs'
-              : 'text-slate-600 hover:text-slate-900'
+            ? 'bg-white text-emerald-700 shadow-xs'
+            : 'text-slate-600 hover:text-slate-900'
             }`}
         >
           <UserCheck className='h-4 w-4' />
@@ -419,8 +421,8 @@ export default function AbsensiClient({
         <button
           onClick={() => setViewMode('preview')}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${viewMode === 'preview'
-              ? 'bg-white text-emerald-700 shadow-xs'
-              : 'text-slate-600 hover:text-slate-900'
+            ? 'bg-white text-emerald-700 shadow-xs'
+            : 'text-slate-600 hover:text-slate-900'
             }`}
         >
           <FileText className='h-4 w-4' />
@@ -740,7 +742,7 @@ export default function AbsensiClient({
                     <div className='grid grid-cols-2 gap-3'>
                       <div className='space-y-1'>
                         <Label className='text-slate-700 font-semibold'>
-                          Nama Kepala Sekolah / Pengawas
+                          Nama Kepala Sekolah
                         </Label>
                         <Input
                           placeholder='Drs. H. Ahmad Dahlan, M.Pd.'
@@ -756,7 +758,7 @@ export default function AbsensiClient({
                       </div>
                       <div className='space-y-1'>
                         <Label className='text-slate-700 font-semibold'>
-                          NIP Kepala Sekolah / Pengawas
+                          NIP Kepala Sekolah
                         </Label>
                         <Input
                           placeholder='19750812 200003 1 002'
@@ -825,8 +827,8 @@ export default function AbsensiClient({
                         key={period}
                         onClick={() => setExportPeriod(period)}
                         className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-all cursor-pointer ${isActive
-                            ? 'bg-emerald-600 text-white shadow-xs'
-                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+                          ? 'bg-emerald-600 text-white shadow-xs'
+                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
                           }`}
                       >
                         {period}
@@ -1379,7 +1381,7 @@ export default function AbsensiClient({
                   <div className='h-20' /> {/* Signature Space */}
                   <div className='space-y-1'>
                     <Input
-                      placeholder='Ketik nama pengawas/kepsek...'
+                      placeholder='Ketik nama kepsek...'
                       value={signatureData.supervisorName}
                       onChange={(e) =>
                         setSignatureData({

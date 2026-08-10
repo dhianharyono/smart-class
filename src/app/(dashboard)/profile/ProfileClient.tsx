@@ -102,6 +102,8 @@ export default function ProfileClient() {
     schoolName: '',
     className: '',
     nip: '',
+    principalName: '',
+    principalNip: '',
   });
 
   // Password Form State
@@ -123,6 +125,8 @@ export default function ProfileClient() {
         schoolName: profile.schoolName || '',
         className: profile.className || '',
         nip: profile.nip || '-',
+        principalName: profile.principalName || '',
+        principalNip: profile.principalNip || '-',
       });
       setSelectedMenus(
         profile.enabledMenus || [
@@ -141,9 +145,22 @@ export default function ProfileClient() {
   // Update Profile Mutation
   const updateProfileMutation = useMutation({
     mutationFn: updateProfile,
-    onSuccess: () => {
+    onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ['profile'] });
+      queryClient.invalidateQueries({ queryKey: ['attendanceHeaderInfo'] });
+      queryClient.invalidateQueries({ queryKey: ['journalHeader'] });
       toast.success('Data profil berhasil diperbarui!');
+      if (res?.teacher) {
+        setProfileForm({
+          name: res.teacher.name || '',
+          email: res.teacher.email || '',
+          schoolName: res.teacher.schoolName || '',
+          className: res.teacher.className || '',
+          nip: res.teacher.nip || '-',
+          principalName: res.teacher.principalName || '',
+          principalNip: res.teacher.principalNip || '-',
+        });
+      }
       router.refresh();
     },
     onError: (err: any) => {
@@ -276,11 +293,10 @@ export default function ProfileClient() {
         <Button
           onClick={() => setActiveTab('profile')}
           variant='ghost'
-          className={`rounded-xl text-xs font-semibold h-10 px-3 sm:px-4 gap-1.5 sm:gap-2 transition-all cursor-pointer w-full sm:w-auto justify-center ${
-            activeTab === 'profile'
-              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-xs'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-          }`}
+          className={`rounded-xl text-xs font-semibold h-10 px-3 sm:px-4 gap-1.5 sm:gap-2 transition-all cursor-pointer w-full sm:w-auto justify-center ${activeTab === 'profile'
+            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-xs'
+            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
         >
           <User className='h-4 w-4 shrink-0' />
           <span className='truncate'>Data Diri & Sekolah</span>
@@ -289,11 +305,10 @@ export default function ProfileClient() {
         <Button
           onClick={() => setActiveTab('security')}
           variant='ghost'
-          className={`rounded-xl text-xs font-semibold h-10 px-3 sm:px-4 gap-1.5 sm:gap-2 transition-all cursor-pointer w-full sm:w-auto justify-center ${
-            activeTab === 'security'
-              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-xs'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-          }`}
+          className={`rounded-xl text-xs font-semibold h-10 px-3 sm:px-4 gap-1.5 sm:gap-2 transition-all cursor-pointer w-full sm:w-auto justify-center ${activeTab === 'security'
+            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-xs'
+            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
         >
           <ShieldCheck className='h-4 w-4 shrink-0' />
           <span className='truncate'>Keamanan & Password</span>
@@ -400,6 +415,57 @@ export default function ProfileClient() {
                 }
                 className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-10'
               />
+            </div>
+
+            {/* Sub-Section: Data Kepala Sekolah */}
+            <div className='pt-4 border-t border-slate-200 space-y-3'>
+              <div>
+                <h4 className='text-xs font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1.5'>
+                  <Building className='h-3.5 w-3.5 text-emerald-600' />
+                  <span>Data Kepala Sekolah</span>
+                </h4>
+                <p className='text-[11px] text-slate-500 mt-0.5'>
+                  Data ini akan otomatis muncul pada kolom pengetahu/tanda tangan Kepala Sekolah di pratinjau cetak PDF dan ekspor Excel.
+                </p>
+              </div>
+
+              <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+                <div className='space-y-1.5'>
+                  <Label className='text-slate-700 text-xs font-semibold flex items-center gap-2'>
+                    <User className='h-3.5 w-3.5 text-slate-400' />
+                    <span>Nama Kepala Sekolah</span>
+                  </Label>
+                  <Input
+                    placeholder='Contoh: Drs. H. Ahmad Dahlan, M.Pd.'
+                    value={profileForm.principalName}
+                    onChange={(e) =>
+                      setProfileForm({
+                        ...profileForm,
+                        principalName: e.target.value,
+                      })
+                    }
+                    className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-10'
+                  />
+                </div>
+
+                <div className='space-y-1.5'>
+                  <Label className='text-slate-700 text-xs font-semibold flex items-center gap-2'>
+                    <FileCheck2 className='h-3.5 w-3.5 text-slate-400' />
+                    <span>NIP Kepala Sekolah</span>
+                  </Label>
+                  <Input
+                    placeholder='Contoh: 19750812 200003 1 002'
+                    value={profileForm.principalNip}
+                    onChange={(e) =>
+                      setProfileForm({
+                        ...profileForm,
+                        principalNip: e.target.value,
+                      })
+                    }
+                    className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-10'
+                  />
+                </div>
+              </div>
             </div>
 
             <div className='pt-4 flex justify-end border-t border-slate-200'>

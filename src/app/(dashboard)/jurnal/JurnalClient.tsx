@@ -104,7 +104,7 @@ export default function JurnalClient() {
   const [signatureData, setSignatureData] = useState({
     place: 'Bandung',
     date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
-    supervisorTitle: 'Mengetahui, Pengawas Sekolah / Kepala Sekolah',
+    supervisorTitle: 'Mengetahui, Kepala Sekolah',
     supervisorName: '',
     supervisorNip: '-',
   });
@@ -165,6 +165,11 @@ export default function JurnalClient() {
       if (headerData.academicYear) {
         setDocHeaderSubtitle(`SEMESTER I (GANJIL) TAHUN PELAJARAN ${headerData.academicYear}`);
       }
+      setSignatureData((prev) => ({
+        ...prev,
+        supervisorName: headerData.principalName || prev.supervisorName,
+        supervisorNip: (headerData.principalNip && headerData.principalNip.trim() !== '') ? headerData.principalNip : prev.supervisorNip,
+      }));
     }
   }, [headerData]);
 
@@ -626,7 +631,7 @@ export default function JurnalClient() {
                   <div className='h-20' /> {/* Signature Blank Space */}
                   <div className='space-y-1'>
                     <Input
-                      placeholder='Ketik nama pengawas/kepsek...'
+                      placeholder='Ketik nama kepsek...'
                       value={signatureData.supervisorName}
                       onChange={(e) => setSignatureData({ ...signatureData, supervisorName: e.target.value })}
                       className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 w-full max-w-xs print:border-none print:p-0'
@@ -634,7 +639,7 @@ export default function JurnalClient() {
                     <div className='flex items-center gap-1 text-[11px] text-slate-700 print:text-black'>
                       <span>NIP.</span>
                       <Input
-                        placeholder='Ketik NIP pengawas...'
+                        placeholder='Ketik NIP kepsek...'
                         value={signatureData.supervisorNip}
                         onChange={(e) => setSignatureData({ ...signatureData, supervisorNip: e.target.value })}
                         className='text-[11px] border-b border-slate-300 border-x-0 border-t-0 rounded-none h-5 px-0 focus:border-emerald-600 w-44 print:border-none print:p-0'

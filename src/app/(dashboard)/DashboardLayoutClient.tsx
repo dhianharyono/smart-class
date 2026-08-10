@@ -94,7 +94,7 @@ const sidebarMenuGroups: SidebarGroup[] = [
   {
     category: 'PENGATURAN',
     items: [
-      { name: 'Profil Saya', href: '/profile', icon: User },
+      { name: 'Profile dan Sekolah', href: '/profile', icon: User },
       { name: 'Pengaturan', href: '/settings', icon: Settings },
     ],
   },
@@ -358,17 +358,15 @@ export default function DashboardLayoutClient({
                                 [item.name]: !isOpen,
                               }))
                             }
-                            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer ${
-                              isChildActive
+                            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer ${isChildActive
                                 ? 'bg-emerald-50/70 text-emerald-900 border border-emerald-200/80 font-bold'
                                 : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 border border-transparent'
-                            }`}
+                              }`}
                           >
                             <div className='flex items-center gap-3'>
                               <Icon
-                                className={`h-4.5 w-4.5 transition-transform duration-200 ${
-                                  isChildActive ? 'text-emerald-600' : 'text-slate-400'
-                                }`}
+                                className={`h-4.5 w-4.5 transition-transform duration-200 ${isChildActive ? 'text-emerald-600' : 'text-slate-400'
+                                  }`}
                               />
                               <span>{item.name}</span>
                             </div>
@@ -389,16 +387,14 @@ export default function DashboardLayoutClient({
                                     key={child.href}
                                     href={child.href}
                                     onClick={() => setMobileOpen(false)}
-                                    className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all duration-200 ${
-                                      isSubActive
+                                    className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all duration-200 ${isSubActive
                                         ? 'bg-emerald-600 text-white font-bold shadow-xs'
                                         : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium'
-                                    }`}
+                                      }`}
                                   >
                                     <SubIcon
-                                      className={`h-4 w-4 ${
-                                        isSubActive ? 'text-white' : 'text-slate-400'
-                                      }`}
+                                      className={`h-4 w-4 ${isSubActive ? 'text-white' : 'text-slate-400'
+                                        }`}
                                     />
                                     <span>{child.name}</span>
                                   </Link>
@@ -417,16 +413,14 @@ export default function DashboardLayoutClient({
                         key={item.href}
                         href={item.href!}
                         onClick={() => setMobileOpen(false)}
-                        className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group ${
-                          isActive
+                        className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group ${isActive
                             ? 'bg-emerald-50/90 text-emerald-800 border border-emerald-200/80 shadow-xs font-bold'
                             : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 border border-transparent'
-                        }`}
+                          }`}
                       >
                         <Icon
-                          className={`h-4.5 w-4.5 transition-transform duration-200 group-hover:scale-110 ${
-                            isActive ? 'text-emerald-600' : 'text-slate-400 group-hover:text-slate-600'
-                          }`}
+                          className={`h-4.5 w-4.5 transition-transform duration-200 group-hover:scale-110 ${isActive ? 'text-emerald-600' : 'text-slate-400 group-hover:text-slate-600'
+                            }`}
                         />
                         <span>{item.name}</span>
                         {isActive && <span className='ml-auto h-1.5 w-1.5 rounded-full bg-emerald-600' />}
@@ -585,16 +579,14 @@ export default function DashboardLayoutClient({
               <button
                 type='button'
                 onClick={() => setOnboardingStep(1)}
-                className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer min-w-0 ${
-                  onboardingStep === 1
+                className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer min-w-0 ${onboardingStep === 1
                     ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
                     : 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
-                }`}
+                  }`}
               >
                 <span
-                  className={`h-5 w-5 rounded-lg flex items-center justify-center font-black text-[11px] shrink-0 ${
-                    onboardingStep === 1 ? 'bg-white/25 text-white' : 'bg-emerald-600 text-white'
-                  }`}
+                  className={`h-5 w-5 rounded-lg flex items-center justify-center font-black text-[11px] shrink-0 ${onboardingStep === 1 ? 'bg-white/25 text-white' : 'bg-emerald-600 text-white'
+                    }`}
                 >
                   1
                 </span>
@@ -604,16 +596,14 @@ export default function DashboardLayoutClient({
               <button
                 type='button'
                 onClick={() => handleNextStep()}
-                className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer min-w-0 ${
-                  onboardingStep === 2
+                className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer min-w-0 ${onboardingStep === 2
                     ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
                     : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100 hover:text-slate-600'
-                }`}
+                  }`}
               >
                 <span
-                  className={`h-5 w-5 rounded-lg flex items-center justify-center font-black text-[11px] shrink-0 ${
-                    onboardingStep === 2 ? 'bg-white/25 text-white' : 'bg-slate-200 text-slate-500'
-                  }`}
+                  className={`h-5 w-5 rounded-lg flex items-center justify-center font-black text-[11px] shrink-0 ${onboardingStep === 2 ? 'bg-white/25 text-white' : 'bg-slate-200 text-slate-500'
+                    }`}
                 >
                   2
                 </span>
@@ -760,18 +750,16 @@ export default function DashboardLayoutClient({
                           setSelectedOnboardingMenus([...selectedOnboardingMenus, menu.href]);
                         }
                       }}
-                      className={`flex items-start gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer select-none ${
-                        isChecked
+                      className={`flex items-start gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer select-none ${isChecked
                           ? 'bg-emerald-50/80 border-emerald-300 text-emerald-950 shadow-2xs'
                           : 'bg-slate-50/60 border-slate-200 text-slate-600 hover:border-slate-300'
-                      }`}
+                        }`}
                     >
                       <div
-                        className={`mt-0.5 h-5 w-5 rounded-lg border flex items-center justify-center shrink-0 transition-colors ${
-                          isChecked
+                        className={`mt-0.5 h-5 w-5 rounded-lg border flex items-center justify-center shrink-0 transition-colors ${isChecked
                             ? 'bg-emerald-600 border-emerald-600 text-white shadow-2xs'
                             : 'border-slate-300 bg-white'
-                        }`}
+                          }`}
                       >
                         {isChecked && <Check className='h-3.5 w-3.5 stroke-[3]' />}
                       </div>

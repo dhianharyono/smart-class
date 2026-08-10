@@ -43,6 +43,8 @@ export async function getProfile() {
         schoolName: teacher.schoolName || '',
         className: teacher.className || '',
         nip: teacher.nip || '-',
+        principalName: teacher.principalName || '',
+        principalNip: teacher.principalNip || '-',
         isFirstLogin: teacher.isFirstLogin ?? false,
         enabledMenus: teacher.enabledMenus && teacher.enabledMenus.length > 0 ? teacher.enabledMenus : DEFAULT_MENUS,
       })
@@ -62,6 +64,8 @@ export async function updateProfile(data: {
   schoolName?: string;
   className?: string;
   nip?: string;
+  principalName?: string;
+  principalNip?: string;
 }) {
   try {
     await dbConnect();
@@ -91,12 +95,14 @@ export async function updateProfile(data: {
           schoolName: data.schoolName?.trim() || '',
           className: data.className?.trim() || '',
           nip: data.nip?.trim() || '-',
+          principalName: data.principalName?.trim() || '',
+          principalNip: data.principalNip?.trim() || '-',
         },
       },
-      { returnDocument: 'after' }
+      { new: true, runValidators: true }
     );
 
-    // Sync teacher name & NIP to JournalHeader as well if it exists
+    // Sync teacher name, NIP & supervisor info to JournalHeader as well if it exists
     await JournalHeader.findOneAndUpdate(
       { teacherId },
       {
@@ -104,6 +110,8 @@ export async function updateProfile(data: {
           teacherName: data.name.trim(),
           nip: data.nip?.trim() || '-',
           schoolName: data.schoolName?.trim() || '',
+          supervisorName: data.principalName?.trim() || '',
+          supervisorNip: data.principalNip?.trim() || '-',
         },
       }
     );

@@ -51,6 +51,8 @@ export async function getAttendanceHeaderInfo() {
       className: teacher?.className || journalHeader?.classNameSemester || 'Kelas Utama',
       teacherName: teacher?.name || journalHeader?.teacherName || '',
       nip: validNip,
+      principalName: teacher?.principalName || '',
+      principalNip: teacher?.principalNip || '-',
       academicYear: journalHeader?.academicYear || `${new Date().getFullYear()}/${new Date().getFullYear() + 1}`,
     };
   } catch (error: any) {

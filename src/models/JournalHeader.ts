@@ -9,6 +9,8 @@ export interface IJournalHeader extends Document {
   curriculum: string;
   teacherName: string;
   nip: string;
+  supervisorName?: string;
+  supervisorNip?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -23,11 +25,17 @@ const JournalHeaderSchema = new Schema<IJournalHeader>(
     curriculum: { type: String, default: '2013' },
     teacherName: { type: String, default: '' },
     nip: { type: String, default: '-' },
+    supervisorName: { type: String, default: '' },
+    supervisorNip: { type: String, default: '-' },
   },
   {
     timestamps: true,
   }
 );
+
+if (mongoose.models.JournalHeader && !mongoose.models.JournalHeader.schema.path('supervisorName')) {
+  delete (mongoose.models as any).JournalHeader;
+}
 
 const JournalHeader: Model<IJournalHeader> =
   mongoose.models.JournalHeader ||

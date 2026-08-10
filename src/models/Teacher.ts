@@ -8,6 +8,8 @@ export interface ITeacher extends Document {
   schoolName?: string;
   className?: string;
   nip?: string;
+  principalName?: string;
+  principalNip?: string;
   role: 'Wali Kelas' | 'Kepala Sekolah';
   kkm: number;
   isFirstLogin?: boolean;
@@ -36,6 +38,8 @@ const TeacherSchema = new Schema<ITeacher>({
   schoolName: { type: String },
   className: { type: String },
   nip: { type: String, default: '-' },
+  principalName: { type: String, default: '' },
+  principalNip: { type: String, default: '-' },
   role: { type: String, enum: ['Wali Kelas', 'Kepala Sekolah'], default: 'Wali Kelas' },
   kkm: { type: Number, default: 70, min: 0, max: 100 },
   isFirstLogin: { type: Boolean, default: true },
@@ -46,6 +50,10 @@ const TeacherSchema = new Schema<ITeacher>({
   lastActiveAt: { type: Date, default: Date.now },
   createdAt: { type: Date, default: Date.now },
 });
+
+if (mongoose.models.Teacher && !mongoose.models.Teacher.schema.path('principalName')) {
+  delete (mongoose.models as any).Teacher;
+}
 
 const Teacher: Model<ITeacher> = mongoose.models.Teacher || mongoose.model<ITeacher>('Teacher', TeacherSchema);
 

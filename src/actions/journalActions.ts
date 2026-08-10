@@ -55,11 +55,15 @@ export async function getJournalHeader() {
         curriculum: '2013',
         teacherName: teacher?.name || '',
         nip: validNip,
+        principalName: teacher?.principalName || '',
+        principalNip: teacher?.principalNip || '-',
       };
     }
 
     const result = JSON.parse(JSON.stringify(header));
     result.nip = validNip;
+    result.principalName = teacher?.principalName || result.supervisorName || '';
+    result.principalNip = teacher?.principalNip || result.supervisorNip || '-';
     if (teacher?.name) result.teacherName = teacher.name;
     if (teacher?.schoolName) result.schoolName = teacher.schoolName;
 

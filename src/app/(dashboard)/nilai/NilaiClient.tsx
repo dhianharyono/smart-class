@@ -153,6 +153,8 @@ export default function NilaiClient({
         ...prev,
         teacherName: headerInfo.teacherName || prev.teacherName,
         teacherNip: activeNip,
+        supervisorName: headerInfo.principalName || prev.supervisorName,
+        supervisorNip: (headerInfo.principalNip && headerInfo.principalNip.trim() !== '') ? headerInfo.principalNip : prev.supervisorNip,
       }));
     }
   }, [headerInfo]);
@@ -494,8 +496,8 @@ export default function NilaiClient({
         <button
           onClick={() => setActiveViewTab('data')}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${activeViewTab === 'data'
-              ? 'bg-white text-emerald-700 shadow-xs'
-              : 'text-slate-600 hover:text-slate-900'
+            ? 'bg-white text-emerald-700 shadow-xs'
+            : 'text-slate-600 hover:text-slate-900'
             }`}
         >
           <GraduationCap className='h-4 w-4' />
@@ -504,8 +506,8 @@ export default function NilaiClient({
         <button
           onClick={() => setActiveViewTab('preview')}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${activeViewTab === 'preview'
-              ? 'bg-white text-emerald-700 shadow-xs'
-              : 'text-slate-600 hover:text-slate-900'
+            ? 'bg-white text-emerald-700 shadow-xs'
+            : 'text-slate-600 hover:text-slate-900'
             }`}
         >
           <FileText className='h-4 w-4' />
@@ -679,8 +681,8 @@ export default function NilaiClient({
                                 handleScoreChange(row.studentId, e.target.value)
                               }
                               className={`text-center font-bold rounded-xl focus:ring-1 focus:ring-emerald-500 h-9 pr-2 ${row.score !== '' && row.score < kkm
-                                  ? 'border-rose-300 text-rose-700 bg-rose-50 focus:border-rose-500'
-                                  : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-emerald-500'
+                                ? 'border-rose-300 text-rose-700 bg-rose-50 focus:border-rose-500'
+                                : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-emerald-500'
                                 }`}
                             />
                             {row.score !== '' && row.score < kkm && (
@@ -849,7 +851,7 @@ export default function NilaiClient({
                     <div className='grid grid-cols-2 gap-3'>
                       <div className='space-y-1'>
                         <Label className='text-slate-700 font-semibold'>
-                          Nama Kepala Sekolah / Pengawas
+                          Nama Kepala Sekolah
                         </Label>
                         <Input
                           placeholder='Drs. H. Ahmad Dahlan, M.Pd.'
@@ -865,7 +867,7 @@ export default function NilaiClient({
                       </div>
                       <div className='space-y-1'>
                         <Label className='text-slate-700 font-semibold'>
-                          NIP Kepala Sekolah / Pengawas
+                          NIP Kepala Sekolah
                         </Label>
                         <Input
                           placeholder='19750812 200003 1 002'
@@ -929,8 +931,8 @@ export default function NilaiClient({
                 <button
                   onClick={() => setReportViewMode('all_subjects')}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${reportViewMode === 'all_subjects'
-                      ? 'bg-emerald-600 text-white shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
                     }`}
                 >
                   Semua Mapel (Leger)
@@ -938,8 +940,8 @@ export default function NilaiClient({
                 <button
                   onClick={() => setReportViewMode('recap')}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${reportViewMode === 'recap'
-                      ? 'bg-emerald-600 text-white shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
                     }`}
                 >
                   Per Mapel (Lengkap)
@@ -947,8 +949,8 @@ export default function NilaiClient({
                 <button
                   onClick={() => setReportViewMode('single')}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${reportViewMode === 'single'
-                      ? 'bg-emerald-600 text-white shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
                     }`}
                 >
                   Per Kategori
@@ -1262,8 +1264,8 @@ export default function NilaiClient({
                                   <td
                                     key={subj}
                                     className={`border border-slate-300 px-2 py-2 text-center font-semibold ${isLow
-                                        ? 'text-rose-600 print:text-black font-bold'
-                                        : ''
+                                      ? 'text-rose-600 print:text-black font-bold'
+                                      : ''
                                       }`}
                                   >
                                     {sc !== '' && sc !== undefined ? sc : '-'}
@@ -1493,7 +1495,7 @@ export default function NilaiClient({
                   <div className='h-20' /> {/* Signature Space */}
                   <div className='space-y-1'>
                     <Input
-                      placeholder='Ketik nama pengawas/kepsek...'
+                      placeholder='Ketik nama kepsek...'
                       value={signatureData.supervisorName}
                       onChange={(e) =>
                         setSignatureData({
