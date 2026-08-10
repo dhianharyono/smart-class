@@ -51,18 +51,20 @@ import { toast } from 'sonner';
 import {
   getAttendanceByDate,
   saveBulkAttendance,
+  getWeeklyAttendanceReport,
   getMonthlyAttendanceReport,
   getYearlyAttendanceReport,
   getAttendanceHeaderInfo,
 } from '@/actions/attendanceActions';
 import {
   exportAttendanceToExcel,
+  exportWeeklyAttendanceToExcel,
   exportMonthlyAttendanceToExcel,
   exportYearlyAttendanceToExcel,
 } from '@/lib/excelExport';
 
 type AttendanceStatus = 'Hadir' | 'Sakit' | 'Izin' | 'Alfa';
-type ExportPeriod = 'harian' | 'bulanan' | 'tahunan';
+type ExportPeriod = 'mingguan' | 'bulanan' | 'tahunan';
 type ViewMode = 'input' | 'preview';
 
 interface StudentAttendanceRow {
@@ -100,7 +102,7 @@ export default function AbsensiClient({
 }: AbsensiClientProps) {
   const queryClient = useQueryClient();
   const [viewMode, setViewMode] = useState<ViewMode>('input');
-  const [exportPeriod, setExportPeriod] = useState<ExportPeriod>('harian');
+  const [exportPeriod, setExportPeriod] = useState<ExportPeriod>('mingguan');
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedMonth, setSelectedMonth] = useState<number>(
@@ -109,6 +111,23 @@ export default function AbsensiClient({
   const [selectedYear, setSelectedYear] = useState<number>(
     new Date().getFullYear(),
   );
+
+  const getWeekRange = (date: Date) => {
+    const day = date.getDay();
+    const diffToMonday = day === 0 ? -6 : 1 - day;
+    const monday = new Date(date);
+    monday.setDate(date.getDate() + diffToMonday);
+    const saturday = new Date(monday);
+    saturday.setDate(monday.getDate() + 5);
+    return {
+      startDateStr: format(monday, 'yyyy-MM-dd'),
+      endDateStr: format(saturday, 'yyyy-MM-dd'),
+      mondayDate: monday,
+      saturdayDate: saturday,
+    };
+  };
+
+  const weekRange = getWeekRange(selectedDate);
 
   const [localRecords, setLocalRecords] = useState<StudentAttendanceRow[]>([]);
   const [isPending, startTransition] = useTransition();
@@ -126,7 +145,7 @@ export default function AbsensiClient({
 
   // Dynamic Interactive Signature Block State
   const [signatureData, setSignatureData] = useState({
-    place: 'Bandar Lampung',
+    place: 'Bandung',
     date: new Date().toLocaleDateString('id-ID', {
       day: 'numeric',
       month: 'long',
@@ -151,17 +170,18 @@ export default function AbsensiClient({
   // Sync headerInfo to docHeader & signatureData
   useEffect(() => {
     if (headerInfo) {
+      const activeNip = (headerInfo.nip && headerInfo.nip.trim() !== '') ? headerInfo.nip : '-';
       setDocHeader((prev) => ({
         ...prev,
         schoolName: headerInfo.schoolName || prev.schoolName,
         teacherName: headerInfo.teacherName || prev.teacherName,
-        nip: headerInfo.nip || prev.nip,
+        nip: activeNip,
         className: headerInfo.className || prev.className,
       }));
       setSignatureData((prev) => ({
         ...prev,
         teacherName: headerInfo.teacherName || prev.teacherName,
-        teacherNip: headerInfo.nip || prev.teacherNip,
+        teacherNip: activeNip,
       }));
     }
   }, [headerInfo]);
@@ -176,14 +196,29 @@ export default function AbsensiClient({
     queryFn: () => getAttendanceByDate(dateStr),
   });
 
-  // Query 2: Monthly Attendance Report
+  // Query 2: Weekly Attendance Report
+  const { data: weeklyReport } = useQuery({
+    queryKey: [
+      'weeklyAttendance',
+      weekRange.startDateStr,
+      weekRange.endDateStr,
+    ],
+    queryFn: () =>
+      getWeeklyAttendanceReport(
+        weekRange.startDateStr,
+        weekRange.endDateStr,
+      ),
+    enabled: exportPeriod === 'mingguan',
+  });
+
+  // Query 3: Monthly Attendance Report
   const { data: monthlyReport } = useQuery({
     queryKey: ['monthlyAttendance', selectedYear, selectedMonth],
     queryFn: () => getMonthlyAttendanceReport(selectedYear, selectedMonth),
     enabled: exportPeriod === 'bulanan',
   });
 
-  // Query 3: Yearly Attendance Report
+  // Query 4: Yearly Attendance Report
   const { data: yearlyReport } = useQuery({
     queryKey: ['yearlyAttendance', selectedYear],
     queryFn: () => getYearlyAttendanceReport(selectedYear),
@@ -223,6 +258,7 @@ export default function AbsensiClient({
       try {
         await saveBulkAttendance(dateStr, localRecords);
         queryClient.invalidateQueries({ queryKey: ['attendance', dateStr] });
+        queryClient.invalidateQueries({ queryKey: ['weeklyAttendance'] });
         queryClient.invalidateQueries({ queryKey: ['monthlyAttendance'] });
         queryClient.invalidateQueries({ queryKey: ['yearlyAttendance'] });
         toast.success(
@@ -236,16 +272,33 @@ export default function AbsensiClient({
 
   const handleExportExcel = async () => {
     try {
-      if (exportPeriod === 'harian') {
-        if (localRecords.length === 0) {
-          toast.error('Tidak ada data absensi harian untuk diekspor!');
-          return;
-        }
-        toast.promise(exportAttendanceToExcel(localRecords, dateStr), {
-          loading: 'Menyusun laporan Excel harian...',
-          success: 'Excel absensi harian berhasil diunduh!',
-          error: 'Gagal mengunduh Excel.',
-        });
+      if (exportPeriod === 'mingguan') {
+        toast.promise(
+          (async () => {
+            const data =
+              weeklyReport ||
+              (await getWeeklyAttendanceReport(
+                weekRange.startDateStr,
+                weekRange.endDateStr,
+              ));
+            if (
+              !data ||
+              !data.studentsReport ||
+              data.studentsReport.length === 0
+            ) {
+              throw new Error(
+                'Tidak ada data absensi mingguan untuk diekspor.',
+              );
+            }
+            const label = `${format(weekRange.mondayDate, 'dd MMM', { locale: id })} - ${format(weekRange.saturdayDate, 'dd MMM yyyy', { locale: id })}`;
+            await exportWeeklyAttendanceToExcel(data, label, docHeader, signatureData);
+          })(),
+          {
+            loading: 'Menyusun rekap Excel mingguan...',
+            success: 'Excel rekap mingguan berhasil diunduh!',
+            error: (err) => err.message || 'Gagal mengunduh Excel.',
+          },
+        );
       } else if (exportPeriod === 'bulanan') {
         toast.promise(
           (async () => {
@@ -263,6 +316,7 @@ export default function AbsensiClient({
               data,
               `${MONTH_NAMES[selectedMonth - 1]} ${selectedYear}`,
               docHeader,
+              signatureData,
             );
           })(),
           {
@@ -283,7 +337,7 @@ export default function AbsensiClient({
             ) {
               throw new Error('Tidak ada data absensi tahunan untuk diekspor.');
             }
-            await exportYearlyAttendanceToExcel(data, docHeader);
+            await exportYearlyAttendanceToExcel(data, docHeader, signatureData);
           })(),
           {
             loading: 'Menyusun rekap Excel tahunan...',
@@ -326,7 +380,7 @@ export default function AbsensiClient({
               Absensi Siswa
             </h2>
             <p className='text-slate-600 text-xs sm:text-sm mt-1'>
-              Catat dan pantau rekapitulasi presensi harian, bulanan, serta
+              Catat dan pantau rekapitulasi presensi mingguan, bulanan, serta
               tahunan siswa.
             </p>
           </div>
@@ -354,22 +408,20 @@ export default function AbsensiClient({
       <div className='flex items-center gap-2 p-1.5 bg-slate-200/80 border border-slate-300/80 rounded-2xl w-fit print:hidden'>
         <button
           onClick={() => setViewMode('input')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-            viewMode === 'input'
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${viewMode === 'input'
               ? 'bg-white text-emerald-700 shadow-xs'
               : 'text-slate-600 hover:text-slate-900'
-          }`}
+            }`}
         >
           <UserCheck className='h-4 w-4' />
           <span>Data Absensi & Rekap</span>
         </button>
         <button
           onClick={() => setViewMode('preview')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-            viewMode === 'preview'
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${viewMode === 'preview'
               ? 'bg-white text-emerald-700 shadow-xs'
               : 'text-slate-600 hover:text-slate-900'
-          }`}
+            }`}
         >
           <FileText className='h-4 w-4' />
           <span>Pratinjau Cetak (A4 PDF)</span>
@@ -765,18 +817,17 @@ export default function AbsensiClient({
 
               {/* Rentang Laporan Pills */}
               <div className='flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/80'>
-                {(['harian', 'bulanan', 'tahunan'] as ExportPeriod[]).map(
+                {(['mingguan', 'bulanan', 'tahunan'] as ExportPeriod[]).map(
                   (period) => {
                     const isActive = exportPeriod === period;
                     return (
                       <button
                         key={period}
                         onClick={() => setExportPeriod(period)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-all cursor-pointer ${
-                          isActive
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-all cursor-pointer ${isActive
                             ? 'bg-emerald-600 text-white shadow-xs'
                             : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-                        }`}
+                          }`}
                       >
                         {period}
                       </button>
@@ -786,15 +837,16 @@ export default function AbsensiClient({
               </div>
 
               {/* Dynamic Period Selectors */}
-              {exportPeriod === 'harian' && (
+              {exportPeriod === 'mingguan' && (
                 <Popover>
                   <PopoverTrigger className='justify-start text-left font-medium border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-900 rounded-xl h-10 gap-2 flex items-center px-3 cursor-pointer text-xs'>
                     <CalendarIcon className='h-3.5 w-3.5 text-emerald-600' />
-                    {selectedDate ? (
-                      format(selectedDate, 'dd MMM yyyy', { locale: id })
-                    ) : (
-                      <span>Pilih Tanggal</span>
-                    )}
+                    <span>
+                      {format(weekRange.mondayDate, 'dd MMM', { locale: id })} -{' '}
+                      {format(weekRange.saturdayDate, 'dd MMM yyyy', {
+                        locale: id,
+                      })}
+                    </span>
                   </PopoverTrigger>
                   <PopoverContent className='w-auto p-0 bg-white border-slate-200 rounded-xl shadow-xl'>
                     <Calendar
@@ -870,8 +922,8 @@ export default function AbsensiClient({
           </div>
 
           {/* Printable Document Wrapper (A4 Simulation with Interactive Dynamic Headers) */}
-          <div className='bg-slate-200/70 p-4 sm:p-10 rounded-2xl border border-slate-300/80 flex justify-center shadow-inner print:p-0 print:bg-white print:border-none'>
-            <div className='w-full max-w-[950px] bg-white text-slate-900 shadow-2xl rounded-sm border border-slate-300 p-8 sm:p-14 print:p-0 print:shadow-none print:border-none print:w-full print:max-w-none print:text-black font-sans leading-relaxed'>
+          <div className='bg-slate-200/70 p-4 sm:p-10 rounded-2xl border border-slate-300/80 flex justify-center shadow-inner print:p-0 print:m-0 print:bg-white print:border-none'>
+            <div className='w-full max-w-[950px] bg-white text-slate-900 shadow-2xl rounded-sm border border-slate-300 p-8 sm:p-14 print:p-6 print:m-0 print:shadow-none print:border-none print:w-full print:max-w-none print:text-black font-sans leading-relaxed'>
               {/* Document KOP / Interactive Header Title */}
               <div className='text-center mb-6 border-b-2 border-slate-900 pb-4 print:border-black space-y-1'>
                 <Input
@@ -884,8 +936,8 @@ export default function AbsensiClient({
                 />
                 <Input
                   value={
-                    exportPeriod === 'harian'
-                      ? `LAPORAN ABSENSI HARIAN SISWA`
+                    exportPeriod === 'mingguan'
+                      ? `LAPORAN REKAPITULASI ABSENSI MINGGUAN SISWA`
                       : exportPeriod === 'bulanan'
                         ? `LAPORAN REKAPITULASI ABSENSI BULAN ${MONTH_NAMES[selectedMonth - 1].toUpperCase()} ${selectedYear}`
                         : `LAPORAN REKAPITULASI ABSENSI TAHUN ${selectedYear}`
@@ -895,8 +947,8 @@ export default function AbsensiClient({
                 />
                 <Input
                   value={
-                    exportPeriod === 'harian'
-                      ? `Tanggal: ${formattedSelectedDate}`
+                    exportPeriod === 'mingguan'
+                      ? `Periode: ${format(weekRange.mondayDate, 'dd MMMM', { locale: id })} s/d ${format(weekRange.saturdayDate, 'dd MMMM yyyy', { locale: id })}`
                       : exportPeriod === 'bulanan'
                         ? `Periode: ${MONTH_NAMES[selectedMonth - 1]} ${selectedYear}`
                         : `Tahun Pelajaran: ${selectedYear}`
@@ -966,62 +1018,124 @@ export default function AbsensiClient({
               </div>
 
               {/* Printable Table Content */}
-              {exportPeriod === 'harian' && (
-                <div className='mb-8'>
+              {exportPeriod === 'mingguan' && weeklyReport && (
+                <div className='mb-8 overflow-x-auto'>
                   <table className='w-full border-collapse border border-slate-300 text-xs'>
                     <thead>
                       <tr className='bg-slate-100 print:bg-slate-200 text-slate-900'>
-                        <th className='border border-slate-300 px-3 py-2 text-center font-bold w-12'>
+                        <th className='border border-slate-300 px-2 py-2 text-center font-bold w-8'>
                           No
                         </th>
-                        <th className='border border-slate-300 px-3 py-2 text-center font-bold w-32'>
+                        <th className='border border-slate-300 px-2 py-2 text-center font-bold w-24'>
                           NIS
                         </th>
-                        <th className='border border-slate-300 px-3 py-2 text-left font-bold'>
+                        <th className='border border-slate-300 px-2 py-2 text-left font-bold min-w-[140px]'>
                           Nama Lengkap
                         </th>
-                        <th className='border border-slate-300 px-3 py-2 text-center font-bold w-24'>
-                          Kelas
+                        <th className='border border-slate-300 px-1 py-2 text-center font-bold w-8'>
+                          L/P
                         </th>
-                        <th className='border border-slate-300 px-3 py-2 text-center font-bold w-32'>
-                          Status
+                        {weeklyReport.datesList.map((dStr: string) => {
+                          const [y, m, d] = dStr.split('-').map(Number);
+                          const dt = new Date(y, m - 1, d);
+                          const dayNames = [
+                            'Min',
+                            'Sen',
+                            'Sel',
+                            'Rab',
+                            'Kam',
+                            'Jum',
+                            'Sab',
+                          ];
+                          return (
+                            <th
+                              key={dStr}
+                              className='border border-slate-300 px-1 py-2 text-center font-bold w-12'
+                            >
+                              <div>{dayNames[dt.getDay()]}</div>
+                              <div className='text-[10px] text-slate-500 font-normal'>
+                                {d}/{m}
+                              </div>
+                            </th>
+                          );
+                        })}
+                        <th className='border border-slate-300 px-1 py-2 text-center font-bold w-8 bg-emerald-50 print:bg-transparent'>
+                          H
+                        </th>
+                        <th className='border border-slate-300 px-1 py-2 text-center font-bold w-8 bg-blue-50 print:bg-transparent'>
+                          S
+                        </th>
+                        <th className='border border-slate-300 px-1 py-2 text-center font-bold w-8 bg-amber-50 print:bg-transparent'>
+                          I
+                        </th>
+                        <th className='border border-slate-300 px-1 py-2 text-center font-bold w-8 bg-rose-50 print:bg-transparent'>
+                          A
+                        </th>
+                        <th className='border border-slate-300 px-1.5 py-2 text-center font-bold w-12'>
+                          %
                         </th>
                       </tr>
                     </thead>
                     <tbody>
-                      {localRecords.map((row, idx) => (
-                        <tr
-                          key={row.studentId}
-                          className='border-b border-slate-200'
-                        >
-                          <td className='border border-slate-300 px-3 py-2 text-center'>
-                            {idx + 1}
-                          </td>
-                          <td className='border border-slate-300 px-3 py-2 text-center font-mono'>
-                            {row.nis}
-                          </td>
-                          <td className='border border-slate-300 px-3 py-2 font-bold'>
-                            {row.name}
-                          </td>
-                          <td className='border border-slate-300 px-3 py-2 text-center'>
-                            {row.className}
-                          </td>
-                          <td className='border border-slate-300 px-3 py-2 text-center font-bold'>
-                            <span
-                              className={`px-2 py-0.5 rounded text-[11px] ${
-                                row.status === 'Hadir'
-                                  ? 'text-emerald-700 bg-emerald-50 print:bg-transparent print:text-black'
-                                  : row.status === 'Sakit' ||
-                                      row.status === 'Izin'
-                                    ? 'text-amber-700 bg-amber-50 print:bg-transparent print:text-black'
-                                    : 'text-rose-700 bg-rose-50 print:bg-transparent print:text-black'
-                              }`}
-                            >
-                              {row.status}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
+                      {weeklyReport.studentsReport.map(
+                        (student: any, idx: number) => (
+                          <tr
+                            key={student.studentId}
+                            className='border-b border-slate-200'
+                          >
+                            <td className='border border-slate-300 px-2 py-1.5 text-center'>
+                              {idx + 1}
+                            </td>
+                            <td className='border border-slate-300 px-2 py-1.5 text-center font-mono'>
+                              {student.nis}
+                            </td>
+                            <td className='border border-slate-300 px-2 py-1.5 font-bold'>
+                              {student.name}
+                            </td>
+                            <td className='border border-slate-300 px-1 py-1.5 text-center'>
+                              {student.gender || '-'}
+                            </td>
+                            {weeklyReport.datesList.map((dStr: string) => {
+                              const st = student.dailyMap
+                                ? student.dailyMap[dStr]
+                                : '';
+                              const code =
+                                st === 'Hadir'
+                                  ? 'H'
+                                  : st === 'Sakit'
+                                    ? 'S'
+                                    : st === 'Izin'
+                                      ? 'I'
+                                      : st === 'Alfa'
+                                        ? 'A'
+                                        : '-';
+                              return (
+                                <td
+                                  key={dStr}
+                                  className={`border border-slate-300 text-center font-semibold ${code === 'A' ? 'text-rose-700 bg-rose-50 print:bg-transparent print:text-black' : code === 'S' || code === 'I' ? 'text-amber-700 bg-amber-50 print:bg-transparent print:text-black' : ''}`}
+                                >
+                                  {code}
+                                </td>
+                              );
+                            })}
+                            <td className='border border-slate-300 text-center font-bold text-emerald-700'>
+                              {student.hadir}
+                            </td>
+                            <td className='border border-slate-300 text-center font-bold text-blue-700'>
+                              {student.sakit}
+                            </td>
+                            <td className='border border-slate-300 text-center font-bold text-amber-700'>
+                              {student.izin}
+                            </td>
+                            <td className='border border-slate-300 text-center font-bold text-rose-700'>
+                              {student.alfa}
+                            </td>
+                            <td className='border border-slate-300 text-center font-extrabold'>
+                              {student.percentage}%
+                            </td>
+                          </tr>
+                        ),
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -1303,7 +1417,10 @@ export default function AbsensiClient({
                           place: e.target.value,
                         })
                       }
-                      className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 text-right w-36 print:border-none print:p-0'
+                      style={{
+                        width: `${Math.max((signatureData.place || '').length * 7.5 + 4, 60)}px`,
+                      }}
+                      className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 print:border-none print:p-0'
                     />
                     <span>,</span>
                     <Input
@@ -1314,7 +1431,10 @@ export default function AbsensiClient({
                           date: e.target.value,
                         })
                       }
-                      className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 w-44 print:border-none print:p-0'
+                      style={{
+                        width: `${Math.max((signatureData.date || '').length * 7.5 + 4, 80)}px`,
+                      }}
+                      className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 print:border-none print:p-0'
                     />
                   </div>
                   <Input

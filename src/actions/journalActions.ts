@@ -38,6 +38,13 @@ export async function getJournalHeader() {
     const teacher = await Teacher.findById(teacherId).lean();
     let header = await JournalHeader.findOne({ teacherId }).lean();
 
+    const validNip =
+      teacher?.nip && teacher.nip.trim() !== '' && teacher.nip !== '-'
+        ? teacher.nip.trim()
+        : header?.nip && header.nip.trim() !== '' && header.nip !== '-'
+          ? header.nip.trim()
+          : '-';
+
     if (!header) {
       // Default fallback header based on teacher info
       return {
@@ -47,11 +54,16 @@ export async function getJournalHeader() {
         academicYear: '2022/2023',
         curriculum: '2013',
         teacherName: teacher?.name || '',
-        nip: '-',
+        nip: validNip,
       };
     }
 
-    return JSON.parse(JSON.stringify(header));
+    const result = JSON.parse(JSON.stringify(header));
+    result.nip = validNip;
+    if (teacher?.name) result.teacherName = teacher.name;
+    if (teacher?.schoolName) result.schoolName = teacher.schoolName;
+
+    return result;
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;

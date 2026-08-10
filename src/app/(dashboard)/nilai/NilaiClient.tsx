@@ -104,7 +104,7 @@ export default function NilaiClient({
 
   // Dynamic Interactive Signature Block State
   const [signatureData, setSignatureData] = useState({
-    place: 'Bandar Lampung',
+    place: 'Bandung',
     date: new Date().toLocaleDateString('id-ID', {
       day: 'numeric',
       month: 'long',
@@ -141,17 +141,18 @@ export default function NilaiClient({
   // Sync headerInfo to docHeader & signatureData
   useEffect(() => {
     if (headerInfo) {
+      const activeNip = (headerInfo.nip && headerInfo.nip.trim() !== '') ? headerInfo.nip : '-';
       setDocHeader((prev) => ({
         ...prev,
         schoolName: headerInfo.schoolName || prev.schoolName,
         teacherName: headerInfo.teacherName || prev.teacherName,
-        nip: headerInfo.nip || prev.nip,
+        nip: activeNip,
         className: headerInfo.className || prev.className,
       }));
       setSignatureData((prev) => ({
         ...prev,
         teacherName: headerInfo.teacherName || prev.teacherName,
-        teacherNip: headerInfo.nip || prev.teacherNip,
+        teacherNip: activeNip,
       }));
     }
   }, [headerInfo]);
@@ -345,9 +346,9 @@ export default function NilaiClient({
   const allSubjAverageScore =
     allSubjScoresOnly.length > 0
       ? (
-          allSubjScoresOnly.reduce((a: number, b: number) => a + b, 0) /
-          allSubjScoresOnly.length
-        ).toFixed(1)
+        allSubjScoresOnly.reduce((a: number, b: number) => a + b, 0) /
+        allSubjScoresOnly.length
+      ).toFixed(1)
       : '-';
   const allSubjPassedCount = allSubjRecapRows.filter(
     (g: any) => g.overallAverage !== '' && Number(g.overallAverage) >= kkm,
@@ -365,9 +366,9 @@ export default function NilaiClient({
   const recapAverageScore =
     recapScoresOnly.length > 0
       ? (
-          recapScoresOnly.reduce((a: number, b: number) => a + b, 0) /
-          recapScoresOnly.length
-        ).toFixed(1)
+        recapScoresOnly.reduce((a: number, b: number) => a + b, 0) /
+        recapScoresOnly.length
+      ).toFixed(1)
       : '-';
   const recapPassedCount = (recapGrades || []).filter(
     (g: any) => g.finalScore !== '' && Number(g.finalScore) >= kkm,
@@ -383,9 +384,9 @@ export default function NilaiClient({
   const singleAverageScore =
     singleScoresOnly.length > 0
       ? (
-          singleScoresOnly.reduce((a: number, b: number) => a + b, 0) /
-          singleScoresOnly.length
-        ).toFixed(1)
+        singleScoresOnly.reduce((a: number, b: number) => a + b, 0) /
+        singleScoresOnly.length
+      ).toFixed(1)
       : '-';
 
   return (
@@ -492,22 +493,20 @@ export default function NilaiClient({
       <div className='flex items-center gap-2 p-1.5 bg-slate-200/80 border border-slate-300/80 rounded-2xl w-fit print:hidden'>
         <button
           onClick={() => setActiveViewTab('data')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-            activeViewTab === 'data'
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${activeViewTab === 'data'
               ? 'bg-white text-emerald-700 shadow-xs'
               : 'text-slate-600 hover:text-slate-900'
-          }`}
+            }`}
         >
           <GraduationCap className='h-4 w-4' />
           <span>Data Nilai Akademik</span>
         </button>
         <button
           onClick={() => setActiveViewTab('preview')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-            activeViewTab === 'preview'
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${activeViewTab === 'preview'
               ? 'bg-white text-emerald-700 shadow-xs'
               : 'text-slate-600 hover:text-slate-900'
-          }`}
+            }`}
         >
           <FileText className='h-4 w-4' />
           <span>Pratinjau Cetak (A4 PDF)</span>
@@ -679,11 +678,10 @@ export default function NilaiClient({
                               onChange={(e) =>
                                 handleScoreChange(row.studentId, e.target.value)
                               }
-                              className={`text-center font-bold rounded-xl focus:ring-1 focus:ring-emerald-500 h-9 pr-2 ${
-                                row.score !== '' && row.score < kkm
+                              className={`text-center font-bold rounded-xl focus:ring-1 focus:ring-emerald-500 h-9 pr-2 ${row.score !== '' && row.score < kkm
                                   ? 'border-rose-300 text-rose-700 bg-rose-50 focus:border-rose-500'
                                   : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-emerald-500'
-                              }`}
+                                }`}
                             />
                             {row.score !== '' && row.score < kkm && (
                               <span className='absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] font-extrabold text-rose-600 uppercase tracking-wider'>
@@ -930,31 +928,28 @@ export default function NilaiClient({
               <div className='flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/80'>
                 <button
                   onClick={() => setReportViewMode('all_subjects')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                    reportViewMode === 'all_subjects'
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${reportViewMode === 'all_subjects'
                       ? 'bg-emerald-600 text-white shadow-xs'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-                  }`}
+                    }`}
                 >
                   Semua Mapel (Leger)
                 </button>
                 <button
                   onClick={() => setReportViewMode('recap')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                    reportViewMode === 'recap'
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${reportViewMode === 'recap'
                       ? 'bg-emerald-600 text-white shadow-xs'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-                  }`}
+                    }`}
                 >
                   Per Mapel (Lengkap)
                 </button>
                 <button
                   onClick={() => setReportViewMode('single')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                    reportViewMode === 'single'
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${reportViewMode === 'single'
                       ? 'bg-emerald-600 text-white shadow-xs'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-                  }`}
+                    }`}
                 >
                   Per Kategori
                 </button>
@@ -1170,8 +1165,8 @@ export default function NilaiClient({
                       : reportViewMode === 'recap'
                         ? recapPassedCount
                         : localGrades.filter(
-                            (g) => g.score !== '' && Number(g.score) >= kkm,
-                          ).length}{' '}
+                          (g) => g.score !== '' && Number(g.score) >= kkm,
+                        ).length}{' '}
                     Siswa
                   </p>
                 </div>
@@ -1185,8 +1180,8 @@ export default function NilaiClient({
                       : reportViewMode === 'recap'
                         ? recapRemedialCount
                         : localGrades.filter(
-                            (g) => g.score !== '' && Number(g.score) < kkm,
-                          ).length}{' '}
+                          (g) => g.score !== '' && Number(g.score) < kkm,
+                        ).length}{' '}
                     Siswa
                   </p>
                 </div>
@@ -1266,11 +1261,10 @@ export default function NilaiClient({
                                 return (
                                   <td
                                     key={subj}
-                                    className={`border border-slate-300 px-2 py-2 text-center font-semibold ${
-                                      isLow
+                                    className={`border border-slate-300 px-2 py-2 text-center font-semibold ${isLow
                                         ? 'text-rose-600 print:text-black font-bold'
                                         : ''
-                                    }`}
+                                      }`}
                                   >
                                     {sc !== '' && sc !== undefined ? sc : '-'}
                                   </td>
@@ -1537,7 +1531,10 @@ export default function NilaiClient({
                           place: e.target.value,
                         })
                       }
-                      className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 text-right w-36 print:border-none print:p-0'
+                      style={{
+                        width: `${Math.max((signatureData.place || '').length * 7.5 + 4, 60)}px`,
+                      }}
+                      className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 print:border-none print:p-0'
                     />
                     <span>,</span>
                     <Input
@@ -1548,7 +1545,10 @@ export default function NilaiClient({
                           date: e.target.value,
                         })
                       }
-                      className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 w-44 print:border-none print:p-0'
+                      style={{
+                        width: `${Math.max((signatureData.date || '').length * 7.5 + 4, 80)}px`,
+                      }}
+                      className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 print:border-none print:p-0'
                     />
                   </div>
                   <Input

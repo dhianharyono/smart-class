@@ -1,6 +1,79 @@
 import ExcelJS from 'exceljs';
 import { sanitizeExcelCell } from '@/lib/utils';
 
+export interface SignatureData {
+  place?: string;
+  date?: string;
+  supervisorTitle?: string;
+  supervisorName?: string;
+  supervisorNip?: string;
+  teacherTitle?: string;
+  teacherName?: string;
+  teacherNip?: string;
+}
+
+function appendSignatureBlock(
+  worksheet: ExcelJS.Worksheet,
+  startRow: number,
+  totalCols: number,
+  headerInfo?: { teacherName?: string; nip?: string },
+  signatureData?: SignatureData
+) {
+  const sigRow = startRow + 2;
+  const leftCol = 'B';
+  const rightColIndex = Math.max(4, totalCols - 2);
+  const rightCol = getColumnLetter(rightColIndex);
+
+  // Left Column (Supervisor / Principal)
+  worksheet.getCell(`${leftCol}${sigRow}`).value = 'Mengetahui,';
+  worksheet.getCell(`${leftCol}${sigRow + 1}`).value =
+    signatureData?.supervisorTitle || 'Kepala Sekolah';
+  worksheet.getCell(`${leftCol}${sigRow + 4}`).value =
+    signatureData?.supervisorName || '';
+  worksheet.getCell(`${leftCol}${sigRow + 5}`).value =
+    `NIP. ${signatureData?.supervisorNip || '-'}`;
+
+  // Right Column (Teacher / Wali Kelas)
+  const placeDateStr = `${signatureData?.place || 'Bandung'}, ${signatureData?.date || ''}`;
+  const teacherNipVal =
+    signatureData?.teacherNip && signatureData.teacherNip.trim() !== '' && signatureData.teacherNip !== '-'
+      ? signatureData.teacherNip
+      : headerInfo?.nip && headerInfo.nip.trim() !== '' && headerInfo.nip !== '-'
+        ? headerInfo.nip
+        : '-';
+
+  worksheet.getCell(`${rightCol}${sigRow}`).value = placeDateStr;
+  worksheet.getCell(`${rightCol}${sigRow + 1}`).value =
+    signatureData?.teacherTitle || 'Guru Kelas / Wali Kelas';
+  worksheet.getCell(`${rightCol}${sigRow + 4}`).value =
+    signatureData?.teacherName || headerInfo?.teacherName || '';
+  worksheet.getCell(`${rightCol}${sigRow + 5}`).value =
+    `NIP. ${teacherNipVal}`;
+
+  // Fonts & Alignment
+  const boldFont = { name: 'Arial', size: 10, bold: true };
+  const nameFont = { name: 'Arial', size: 10, bold: true };
+  const regularFont = { name: 'Arial', size: 9 };
+
+  [`${leftCol}${sigRow}`, `${leftCol}${sigRow + 1}`, `${rightCol}${sigRow}`, `${rightCol}${sigRow + 1}`].forEach((cellId) => {
+    const cell = worksheet.getCell(cellId);
+    cell.font = boldFont;
+    cell.alignment = { horizontal: 'left', vertical: 'middle' };
+  });
+
+  [`${leftCol}${sigRow + 4}`, `${rightCol}${sigRow + 4}`].forEach((cellId) => {
+    const cell = worksheet.getCell(cellId);
+    cell.font = nameFont;
+    cell.alignment = { horizontal: 'left', vertical: 'middle' };
+  });
+
+  [`${leftCol}${sigRow + 5}`, `${rightCol}${sigRow + 5}`].forEach((cellId) => {
+    const cell = worksheet.getCell(cellId);
+    cell.font = regularFont;
+    cell.alignment = { horizontal: 'left', vertical: 'middle' };
+  });
+}
+
 export async function exportStudentsToExcel(students: any[]) {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Daftar Siswa');
@@ -72,6 +145,13 @@ export async function exportStudentsToExcel(students: any[]) {
 export async function exportAttendanceToExcel(
   attendanceData: any[],
   dateStr: string,
+  headerInfo?: {
+    schoolName: string;
+    className: string;
+    teacherName: string;
+    nip: string;
+  },
+  signatureData?: SignatureData
 ) {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Kehadiran');
@@ -132,6 +212,9 @@ export async function exportAttendanceToExcel(
       }
     });
   });
+
+  const lastRow = attendanceData.length + 1;
+  appendSignatureBlock(worksheet, lastRow, 5, headerInfo, signatureData);
 
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], {
@@ -254,8 +337,8 @@ export async function exportGradesRecapToExcel(
     const statusText = !isScored
       ? 'Belum Dinilai'
       : isPassed
-      ? 'Tuntas'
-      : 'Remedial';
+        ? 'Tuntas'
+        : 'Remedial';
 
     worksheet.addRow({
       no: index + 1,
@@ -338,8 +421,8 @@ export async function exportAllSubjectsGradesRecapToExcel(
     const statusText = !isScored
       ? 'Belum Ada Nilai'
       : isPassed
-      ? 'Tuntas'
-      : 'Remedial';
+        ? 'Tuntas'
+        : 'Remedial';
 
     const rowObj: any = {
       no: index + 1,
@@ -633,6 +716,173 @@ function getColumnLetter(colIndex: number): string {
   return letter;
 }
 
+export async function exportWeeklyAttendanceToExcel(
+  reportData: {
+    startDateStr: string;
+    endDateStr: string;
+    datesList: string[];
+    studentsReport: any[];
+  },
+  weekLabel: string,
+  headerInfo: {
+    schoolName: string;
+    className: string;
+    teacherName: string;
+    nip: string;
+  },
+  signatureData?: SignatureData
+) {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Rekap Absensi Mingguan');
+  worksheet.pageSetup.orientation = 'landscape';
+  worksheet.pageSetup.fitToPage = true;
+
+  const datesCount = reportData.datesList.length;
+  const totalCols = 4 + datesCount + 5;
+  const lastColLetter = getColumnLetter(totalCols);
+
+  worksheet.mergeCells(`A1:${lastColLetter}1`);
+  const titleCell = worksheet.getCell('A1');
+  titleCell.value = `LAPORAN REKAPITULASI ABSENSI SISWA (${weekLabel.toUpperCase()})`;
+  titleCell.font = { name: 'Arial', size: 14, bold: true };
+  titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+  worksheet.getCell('A3').value = 'Nama Sekolah';
+  worksheet.getCell('B3').value = `: ${headerInfo.schoolName || '-'}`;
+  worksheet.getCell('A4').value = 'Kelas';
+  worksheet.getCell('B4').value = `: ${headerInfo.className || '-'}`;
+
+  worksheet.getCell('E3').value = 'Guru Kelas';
+  worksheet.getCell('F3').value = `: ${headerInfo.teacherName || '-'}`;
+  worksheet.getCell('E4').value = 'NIP';
+  worksheet.getCell('F4').value = `: ${headerInfo.nip || '-'}`;
+
+  ['A3', 'A4', 'E3', 'E4'].forEach((c) => {
+    worksheet.getCell(c).font = { name: 'Arial', size: 10, bold: true };
+  });
+
+  worksheet.getCell('A6').value = 'No';
+  worksheet.getCell('B6').value = 'NIS';
+  worksheet.getCell('C6').value = 'Nama Lengkap';
+  worksheet.getCell('D6').value = 'L/P';
+
+  const DAY_NAMES = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+  reportData.datesList.forEach((dStr, idx) => {
+    const colIndex = 4 + idx + 1;
+    const colLetter = getColumnLetter(colIndex);
+    const [y, m, d] = dStr.split('-').map(Number);
+    const dt = new Date(y, m - 1, d);
+    const dayName = DAY_NAMES[dt.getDay()];
+    worksheet.getCell(`${colLetter}6`).value = `${dayName}\n${d}/${m}`;
+  });
+
+  const startSummaryCol = 4 + datesCount + 1;
+  worksheet.getCell(`${getColumnLetter(startSummaryCol)}6`).value = 'H';
+  worksheet.getCell(`${getColumnLetter(startSummaryCol + 1)}6`).value = 'S';
+  worksheet.getCell(`${getColumnLetter(startSummaryCol + 2)}6`).value = 'I';
+  worksheet.getCell(`${getColumnLetter(startSummaryCol + 3)}6`).value = 'A';
+  worksheet.getCell(`${getColumnLetter(startSummaryCol + 4)}6`).value = '%';
+
+  for (let c = 1; c <= totalCols; c++) {
+    const cell = worksheet.getCell(`${getColumnLetter(c)}6`);
+    cell.font = { name: 'Arial', size: 9, bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF059669' },
+    };
+    cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+  }
+
+  worksheet.getColumn(1).width = 5;
+  worksheet.getColumn(2).width = 14;
+  worksheet.getColumn(3).width = 25;
+  worksheet.getColumn(4).width = 6;
+
+  for (let d = 0; d < datesCount; d++) {
+    worksheet.getColumn(4 + d + 1).width = 9;
+  }
+  worksheet.getColumn(startSummaryCol).width = 5;
+  worksheet.getColumn(startSummaryCol + 1).width = 5;
+  worksheet.getColumn(startSummaryCol + 2).width = 5;
+  worksheet.getColumn(startSummaryCol + 3).width = 5;
+  worksheet.getColumn(startSummaryCol + 4).width = 7;
+
+  let currentRow = 7;
+  reportData.studentsReport.forEach((student, index) => {
+    const row = worksheet.getRow(currentRow);
+    row.getCell(1).value = index + 1;
+    row.getCell(2).value = sanitizeExcelCell(student.nis);
+    row.getCell(3).value = sanitizeExcelCell(student.name);
+    row.getCell(4).value = student.gender || '-';
+
+    row.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
+    row.getCell(2).alignment = { horizontal: 'center', vertical: 'middle' };
+    row.getCell(3).alignment = { horizontal: 'left', vertical: 'middle' };
+    row.getCell(4).alignment = { horizontal: 'center', vertical: 'middle' };
+
+    reportData.datesList.forEach((dStr, idx) => {
+      const colIndex = 4 + idx + 1;
+      const status = student.dailyMap ? student.dailyMap[dStr] : '';
+      let code = '';
+      if (status === 'Hadir') code = 'H';
+      else if (status === 'Sakit') code = 'S';
+      else if (status === 'Izin') code = 'I';
+      else if (status === 'Alfa') code = 'A';
+
+      const cell = row.getCell(colIndex);
+      cell.value = code;
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+      if (code === 'A') {
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEE2E2' } };
+        cell.font = { color: { argb: 'FF991B1B' }, bold: true, name: 'Arial', size: 9 };
+      } else if (code === 'S' || code === 'I') {
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FEF3C7' } };
+        cell.font = { color: { argb: 'D97706' }, bold: true, name: 'Arial', size: 9 };
+      }
+    });
+
+    row.getCell(startSummaryCol).value = student.hadir;
+    row.getCell(startSummaryCol + 1).value = student.sakit;
+    row.getCell(startSummaryCol + 2).value = student.izin;
+    row.getCell(startSummaryCol + 3).value = student.alfa;
+    row.getCell(startSummaryCol + 4).value = `${student.percentage}%`;
+
+    for (let i = 0; i < 5; i++) {
+      row.getCell(startSummaryCol + i).alignment = { horizontal: 'center', vertical: 'middle' };
+    }
+
+    currentRow++;
+  });
+
+  for (let r = 6; r < currentRow; r++) {
+    const row = worksheet.getRow(r);
+    for (let c = 1; c <= totalCols; c++) {
+      const cell = row.getCell(c);
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+        left: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+        bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+        right: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+      };
+    }
+  }
+
+  appendSignatureBlock(worksheet, currentRow, totalCols, headerInfo, signatureData);
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Laporan_Absensi_Mingguan_${weekLabel.replace(/[^a-zA-Z0-9_-]/g, '_')}.xlsx`;
+  a.click();
+  window.URL.revokeObjectURL(url);
+}
+
 export async function exportMonthlyAttendanceToExcel(
   reportData: {
     year: number;
@@ -646,7 +896,8 @@ export async function exportMonthlyAttendanceToExcel(
     className: string;
     teacherName: string;
     nip: string;
-  }
+  },
+  signatureData?: SignatureData
 ) {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Rekap Absensi Bulanan');
@@ -780,6 +1031,8 @@ export async function exportMonthlyAttendanceToExcel(
     }
   }
 
+  appendSignatureBlock(worksheet, currentRow, totalCols, headerInfo, signatureData);
+
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], {
     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -802,7 +1055,8 @@ export async function exportYearlyAttendanceToExcel(
     className: string;
     teacherName: string;
     nip: string;
-  }
+  },
+  signatureData?: SignatureData
 ) {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Rekap Absensi Tahunan');
@@ -918,6 +1172,8 @@ export async function exportYearlyAttendanceToExcel(
       };
     }
   }
+
+  appendSignatureBlock(worksheet, currentRow, totalCols, headerInfo, signatureData);
 
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], {

@@ -160,12 +160,26 @@
 @media print {
   @page {
     margin: 0;
-    size: auto;
+    size: landscape;
   }
+  html,
   body {
-    padding: 0;
-    margin: 0;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
     background: #ffffff !important;
+    overflow: visible !important;
+  }
+  div,
+  main,
+  section,
+  article {
+    min-height: 0 !important;
+  }
+  .min-h-screen {
+    min-height: 0 !important;
+    height: auto !important;
   }
 }
 

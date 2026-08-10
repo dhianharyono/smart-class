@@ -102,7 +102,7 @@ export default function JurnalClient() {
 
   // Signature Block State for A4 Print Preview
   const [signatureData, setSignatureData] = useState({
-    place: 'Bandar Lampung',
+    place: 'Bandung',
     date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
     supervisorTitle: 'Mengetahui, Pengawas Sekolah / Kepala Sekolah',
     supervisorName: '',
@@ -152,6 +152,7 @@ export default function JurnalClient() {
   // Keep headerForm synced with fetched header
   React.useEffect(() => {
     if (headerData) {
+      const activeNip = (headerData.nip && headerData.nip.trim() !== '') ? headerData.nip : '-';
       setHeaderForm({
         schoolName: headerData.schoolName || '',
         subject: headerData.subject || '',
@@ -159,7 +160,7 @@ export default function JurnalClient() {
         academicYear: headerData.academicYear || '',
         curriculum: headerData.curriculum || '2013',
         teacherName: headerData.teacherName || '',
-        nip: headerData.nip || '-',
+        nip: activeNip,
       });
       if (headerData.academicYear) {
         setDocHeaderSubtitle(`SEMESTER I (GANJIL) TAHUN PELAJARAN ${headerData.academicYear}`);
@@ -648,13 +649,15 @@ export default function JurnalClient() {
                     <Input
                       value={signatureData.place}
                       onChange={(e) => setSignatureData({ ...signatureData, place: e.target.value })}
-                      className='text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 w-28 text-right focus:border-emerald-600 print:border-none'
+                      style={{ width: `${Math.max((signatureData.place || '').length * 7.5 + 4, 60)}px` }}
+                      className='text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 print:border-none'
                     />
                     <span>,</span>
                     <Input
                       value={signatureData.date}
                       onChange={(e) => setSignatureData({ ...signatureData, date: e.target.value })}
-                      className='text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 w-36 focus:border-emerald-600 print:border-none'
+                      style={{ width: `${Math.max((signatureData.date || '').length * 7.5 + 4, 80)}px` }}
+                      className='text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 print:border-none'
                     />
                   </div>
                   <p className='font-bold text-slate-800 print:text-black'>Guru Kelas / Wali Kelas,</p>

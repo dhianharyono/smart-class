@@ -39,11 +39,18 @@ export async function getAttendanceHeaderInfo() {
     const teacher = await Teacher.findById(teacherId).lean();
     const journalHeader = await JournalHeader.findOne({ teacherId }).lean();
 
+    const validNip =
+      teacher?.nip && teacher.nip.trim() !== '' && teacher.nip !== '-'
+        ? teacher.nip.trim()
+        : journalHeader?.nip && journalHeader.nip.trim() !== '' && journalHeader.nip !== '-'
+          ? journalHeader.nip.trim()
+          : '-';
+
     return {
       schoolName: teacher?.schoolName || journalHeader?.schoolName || 'SMK Negeri 1',
       className: teacher?.className || journalHeader?.classNameSemester || 'Kelas Utama',
       teacherName: teacher?.name || journalHeader?.teacherName || '',
-      nip: teacher?.nip || journalHeader?.nip || '-',
+      nip: validNip,
       academicYear: journalHeader?.academicYear || `${new Date().getFullYear()}/${new Date().getFullYear() + 1}`,
     };
   } catch (error: any) {
@@ -98,6 +105,97 @@ export async function getAttendanceByDate(dateStr: string) {
     }
     console.error('Error fetching attendance:', error);
     throw new Error(error.message || 'Failed to fetch attendance.');
+  }
+}
+
+export async function getWeeklyAttendanceReport(startDateStr: string, endDateStr: string) {
+  try {
+    await dbConnect();
+    const teacherId = await requireAuth();
+
+    const startDate = parseLocalDate(startDateStr);
+    const [endY, endM, endD] = endDateStr.split('-').map(Number);
+    const endDate = new Date(Date.UTC(endY, endM - 1, endD, 23, 59, 59, 999));
+
+    const students = await Student.find({ teacherId }).sort({ name: 1 }).lean();
+    const attendanceRecords = await Attendance.find({
+      teacherId,
+      date: { $gte: startDate, $lte: endDate },
+    }).lean();
+
+    const datesList: string[] = [];
+    let curr = new Date(startDate);
+    while (curr <= endDate) {
+      const year = curr.getUTCFullYear();
+      const month = String(curr.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(curr.getUTCDate()).padStart(2, '0');
+      datesList.push(`${year}-${month}-${day}`);
+      curr.setUTCDate(curr.getUTCDate() + 1);
+    }
+
+    const studentDateMap: Record<string, Record<string, string>> = {};
+    attendanceRecords.forEach((rec) => {
+      const sId = rec.studentId.toString();
+      const recDate = new Date(rec.date);
+      const year = recDate.getUTCFullYear();
+      const month = String(recDate.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(recDate.getUTCDate()).padStart(2, '0');
+      const dStr = `${year}-${month}-${day}`;
+      if (!studentDateMap[sId]) {
+        studentDateMap[sId] = {};
+      }
+      studentDateMap[sId][dStr] = rec.status;
+    });
+
+    const studentsReport = students.map((student) => {
+      const sId = student._id.toString();
+      const dateMap = studentDateMap[sId] || {};
+
+      let hadir = 0;
+      let sakit = 0;
+      let izin = 0;
+      let alfa = 0;
+
+      Object.values(dateMap).forEach((st) => {
+        if (st === 'Hadir') hadir++;
+        else if (st === 'Sakit') sakit++;
+        else if (st === 'Izin') izin++;
+        else if (st === 'Alfa') alfa++;
+      });
+
+      const totalRecorded = hadir + sakit + izin + alfa;
+      const percentage = totalRecorded > 0 ? Math.round((hadir / totalRecorded) * 100) : 0;
+
+      return {
+        studentId: sId,
+        nis: student.nis,
+        name: student.name,
+        className: student.className,
+        gender: student.gender,
+        dailyMap: dateMap,
+        hadir,
+        sakit,
+        izin,
+        alfa,
+        totalRecorded,
+        percentage,
+      };
+    });
+
+    return JSON.parse(
+      JSON.stringify({
+        startDateStr,
+        endDateStr,
+        datesList,
+        studentsReport,
+      })
+    );
+  } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+    console.error('Error fetching weekly attendance report:', error);
+    throw new Error(error.message || 'Gagal memuat rekap absensi mingguan.');
   }
 }
 
