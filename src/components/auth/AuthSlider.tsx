@@ -23,6 +23,10 @@ import {
   Eye,
   EyeOff,
   AtSign,
+  Check,
+  X,
+  ShieldCheck,
+  AlertCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import LoadingScreen from '@/components/LoadingScreen';
@@ -68,6 +72,17 @@ export default function AuthSlider({
   const [signUpEmail, setSignUpEmail] = useState('');
   const [signUpPassword, setSignUpPassword] = useState('');
   const [signUpConfirmPassword, setSignUpConfirmPassword] = useState('');
+
+  // Sign Up Password Validation logic
+  const hasMinLength = signUpPassword.length >= 6;
+  const hasLetter = /[a-zA-Z]/.test(signUpPassword);
+  const hasNumber = /\d/.test(signUpPassword);
+  const passwordCriteriaMetCount = [hasMinLength, hasLetter, hasNumber].filter(Boolean).length;
+  const isPasswordValid = hasMinLength && hasLetter && hasNumber;
+
+  const isConfirmNotEmpty = signUpConfirmPassword.length > 0;
+  const isPasswordMatching = isConfirmNotEmpty && signUpPassword === signUpConfirmPassword;
+  const isPasswordMismatch = isConfirmNotEmpty && signUpPassword !== signUpConfirmPassword;
 
   // Logout stale sessions on mount
   useEffect(() => {
@@ -162,8 +177,18 @@ export default function AuthSlider({
       return;
     }
 
-    if (signUpPassword.length < 6) {
+    if (!hasMinLength) {
       toast.error('Password minimal harus 6 karakter.');
+      return;
+    }
+
+    if (!hasLetter) {
+      toast.error('Password harus mengandung setidaknya 1 huruf.');
+      return;
+    }
+
+    if (!hasNumber) {
+      toast.error('Password harus mengandung setidaknya 1 angka.');
       return;
     }
 
@@ -497,6 +522,7 @@ export default function AuthSlider({
 
               {/* Password & Confirm Password */}
               <div className='space-y-3 sm:space-y-3.5'>
+                {/* Password Field */}
                 <div className='space-y-1'>
                   <label className='text-[11px] font-bold uppercase tracking-wider text-slate-500 block'>
                     PASSWORD
@@ -512,7 +538,12 @@ export default function AuthSlider({
                       value={signUpPassword}
                       onChange={(e) => setSignUpPassword(e.target.value)}
                       disabled={loading}
-                      className='w-full pl-10 pr-10 py-2.5 bg-white border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-xs sm:text-sm transition-all shadow-2xs'
+                      className={`w-full pl-10 pr-10 py-2.5 bg-white border ${signUpPassword.length > 0 && !isPasswordValid
+                          ? 'border-amber-300 focus:border-amber-500 focus:ring-amber-500'
+                          : signUpPassword.length > 0 && isPasswordValid
+                            ? 'border-emerald-400 focus:border-emerald-500 focus:ring-emerald-500'
+                            : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500'
+                        } text-slate-900 placeholder-slate-400 focus:ring-1 focus:outline-none rounded-xl text-xs sm:text-sm transition-all shadow-2xs`}
                     />
                     <button
                       type='button'
@@ -526,8 +557,80 @@ export default function AuthSlider({
                       )}
                     </button>
                   </div>
+
+                  {/* Real-time Password Strength Indicator & Checklist */}
+                  {signUpPassword.length > 0 && (
+                    <div className='pt-1.5 space-y-2 text-xs'>
+                      {/* Strength Bar */}
+                      <div className='space-y-1'>
+                        <div className='flex justify-between items-center text-[10px] font-semibold text-slate-500'>
+                          <span>Kekuatan Password:</span>
+                          <span
+                            className={
+                              passwordCriteriaMetCount === 3
+                                ? 'text-emerald-600 font-bold'
+                                : passwordCriteriaMetCount === 2
+                                  ? 'text-amber-600 font-bold'
+                                  : 'text-rose-500 font-bold'
+                            }
+                          >
+                            {passwordCriteriaMetCount === 3
+                              ? 'Kuat'
+                              : passwordCriteriaMetCount === 2
+                                ? 'Sedang'
+                                : 'Lemah'}
+                          </span>
+                        </div>
+                        <div className='h-1.5 w-full bg-slate-100 rounded-full overflow-hidden flex'>
+                          <div
+                            className={`h-full transition-all duration-300 ${passwordCriteriaMetCount === 3
+                                ? 'w-full bg-emerald-500'
+                                : passwordCriteriaMetCount === 2
+                                  ? 'w-2/3 bg-amber-500'
+                                  : 'w-1/3 bg-rose-500'
+                              }`}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Criteria Checklist */}
+                      <div className='grid grid-cols-1 sm:grid-cols-3 gap-1 pt-1 text-[11px] text-slate-600'>
+                        <div className='flex items-center gap-1.5'>
+                          {hasMinLength ? (
+                            <Check className='h-3.5 w-3.5 text-emerald-500 shrink-0' />
+                          ) : (
+                            <X className='h-3.5 w-3.5 text-slate-300 shrink-0' />
+                          )}
+                          <span className={hasMinLength ? 'text-emerald-700 font-medium' : 'text-slate-500'}>
+                            Min. 6 karakter
+                          </span>
+                        </div>
+                        <div className='flex items-center gap-1.5'>
+                          {hasLetter ? (
+                            <Check className='h-3.5 w-3.5 text-emerald-500 shrink-0' />
+                          ) : (
+                            <X className='h-3.5 w-3.5 text-slate-300 shrink-0' />
+                          )}
+                          <span className={hasLetter ? 'text-emerald-700 font-medium' : 'text-slate-500'}>
+                            huruf
+                          </span>
+                        </div>
+                        <div className='flex items-center gap-1.5'>
+                          {hasNumber ? (
+                            <Check className='h-3.5 w-3.5 text-emerald-500 shrink-0' />
+                          ) : (
+                            <X className='h-3.5 w-3.5 text-slate-300 shrink-0' />
+                          )}
+                          <span className={hasNumber ? 'text-emerald-700 font-medium' : 'text-slate-500'}>
+                            angka
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
+                {/* Confirm Password Field */}
                 <div className='space-y-1'>
                   <label className='text-[11px] font-bold uppercase tracking-wider text-slate-500 block'>
                     KONFIRMASI PASSWORD
@@ -543,7 +646,12 @@ export default function AuthSlider({
                       value={signUpConfirmPassword}
                       onChange={(e) => setSignUpConfirmPassword(e.target.value)}
                       disabled={loading}
-                      className='w-full pl-10 pr-10 py-2.5 bg-white border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-xs sm:text-sm transition-all shadow-2xs'
+                      className={`w-full pl-10 pr-10 py-2.5 bg-white border ${isPasswordMismatch
+                          ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500 bg-rose-50/20'
+                          : isPasswordMatching
+                            ? 'border-emerald-400 focus:border-emerald-500 focus:ring-emerald-500 bg-emerald-50/20'
+                            : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500'
+                        } text-slate-900 placeholder-slate-400 focus:ring-1 focus:outline-none rounded-xl text-xs sm:text-sm transition-all shadow-2xs`}
                     />
                     <button
                       type='button'
@@ -557,6 +665,20 @@ export default function AuthSlider({
                       )}
                     </button>
                   </div>
+
+                  {/* Confirm Password Status Indicator */}
+                  {isPasswordMismatch && (
+                    <p className='text-[11px] text-rose-500 font-medium flex items-center gap-1 mt-1'>
+                      <X className='h-3.5 w-3.5 shrink-0' />
+                      <span>Konfirmasi password tidak cocok dengan password.</span>
+                    </p>
+                  )}
+                  {isPasswordMatching && (
+                    <p className='text-[11px] text-emerald-600 font-medium flex items-center gap-1 mt-1'>
+                      <Check className='h-3.5 w-3.5 shrink-0' />
+                      <span>Password cocok.</span>
+                    </p>
+                  )}
                 </div>
               </div>
 

@@ -43,6 +43,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
         schoolName: teacher.schoolName || '',
         className: teacher.className || '',
         nip: teacher.nip || '-',
+        principalName: teacher.principalName || '',
+        principalNip: teacher.principalNip || '-',
         isAdmin: !!session.isAdmin,
         isFirstLogin: teacher.isFirstLogin ?? false,
         enabledMenus:

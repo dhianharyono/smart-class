@@ -127,6 +127,14 @@ export async function registerTeacher(data: {
       throw new Error('Password minimal harus 6 karakter.');
     }
 
+    if (!/[a-zA-Z]/.test(password)) {
+      throw new Error('Password harus mengandung setidaknya 1 huruf.');
+    }
+
+    if (!/\d/.test(password)) {
+      throw new Error('Password harus mengandung setidaknya 1 angka.');
+    }
+
     // Check if username is already taken by another teacher
     const usernameExists = await Teacher.findOne({ username: normalizedUsername });
     if (usernameExists) {

@@ -202,6 +202,30 @@ export default function ProfileClient() {
 
   const handleProfileSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!profileForm.name.trim()) {
+      toast.error('Nama lengkap & gelar wajib diisi.');
+      return;
+    }
+    if (!profileForm.schoolName.trim()) {
+      toast.error('Nama sekolah wajib diisi.');
+      return;
+    }
+    if (!profileForm.className.trim()) {
+      toast.error('Kelas diajar wajib diisi.');
+      return;
+    }
+    if (!profileForm.nip.trim() || profileForm.nip.trim() === '-') {
+      toast.error('NIP Guru wajib diisi.');
+      return;
+    }
+    if (!profileForm.principalName.trim()) {
+      toast.error('Nama kepala sekolah wajib diisi.');
+      return;
+    }
+    if (!profileForm.principalNip.trim()) {
+      toast.error('NIP kepala sekolah wajib diisi.');
+      return;
+    }
     updateProfileMutation.mutate(profileForm);
   };
 
@@ -405,10 +429,10 @@ export default function ProfileClient() {
             <div className='space-y-1.5 w-full sm:w-1/2'>
               <Label className='text-slate-700 text-xs font-semibold flex items-center gap-2'>
                 <FileCheck2 className='h-3.5 w-3.5 text-slate-400' />
-                <span>NIP Guru</span>
+                <span>NIP Guru</span> <span className='text-rose-500'>*</span>
               </Label>
               <Input
-                placeholder='-'
+                placeholder='Contoh: 19850101 201001 1 001'
                 value={profileForm.nip}
                 onChange={(e) =>
                   setProfileForm({ ...profileForm, nip: e.target.value })
@@ -433,7 +457,7 @@ export default function ProfileClient() {
                 <div className='space-y-1.5'>
                   <Label className='text-slate-700 text-xs font-semibold flex items-center gap-2'>
                     <User className='h-3.5 w-3.5 text-slate-400' />
-                    <span>Nama Kepala Sekolah</span>
+                    <span>Nama Kepala Sekolah</span> <span className='text-rose-500'>*</span>
                   </Label>
                   <Input
                     placeholder='Contoh: Drs. H. Ahmad Dahlan, M.Pd.'
@@ -451,7 +475,7 @@ export default function ProfileClient() {
                 <div className='space-y-1.5'>
                   <Label className='text-slate-700 text-xs font-semibold flex items-center gap-2'>
                     <FileCheck2 className='h-3.5 w-3.5 text-slate-400' />
-                    <span>NIP Kepala Sekolah</span>
+                    <span>NIP Kepala Sekolah</span> <span className='text-rose-500'>*</span>
                   </Label>
                   <Input
                     placeholder='Contoh: 19750812 200003 1 002'

@@ -30,6 +30,7 @@ import {
   ArrowRight,
   ArrowLeft,
   IdCard,
+  UserCheck,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -118,6 +119,8 @@ interface DashboardLayoutClientProps {
     schoolName?: string;
     className?: string;
     nip?: string;
+    principalName?: string;
+    principalNip?: string;
     isAdmin?: boolean;
     isFirstLogin?: boolean;
     enabledMenus?: string[];
@@ -147,11 +150,19 @@ export default function DashboardLayoutClient({
     }
   }, [teacher.enabledMenus]);
 
+  // Check if teacher profile data is incomplete (including NIP & Principal info)
+  const isProfileIncomplete = React.useMemo(() => {
+    const isNipInvalid = !teacher.nip || teacher.nip.trim() === '' || teacher.nip.trim() === '-';
+    const isPrincipalNameInvalid = !teacher.principalName || teacher.principalName.trim() === '';
+    const isPrincipalNipInvalid = !teacher.principalNip || teacher.principalNip.trim() === '' || teacher.principalNip.trim() === '-';
+    const isBasicInfoInvalid = !teacher.name || !teacher.schoolName || !teacher.className;
+
+    return !!teacher.isFirstLogin || isNipInvalid || isPrincipalNameInvalid || isPrincipalNipInvalid || isBasicInfoInvalid;
+  }, [teacher]);
+
   // Onboarding Modal state
   const ALL_CONFIGURABLE_HREFS = CONFIGURABLE_MENUS.map((m) => m.href);
-  const [onboardingOpen, setOnboardingOpen] = useState<boolean>(
-    !!teacher.isFirstLogin
-  );
+  const [onboardingOpen, setOnboardingOpen] = useState<boolean>(isProfileIncomplete);
   const [onboardingStep, setOnboardingStep] = useState<1 | 2>(1);
   const [onboardingName, setOnboardingName] = useState(teacher.name || '');
   const [onboardingSchool, setOnboardingSchool] = useState(teacher.schoolName || '');
@@ -160,6 +171,12 @@ export default function DashboardLayoutClient({
   const [onboardingNip, setOnboardingNip] = useState(
     teacher.nip && teacher.nip !== '-' ? teacher.nip : ''
   );
+  const [onboardingPrincipalName, setOnboardingPrincipalName] = useState(
+    teacher.principalName || ''
+  );
+  const [onboardingPrincipalNip, setOnboardingPrincipalNip] = useState(
+    teacher.principalNip && teacher.principalNip !== '-' ? teacher.principalNip : ''
+  );
   const [schoolsList, setSchoolsList] = useState<any[]>([]);
   const [loadingSchools, setLoadingSchools] = useState(false);
 
@@ -167,6 +184,12 @@ export default function DashboardLayoutClient({
     ALL_CONFIGURABLE_HREFS
   );
   const [isSavingOnboarding, setIsSavingOnboarding] = useState(false);
+
+  React.useEffect(() => {
+    if (isProfileIncomplete) {
+      setOnboardingOpen(true);
+    }
+  }, [isProfileIncomplete]);
 
   React.useEffect(() => {
     if (onboardingOpen) {
@@ -223,6 +246,11 @@ export default function DashboardLayoutClient({
       return;
     }
 
+    if (!onboardingNip.trim()) {
+      toast.error('NIP (Nomor Induk Pegawai) wajib diisi.');
+      return;
+    }
+
     if (!finalSchoolName) {
       toast.error('Nama sekolah wajib diisi.');
       return;
@@ -230,6 +258,16 @@ export default function DashboardLayoutClient({
 
     if (!onboardingClass.trim()) {
       toast.error('Kelas diajar wajib diisi.');
+      return;
+    }
+
+    if (!onboardingPrincipalName.trim()) {
+      toast.error('Nama kepala sekolah wajib diisi.');
+      return;
+    }
+
+    if (!onboardingPrincipalNip.trim()) {
+      toast.error('NIP kepala sekolah wajib diisi.');
       return;
     }
 
@@ -248,6 +286,12 @@ export default function DashboardLayoutClient({
       return;
     }
 
+    if (!onboardingNip.trim()) {
+      toast.error('NIP (Nomor Induk Pegawai) wajib diisi.');
+      setOnboardingStep(1);
+      return;
+    }
+
     if (!finalSchoolName) {
       toast.error('Nama sekolah wajib diisi.');
       setOnboardingStep(1);
@@ -260,6 +304,18 @@ export default function DashboardLayoutClient({
       return;
     }
 
+    if (!onboardingPrincipalName.trim()) {
+      toast.error('Nama kepala sekolah wajib diisi.');
+      setOnboardingStep(1);
+      return;
+    }
+
+    if (!onboardingPrincipalNip.trim()) {
+      toast.error('NIP kepala sekolah wajib diisi.');
+      setOnboardingStep(1);
+      return;
+    }
+
     if (selectedOnboardingMenus.length === 0) {
       toast.error('Pilih setidaknya 1 menu fitur.');
       setOnboardingStep(2);
@@ -268,13 +324,15 @@ export default function DashboardLayoutClient({
 
     setIsSavingOnboarding(true);
     try {
-      // 1. Update Profile (Nama, Sekolah, Kelas, NIP)
+      // 1. Update Profile (Nama, Sekolah, Kelas, NIP, Principal Name & NIP)
       await updateProfile({
         name: onboardingName.trim(),
         email: teacher.email,
         schoolName: finalSchoolName,
         className: onboardingClass.trim(),
         nip: onboardingNip.trim() || '-',
+        principalName: onboardingPrincipalName.trim(),
+        principalNip: onboardingPrincipalNip.trim(),
       });
 
       // 2. Update Menu Preferences & mark first login done
@@ -534,11 +592,11 @@ export default function DashboardLayoutClient({
         onConfirm={handleLogoutSubmit}
       />
 
-      {/* First-Login Mandatory Profile & Menu Customization Modal */}
+      {/* First-Login / Incomplete Profile Mandatory Modal */}
       <Dialog
         open={onboardingOpen}
         onOpenChange={(open) => {
-          if (teacher.isFirstLogin) return; // Prevent closing on first login
+          if (isProfileIncomplete) return; // Prevent closing if profile data is incomplete
           setOnboardingOpen(open);
         }}
       >
@@ -548,7 +606,9 @@ export default function DashboardLayoutClient({
             <div className='flex items-center justify-between gap-2 pb-1 flex-wrap'>
               <div className='flex items-center gap-1.5 text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200/80 shadow-2xs shrink-0'>
                 <Sparkles className='h-3.5 w-3.5 text-emerald-600 shrink-0' />
-                <span className='text-[11px] font-extrabold uppercase tracking-wide whitespace-nowrap'>Aktivasi Akun Wali Kelas</span>
+                <span className='text-[11px] font-extrabold uppercase tracking-wide whitespace-nowrap'>
+                  {teacher.isFirstLogin ? 'Aktivasi Akun Wali Kelas' : 'Lengkapi Data Profil & Sekolah'}
+                </span>
               </div>
               <Button
                 type='button'
@@ -638,7 +698,7 @@ export default function DashboardLayoutClient({
               {/* NIP */}
               <div className='space-y-1.5'>
                 <label className='text-xs font-bold uppercase tracking-wider text-slate-700 block'>
-                  NIP (Nomor Induk Pegawai)
+                  NIP (Nomor Induk Pegawai) <span className='text-rose-500'>*</span>
                 </label>
                 <div className='relative'>
                   <div className='absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400'>
@@ -646,7 +706,8 @@ export default function DashboardLayoutClient({
                   </div>
                   <input
                     type='text'
-                    placeholder='Misal: 19850101 201001 1 001 (opsional)'
+                    required
+                    placeholder='Misal: 19850101 201001 1 001'
                     value={onboardingNip}
                     onChange={(e) => setOnboardingNip(e.target.value)}
                     className='w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:outline-none rounded-xl text-sm font-medium transition-all'
@@ -725,6 +786,47 @@ export default function DashboardLayoutClient({
                   />
                 </div>
               )}
+
+              {/* Kepala Sekolah & NIP Kepala Sekolah – 2 column grid */}
+              <div className='grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1'>
+                <div className='space-y-1.5'>
+                  <label className='text-xs font-bold uppercase tracking-wider text-slate-700 block'>
+                    NAMA KEPALA SEKOLAH <span className='text-rose-500'>*</span>
+                  </label>
+                  <div className='relative'>
+                    <div className='absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400'>
+                      <UserCheck className='h-4 w-4' />
+                    </div>
+                    <input
+                      type='text'
+                      required
+                      placeholder='Contoh: Dr. H. Ahmad Dahlan, M.Pd'
+                      value={onboardingPrincipalName}
+                      onChange={(e) => setOnboardingPrincipalName(e.target.value)}
+                      className='w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:outline-none rounded-xl text-sm font-medium transition-all'
+                    />
+                  </div>
+                </div>
+
+                <div className='space-y-1.5'>
+                  <label className='text-xs font-bold uppercase tracking-wider text-slate-700 block'>
+                    NIP KEPALA SEKOLAH <span className='text-rose-500'>*</span>
+                  </label>
+                  <div className='relative'>
+                    <div className='absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400'>
+                      <IdCard className='h-4 w-4' />
+                    </div>
+                    <input
+                      type='text'
+                      required
+                      placeholder='Misal: 19700101 199503 1 002'
+                      value={onboardingPrincipalNip}
+                      onChange={(e) => setOnboardingPrincipalNip(e.target.value)}
+                      className='w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:outline-none rounded-xl text-sm font-medium transition-all'
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
