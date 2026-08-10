@@ -485,7 +485,7 @@ export default function JurnalClient() {
                 className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl h-10 px-4.5 gap-2 shadow-xs cursor-pointer'
               >
                 <Printer className='h-4 w-4 text-blue-600' />
-                Ekspor / Cetak PDF
+                Cetak PDF
               </Button>
             </div>
           </div>

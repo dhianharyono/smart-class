@@ -479,14 +479,14 @@ export default function DashboardLayoutClient({
   return (
     <div className='flex min-h-screen bg-slate-50 text-slate-900'>
       {/* Desktop Sidebar */}
-      <aside className='hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-white border-r border-slate-200/80 shadow-xs'>
+      <aside className='hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-white border-r border-slate-200/80 shadow-xs print:hidden'>
         {sidebarContent}
       </aside>
 
       {/* Main Content Area */}
-      <div className='flex-1 md:pl-64 flex flex-col min-w-0 max-w-full'>
+      <div className='flex-1 md:pl-64 flex flex-col min-w-0 max-w-full print:pl-0 print:m-0'>
         {/* Mobile Top Header */}
-        <header className='flex h-16 items-center justify-between border-b border-slate-200/80 px-4 md:hidden bg-white/90 backdrop-blur-md sticky top-0 z-40'>
+        <header className='flex h-16 items-center justify-between border-b border-slate-200/80 px-4 md:hidden bg-white/90 backdrop-blur-md sticky top-0 z-40 print:hidden'>
           <div className='flex items-center gap-2'>
             <BookOpen className='h-5 w-5 text-emerald-600' />
             <span className='font-bold text-emerald-700 text-sm'>
@@ -509,14 +509,14 @@ export default function DashboardLayoutClient({
 
         {/* Mobile Navigation Drawer */}
         {mobileOpen && (
-          <div className='fixed inset-0 z-50 md:hidden flex'>
+          <div className='fixed inset-0 z-50 md:hidden flex print:hidden'>
             {/* Backdrop overlay */}
             <div
               className='fixed inset-0 bg-slate-900/40 backdrop-blur-sm'
               onClick={toggleSidebar}
             />
             {/* Drawer */}
-            <aside className='relative flex w-64 max-w-xs flex-col bg-white border-r border-slate-200 animate-in slide-in-from-left duration-200 shadow-xl'>
+            <aside className='relative flex w-64 max-w-xs flex-col bg-white border-r border-slate-200 animate-in slide-in-from-left duration-200 shadow-xl print:hidden'>
               {sidebarContent}
             </aside>
           </div>

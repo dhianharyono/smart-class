@@ -218,6 +218,174 @@ export async function exportGradesToExcel(
   window.URL.revokeObjectURL(url);
 }
 
+export async function exportGradesRecapToExcel(
+  recapData: any[],
+  subject: string,
+  kkm: number
+) {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Rekap Nilai');
+
+  worksheet.columns = [
+    { header: 'No', key: 'no', width: 6 },
+    { header: 'NIS', key: 'nis', width: 14 },
+    { header: 'Nama Lengkap', key: 'name', width: 26 },
+    { header: 'Kelas', key: 'className', width: 12 },
+    { header: 'Tugas', key: 'tugas', width: 10 },
+    { header: 'UH', key: 'uh', width: 10 },
+    { header: 'UTS', key: 'uts', width: 10 },
+    { header: 'UAS', key: 'uas', width: 10 },
+    { header: 'Nilai Akhir', key: 'finalScore', width: 14 },
+    { header: 'Status Ketuntasan', key: 'status', width: 18 },
+  ];
+
+  const headerRow = worksheet.getRow(1);
+  headerRow.font = { name: 'Arial', bold: true, color: { argb: 'FFFFFFFF' } };
+  headerRow.fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FF059669' },
+  };
+  headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
+
+  recapData.forEach((record, index) => {
+    const isScored = record.finalScore !== '';
+    const isPassed = isScored && Number(record.finalScore) >= kkm;
+    const statusText = !isScored
+      ? 'Belum Dinilai'
+      : isPassed
+      ? 'Tuntas'
+      : 'Remedial';
+
+    worksheet.addRow({
+      no: index + 1,
+      nis: sanitizeExcelCell(record.nis),
+      name: sanitizeExcelCell(record.name),
+      className: sanitizeExcelCell(record.className),
+      tugas: record.tugas === '' ? '-' : Number(record.tugas),
+      uh: record.uh === '' ? '-' : Number(record.uh),
+      uts: record.uts === '' ? '-' : Number(record.uts),
+      uas: record.uas === '' ? '-' : Number(record.uas),
+      finalScore: record.finalScore === '' ? '-' : Number(record.finalScore),
+      status: statusText,
+    });
+  });
+
+  worksheet.eachRow((row, rowNumber) => {
+    row.eachCell((cell) => {
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+        left: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+        bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+        right: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+      };
+      if (rowNumber > 1) {
+        cell.font = { name: 'Arial', size: 10 };
+      }
+    });
+  });
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Laporan_Rekap_Nilai_${subject}.xlsx`;
+  a.click();
+  window.URL.revokeObjectURL(url);
+}
+
+export async function exportAllSubjectsGradesRecapToExcel(
+  subjects: string[],
+  recapData: any[],
+  kkm: number
+) {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Leger Nilai Kelas');
+
+  const columns: any[] = [
+    { header: 'No', key: 'no', width: 6 },
+    { header: 'NIS', key: 'nis', width: 14 },
+    { header: 'Nama Lengkap', key: 'name', width: 26 },
+    { header: 'Kelas', key: 'className', width: 12 },
+  ];
+
+  subjects.forEach((subj, idx) => {
+    columns.push({ header: subj, key: `subj_${idx}`, width: 16 });
+  });
+
+  columns.push(
+    { header: 'Rata-Rata Rapor', key: 'overallAverage', width: 16 },
+    { header: 'Status Ketuntasan', key: 'status', width: 18 }
+  );
+
+  worksheet.columns = columns;
+
+  const headerRow = worksheet.getRow(1);
+  headerRow.font = { name: 'Arial', bold: true, color: { argb: 'FFFFFFFF' } };
+  headerRow.fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FF059669' },
+  };
+  headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
+
+  recapData.forEach((record, index) => {
+    const isScored = record.overallAverage !== '';
+    const isPassed = isScored && Number(record.overallAverage) >= kkm;
+    const statusText = !isScored
+      ? 'Belum Ada Nilai'
+      : isPassed
+      ? 'Tuntas'
+      : 'Remedial';
+
+    const rowObj: any = {
+      no: index + 1,
+      nis: sanitizeExcelCell(record.nis),
+      name: sanitizeExcelCell(record.name),
+      className: sanitizeExcelCell(record.className),
+      overallAverage: record.overallAverage === '' ? '-' : Number(record.overallAverage),
+      status: statusText,
+    };
+
+    subjects.forEach((subj, idx) => {
+      const score = record.subjectScores[subj];
+      rowObj[`subj_${idx}`] = score === '' || score === undefined ? '-' : Number(score);
+    });
+
+    worksheet.addRow(rowObj);
+  });
+
+  worksheet.eachRow((row, rowNumber) => {
+    row.eachCell((cell) => {
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+        left: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+        bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+        right: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+      };
+      if (rowNumber > 1) {
+        cell.font = { name: 'Arial', size: 10 };
+      }
+    });
+  });
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Leger_Rekap_Nilai_Semua_Mata_Pelajaran.xlsx`;
+  a.click();
+  window.URL.revokeObjectURL(url);
+}
+
+
+
 export async function exportSavingsToExcel(savingsSummary: any[]) {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Ringkasan Tabungan');
@@ -453,3 +621,313 @@ export async function exportJournalToExcel(
   a.click();
   window.URL.revokeObjectURL(url);
 }
+
+function getColumnLetter(colIndex: number): string {
+  let temp;
+  let letter = '';
+  while (colIndex > 0) {
+    temp = (colIndex - 1) % 26;
+    letter = String.fromCharCode(65 + temp) + letter;
+    colIndex = Math.floor((colIndex - temp - 1) / 26);
+  }
+  return letter;
+}
+
+export async function exportMonthlyAttendanceToExcel(
+  reportData: {
+    year: number;
+    month: number;
+    daysInMonth: number;
+    studentsReport: any[];
+  },
+  monthLabel: string,
+  headerInfo: {
+    schoolName: string;
+    className: string;
+    teacherName: string;
+    nip: string;
+  }
+) {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Rekap Absensi Bulanan');
+  worksheet.pageSetup.orientation = 'landscape';
+  worksheet.pageSetup.fitToPage = true;
+
+  const totalCols = 4 + reportData.daysInMonth + 5;
+  const lastColLetter = getColumnLetter(totalCols);
+
+  worksheet.mergeCells(`A1:${lastColLetter}1`);
+  const titleCell = worksheet.getCell('A1');
+  titleCell.value = `LAPORAN REKAPITULASI ABSENSI BULAN ${monthLabel.toUpperCase()} ${reportData.year}`;
+  titleCell.font = { name: 'Arial', size: 14, bold: true };
+  titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+  worksheet.getCell('A3').value = 'Nama Sekolah';
+  worksheet.getCell('B3').value = `: ${headerInfo.schoolName || '-'}`;
+  worksheet.getCell('A4').value = 'Kelas';
+  worksheet.getCell('B4').value = `: ${headerInfo.className || '-'}`;
+
+  worksheet.getCell('E3').value = 'Guru Kelas';
+  worksheet.getCell('F3').value = `: ${headerInfo.teacherName || '-'}`;
+  worksheet.getCell('E4').value = 'NIP';
+  worksheet.getCell('F4').value = `: ${headerInfo.nip || '-'}`;
+
+  ['A3', 'A4', 'E3', 'E4'].forEach((c) => {
+    worksheet.getCell(c).font = { name: 'Arial', size: 10, bold: true };
+  });
+
+  worksheet.getCell('A6').value = 'No';
+  worksheet.getCell('B6').value = 'NIS';
+  worksheet.getCell('C6').value = 'Nama Lengkap';
+  worksheet.getCell('D6').value = 'L/P';
+
+  for (let d = 1; d <= reportData.daysInMonth; d++) {
+    const colIndex = 4 + d;
+    const colLetter = getColumnLetter(colIndex);
+    worksheet.getCell(`${colLetter}6`).value = d;
+  }
+
+  const startSummaryCol = 4 + reportData.daysInMonth + 1;
+  worksheet.getCell(`${getColumnLetter(startSummaryCol)}6`).value = 'H';
+  worksheet.getCell(`${getColumnLetter(startSummaryCol + 1)}6`).value = 'S';
+  worksheet.getCell(`${getColumnLetter(startSummaryCol + 2)}6`).value = 'I';
+  worksheet.getCell(`${getColumnLetter(startSummaryCol + 3)}6`).value = 'A';
+  worksheet.getCell(`${getColumnLetter(startSummaryCol + 4)}6`).value = '%';
+
+  for (let c = 1; c <= totalCols; c++) {
+    const cell = worksheet.getCell(`${getColumnLetter(c)}6`);
+    cell.font = { name: 'Arial', size: 10, bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF059669' },
+    };
+    cell.alignment = { horizontal: 'center', vertical: 'middle' };
+  }
+
+  worksheet.getColumn(1).width = 5;
+  worksheet.getColumn(2).width = 14;
+  worksheet.getColumn(3).width = 25;
+  worksheet.getColumn(4).width = 6;
+
+  for (let d = 1; d <= reportData.daysInMonth; d++) {
+    worksheet.getColumn(4 + d).width = 4;
+  }
+  worksheet.getColumn(startSummaryCol).width = 5;
+  worksheet.getColumn(startSummaryCol + 1).width = 5;
+  worksheet.getColumn(startSummaryCol + 2).width = 5;
+  worksheet.getColumn(startSummaryCol + 3).width = 5;
+  worksheet.getColumn(startSummaryCol + 4).width = 7;
+
+  let currentRow = 7;
+  reportData.studentsReport.forEach((student, index) => {
+    const row = worksheet.getRow(currentRow);
+    row.getCell(1).value = index + 1;
+    row.getCell(2).value = sanitizeExcelCell(student.nis);
+    row.getCell(3).value = sanitizeExcelCell(student.name);
+    row.getCell(4).value = student.gender || '-';
+
+    row.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
+    row.getCell(2).alignment = { horizontal: 'center', vertical: 'middle' };
+    row.getCell(3).alignment = { horizontal: 'left', vertical: 'middle' };
+    row.getCell(4).alignment = { horizontal: 'center', vertical: 'middle' };
+
+    for (let d = 1; d <= reportData.daysInMonth; d++) {
+      const colIndex = 4 + d;
+      const status = student.dailyMap[d];
+      let code = '';
+      if (status === 'Hadir') code = 'H';
+      else if (status === 'Sakit') code = 'S';
+      else if (status === 'Izin') code = 'I';
+      else if (status === 'Alfa') code = 'A';
+
+      const cell = row.getCell(colIndex);
+      cell.value = code;
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+      if (code === 'A') {
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEE2E2' } };
+        cell.font = { color: { argb: 'FF991B1B' }, bold: true, name: 'Arial', size: 9 };
+      } else if (code === 'S' || code === 'I') {
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FEF3C7' } };
+        cell.font = { color: { argb: 'D97706' }, bold: true, name: 'Arial', size: 9 };
+      }
+    }
+
+    row.getCell(startSummaryCol).value = student.hadir;
+    row.getCell(startSummaryCol + 1).value = student.sakit;
+    row.getCell(startSummaryCol + 2).value = student.izin;
+    row.getCell(startSummaryCol + 3).value = student.alfa;
+    row.getCell(startSummaryCol + 4).value = `${student.percentage}%`;
+
+    for (let i = 0; i < 5; i++) {
+      row.getCell(startSummaryCol + i).alignment = { horizontal: 'center', vertical: 'middle' };
+    }
+
+    currentRow++;
+  });
+
+  for (let r = 6; r < currentRow; r++) {
+    const row = worksheet.getRow(r);
+    for (let c = 1; c <= totalCols; c++) {
+      const cell = row.getCell(c);
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+        left: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+        bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+        right: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+      };
+    }
+  }
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Laporan_Absensi_Bulanan_${monthLabel}_${reportData.year}.xlsx`;
+  a.click();
+  window.URL.revokeObjectURL(url);
+}
+
+export async function exportYearlyAttendanceToExcel(
+  reportData: {
+    year: number;
+    studentsReport: any[];
+  },
+  headerInfo: {
+    schoolName: string;
+    className: string;
+    teacherName: string;
+    nip: string;
+  }
+) {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Rekap Absensi Tahunan');
+  worksheet.pageSetup.orientation = 'landscape';
+  worksheet.pageSetup.fitToPage = true;
+
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+  const totalCols = 4 + 12 + 5;
+  const lastColLetter = getColumnLetter(totalCols);
+
+  worksheet.mergeCells(`A1:${lastColLetter}1`);
+  const titleCell = worksheet.getCell('A1');
+  titleCell.value = `LAPORAN REKAPITULASI ABSENSI SISWA TAHUN ${reportData.year}`;
+  titleCell.font = { name: 'Arial', size: 14, bold: true };
+  titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+  worksheet.getCell('A3').value = 'Nama Sekolah';
+  worksheet.getCell('B3').value = `: ${headerInfo.schoolName || '-'}`;
+  worksheet.getCell('A4').value = 'Kelas';
+  worksheet.getCell('B4').value = `: ${headerInfo.className || '-'}`;
+
+  worksheet.getCell('E3').value = 'Guru Kelas';
+  worksheet.getCell('F3').value = `: ${headerInfo.teacherName || '-'}`;
+  worksheet.getCell('E4').value = 'NIP';
+  worksheet.getCell('F4').value = `: ${headerInfo.nip || '-'}`;
+
+  ['A3', 'A4', 'E3', 'E4'].forEach((c) => {
+    worksheet.getCell(c).font = { name: 'Arial', size: 10, bold: true };
+  });
+
+  worksheet.getCell('A6').value = 'No';
+  worksheet.getCell('B6').value = 'NIS';
+  worksheet.getCell('C6').value = 'Nama Lengkap';
+  worksheet.getCell('D6').value = 'L/P';
+
+  months.forEach((m, idx) => {
+    const colLetter = getColumnLetter(4 + idx + 1);
+    worksheet.getCell(`${colLetter}6`).value = m;
+  });
+
+  const startSummaryCol = 4 + 12 + 1;
+  worksheet.getCell(`${getColumnLetter(startSummaryCol)}6`).value = 'Tot. H';
+  worksheet.getCell(`${getColumnLetter(startSummaryCol + 1)}6`).value = 'Tot. S';
+  worksheet.getCell(`${getColumnLetter(startSummaryCol + 2)}6`).value = 'Tot. I';
+  worksheet.getCell(`${getColumnLetter(startSummaryCol + 3)}6`).value = 'Tot. A';
+  worksheet.getCell(`${getColumnLetter(startSummaryCol + 4)}6`).value = '% Kehadiran';
+
+  for (let c = 1; c <= totalCols; c++) {
+    const cell = worksheet.getCell(`${getColumnLetter(c)}6`);
+    cell.font = { name: 'Arial', size: 10, bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF059669' },
+    };
+    cell.alignment = { horizontal: 'center', vertical: 'middle' };
+  }
+
+  worksheet.getColumn(1).width = 5;
+  worksheet.getColumn(2).width = 14;
+  worksheet.getColumn(3).width = 25;
+  worksheet.getColumn(4).width = 6;
+  for (let i = 1; i <= 12; i++) {
+    worksheet.getColumn(4 + i).width = 6;
+  }
+  worksheet.getColumn(startSummaryCol).width = 8;
+  worksheet.getColumn(startSummaryCol + 1).width = 8;
+  worksheet.getColumn(startSummaryCol + 2).width = 8;
+  worksheet.getColumn(startSummaryCol + 3).width = 8;
+  worksheet.getColumn(startSummaryCol + 4).width = 13;
+
+  let currentRow = 7;
+  reportData.studentsReport.forEach((student, index) => {
+    const row = worksheet.getRow(currentRow);
+    row.getCell(1).value = index + 1;
+    row.getCell(2).value = sanitizeExcelCell(student.nis);
+    row.getCell(3).value = sanitizeExcelCell(student.name);
+    row.getCell(4).value = student.gender || '-';
+
+    row.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
+    row.getCell(2).alignment = { horizontal: 'center', vertical: 'middle' };
+    row.getCell(3).alignment = { horizontal: 'left', vertical: 'middle' };
+    row.getCell(4).alignment = { horizontal: 'center', vertical: 'middle' };
+
+    student.monthlyBreakdown.forEach((mb: any, idx: number) => {
+      const cell = row.getCell(4 + idx + 1);
+      cell.value = mb.hadir > 0 ? mb.hadir : '-';
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+    });
+
+    row.getCell(startSummaryCol).value = student.hadir;
+    row.getCell(startSummaryCol + 1).value = student.sakit;
+    row.getCell(startSummaryCol + 2).value = student.izin;
+    row.getCell(startSummaryCol + 3).value = student.alfa;
+    row.getCell(startSummaryCol + 4).value = `${student.percentage}%`;
+
+    for (let i = 0; i < 5; i++) {
+      row.getCell(startSummaryCol + i).alignment = { horizontal: 'center', vertical: 'middle' };
+    }
+
+    currentRow++;
+  });
+
+  for (let r = 6; r < currentRow; r++) {
+    const row = worksheet.getRow(r);
+    for (let c = 1; c <= totalCols; c++) {
+      const cell = row.getCell(c);
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+        left: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+        bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+        right: { style: 'thin', color: { argb: 'FFE5E7EB' } },
+      };
+    }
+  }
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Laporan_Absensi_Tahunan_${reportData.year}.xlsx`;
+  a.click();
+  window.URL.revokeObjectURL(url);
+}
+

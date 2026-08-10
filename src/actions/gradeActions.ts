@@ -147,3 +147,145 @@ export async function saveBulkGrades(
     throw new Error(error.message || 'Failed to save grades.');
   }
 }
+
+export async function getAllGradesRecap(subject: string) {
+  try {
+    await dbConnect();
+    const teacherId = await requireAuth();
+
+    const students = await Student.find({ teacherId }).sort({ name: 1 }).lean();
+
+    const grades = await Grade.find({
+      teacherId,
+      subject,
+    }).lean();
+
+    const gradeMap = new Map<string, { Tugas?: number; UH?: number; UTS?: number; UAS?: number }>();
+
+    for (const g of grades) {
+      const sId = g.studentId.toString();
+      if (!gradeMap.has(sId)) {
+        gradeMap.set(sId, {});
+      }
+      const item = gradeMap.get(sId)!;
+      if (g.category === 'Tugas') item.Tugas = g.score;
+      if (g.category === 'UH') item.UH = g.score;
+      if (g.category === 'UTS') item.UTS = g.score;
+      if (g.category === 'UAS') item.UAS = g.score;
+    }
+
+    const result = students.map((student) => {
+      const sId = student._id.toString();
+      const stGrades = gradeMap.get(sId) || {};
+
+      const tugas = stGrades.Tugas ?? '';
+      const uh = stGrades.UH ?? '';
+      const uts = stGrades.UTS ?? '';
+      const uas = stGrades.UAS ?? '';
+
+      const validScores: number[] = [];
+      if (tugas !== '') validScores.push(Number(tugas));
+      if (uh !== '') validScores.push(Number(uh));
+      if (uts !== '') validScores.push(Number(uts));
+      if (uas !== '') validScores.push(Number(uas));
+
+      const finalScore =
+        validScores.length > 0
+          ? Number((validScores.reduce((a, b) => a + b, 0) / validScores.length).toFixed(1))
+          : '';
+
+      return {
+        studentId: sId,
+        name: student.name,
+        nis: student.nis,
+        className: student.className,
+        tugas,
+        uh,
+        uts,
+        uas,
+        finalScore,
+      };
+    });
+
+    return JSON.parse(JSON.stringify(result));
+  } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+    console.error('Error fetching grades recap:', error);
+    throw new Error(error.message || 'Failed to fetch grades recap.');
+  }
+}
+
+export async function getAllSubjectsGradesRecap() {
+  try {
+    await dbConnect();
+    const teacherId = await requireAuth();
+
+    const students = await Student.find({ teacherId }).sort({ name: 1 }).lean();
+
+    const defaultSubjects = ['Matematika', 'IPA', 'IPS', 'Bahasa Indonesia', 'Bahasa Inggris', 'Pendidikan Pancasila'];
+    const distinctSubjects = await Grade.distinct('subject', { teacherId });
+    const subjects = Array.from(new Set([...defaultSubjects, ...distinctSubjects])).sort();
+
+    const grades = await Grade.find({ teacherId }).lean();
+
+    const studentSubjectMap = new Map<string, Map<string, number[]>>();
+
+    for (const g of grades) {
+      const sId = g.studentId.toString();
+      const subj = g.subject;
+      if (!studentSubjectMap.has(sId)) {
+        studentSubjectMap.set(sId, new Map());
+      }
+      const subjMap = studentSubjectMap.get(sId)!;
+      if (!subjMap.has(subj)) {
+        subjMap.set(subj, []);
+      }
+      subjMap.get(subj)!.push(g.score);
+    }
+
+    const result = students.map((student) => {
+      const sId = student._id.toString();
+      const subjMap = studentSubjectMap.get(sId);
+
+      const subjectScores: Record<string, number | ''> = {};
+      const allSubjectFinalScores: number[] = [];
+
+      for (const subj of subjects) {
+        const scores = subjMap?.get(subj);
+        if (scores && scores.length > 0) {
+          const avg = Number((scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1));
+          subjectScores[subj] = avg;
+          allSubjectFinalScores.push(avg);
+        } else {
+          subjectScores[subj] = '';
+        }
+      }
+
+      const overallAverage =
+        allSubjectFinalScores.length > 0
+          ? Number((allSubjectFinalScores.reduce((a, b) => a + b, 0) / allSubjectFinalScores.length).toFixed(1))
+          : '';
+
+      return {
+        studentId: sId,
+        name: student.name,
+        nis: student.nis,
+        className: student.className,
+        subjectScores,
+        overallAverage,
+      };
+    });
+
+    return JSON.parse(JSON.stringify({ subjects, recap: result }));
+  } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+    console.error('Error fetching all subjects grades recap:', error);
+    throw new Error(error.message || 'Failed to fetch all subjects grades recap.');
+  }
+}
+
+

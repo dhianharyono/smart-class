@@ -9,6 +9,9 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { isRedirectError } from '@/lib/utils';
 
+import Teacher from '@/models/Teacher';
+import JournalHeader from '@/models/JournalHeader';
+
 async function requireAuth() {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get('session')?.value;
@@ -26,6 +29,36 @@ async function requireAuth() {
 function parseLocalDate(dateStr: string): Date {
   const [year, month, day] = dateStr.split('-').map(Number);
   return new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+}
+
+export async function getAttendanceHeaderInfo() {
+  try {
+    await dbConnect();
+    const teacherId = await requireAuth();
+
+    const teacher = await Teacher.findById(teacherId).lean();
+    const journalHeader = await JournalHeader.findOne({ teacherId }).lean();
+
+    return {
+      schoolName: teacher?.schoolName || journalHeader?.schoolName || 'SMK Negeri 1',
+      className: teacher?.className || journalHeader?.classNameSemester || 'Kelas Utama',
+      teacherName: teacher?.name || journalHeader?.teacherName || '',
+      nip: teacher?.nip || journalHeader?.nip || '-',
+      academicYear: journalHeader?.academicYear || `${new Date().getFullYear()}/${new Date().getFullYear() + 1}`,
+    };
+  } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+    console.error('Error fetching attendance header info:', error);
+    return {
+      schoolName: 'Sekolah Smart Class',
+      className: 'Kelas Utama',
+      teacherName: 'Guru Kelas',
+      nip: '-',
+      academicYear: `${new Date().getFullYear()}/${new Date().getFullYear() + 1}`,
+    };
+  }
 }
 
 export async function getAttendanceByDate(dateStr: string) {
@@ -65,6 +98,181 @@ export async function getAttendanceByDate(dateStr: string) {
     }
     console.error('Error fetching attendance:', error);
     throw new Error(error.message || 'Failed to fetch attendance.');
+  }
+}
+
+export async function getMonthlyAttendanceReport(year: number, month: number) {
+  try {
+    await dbConnect();
+    const teacherId = await requireAuth();
+
+    const startDate = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0, 0));
+    const endDate = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
+    const daysInMonth = new Date(year, month, 0).getDate();
+
+    const students = await Student.find({ teacherId }).sort({ name: 1 }).lean();
+    const attendanceRecords = await Attendance.find({
+      teacherId,
+      date: { $gte: startDate, $lte: endDate },
+    }).lean();
+
+    // Map: studentId -> { [day]: status }
+    const studentDayMap: Record<string, Record<number, string>> = {};
+    attendanceRecords.forEach((rec) => {
+      const sId = rec.studentId.toString();
+      const recDate = new Date(rec.date);
+      const day = recDate.getUTCDate();
+      if (!studentDayMap[sId]) {
+        studentDayMap[sId] = {};
+      }
+      studentDayMap[sId][day] = rec.status;
+    });
+
+    const studentsReport = students.map((student) => {
+      const sId = student._id.toString();
+      const dayMap = studentDayMap[sId] || {};
+
+      let hadir = 0;
+      let sakit = 0;
+      let izin = 0;
+      let alfa = 0;
+
+      Object.values(dayMap).forEach((st) => {
+        if (st === 'Hadir') hadir++;
+        else if (st === 'Sakit') sakit++;
+        else if (st === 'Izin') izin++;
+        else if (st === 'Alfa') alfa++;
+      });
+
+      const totalRecorded = hadir + sakit + izin + alfa;
+      const percentage = totalRecorded > 0 ? Math.round((hadir / totalRecorded) * 100) : 0;
+
+      return {
+        studentId: sId,
+        nis: student.nis,
+        name: student.name,
+        className: student.className,
+        gender: student.gender,
+        dailyMap: dayMap,
+        hadir,
+        sakit,
+        izin,
+        alfa,
+        totalRecorded,
+        percentage,
+      };
+    });
+
+    return JSON.parse(
+      JSON.stringify({
+        year,
+        month,
+        daysInMonth,
+        studentsReport,
+      })
+    );
+  } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+    console.error('Error fetching monthly attendance report:', error);
+    throw new Error(error.message || 'Gagal memuat rekap absensi bulanan.');
+  }
+}
+
+export async function getYearlyAttendanceReport(year: number) {
+  try {
+    await dbConnect();
+    const teacherId = await requireAuth();
+
+    const startDate = new Date(Date.UTC(year, 0, 1, 0, 0, 0, 0));
+    const endDate = new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999));
+
+    const students = await Student.find({ teacherId }).sort({ name: 1 }).lean();
+    const attendanceRecords = await Attendance.find({
+      teacherId,
+      date: { $gte: startDate, $lte: endDate },
+    }).lean();
+
+    // Map: studentId -> { [monthIndex 0..11]: { hadir, sakit, izin, alfa } }
+    const studentMonthMap: Record<
+      string,
+      Record<number, { hadir: number; sakit: number; izin: number; alfa: number }>
+    > = {};
+
+    attendanceRecords.forEach((rec) => {
+      const sId = rec.studentId.toString();
+      const recDate = new Date(rec.date);
+      const mIdx = recDate.getUTCMonth(); // 0..11
+
+      if (!studentMonthMap[sId]) {
+        studentMonthMap[sId] = {};
+      }
+      if (!studentMonthMap[sId][mIdx]) {
+        studentMonthMap[sId][mIdx] = { hadir: 0, sakit: 0, izin: 0, alfa: 0 };
+      }
+
+      if (rec.status === 'Hadir') studentMonthMap[sId][mIdx].hadir++;
+      else if (rec.status === 'Sakit') studentMonthMap[sId][mIdx].sakit++;
+      else if (rec.status === 'Izin') studentMonthMap[sId][mIdx].izin++;
+      else if (rec.status === 'Alfa') studentMonthMap[sId][mIdx].alfa++;
+    });
+
+    const studentsReport = students.map((student) => {
+      const sId = student._id.toString();
+      const monthData = studentMonthMap[sId] || {};
+
+      let totalHadir = 0;
+      let totalSakit = 0;
+      let totalIzin = 0;
+      let totalAlfa = 0;
+
+      const monthlyBreakdown = Array.from({ length: 12 }, (_, i) => {
+        const m = monthData[i] || { hadir: 0, sakit: 0, izin: 0, alfa: 0 };
+        totalHadir += m.hadir;
+        totalSakit += m.sakit;
+        totalIzin += m.izin;
+        totalAlfa += m.alfa;
+        return {
+          monthIndex: i,
+          hadir: m.hadir,
+          sakit: m.sakit,
+          izin: m.izin,
+          alfa: m.alfa,
+        };
+      });
+
+      const totalRecorded = totalHadir + totalSakit + totalIzin + totalAlfa;
+      const percentage = totalRecorded > 0 ? Math.round((totalHadir / totalRecorded) * 100) : 0;
+
+      return {
+        studentId: sId,
+        nis: student.nis,
+        name: student.name,
+        className: student.className,
+        gender: student.gender,
+        monthlyBreakdown,
+        hadir: totalHadir,
+        sakit: totalSakit,
+        izin: totalIzin,
+        alfa: totalAlfa,
+        totalRecorded,
+        percentage,
+      };
+    });
+
+    return JSON.parse(
+      JSON.stringify({
+        year,
+        studentsReport,
+      })
+    );
+  } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+    console.error('Error fetching yearly attendance report:', error);
+    throw new Error(error.message || 'Gagal memuat rekap absensi tahunan.');
   }
 }
 
@@ -111,3 +319,4 @@ export async function saveBulkAttendance(
     throw new Error(error.message || 'Failed to save attendance records.');
   }
 }
+
