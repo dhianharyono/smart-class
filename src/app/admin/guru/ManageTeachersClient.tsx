@@ -37,6 +37,7 @@ interface Teacher {
   email: string;
   schoolName?: string;
   className?: string;
+  classes?: string[];
   role?: 'Wali Kelas' | 'Kepala Sekolah';
   createdAt: string;
 }
@@ -85,11 +86,13 @@ export default function ManageTeachersClient({
   // Search & School Filter
   const filteredTeachers = teachers.filter((t) => {
     const query = searchQuery.toLowerCase();
+    const teacherClasses = Array.isArray(t.classes) && t.classes.length > 0 ? t.classes : (t.className ? [t.className] : []);
+    const matchesClass = teacherClasses.some((c) => c.toLowerCase().includes(query));
     const matchesSearch =
       t.name.toLowerCase().includes(query) ||
       t.email.toLowerCase().includes(query) ||
       (t.schoolName || '').toLowerCase().includes(query) ||
-      (t.className || '').toLowerCase().includes(query);
+      matchesClass;
 
     const matchesSchool =
       !selectedSchoolFilter || t.schoolName === selectedSchoolFilter;
@@ -102,7 +105,7 @@ export default function ManageTeachersClient({
     setEditName(teacher.name);
     setEditEmail(teacher.email);
     setEditSchool(teacher.schoolName || '');
-    setEditClass(teacher.className || '');
+    setEditClass(teacher.classes && teacher.classes.length > 0 ? teacher.classes.join(', ') : (teacher.className || ''));
     setEditRole(teacher.role || 'Wali Kelas');
     setIsEditOpen(true);
   };
@@ -175,6 +178,9 @@ export default function ManageTeachersClient({
 
       if (res.success) {
         toast.success('Data guru berhasil diubah.');
+        const parsedEditClasses = editClass
+          ? Array.from(new Set(editClass.split(/[,/]/).map((s) => s.trim()).filter(Boolean)))
+          : [];
         setTeachers((prev) =>
           prev.map((t) =>
             t._id === selectedTeacher._id
@@ -183,7 +189,8 @@ export default function ManageTeachersClient({
                 name: editName,
                 email: editEmail,
                 schoolName: editSchool,
-                className: editClass,
+                className: parsedEditClasses[0] || editClass,
+                classes: parsedEditClasses.length > 0 ? parsedEditClasses : (editClass ? [editClass] : []),
                 role: editRole,
               }
               : t,
@@ -238,7 +245,7 @@ export default function ManageTeachersClient({
         </div>
         <Button
           onClick={openCreateModal}
-          className='bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl cursor-pointer text-xs font-semibold py-2.5 px-4 flex items-center justify-center gap-2 w-full sm:w-auto shadow-xs transition-all duration-200'
+          className='bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl cursor-pointer text-xs font-semibold py-2.5 px-4 flex items-center justify-center gap-2 w-full sm:w-auto shadow-xs transition-all duration-200'
         >
           <Plus className='h-4 w-4' />
           <span>Tambah Wali Kelas</span>
@@ -258,7 +265,7 @@ export default function ManageTeachersClient({
               placeholder='Cari guru, email, kelas...'
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className='w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none rounded-xl text-sm transition-all duration-200'
+              className='w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-sm transition-all duration-200'
             />
           </div>
 
@@ -267,7 +274,7 @@ export default function ManageTeachersClient({
             <select
               value={selectedSchoolFilter}
               onChange={(e) => setSelectedSchoolFilter(e.target.value)}
-              className='w-full px-3 py-2.5 bg-slate-50 border border-slate-200 text-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none rounded-xl text-sm transition-all duration-200 cursor-pointer font-medium'
+              className='w-full px-3 py-2.5 bg-slate-50 border border-slate-200 text-slate-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-sm transition-all duration-200 cursor-pointer font-medium'
             >
               <option value='' className='bg-white text-slate-700'>
                 Semua Sekolah
@@ -313,7 +320,7 @@ export default function ManageTeachersClient({
                     >
                       <td className='py-4 px-6'>
                         <div className='flex flex-col'>
-                          <span className='font-bold text-slate-900 group-hover:text-indigo-700 transition-colors'>
+                          <span className='font-bold text-slate-900 group-hover:text-emerald-700 transition-colors'>
                             {teacher.name}
                           </span>
                           <div className='flex items-center gap-2 mt-0.5'>
@@ -322,8 +329,8 @@ export default function ManageTeachersClient({
                             </span>
                             <span
                               className={`px-2 py-0.5 border text-[9px] font-bold rounded-md uppercase tracking-wider ${teacher.role === 'Kepala Sekolah'
-                                  ? 'bg-violet-50 text-violet-700 border-violet-200'
-                                  : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                ? 'bg-violet-50 text-violet-700 border-violet-200'
+                                : 'bg-emerald-50 text-emerald-700 border-emerald-200'
                                 }`}
                             >
                               {teacher.role || 'Wali Kelas'}
@@ -338,9 +345,19 @@ export default function ManageTeachersClient({
                         </div>
                       </td>
                       <td className='py-4 px-6'>
-                        <span className='bg-slate-100 border border-slate-200 text-slate-700 px-2.5 py-0.5 rounded-lg text-xs font-bold font-mono'>
-                          {teacher.className || '-'}
-                        </span>
+                        <div className='flex flex-wrap gap-1 items-center'>
+                          {teacher.classes && teacher.classes.length > 0 ? (
+                            teacher.classes.map((cls, idx) => (
+                              <span key={idx} className='bg-emerald-50 border border-emerald-200/90 text-emerald-800 px-2 py-0.5 rounded text-[11px] font-mono font-bold'>
+                                Kelas {cls}
+                              </span>
+                            ))
+                          ) : (
+                            <span className='bg-slate-100 border border-slate-200 text-slate-700 px-2.5 py-0.5 rounded-lg text-xs font-bold font-mono'>
+                              Kelas {teacher.className || '-'}
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className='py-4 px-6 text-slate-500 text-xs font-medium'>
                         <div className='flex items-center gap-1.5'>
@@ -363,7 +380,7 @@ export default function ManageTeachersClient({
                             variant='ghost'
                             size='icon'
                             onClick={() => openEditModal(teacher)}
-                            className='h-8 w-8 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 rounded-xl cursor-pointer'
+                            className='h-8 w-8 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-200 rounded-xl cursor-pointer'
                           >
                             <Edit2 className='h-3.5 w-3.5' />
                           </Button>
@@ -483,16 +500,19 @@ export default function ManageTeachersClient({
                   </select>
                 </div>
                 <div className='space-y-1'>
-                  <label className='text-[10px] font-bold text-slate-500 tracking-wider uppercase'>
-                    Kelas Diajar
-                  </label>
-                  <input
-                    type='text'
-                    value={editClass}
-                    onChange={(e) => setEditClass(e.target.value)}
-                    disabled={loading}
-                    className='w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-slate-900 disabled:opacity-50'
-                  />
+                  <div>
+                    <label className='block text-xs font-semibold text-slate-700 mb-1'>
+                      Nama Kelas <span className='text-slate-400'>(misal: 5A, 5B)</span> <span className='text-rose-500'>*</span>
+                    </label>
+                    <input
+                      type='text'
+                      required
+                      value={editClass}
+                      onChange={(e) => setEditClass(e.target.value)}
+                      placeholder='Contoh: 5A, 5B'
+                      className='w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 text-slate-900 disabled:opacity-50'
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -509,7 +529,7 @@ export default function ManageTeachersClient({
                 <Button
                   type='submit'
                   disabled={loading}
-                  className='bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl cursor-pointer text-xs font-semibold flex items-center gap-1.5 shadow-xs'
+                  className='bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl cursor-pointer text-xs font-semibold flex items-center gap-1.5 shadow-xs'
                 >
                   {loading ? (
                     <>
@@ -635,7 +655,7 @@ export default function ManageTeachersClient({
                     required
                     placeholder='Nama Lengkap & Gelar'
                     disabled={loading}
-                    className='w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-slate-900 placeholder-slate-400 disabled:opacity-50'
+                    className='w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 text-slate-900 placeholder-slate-400 disabled:opacity-50'
                   />
                 </div>
 
@@ -650,7 +670,7 @@ export default function ManageTeachersClient({
                     required
                     placeholder='Email atau Username wali kelas'
                     disabled={loading}
-                    className='w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-slate-900 placeholder-slate-400 disabled:opacity-50'
+                    className='w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 text-slate-900 placeholder-slate-400 disabled:opacity-50'
                   />
                 </div>
 
@@ -663,7 +683,7 @@ export default function ManageTeachersClient({
                     onChange={(e) => setNewRole(e.target.value as any)}
                     required
                     disabled={loading}
-                    className='w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-slate-900 disabled:opacity-50 cursor-pointer font-medium'
+                    className='w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 text-slate-900 disabled:opacity-50 cursor-pointer font-medium'
                   >
                     <option
                       value='Wali Kelas'
@@ -691,7 +711,7 @@ export default function ManageTeachersClient({
                       onChange={(e) => setNewPassword(e.target.value)}
                       placeholder='Kosongkan untuk default: Gurusmart123!'
                       disabled={loading}
-                      className='w-full pl-3 pr-10 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-slate-900 placeholder-slate-400 disabled:opacity-50'
+                      className='w-full pl-3 pr-10 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 text-slate-900 placeholder-slate-400 disabled:opacity-50'
                     />
                     <button
                       type='button'
@@ -717,7 +737,7 @@ export default function ManageTeachersClient({
                       onChange={(e) => setNewSchool(e.target.value)}
                       required
                       disabled={loading}
-                      className='w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-slate-900 disabled:opacity-50 cursor-pointer font-medium'
+                      className='w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 text-slate-900 disabled:opacity-50 cursor-pointer font-medium'
                     >
                       {schools.map((s) => (
                         <option
@@ -731,17 +751,17 @@ export default function ManageTeachersClient({
                     </select>
                   </div>
                   <div className='space-y-1'>
-                    <label className='text-[10px] font-bold text-slate-500 tracking-wider uppercase'>
-                      Kelas Diajar
+                    <label className='block text-xs font-semibold text-slate-700 mb-1'>
+                      Nama Kelas <span className='text-slate-400 font-normal'>(misal: 5A, 5B)</span> <span className='text-rose-500'>*</span>
                     </label>
                     <input
                       type='text'
                       value={newClass}
                       onChange={(e) => setNewClass(e.target.value)}
                       required
-                      placeholder='Contoh: Kelas 5B'
+                      placeholder='Contoh: 5A, 5B'
                       disabled={loading}
-                      className='w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-slate-900 placeholder-slate-400 disabled:opacity-50'
+                      className='w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 text-slate-900 placeholder-slate-400 disabled:opacity-50'
                     />
                   </div>
                 </div>

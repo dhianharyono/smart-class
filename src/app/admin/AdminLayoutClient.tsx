@@ -86,12 +86,12 @@ export default function AdminLayoutClient({ children, admin }: AdminLayoutClient
     <div className="flex h-full flex-col justify-between p-4 bg-white">
       <div>
         {/* Brand Header */}
-        <div className="flex items-center gap-3 px-2 py-4 mb-6 border-b border-slate-200">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 text-white shadow-md">
+        <div className="flex items-center gap-3 px-2 py-4 mb-6 border-b border-slate-200/80">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-md shadow-emerald-500/20">
             <ShieldCheck className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-lg font-extrabold text-slate-900">
+            <h1 className="text-lg font-extrabold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
               Smart Admin
             </h1>
             <p className="text-[10px] text-slate-400 font-bold tracking-widest uppercase">Dashboard Admin</p>
@@ -116,17 +116,17 @@ export default function AdminLayoutClient({ children, admin }: AdminLayoutClient
                       href={item.href}
                       onClick={() => setMobileOpen(false)}
                       className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group ${isActive
-                        ? 'bg-indigo-50 text-indigo-700 border border-indigo-200/70 shadow-xs font-bold'
+                        ? 'bg-emerald-50/80 text-emerald-900 border border-emerald-200/80 shadow-xs font-bold'
                         : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-transparent'
                         }`}
                     >
                       <Icon
-                        className={`h-4.5 w-4.5 transition-transform duration-200 group-hover:scale-110 ${isActive ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-700'
+                        className={`h-4.5 w-4.5 transition-transform duration-200 group-hover:scale-110 ${isActive ? 'text-emerald-600' : 'text-slate-400 group-hover:text-slate-700'
                           }`}
                       />
                       <span>{item.name}</span>
                       {isActive && (
-                        <span className="ml-auto h-1.5 w-1.5 rounded-full bg-indigo-600" />
+                        <span className="ml-auto h-1.5 w-1.5 rounded-full bg-emerald-600" />
                       )}
                     </Link>
                   );
@@ -146,11 +146,11 @@ export default function AdminLayoutClient({ children, admin }: AdminLayoutClient
             className="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer"
             title="Edit Profil Admin"
           >
-            <div className="h-9 w-9 shrink-0 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-xs group-hover:scale-105 transition-transform">
+            <div className="h-9 w-9 shrink-0 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-bold text-sm shadow-xs group-hover:scale-105 transition-transform">
               {initialName}
             </div>
             <div className="flex flex-col min-w-0 flex-1">
-              <span className="text-xs font-bold text-slate-900 truncate group-hover:text-indigo-600 transition-colors">
+              <span className="text-xs font-bold text-slate-900 truncate group-hover:text-emerald-600 transition-colors">
                 {admin.name || 'Administrator'}
               </span>
               <span className="text-[10px] text-slate-500 truncate font-medium">
@@ -185,8 +185,8 @@ export default function AdminLayoutClient({ children, admin }: AdminLayoutClient
         {/* Mobile Top Header */}
         <header className="flex h-16 items-center justify-between border-b border-slate-200 px-4 md:hidden bg-white/90 backdrop-blur-md sticky top-0 z-40">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="h-5 w-5 text-indigo-600" />
-            <span className="font-bold text-indigo-700 text-sm">Smart Admin</span>
+            <ShieldCheck className="h-5 w-5 text-emerald-600" />
+            <span className="font-bold text-emerald-700 text-sm">Smart Admin</span>
           </div>
           <Button
             variant="ghost"

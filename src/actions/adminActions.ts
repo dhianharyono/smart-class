@@ -64,6 +64,7 @@ export async function getAdminStats() {
     const schoolCount = await School.countDocuments();
     const studentCount = await Student.countDocuments();
     const totalJournalCount = await Journal.countDocuments();
+    const totalGradeCount = await Grade.countDocuments();
 
     // 2. Hitung total saldo tabungan di seluruh sistem
     const savings = await Saving.find({}).lean();
@@ -72,7 +73,48 @@ export async function getAdminStats() {
       totalSavingsBalance += tx.type === 'Kredit' ? tx.amount : -tx.amount;
     });
 
-    // 3. Ambil data statistik per guru (kecuali admin)
+    // 3. Rekapituasi Presensi Sistem (Hadir, Sakit, Izin, Alfa)
+    const totalHadir = await Attendance.countDocuments({ status: 'Hadir' });
+    const totalSakit = await Attendance.countDocuments({ status: 'Sakit' });
+    const totalIzin = await Attendance.countDocuments({ status: 'Izin' });
+    const totalAlfa = await Attendance.countDocuments({ status: 'Alfa' });
+    const totalAttendanceRecords = totalHadir + totalSakit + totalIzin + totalAlfa;
+    const attendanceBreakdown = {
+      hadir: totalHadir,
+      sakit: totalSakit,
+      izin: totalIzin,
+      alfa: totalAlfa,
+      total: totalAttendanceRecords,
+      hadirPct: totalAttendanceRecords > 0 ? Math.round((totalHadir / totalAttendanceRecords) * 100) : 0,
+      sakitPct: totalAttendanceRecords > 0 ? Math.round((totalSakit / totalAttendanceRecords) * 100) : 0,
+      izinPct: totalAttendanceRecords > 0 ? Math.round((totalIzin / totalAttendanceRecords) * 100) : 0,
+      alfaPct: totalAttendanceRecords > 0 ? Math.round((totalAlfa / totalAttendanceRecords) * 100) : 0,
+    };
+
+    // 4. Activity Stream: Entri Jurnal Pembelajaran KBM Terkini
+    const recentJournalDocs = await Journal.find({})
+      .sort({ createdAt: -1 })
+      .limit(6)
+      .lean();
+
+    const teacherIds = Array.from(new Set(recentJournalDocs.map((j) => j.teacherId)));
+    const journalTeachers = await Teacher.find({ _id: { $in: teacherIds } }).lean();
+    const teacherMap = new Map(journalTeachers.map((t) => [t._id.toString(), t]));
+
+    const recentJournals = recentJournalDocs.map((j) => {
+      const t = teacherMap.get(j.teacherId);
+      return {
+        id: j._id.toString(),
+        teacherName: t?.name || 'Wali Kelas',
+        schoolName: t?.schoolName || '-',
+        className: j.className || t?.className || '-',
+        subject: j.subject || 'Umum',
+        material: j.material || '-',
+        date: j.date ? new Date(j.date).toISOString() : new Date(j.createdAt).toISOString(),
+      };
+    });
+
+    // 5. Ambil data statistik per guru (kecuali admin)
     const teachers = await Teacher.find({ email: { $nin: adminEmails } }).sort({ name: 1 }).lean();
     const teacherStats = await Promise.all(
       teachers.map(async (t) => {
@@ -92,12 +134,17 @@ export async function getAdminStats() {
         const hadirAttendance = await Attendance.countDocuments({ teacherId: teacherIdStr, status: 'Hadir' });
         const attendanceRate = totalAttendance > 0 ? Math.round((hadirAttendance / totalAttendance) * 100) : 0;
 
+        const teacherClasses = Array.isArray(t.classes) && t.classes.length > 0
+          ? Array.from(new Set(t.classes.filter(Boolean)))
+          : (t.className ? [t.className] : []);
+
         return {
           id: teacherIdStr,
           name: t.name,
           email: t.email,
           schoolName: t.schoolName || '-',
-          className: t.className || '-',
+          className: t.className || (teacherClasses[0] || '-'),
+          classes: teacherClasses,
           studentCount: classStudentCount,
           totalSavings: classSavingsBalance,
           journalCount,
@@ -115,7 +162,7 @@ export async function getAdminStats() {
       ? Math.round(teachersWithAttendance.reduce((acc, curr) => acc + curr.attendanceRate, 0) / teachersWithAttendance.length)
       : 0;
 
-    // 4. Dapatkan pengguna online (aktif dalam 5 menit terakhir)
+    // 6. Dapatkan pengguna online (aktif dalam 5 menit terakhir)
     const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
     const activeTeachers = await Teacher.find({
       lastActiveAt: { $gte: fiveMinutesAgo }
@@ -141,7 +188,10 @@ export async function getAdminStats() {
       studentCount,
       totalSavingsBalance,
       totalJournalCount,
+      totalGradeCount,
       overallAttendanceRate,
+      attendanceBreakdown,
+      recentJournals,
       teacherStats,
       onlineUsers,
     };
@@ -204,13 +254,24 @@ export async function updateTeacher(id: string, data: {
       throw new Error('Email sudah digunakan oleh guru lain.');
     }
 
-    await Teacher.findByIdAndUpdate(id, {
+    const parsedClasses = className
+      ? Array.from(new Set(className.split(/[,/]/).map((s) => s.trim()).filter(Boolean)))
+      : [];
+
+    const updateFields: any = {
       name: name.trim(),
       email: normalizedEmail,
       schoolName: schoolName?.trim(),
-      className: className?.trim(),
+      className: parsedClasses[0] || className?.trim() || '',
+      classes: parsedClasses.length > 0 ? parsedClasses : (className?.trim() ? [className.trim()] : []),
       role: role || 'Wali Kelas',
-    });
+    };
+
+    if (parsedClasses.length > 0) {
+      updateFields.activeClass = parsedClasses[0];
+    }
+
+    await Teacher.findByIdAndUpdate(id, updateFields);
 
     return { success: true };
   } catch (error: any) {
@@ -330,12 +391,18 @@ export async function createTeacher(data: {
     const rawPassword = password || 'Gurusmart123!';
     const hashedPassword = hashPassword(rawPassword);
 
+    const parsedClasses = className
+      ? Array.from(new Set(className.split(/[,/]/).map((s) => s.trim()).filter(Boolean)))
+      : [];
+
     const newTeacher = new Teacher({
       name: name.trim(),
       email: normalizedEmail,
       password: hashedPassword,
       schoolName: schoolName.trim(),
-      className: className.trim(),
+      className: parsedClasses[0] || className.trim(),
+      classes: parsedClasses.length > 0 ? parsedClasses : [className.trim()],
+      activeClass: parsedClasses[0] || className.trim(),
       role: role || 'Wali Kelas',
     });
 
@@ -349,6 +416,7 @@ export async function createTeacher(data: {
         email: newTeacher.email,
         schoolName: newTeacher.schoolName,
         className: newTeacher.className,
+        classes: newTeacher.classes,
         role: newTeacher.role,
         createdAt: newTeacher.createdAt.toISOString()
       } 
