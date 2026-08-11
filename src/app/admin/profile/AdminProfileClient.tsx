@@ -188,7 +188,7 @@ export default function AdminProfileClient() {
     : '-';
 
   return (
-    <div className='space-y-6 max-w-4xl mx-auto pb-12'>
+    <div className='space-y-6 pb-12 animate-fade-in'>
       {/* Header Profile Badge Banner */}
       <div className='bg-gradient-to-r from-indigo-700 via-indigo-600 to-violet-700 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5'>
         <div className='absolute -right-10 -bottom-10 w-48 h-48 rounded-full bg-white/10 blur-2xl pointer-events-none' />

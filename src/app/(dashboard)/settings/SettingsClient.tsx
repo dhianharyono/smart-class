@@ -120,9 +120,14 @@ export default function SettingsClient() {
     },
   });
 
+  const ALL_CONFIGURABLE_HREFS = CONFIGURABLE_MENUS.map((m) => m.href);
+  const isAllSelected = ALL_CONFIGURABLE_HREFS.every((href) => selectedMenus.includes(href));
+  const activeConfigurableCount = selectedMenus.filter((href) =>
+    ALL_CONFIGURABLE_HREFS.includes(href)
+  ).length;
+
   const handleToggleMenu = (href: string) => {
-    const configurableHrefs = CONFIGURABLE_MENUS.map((m) => m.href);
-    const activeConfigurable = selectedMenus.filter((m) => configurableHrefs.includes(m));
+    const activeConfigurable = selectedMenus.filter((m) => ALL_CONFIGURABLE_HREFS.includes(m));
     if (selectedMenus.includes(href)) {
       if (activeConfigurable.length <= 1) {
         toast.error('Pilih setidaknya 1 menu fitur utama.');
@@ -134,22 +139,21 @@ export default function SettingsClient() {
     }
   };
 
-  const ALL_CONFIGURABLE_HREFS = CONFIGURABLE_MENUS.map((m) => m.href);
-  const isAllSelected = ALL_CONFIGURABLE_HREFS.every((href) => selectedMenus.includes(href));
-
   const handleToggleAll = () => {
     if (isAllSelected) {
-      // Nonaktifkan semua → sisakan 1 item minimal
-      setSelectedMenus([ALL_CONFIGURABLE_HREFS[0]]);
-      toast.info('Semua menu dinonaktifkan');
+      const nonConfigurable = selectedMenus.filter((m) => !ALL_CONFIGURABLE_HREFS.includes(m));
+      setSelectedMenus([...nonConfigurable, ALL_CONFIGURABLE_HREFS[0]]);
+      toast.info('Semua menu tambahan dinonaktifkan');
     } else {
-      setSelectedMenus(ALL_CONFIGURABLE_HREFS);
-      toast.info('Seluruh menu diaktifkan');
+      const nonConfigurable = selectedMenus.filter((m) => !ALL_CONFIGURABLE_HREFS.includes(m));
+      setSelectedMenus([...nonConfigurable, ...ALL_CONFIGURABLE_HREFS]);
+      toast.info('Seluruh menu tambahan diaktifkan');
     }
   };
 
   const handleResetDefault = () => {
-    setSelectedMenus(['/siswa', '/absensi', '/nilai', '/tabungan', '/jadwal', '/piket', '/jurnal']);
+    const nonConfigurable = selectedMenus.filter((m) => !ALL_CONFIGURABLE_HREFS.includes(m));
+    setSelectedMenus([...nonConfigurable, ...ALL_CONFIGURABLE_HREFS]);
     toast.info('Pengaturan dikembalikan ke standar');
   };
 
@@ -181,14 +185,14 @@ export default function SettingsClient() {
   }
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto animate-fade-in">
+    <div className="space-y-6 sm:space-y-8 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between border-b border-slate-200 pb-5">
         <div>
-          <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900">
             Pengaturan Aplikasi
           </h2>
-          <p className="text-slate-600 text-xs mt-1">
+          <p className="text-slate-600 text-xs sm:text-sm mt-1">
             Kelola visibilitas menu navigasi sidebar dan preferensi tampilan dashboard Anda.
           </p>
         </div>
@@ -198,21 +202,20 @@ export default function SettingsClient() {
       <Card className="bg-white border-slate-200/80 rounded-2xl shadow-xs">
         <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-5">
           <div>
-            <CardTitle className="text-md font-bold text-slate-900 flex items-center gap-2">
-              <Sliders className="h-5 w-5 text-emerald-600" />
+            <CardTitle className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
               <span>Kustomisasi Menu Sidebar</span>
             </CardTitle>
-            <CardDescription className="text-xs text-slate-500 mt-1">
+            <CardDescription className="text-xs sm:text-sm text-slate-500 mt-1">
               Pilih menu modul mana saja yang ingin Anda tampilkan pada bilah navigasi utama.
             </CardDescription>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <Button
               type="button"
               variant="outline"
               onClick={handleResetDefault}
-              className="bg-white border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-xl text-xs h-9 gap-1.5 shadow-xs font-semibold"
+              className="bg-white border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-xl text-xs h-9 gap-1.5 shadow-xs font-semibold cursor-pointer"
             >
               <RotateCcw className="h-3.5 w-3.5" />
               <span>Reset</span>
@@ -221,11 +224,10 @@ export default function SettingsClient() {
               type="button"
               variant="ghost"
               onClick={handleToggleAll}
-              className={`text-xs rounded-lg h-8 px-2.5 font-bold cursor-pointer transition-colors ${
-                isAllSelected
+              className={`text-xs rounded-lg h-8 px-2.5 font-bold cursor-pointer transition-colors ${isAllSelected
                   ? 'text-rose-600 hover:text-rose-700 hover:bg-rose-50'
                   : 'text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50'
-              }`}
+                }`}
             >
               {isAllSelected ? 'Nonaktifkan Semua' : 'Aktifkan Semua'}
             </Button>
@@ -233,23 +235,23 @@ export default function SettingsClient() {
         </CardHeader>
 
         <CardContent className="pt-6 space-y-4">
-          <div className="grid gap-3.5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
             {/* Always Visible Menus Info */}
-            <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between">
+            <div className="md:col-span-2 p-3.5 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-white text-slate-500 border border-slate-200">
+                <div className="p-2.5 rounded-xl bg-white text-slate-500 border border-slate-200 shrink-0">
                   <LayoutDashboard className="h-5 w-5" />
                 </div>
                 <div>
-                  <span className="text-xs font-bold text-slate-800 block">
+                  <span className="text-xs sm:text-sm font-bold text-slate-800 block">
                     Dashboard Utama & Profil
                   </span>
-                  <span className="text-[11px] text-slate-500 block">
+                  <span className="text-[11px] sm:text-xs text-slate-500 block">
                     Menu wajib sistem (selalu ditampilkan)
                   </span>
                 </div>
               </div>
-              <span className="px-2.5 py-1 text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-md uppercase tracking-wider">
+              <span className="px-2.5 py-1 text-[10px] sm:text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-md uppercase tracking-wider shrink-0">
                 Wajib
               </span>
             </div>
@@ -267,12 +269,12 @@ export default function SettingsClient() {
                     : 'bg-slate-50/60 border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-100/80'
                     }`}
                 >
-                  <div className="flex items-start gap-3.5">
-                    <div className={`p-2.5 rounded-xl border ${menu.color}`}>
+                  <div className="flex items-start gap-3.5 min-w-0 pr-2">
+                    <div className={`p-2.5 rounded-xl border shrink-0 ${menu.color}`}>
                       <MenuIcon className="h-5 w-5" />
                     </div>
-                    <div>
-                      <span className="text-sm font-bold text-slate-900 block group-hover:text-emerald-800 transition-colors">
+                    <div className="min-w-0">
+                      <span className="text-xs sm:text-sm font-bold text-slate-900 block group-hover:text-emerald-800 transition-colors">
                         {menu.label}
                       </span>
                       <span className="text-xs text-slate-500 block mt-0.5 font-medium">
@@ -296,10 +298,10 @@ export default function SettingsClient() {
 
           {/* Bottom Save Action Footer */}
           <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-200 mt-6">
-            <span className="text-xs text-slate-600 flex items-center gap-1.5 font-medium">
-              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+            <span className="text-xs sm:text-sm text-slate-600 flex items-center gap-1.5 font-medium">
+              <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
               <span>
-                <strong className="text-slate-900">{selectedMenus.length}</strong> dari {CONFIGURABLE_MENUS.length} menu tambahan diaktifkan
+                <strong className="text-slate-900">{activeConfigurableCount}</strong> dari {CONFIGURABLE_MENUS.length} menu tambahan diaktifkan
               </span>
             </span>
 
@@ -307,7 +309,7 @@ export default function SettingsClient() {
               type="button"
               onClick={handleSave}
               disabled={updateMenusMutation.isPending}
-              className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-xs h-10 px-6 gap-2 shadow-xs"
+              className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-xs sm:text-sm h-10 px-6 gap-2 shadow-xs cursor-pointer"
             >
               {updateMenusMutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

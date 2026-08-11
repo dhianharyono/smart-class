@@ -99,7 +99,7 @@ const sidebarMenuGroups: SidebarGroup[] = [
   {
     category: 'PENGATURAN',
     items: [
-      { name: 'Profile dan Sekolah', href: '/profile', icon: User },
+      { name: 'Profil & Identitas Sekolah', href: '/profile', icon: User },
       { name: 'Pengaturan', href: '/settings', icon: Settings },
     ],
   },
@@ -731,8 +731,8 @@ export default function DashboardLayoutClient({
             className='fixed inset-0 z-40'
             onClick={() => setIsClassDropdownOpen(false)}
           />
-          <div className='absolute right-0 sm:left-0 mt-2 w-56 bg-white rounded-2xl border border-slate-200 shadow-xl z-50 p-2 animate-in fade-in-50 zoom-in-95 duration-150'>
-            <div className='px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-slate-400'>
+          <div className='absolute right-0 sm:left-0 mt-2 min-w-full w-max bg-white rounded-2xl border border-slate-200 shadow-xl z-50 p-2 animate-in fade-in-50 zoom-in-95 duration-150'>
+            <div className='px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-slate-400 whitespace-nowrap'>
               PILIH KELAS AKTIF
             </div>
             <div className='space-y-1 max-h-48 overflow-y-auto my-1'>
@@ -741,7 +741,7 @@ export default function DashboardLayoutClient({
                 return (
                   <div
                     key={cls}
-                    className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${isActive
+                    className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${isActive
                       ? 'bg-emerald-600 text-white shadow-2xs'
                       : 'text-slate-700 hover:bg-slate-100'
                       }`}
@@ -749,12 +749,12 @@ export default function DashboardLayoutClient({
                     <button
                       type='button'
                       onClick={() => handleSwitchClass(cls)}
-                      className='w-full flex items-center gap-1.5 text-left cursor-pointer'
+                      className='w-full flex items-center gap-1.5 text-left cursor-pointer whitespace-nowrap'
                     >
-                      <School className={`h-3.5 w-3.5 ${isActive ? 'text-white' : 'text-emerald-600'}`} />
+                      <School className={`h-3.5 w-3.5 shrink-0 ${isActive ? 'text-white' : 'text-emerald-600'}`} />
                       <span>Kelas {cls}</span>
                       {isActive && (
-                        <span className='text-[9px] bg-white/20 text-white px-1.5 py-0.2 rounded font-extrabold ml-1'>
+                        <span className='text-[9px] bg-white/20 text-white px-1.5 py-0.2 rounded font-extrabold ml-5 shrink-0'>
                           AKTIF
                         </span>
                       )}
@@ -770,7 +770,7 @@ export default function DashboardLayoutClient({
                   setIsClassDropdownOpen(false);
                   setIsAddClassModalOpen(true);
                 }}
-                className='w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-emerald-700 hover:bg-emerald-50 transition-colors cursor-pointer'
+                className='w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-emerald-700 hover:bg-emerald-50 transition-colors cursor-pointer whitespace-nowrap'
               >
                 <Plus className='h-4 w-4 text-emerald-600 shrink-0' />
                 <span>Tambah Kelas Baru</span>

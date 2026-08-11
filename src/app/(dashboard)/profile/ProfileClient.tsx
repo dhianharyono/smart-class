@@ -378,7 +378,7 @@ export default function ProfileClient() {
     : 'G';
 
   return (
-    <div className='space-y-6 max-w-4xl mx-auto animate-fade-in'>
+    <div className='space-y-6 sm:space-y-8 animate-fade-in'>
       {/* Top Banner Header */}
       <Card className='bg-white border-slate-200/80 shadow-xs rounded-2xl overflow-hidden relative'>
         <div className='h-24 sm:h-28 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 border-b border-emerald-500/20 relative' />
