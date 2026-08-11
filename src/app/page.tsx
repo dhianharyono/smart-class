@@ -184,8 +184,14 @@ export default function LandingPage() {
           <div className='hidden md:flex items-center gap-3'>
             {currentUser ? (
               <div className='flex items-center gap-2.5'>
-                <Link href={dashboardHref} onClick={() => setNavigatingButton('header')}>
-                  <Button disabled={navigatingButton !== null} className='bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-5 py-2.5 rounded-xl shadow-xs transition-all duration-300 flex items-center gap-2 cursor-pointer'>
+                <Link
+                  href={dashboardHref}
+                  onClick={() => setNavigatingButton('header')}
+                >
+                  <Button
+                    disabled={navigatingButton !== null}
+                    className='bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-5 py-2.5 rounded-xl shadow-xs transition-all duration-300 flex items-center gap-2 cursor-pointer'
+                  >
                     {navigatingButton === 'header' ? (
                       <>
                         <Loader2 className='h-4 w-4 animate-spin' />
@@ -301,7 +307,10 @@ export default function LandingPage() {
                         setMobileMenuOpen(false);
                       }}
                     >
-                      <Button disabled={navigatingButton !== null} className='w-full justify-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl py-3 flex items-center gap-2 cursor-pointer shadow-xs'>
+                      <Button
+                        disabled={navigatingButton !== null}
+                        className='w-full justify-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl py-3 flex items-center gap-2 cursor-pointer shadow-xs'
+                      >
                         {navigatingButton === 'mobile' ? (
                           <>
                             <Loader2 className='h-4 w-4 animate-spin' />
@@ -393,12 +402,19 @@ export default function LandingPage() {
           >
             {currentUser ? (
               <>
-                <Link href={dashboardHref} onClick={() => setNavigatingButton('hero')} className='w-full sm:w-auto'>
+                <Link
+                  href={dashboardHref}
+                  onClick={() => setNavigatingButton('hero')}
+                  className='w-full sm:w-auto'
+                >
                   <motion.div
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
                   >
-                    <Button disabled={navigatingButton !== null} className='w-full sm:w-auto h-12 sm:h-14 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm sm:text-base px-7 sm:px-9 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2.5 cursor-pointer'>
+                    <Button
+                      disabled={navigatingButton !== null}
+                      className='w-full sm:w-auto h-12 sm:h-14 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm sm:text-base px-7 sm:px-9 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2.5 cursor-pointer'
+                    >
                       {navigatingButton === 'hero' ? (
                         <>
                           <Loader2 className='h-5 w-5 animate-spin' />
@@ -407,7 +423,7 @@ export default function LandingPage() {
                       ) : (
                         <>
                           <LayoutDashboard className='h-5 w-5' />
-                          <span>Buka Dashboard</span>
+                          <span>Dashboard</span>
                         </>
                       )}
                     </Button>
@@ -450,31 +466,6 @@ export default function LandingPage() {
             )}
           </motion.div>
 
-          {/* Feature Micro-Badges & Multi-Device Branding */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className='mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-2.5 sm:gap-4 text-xs sm:text-sm text-slate-600 font-semibold px-2'
-          >
-            <div className='flex items-center gap-2 bg-white px-3.5 py-1.5 rounded-full border border-slate-200/80 shadow-xs'>
-              <Smartphone className='h-4 w-4 text-emerald-600 shrink-0' />
-              <span>HP</span>
-            </div>
-            <div className='flex items-center gap-2 bg-white px-3.5 py-1.5 rounded-full border border-slate-200/80 shadow-xs'>
-              <Tablet className='h-4 w-4 text-teal-600 shrink-0' />
-              <span>Tablet</span>
-            </div>
-            <div className='flex items-center gap-2 bg-white px-3.5 py-1.5 rounded-full border border-slate-200/80 shadow-xs'>
-              <Monitor className='h-4 w-4 text-indigo-600 shrink-0' />
-              <span>Laptop & PC</span>
-            </div>
-            <div className='flex items-center gap-2 bg-white px-3.5 py-1.5 rounded-full border border-slate-200/80 shadow-xs'>
-              <CheckCircle2 className='h-4 w-4 text-emerald-600 shrink-0' />
-              <span>100% Paperless</span>
-            </div>
-          </motion.div>
-
           {/* Hero Interactive Showcase Mockup Card */}
           <motion.div
             initial={{ opacity: 0, y: 30, scale: 0.98 }}
@@ -491,12 +482,12 @@ export default function LandingPage() {
                   <div className='w-3 h-3 rounded-full bg-slate-300' />
                 </div>
                 <span className='text-xs font-bold text-slate-700 truncate'>
-                  Smart Class — Dashboard Multi-Perangkat
+                  Smart Class — Dashboard Wali Kelas
                 </span>
               </div>
               <div className='flex items-center gap-2 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 shrink-0'>
                 <span className='w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse' />
-                <span>Responsive Sync</span>
+                <span>Tampilan Responsive</span>
               </div>
             </div>
 
@@ -667,10 +658,11 @@ export default function LandingPage() {
                   key={tab.id}
                   whileTap={{ scale: 0.96 }}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer border ${isActive
-                    ? 'bg-emerald-600 text-white border-emerald-500 shadow-xs'
-                    : 'bg-white text-slate-600 hover:bg-slate-100 border-slate-200'
-                    }`}
+                  className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer border ${
+                    isActive
+                      ? 'bg-emerald-600 text-white border-emerald-500 shadow-xs'
+                      : 'bg-white text-slate-600 hover:bg-slate-100 border-slate-200'
+                  }`}
                 >
                   <Icon className='h-4 w-4' />
                   <span>{tab.label}</span>
@@ -700,7 +692,9 @@ export default function LandingPage() {
                       Plotting Jam Mengajar & AI Generator Schedule
                     </h3>
                     <p className='text-slate-600 text-sm leading-relaxed font-medium'>
-                      Atur alokasi jam mingguan per mata pelajaran, gunakan generator AI untuk memplot jadwal otomatis tanpa bentrok, dan cetak jadwal dinding kelas siap tempel.
+                      Atur alokasi jam mingguan per mata pelajaran, gunakan
+                      generator AI untuk memplot jadwal otomatis tanpa bentrok,
+                      dan cetak jadwal dinding kelas siap tempel.
                     </p>
                     <ul className='space-y-3 text-sm text-slate-700 font-medium'>
                       <li className='flex items-center gap-3'>
@@ -709,11 +703,15 @@ export default function LandingPage() {
                       </li>
                       <li className='flex items-center gap-3'>
                         <Check className='h-4 w-4 text-emerald-600' />
-                        <span>Tracker alokasi baseline jam mengajar mingguan</span>
+                        <span>
+                          Tracker alokasi baseline jam mengajar mingguan
+                        </span>
                       </li>
                       <li className='flex items-center gap-3'>
                         <Check className='h-4 w-4 text-emerald-600' />
-                        <span>Toggle jam istirahat interaktif & cetak poster dinding</span>
+                        <span>
+                          Toggle jam istirahat interaktif & cetak poster dinding
+                        </span>
                       </li>
                     </ul>
                   </div>
@@ -729,16 +727,24 @@ export default function LandingPage() {
                     </div>
                     <div className='space-y-2 text-xs'>
                       <div className='flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 shadow-xs'>
-                        <span className='font-bold text-slate-800'>Jam 1-2 (07.00 - 08.20)</span>
-                        <span className='text-emerald-700 font-extrabold'>Matematika</span>
+                        <span className='font-bold text-slate-800'>
+                          Jam 1-2 (07.00 - 08.20)
+                        </span>
+                        <span className='text-emerald-700 font-extrabold'>
+                          Matematika
+                        </span>
                       </div>
                       <div className='flex items-center justify-between p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 shadow-xs font-bold'>
                         <span>Jam 3 (08.20 - 08.40)</span>
                         <span>☕ Istirahat Pertama</span>
                       </div>
                       <div className='flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 shadow-xs'>
-                        <span className='font-bold text-slate-800'>Jam 4-5 (08.40 - 10.00)</span>
-                        <span className='text-teal-700 font-extrabold'>IPA & Eksperimen</span>
+                        <span className='font-bold text-slate-800'>
+                          Jam 4-5 (08.40 - 10.00)
+                        </span>
+                        <span className='text-teal-700 font-extrabold'>
+                          IPA & Eksperimen
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -756,7 +762,9 @@ export default function LandingPage() {
                       Pembagian Petugas Piket Harian Teratur
                     </h3>
                     <p className='text-slate-600 text-sm leading-relaxed font-medium'>
-                      Bagi kelompok piket kebersihan harian (Senin - Sabtu) secara adil. Cetak jadwal poster piket dengan format visual menarik untuk papan kelas.
+                      Bagi kelompok piket kebersihan harian (Senin - Sabtu)
+                      secara adil. Cetak jadwal poster piket dengan format
+                      visual menarik untuk papan kelas.
                     </p>
                     <ul className='space-y-3 text-sm text-slate-700 font-medium'>
                       <li className='flex items-center gap-3'>
@@ -765,11 +773,15 @@ export default function LandingPage() {
                       </li>
                       <li className='flex items-center gap-3'>
                         <Check className='h-4 w-4 text-indigo-600' />
-                        <span>Pengeditan nama petugas piket cepat & fleksibel</span>
+                        <span>
+                          Pengeditan nama petugas piket cepat & fleksibel
+                        </span>
                       </li>
                       <li className='flex items-center gap-3'>
                         <Check className='h-4 w-4 text-indigo-600' />
-                        <span>Format cetak siap tempel di papan informasi kelas</span>
+                        <span>
+                          Format cetak siap tempel di papan informasi kelas
+                        </span>
                       </li>
                     </ul>
                   </div>
@@ -784,8 +796,16 @@ export default function LandingPage() {
                       </span>
                     </div>
                     <div className='flex flex-wrap gap-2 py-1'>
-                      {['Ahmad Supriyadi', 'Budi Santoso', 'Citra Lestari', 'Dewi Anggraini'].map((n, i) => (
-                        <span key={i} className='px-3 py-1.5 bg-white border border-indigo-200 text-indigo-900 font-bold text-xs rounded-xl shadow-xs flex items-center gap-1.5'>
+                      {[
+                        'Ahmad Supriyadi',
+                        'Budi Santoso',
+                        'Citra Lestari',
+                        'Dewi Anggraini',
+                      ].map((n, i) => (
+                        <span
+                          key={i}
+                          className='px-3 py-1.5 bg-white border border-indigo-200 text-indigo-900 font-bold text-xs rounded-xl shadow-xs flex items-center gap-1.5'
+                        >
                           <span className='w-2 h-2 rounded-full bg-indigo-500' />
                           {n}
                         </span>
@@ -1252,8 +1272,9 @@ export default function LandingPage() {
                 >
                   <span>{item.q}</span>
                   <ChevronDown
-                    className={`h-5 w-5 text-slate-400 transition-transform duration-300 flex-shrink-0 ${openFaq === idx ? 'rotate-180 text-emerald-600' : ''
-                      }`}
+                    className={`h-5 w-5 text-slate-400 transition-transform duration-300 flex-shrink-0 ${
+                      openFaq === idx ? 'rotate-180 text-emerald-600' : ''
+                    }`}
                   />
                 </button>
                 <AnimatePresence>
