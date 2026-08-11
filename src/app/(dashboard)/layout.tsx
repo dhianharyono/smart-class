@@ -54,10 +54,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
         principalNip: teacher.principalNip || '-',
         isAdmin: !!session.isAdmin,
         isFirstLogin: teacher.isFirstLogin ?? false,
-        enabledMenus:
-          teacher.enabledMenus && teacher.enabledMenus.length > 0
-            ? (teacher.enabledMenus as string[])
-            : ['/dashboard', '/siswa', '/absensi', '/nilai', '/tabungan', '/jadwal', '/piket', '/jurnal', '/profile', '/settings'],
+        enabledMenus: (() => {
+          const base =
+            teacher.enabledMenus && teacher.enabledMenus.length > 0
+              ? (teacher.enabledMenus as string[])
+              : ['/dashboard', '/kelas', '/siswa', '/absensi', '/nilai', '/tabungan', '/jadwal', '/piket', '/jurnal', '/profile', '/settings'];
+          return base.includes('/kelas') ? base : [...base, '/kelas'];
+        })(),
       }}
     >
       {children}

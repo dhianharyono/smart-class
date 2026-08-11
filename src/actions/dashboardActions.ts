@@ -59,7 +59,7 @@ export async function getDashboardStats() {
         date: { $gte: startOfMonth, $lte: endOfMonth },
       }).lean(),
       Saving.find({ teacherId, studentId: { $in: studentIds } }).sort({ date: 1 }).lean(),
-      Journal.find({ teacherId }).sort({ date: 1 }).lean(),
+      Journal.find({ teacherId }).sort({ date: -1 }).lean(),
     ]);
 
     const kkm = teacher?.kkm ?? 70;
@@ -145,7 +145,7 @@ export async function getDashboardStats() {
 
     // If all are zero, provide placeholder
     if (attendanceChartData.length === 0) {
-      attendanceChartData.push({ name: 'Belum Ada Data', value: 1, color: '#71717a' });
+      attendanceChartData.push({ name: 'Belum Ada Data', value: 1, color: '#e2e8f0' });
     }
 
     // 6. Journal monthly meeting and attendance stats
@@ -171,7 +171,24 @@ export async function getDashboardStats() {
       journalMap.set(key, current);
     });
 
-    const journalMonthlyStats = Array.from(journalMap.values());
+    const journalMonthlyStats = Array.from(journalMap.values()).reverse(); // chronological order for chart
+
+    const recentJournals = journals.slice(0, 5).map((j: any) => ({
+      id: j._id.toString(),
+      date: new Date(j.date).toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      }),
+      meetingNo: j.meetingNo,
+      subject: j.subject || 'Umum',
+      material: j.material || '',
+      learningActivity: j.learningActivity || '',
+      absentS: j.absentS || 0,
+      absentI: j.absentI || 0,
+      absentA: j.absentA || 0,
+      notes: j.notes || '',
+    }));
 
     return JSON.parse(JSON.stringify({
       studentCount,
@@ -183,6 +200,7 @@ export async function getDashboardStats() {
       attendanceBreakdown,
       attendanceChartData,
       journalMonthlyStats,
+      recentJournals,
       totalJournalEntries: journals.length,
       enabledMenus,
       kkm,

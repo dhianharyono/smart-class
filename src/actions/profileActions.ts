@@ -3,6 +3,7 @@
 import dbConnect from '@/lib/db';
 import Teacher from '@/models/Teacher';
 import JournalHeader from '@/models/JournalHeader';
+import Student from '@/models/Student';
 import { cookies } from 'next/headers';
 import { verifySession } from '@/lib/auth';
 import { hashPassword, verifyPassword } from '@/lib/password';
@@ -23,7 +24,7 @@ async function requireAuth() {
   return session.userId;
 }
 
-const DEFAULT_MENUS = ['/', '/siswa', '/absensi', '/nilai', '/tabungan', '/jurnal'];
+const DEFAULT_MENUS = ['/', '/kelas', '/siswa', '/absensi', '/nilai', '/tabungan', '/jurnal'];
 
 export async function getProfile() {
   try {
@@ -45,6 +46,9 @@ export async function getProfile() {
       ? teacher.activeClass
       : (classes[0] || fallbackClassName);
 
+    const rawEnabled = teacher.enabledMenus && teacher.enabledMenus.length > 0 ? teacher.enabledMenus : DEFAULT_MENUS;
+    const enabledMenus = rawEnabled.includes('/kelas') ? rawEnabled : [...rawEnabled, '/kelas'];
+
     return JSON.parse(
       JSON.stringify({
         _id: teacher._id.toString(),
@@ -58,7 +62,7 @@ export async function getProfile() {
         principalName: teacher.principalName || '',
         principalNip: teacher.principalNip || '-',
         isFirstLogin: teacher.isFirstLogin ?? false,
-        enabledMenus: teacher.enabledMenus && teacher.enabledMenus.length > 0 ? teacher.enabledMenus : DEFAULT_MENUS,
+        enabledMenus,
       })
     );
   } catch (error: any) {
@@ -289,6 +293,7 @@ export async function switchActiveClass(newClass: string) {
 
     revalidatePath('/');
     revalidatePath('/profile');
+    revalidatePath('/kelas');
     revalidatePath('/siswa');
     revalidatePath('/absensi');
     revalidatePath('/nilai');
@@ -336,6 +341,7 @@ export async function addClass(newClass: string) {
 
     revalidatePath('/');
     revalidatePath('/profile');
+    revalidatePath('/kelas');
     revalidatePath('/siswa');
     revalidatePath('/absensi');
     revalidatePath('/nilai');
@@ -388,6 +394,7 @@ export async function deleteClass(classToDelete: string) {
 
     revalidatePath('/');
     revalidatePath('/profile');
+    revalidatePath('/kelas');
     revalidatePath('/siswa');
     revalidatePath('/absensi');
     revalidatePath('/nilai');
@@ -403,3 +410,79 @@ export async function deleteClass(classToDelete: string) {
     return { success: false, error: error.message || 'Gagal menghapus kelas.' };
   }
 }
+
+/**
+ * Mengubah nama kelas yang diampu dan memperbarui data siswa terkait.
+ */
+export async function updateClass(oldClassName: string, newClassName: string) {
+  try {
+    await dbConnect();
+    const teacherId = await requireAuth();
+
+    const oldClean = oldClassName?.trim();
+    const newClean = newClassName?.trim();
+
+    if (!oldClean || !newClean) {
+      throw new Error('Nama kelas tidak boleh kosong.');
+    }
+
+    if (oldClean === newClean) {
+      return { success: true, activeClass: newClean };
+    }
+
+    const teacher = await Teacher.findById(teacherId);
+    if (!teacher) {
+      throw new Error('Pengguna tidak ditemukan.');
+    }
+
+    const rawClasses = Array.isArray(teacher.classes) && teacher.classes.length > 0
+      ? teacher.classes
+      : (teacher.className ? [teacher.className] : []);
+    
+    const classes = Array.from(new Set(rawClasses));
+
+    if (!classes.includes(oldClean)) {
+      throw new Error(`Kelas ${oldClean} tidak ditemukan.`);
+    }
+
+    if (classes.some((c) => c !== oldClean && c.toLowerCase() === newClean.toLowerCase())) {
+      throw new Error(`Kelas "${newClean}" sudah ada dalam daftar kelas Anda.`);
+    }
+
+    // Replace oldClean with newClean in classes array
+    const updatedClasses = classes.map((c) => (c === oldClean ? newClean : c));
+    teacher.classes = updatedClasses;
+
+    if (teacher.activeClass === oldClean) {
+      teacher.activeClass = newClean;
+    }
+    if (teacher.className === oldClean) {
+      teacher.className = newClean;
+    }
+    await teacher.save();
+
+    // Synchronize Student model records for this teacher & class
+    await Student.updateMany(
+      { teacherId, className: oldClean },
+      { className: newClean }
+    );
+
+    revalidatePath('/');
+    revalidatePath('/profile');
+    revalidatePath('/kelas');
+    revalidatePath('/siswa');
+    revalidatePath('/absensi');
+    revalidatePath('/nilai');
+    revalidatePath('/tabungan');
+    revalidatePath('/jurnal');
+
+    return { success: true, activeClass: teacher.activeClass, classes: updatedClasses };
+  } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+    console.error('Error updating class:', error);
+    return { success: false, error: error.message || 'Gagal mengubah nama kelas.' };
+  }
+}
+

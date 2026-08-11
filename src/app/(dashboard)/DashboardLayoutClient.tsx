@@ -89,6 +89,7 @@ const sidebarMenuGroups: SidebarGroup[] = [
         name: 'Kelola Kelas',
         icon: School,
         children: [
+          { name: 'Daftar Kelas', href: '/kelas', icon: School },
           { name: 'Jadwal & Alokasi', href: '/jadwal', icon: Calendar },
           { name: 'Piket Kelas', href: '/piket', icon: CheckSquare },
         ],
@@ -106,6 +107,7 @@ const sidebarMenuGroups: SidebarGroup[] = [
 ];
 
 const CONFIGURABLE_MENUS = [
+  { href: '/kelas', label: 'Daftar Kelas', desc: 'Kelola daftar kelas yang diampu (multi-kelas)' },
   { href: '/siswa', label: 'Data Siswa', desc: 'Manajemen data profil dan informasi siswa' },
   { href: '/absensi', label: 'Absensi Kelas', desc: 'Pencatatan daftar hadir harian & rekap presensi kelas' },
   { href: '/nilai', label: 'Nilai Akademik', desc: 'Penginputan nilai mata pelajaran & KKM' },
@@ -142,18 +144,22 @@ export default function DashboardLayoutClient({
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Menu Preferences state (auto-includes /jadwal and /piket for existing profiles)
-  const [enabledMenus, setEnabledMenus] = useState<string[]>(
-    teacher.enabledMenus && teacher.enabledMenus.length > 0
-      ? teacher.enabledMenus
-      : ['/dashboard', '/siswa', '/absensi', '/nilai', '/tabungan', '/jadwal', '/piket', '/jurnal', '/profile', '/settings']
-  );
-
+  // Menu Preferences state (auto-includes /kelas, /jadwal and /piket for existing profiles)
+  const [enabledMenus, setEnabledMenus] = useState<string[]>(() => {
+    const base =
+      teacher.enabledMenus && teacher.enabledMenus.length > 0
+        ? teacher.enabledMenus
+        : ['/dashboard', '/kelas', '/siswa', '/absensi', '/nilai', '/tabungan', '/jadwal', '/piket', '/jurnal', '/profile', '/settings'];
+    return base.includes('/kelas') ? base : [...base, '/kelas'];
+  });
 
   // Sync state if teacher prop changes
   React.useEffect(() => {
     if (teacher.enabledMenus && teacher.enabledMenus.length > 0) {
-      setEnabledMenus(teacher.enabledMenus);
+      const updated = teacher.enabledMenus.includes('/kelas')
+        ? teacher.enabledMenus
+        : [...teacher.enabledMenus, '/kelas'];
+      setEnabledMenus(updated);
     }
   }, [teacher.enabledMenus]);
 

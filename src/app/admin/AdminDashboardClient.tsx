@@ -240,22 +240,25 @@ export default function AdminDashboardClient({ stats, schools }: AdminDashboardC
         {statCards.map((card, i) => {
           const Icon = card.icon;
           return (
-            <Card key={i} className={`${card.color} rounded-2xl relative overflow-hidden`}>
-              <CardHeader className="flex flex-row items-center justify-between p-5 pb-2">
-                <CardTitle className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+            <div
+              key={i}
+              className={`${card.color} rounded-2xl relative overflow-hidden p-4 sm:p-4.5 flex flex-col justify-between border border-slate-200/70 shadow-xs transition-all duration-200 hover:shadow-sm`}
+            >
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <span className="text-xs font-extrabold text-slate-500 uppercase tracking-wider truncate">
                   {card.title}
-                </CardTitle>
+                </span>
                 <div className={`p-2 rounded-xl border ${card.iconColor}`}>
                   <Icon className="h-4 w-4" />
                 </div>
-              </CardHeader>
-              <CardContent className="px-5 pb-5">
-                <div className={`font-extrabold tracking-tight text-slate-900 mb-1 ${card.isCurrency ? 'text-lg sm:text-xl' : 'text-2xl'}`}>
+              </div>
+              <div>
+                <div className={`font-black tracking-tight text-slate-900 mb-1 leading-none ${card.isCurrency ? 'text-lg sm:text-xl' : 'text-2xl sm:text-3xl'}`}>
                   {card.value}
                 </div>
-                <p className="text-[10px] text-slate-500 font-medium">{card.description}</p>
-              </CardContent>
-            </Card>
+                <p className="text-[11px] text-slate-500 font-medium truncate">{card.description}</p>
+              </div>
+            </div>
           );
         })}
       </div>

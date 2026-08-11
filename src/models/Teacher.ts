@@ -25,6 +25,7 @@ export interface ITeacher extends Document {
 
 const DEFAULT_MENUS = [
   '/',
+  '/kelas',
   '/siswa',
   '/absensi',
   '/nilai',
