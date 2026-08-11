@@ -202,28 +202,28 @@ export default function ProfileClient() {
 
   const handleProfileSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!profileForm.name.trim()) {
-      toast.error('Nama lengkap & gelar wajib diisi.');
+    if (!profileForm.name.trim() || profileForm.name.trim().length < 3) {
+      toast.error('Nama lengkap & gelar minimal 3 karakter.');
       return;
     }
-    if (!profileForm.schoolName.trim()) {
-      toast.error('Nama sekolah wajib diisi.');
+    if (!profileForm.schoolName.trim() || profileForm.schoolName.trim().length < 3) {
+      toast.error('Nama sekolah wajib diisi minimal 3 karakter.');
       return;
     }
     if (!profileForm.className.trim()) {
       toast.error('Kelas diajar wajib diisi.');
       return;
     }
-    if (!profileForm.nip.trim() || profileForm.nip.trim() === '-') {
-      toast.error('NIP/NUPTK Guru wajib diisi.');
+    if (!profileForm.nip.trim() || profileForm.nip.trim() === '-' || profileForm.nip.trim().length < 3) {
+      toast.error('NIP/NUPTK Guru wajib diisi dengan NIP/NUPTK yang valid (tidak boleh "-").');
       return;
     }
-    if (!profileForm.principalName.trim()) {
-      toast.error('Nama kepala sekolah wajib diisi.');
+    if (!profileForm.principalName.trim() || profileForm.principalName.trim().length < 3) {
+      toast.error('Nama kepala sekolah minimal 3 karakter.');
       return;
     }
-    if (!profileForm.principalNip.trim()) {
-      toast.error('NIP kepala sekolah wajib diisi.');
+    if (!profileForm.principalNip.trim() || profileForm.principalNip.trim() === '-' || profileForm.principalNip.trim().length < 3) {
+      toast.error('NIP kepala sekolah wajib diisi dengan NIP yang valid (tidak boleh "-").');
       return;
     }
     updateProfileMutation.mutate(profileForm);

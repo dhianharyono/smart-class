@@ -8,6 +8,8 @@ import {
   loginTeacher,
   logoutTeacher,
   registerTeacher,
+  verifyEmailOTP,
+  resendVerificationOTP,
 } from '@/actions/authActions';
 import { getSchools } from '@/actions/adminActions';
 import { toast } from 'sonner';
@@ -73,16 +75,38 @@ export default function AuthSlider({
   const [signUpPassword, setSignUpPassword] = useState('');
   const [signUpConfirmPassword, setSignUpConfirmPassword] = useState('');
 
+  // Email OTP Verification Modal States
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otpEmail, setOtpEmail] = useState('');
+  const [otpCodeInput, setOtpCodeInput] = useState('');
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [demoOtpCode, setDemoOtpCode] = useState<string | null>(null);
+
+  // Countdown timer for OTP Resend
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(
+      () => setResendCooldown((prev) => prev - 1),
+      1000,
+    );
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
   // Sign Up Password Validation logic
   const hasMinLength = signUpPassword.length >= 6;
   const hasLetter = /[a-zA-Z]/.test(signUpPassword);
   const hasNumber = /\d/.test(signUpPassword);
-  const passwordCriteriaMetCount = [hasMinLength, hasLetter, hasNumber].filter(Boolean).length;
+  const passwordCriteriaMetCount = [hasMinLength, hasLetter, hasNumber].filter(
+    Boolean,
+  ).length;
   const isPasswordValid = hasMinLength && hasLetter && hasNumber;
 
   const isConfirmNotEmpty = signUpConfirmPassword.length > 0;
-  const isPasswordMatching = isConfirmNotEmpty && signUpPassword === signUpConfirmPassword;
-  const isPasswordMismatch = isConfirmNotEmpty && signUpPassword !== signUpConfirmPassword;
+  const isPasswordMatching =
+    isConfirmNotEmpty && signUpPassword === signUpConfirmPassword;
+  const isPasswordMismatch =
+    isConfirmNotEmpty && signUpPassword !== signUpConfirmPassword;
 
   // Logout stale sessions on mount
   useEffect(() => {
@@ -137,6 +161,12 @@ export default function AuthSlider({
           router.push('/dashboard');
         }
         router.refresh();
+      } else if (res.requiresEmailVerification && res.email) {
+        toast.info('Email Anda belum diverifikasi. Masukkan 6 digit kode OTP.');
+        setOtpEmail(res.email);
+        setShowOtpModal(true);
+        setResendCooldown(60);
+        setLoading(false);
       } else {
         toast.error(res.error || 'Username/email atau password salah.');
         const nextAttempts = failedAttempts + 1;
@@ -153,10 +183,7 @@ export default function AuthSlider({
       toast.error('Terjadi kesalahan. Silakan coba lagi.');
       const nextAttempts = failedAttempts + 1;
       setFailedAttempts(nextAttempts);
-      sessionStorage.setItem(
-        'login_failed_attempts',
-        nextAttempts.toString(),
-      );
+      sessionStorage.setItem('login_failed_attempts', nextAttempts.toString());
       setResetCaptcha((prev) => prev + 1);
       setRecaptchaToken('');
       setLoading(false);
@@ -167,8 +194,16 @@ export default function AuthSlider({
   const handleSignUpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!signUpName || !signUpUsername || !signUpEmail || !signUpPassword || !signUpConfirmPassword) {
-      toast.error('Nama, username, email, password, dan konfirmasi password wajib diisi.');
+    if (
+      !signUpName ||
+      !signUpUsername ||
+      !signUpEmail ||
+      !signUpPassword ||
+      !signUpConfirmPassword
+    ) {
+      toast.error(
+        'Nama, username, email, password, dan konfirmasi password wajib diisi.',
+      );
       return;
     }
 
@@ -207,7 +242,17 @@ export default function AuthSlider({
         recaptchaToken,
       });
 
-      if (res.success) {
+      if (res.success && res.requiresEmailVerification && res.email) {
+        toast.success(
+          res.message ||
+            'Pendaftaran berhasil! Kode OTP verifikasi telah dikirim ke email Anda.',
+        );
+        setOtpEmail(res.email);
+        if (res.demoOtp) setDemoOtpCode(res.demoOtp);
+        setShowOtpModal(true);
+        setResendCooldown(60);
+        setLoading(false);
+      } else if (res.success) {
         toast.success('Pendaftaran berhasil! Selamat datang.');
         const isAdmin = !!(res as any).isAdmin;
         setRedirectVariant(isAdmin ? 'admin' : 'teacher');
@@ -229,6 +274,65 @@ export default function AuthSlider({
       setResetCaptcha((prev) => prev + 1);
       setRecaptchaToken('');
       setLoading(false);
+    }
+  };
+
+  // OTP Verification Submit Handler
+  const handleVerifyOtpSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanOtp = otpCodeInput.trim();
+    if (!cleanOtp || cleanOtp.length !== 6) {
+      toast.error('Silakan masukkan 6 digit kode OTP verifikasi.');
+      return;
+    }
+
+    setOtpLoading(true);
+    try {
+      const res = await verifyEmailOTP({ email: otpEmail, otp: cleanOtp });
+      if (res.success) {
+        toast.success(
+          'Email berhasil diverifikasi! Selamat datang di Smart Class.',
+        );
+        setShowOtpModal(false);
+        setRedirectVariant(res.isAdmin ? 'admin' : 'teacher');
+        setIsRedirecting(true);
+        if (res.isAdmin) {
+          router.push('/admin');
+        } else {
+          router.push('/dashboard');
+        }
+        router.refresh();
+      } else {
+        toast.error(res.error || 'Kode OTP tidak cocok atau sudah kadaluarsa.');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Gagal memverifikasi OTP.');
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  // Resend OTP Handler
+  const handleResendOtp = async () => {
+    if (resendCooldown > 0 || !otpEmail) return;
+    setOtpLoading(true);
+    try {
+      const res = await resendVerificationOTP({ email: otpEmail });
+      if (res.success) {
+        toast.success(
+          'Kode OTP verifikasi baru telah dikirimkan ke email Anda.',
+        );
+        if (res.demoOtp) setDemoOtpCode(res.demoOtp);
+        setResendCooldown(60);
+      } else {
+        toast.error(res.error || 'Gagal mengirim ulang kode OTP.');
+      }
+    } catch (err: any) {
+      toast.error(
+        err.message || 'Terjadi kesalahan saat mengirim ulang kode OTP.',
+      );
+    } finally {
+      setOtpLoading(false);
     }
   };
 
@@ -269,8 +373,11 @@ export default function AuthSlider({
             <button
               type='button'
               onClick={() => toggleMode('signin')}
-              className={`relative flex-1 py-2.5 text-xs font-extrabold rounded-xl transition-colors duration-200 z-10 ${mode === 'signin' ? 'text-white' : 'text-slate-600 hover:text-slate-900'
-                }`}
+              className={`relative flex-1 py-2.5 text-xs font-extrabold rounded-xl transition-colors duration-200 z-10 ${
+                mode === 'signin'
+                  ? 'text-white'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
             >
               {mode === 'signin' && (
                 <motion.div
@@ -284,8 +391,11 @@ export default function AuthSlider({
             <button
               type='button'
               onClick={() => toggleMode('signup')}
-              className={`relative flex-1 py-2.5 text-xs font-extrabold rounded-xl transition-colors duration-200 z-10 ${mode === 'signup' ? 'text-white' : 'text-slate-600 hover:text-slate-900'
-                }`}
+              className={`relative flex-1 py-2.5 text-xs font-extrabold rounded-xl transition-colors duration-200 z-10 ${
+                mode === 'signup'
+                  ? 'text-white'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
             >
               {mode === 'signup' && (
                 <motion.div
@@ -303,8 +413,9 @@ export default function AuthSlider({
         {/* LEFT PANEL FORM: LOGIN / SIGN IN */}
         {/* ------------------------------------------------------------------ */}
         <div
-          className={`w-full md:w-1/2 p-5 sm:p-10 lg:p-14 flex-col justify-between transition-all duration-300 ${mode === 'signin' ? 'flex' : 'hidden md:flex opacity-90'
-            }`}
+          className={`w-full md:w-1/2 p-5 sm:p-10 lg:p-14 flex-col justify-between transition-all duration-300 ${
+            mode === 'signin' ? 'flex' : 'hidden md:flex opacity-90'
+          }`}
         >
           <div className='hidden md:block' />
           <div className='max-w-md mx-auto w-full space-y-5 sm:space-y-6 text-center sm:text-left'>
@@ -434,8 +545,9 @@ export default function AuthSlider({
         {/* RIGHT PANEL FORM: REGISTER / SIGN UP */}
         {/* ------------------------------------------------------------------ */}
         <div
-          className={`w-full md:w-1/2 p-5 sm:p-10 lg:p-14 flex-col justify-between transition-all duration-300 ${mode === 'signup' ? 'flex' : 'hidden md:flex opacity-90'
-            }`}
+          className={`w-full md:w-1/2 p-5 sm:p-10 lg:p-14 flex-col justify-between transition-all duration-300 ${
+            mode === 'signup' ? 'flex' : 'hidden md:flex opacity-90'
+          }`}
         >
           <div className='hidden md:block' />
           <div className='max-w-md mx-auto w-full space-y-4 sm:space-y-5 text-center sm:text-left'>
@@ -492,7 +604,11 @@ export default function AuthSlider({
                     required
                     placeholder='username_anda (min. 3 karakter)'
                     value={signUpUsername}
-                    onChange={(e) => setSignUpUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                    onChange={(e) =>
+                      setSignUpUsername(
+                        e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''),
+                      )
+                    }
                     disabled={loading}
                     className='w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-xs sm:text-sm transition-all shadow-2xs'
                   />
@@ -538,12 +654,13 @@ export default function AuthSlider({
                       value={signUpPassword}
                       onChange={(e) => setSignUpPassword(e.target.value)}
                       disabled={loading}
-                      className={`w-full pl-10 pr-10 py-2.5 bg-white border ${signUpPassword.length > 0 && !isPasswordValid
+                      className={`w-full pl-10 pr-10 py-2.5 bg-white border ${
+                        signUpPassword.length > 0 && !isPasswordValid
                           ? 'border-amber-300 focus:border-amber-500 focus:ring-amber-500'
                           : signUpPassword.length > 0 && isPasswordValid
                             ? 'border-emerald-400 focus:border-emerald-500 focus:ring-emerald-500'
                             : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500'
-                        } text-slate-900 placeholder-slate-400 focus:ring-1 focus:outline-none rounded-xl text-xs sm:text-sm transition-all shadow-2xs`}
+                      } text-slate-900 placeholder-slate-400 focus:ring-1 focus:outline-none rounded-xl text-xs sm:text-sm transition-all shadow-2xs`}
                     />
                     <button
                       type='button'
@@ -583,12 +700,13 @@ export default function AuthSlider({
                         </div>
                         <div className='h-1.5 w-full bg-slate-100 rounded-full overflow-hidden flex'>
                           <div
-                            className={`h-full transition-all duration-300 ${passwordCriteriaMetCount === 3
+                            className={`h-full transition-all duration-300 ${
+                              passwordCriteriaMetCount === 3
                                 ? 'w-full bg-emerald-500'
                                 : passwordCriteriaMetCount === 2
                                   ? 'w-2/3 bg-amber-500'
                                   : 'w-1/3 bg-rose-500'
-                              }`}
+                            }`}
                           />
                         </div>
                       </div>
@@ -601,7 +719,13 @@ export default function AuthSlider({
                           ) : (
                             <X className='h-3.5 w-3.5 text-slate-300 shrink-0' />
                           )}
-                          <span className={hasMinLength ? 'text-emerald-700 font-medium' : 'text-slate-500'}>
+                          <span
+                            className={
+                              hasMinLength
+                                ? 'text-emerald-700 font-medium'
+                                : 'text-slate-500'
+                            }
+                          >
                             Min. 6 karakter
                           </span>
                         </div>
@@ -611,7 +735,13 @@ export default function AuthSlider({
                           ) : (
                             <X className='h-3.5 w-3.5 text-slate-300 shrink-0' />
                           )}
-                          <span className={hasLetter ? 'text-emerald-700 font-medium' : 'text-slate-500'}>
+                          <span
+                            className={
+                              hasLetter
+                                ? 'text-emerald-700 font-medium'
+                                : 'text-slate-500'
+                            }
+                          >
                             huruf
                           </span>
                         </div>
@@ -621,7 +751,13 @@ export default function AuthSlider({
                           ) : (
                             <X className='h-3.5 w-3.5 text-slate-300 shrink-0' />
                           )}
-                          <span className={hasNumber ? 'text-emerald-700 font-medium' : 'text-slate-500'}>
+                          <span
+                            className={
+                              hasNumber
+                                ? 'text-emerald-700 font-medium'
+                                : 'text-slate-500'
+                            }
+                          >
                             angka
                           </span>
                         </div>
@@ -646,16 +782,19 @@ export default function AuthSlider({
                       value={signUpConfirmPassword}
                       onChange={(e) => setSignUpConfirmPassword(e.target.value)}
                       disabled={loading}
-                      className={`w-full pl-10 pr-10 py-2.5 bg-white border ${isPasswordMismatch
+                      className={`w-full pl-10 pr-10 py-2.5 bg-white border ${
+                        isPasswordMismatch
                           ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500 bg-rose-50/20'
                           : isPasswordMatching
                             ? 'border-emerald-400 focus:border-emerald-500 focus:ring-emerald-500 bg-emerald-50/20'
                             : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500'
-                        } text-slate-900 placeholder-slate-400 focus:ring-1 focus:outline-none rounded-xl text-xs sm:text-sm transition-all shadow-2xs`}
+                      } text-slate-900 placeholder-slate-400 focus:ring-1 focus:outline-none rounded-xl text-xs sm:text-sm transition-all shadow-2xs`}
                     />
                     <button
                       type='button'
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
                       className='absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600'
                     >
                       {showConfirmPassword ? (
@@ -670,7 +809,9 @@ export default function AuthSlider({
                   {isPasswordMismatch && (
                     <p className='text-[11px] text-rose-500 font-medium flex items-center gap-1 mt-1'>
                       <X className='h-3.5 w-3.5 shrink-0' />
-                      <span>Konfirmasi password tidak cocok dengan password.</span>
+                      <span>
+                        Konfirmasi password tidak cocok dengan password.
+                      </span>
                     </p>
                   )}
                   {isPasswordMatching && (
@@ -777,6 +918,119 @@ export default function AuthSlider({
           </div>
         </motion.div>
       </div>
+      {/* ------------------------------------------------------------------ */}
+      {/* OTP VERIFICATION MODAL OVERLAY */}
+      {/* ------------------------------------------------------------------ */}
+      <AnimatePresence>
+        {showOtpModal && (
+          <div className='fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm'>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+              className='w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-100 p-6 sm:p-8 space-y-6 text-center relative overflow-hidden'
+            >
+              {/* Background ambient glow */}
+              <div className='absolute -top-20 -right-20 w-48 h-48 rounded-full bg-emerald-500/10 blur-2xl pointer-events-none' />
+
+              {/* Close / Dismiss button */}
+              <button
+                type='button'
+                onClick={() => setShowOtpModal(false)}
+                className='absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-all'
+              >
+                <X className='h-5 w-5' />
+              </button>
+
+              {/* Header Icon */}
+              <div className='flex justify-center'>
+                <div className='h-16 w-16 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/10'>
+                  <ShieldCheck className='h-8 w-8' />
+                </div>
+              </div>
+
+              {/* Title & Email Info */}
+              <div className='space-y-2'>
+                <h3 className='text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight'>
+                  Verifikasi Kode OTP
+                </h3>
+                <p className='text-xs sm:text-sm text-slate-500 font-medium leading-relaxed'>
+                  Kami telah mengirimkan 6 digit kode OTP verifikasi ke alamat
+                  email:
+                </p>
+                <div className='inline-block bg-slate-100 px-3 py-1 rounded-full border border-slate-200/80 text-xs font-bold text-slate-700'>
+                  {otpEmail}
+                </div>
+              </div>
+
+              {/* OTP Form */}
+              <form
+                onSubmit={handleVerifyOtpSubmit}
+                className='space-y-4 text-left'
+              >
+                <div className='space-y-1.5'>
+                  <label className='text-[11px] font-bold uppercase tracking-wider text-slate-500 block text-center'>
+                    KODE OTP (6 DIGIT)
+                  </label>
+                  <input
+                    type='text'
+                    maxLength={6}
+                    required
+                    autoFocus
+                    placeholder='123456'
+                    value={otpCodeInput}
+                    onChange={(e) =>
+                      setOtpCodeInput(e.target.value.replace(/[^0-9]/g, ''))
+                    }
+                    disabled={otpLoading}
+                    className='w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 focus:border-emerald-500 focus:bg-white text-slate-900 focus:outline-none rounded-2xl text-center font-mono text-2xl font-bold tracking-[0.4em] transition-all shadow-xs'
+                  />
+                </div>
+
+                <Button
+                  type='submit'
+                  disabled={otpLoading || otpCodeInput.length !== 6}
+                  className='w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-emerald-600/25 transition-all text-xs uppercase tracking-wider cursor-pointer disabled:opacity-50'
+                >
+                  {otpLoading ? (
+                    <div className='flex items-center justify-center gap-2'>
+                      <Loader2 className='h-4 w-4 animate-spin' />
+                      <span>MEMVERIFIKASI...</span>
+                    </div>
+                  ) : (
+                    <span>VERIFIKASI EMAIL</span>
+                  )}
+                </Button>
+              </form>
+
+              {/* Resend & Back Action */}
+              <div className='pt-2 flex flex-col items-center gap-2.5 border-t border-slate-100 text-xs'>
+                <div className='flex items-center gap-1.5 text-slate-500 font-medium'>
+                  <span>Tidak menerima kode?</span>
+                  <button
+                    type='button'
+                    onClick={handleResendOtp}
+                    disabled={resendCooldown > 0 || otpLoading}
+                    className='font-bold text-emerald-600 hover:text-emerald-700 hover:underline disabled:opacity-50 disabled:no-underline'
+                  >
+                    {resendCooldown > 0
+                      ? `Kirim Ulang (${resendCooldown}s)`
+                      : 'Kirim Ulang Kode'}
+                  </button>
+                </div>
+                <button
+                  type='button'
+                  onClick={() => setShowOtpModal(false)}
+                  className='text-[11px] font-semibold text-slate-400 hover:text-slate-600 transition-colors'
+                >
+                  Batal / Kembali ke Form Auth
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

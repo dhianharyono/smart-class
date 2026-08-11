@@ -71,8 +71,32 @@ export async function updateProfile(data: {
     await dbConnect();
     const teacherId = await requireAuth();
 
-    if (!data.name || !data.email) {
-      throw new Error('Nama dan Email wajib diisi.');
+    if (!data.name || data.name.trim().length < 3) {
+      throw new Error('Nama lengkap & gelar minimal 3 karakter.');
+    }
+
+    if (!data.email || !data.email.trim()) {
+      throw new Error('Alamat Email wajib diisi.');
+    }
+
+    if (!data.schoolName || data.schoolName.trim().length < 3) {
+      throw new Error('Nama sekolah wajib diisi minimal 3 karakter.');
+    }
+
+    if (!data.className || !data.className.trim()) {
+      throw new Error('Kelas diajar wajib diisi.');
+    }
+
+    if (!data.nip || data.nip.trim() === '-' || data.nip.trim().length < 3) {
+      throw new Error('NIP/NUPTK Guru wajib diisi dengan NIP/NUPTK yang valid (tidak boleh "-").');
+    }
+
+    if (!data.principalName || data.principalName.trim().length < 3) {
+      throw new Error('Nama Kepala Sekolah minimal 3 karakter.');
+    }
+
+    if (!data.principalNip || data.principalNip.trim() === '-' || data.principalNip.trim().length < 3) {
+      throw new Error('NIP Kepala Sekolah wajib diisi dengan NIP yang valid (tidak boleh "-").');
     }
 
     const normalizedEmail = data.email.toLowerCase().trim();
@@ -94,9 +118,9 @@ export async function updateProfile(data: {
           email: normalizedEmail,
           schoolName: data.schoolName?.trim() || '',
           className: data.className?.trim() || '',
-          nip: data.nip?.trim() || '-',
+          nip: data.nip.trim(),
           principalName: data.principalName?.trim() || '',
-          principalNip: data.principalNip?.trim() || '-',
+          principalNip: data.principalNip.trim(),
         },
       },
       { new: true, runValidators: true }
@@ -108,10 +132,10 @@ export async function updateProfile(data: {
       {
         $set: {
           teacherName: data.name.trim(),
-          nip: data.nip?.trim() || '-',
+          nip: data.nip.trim(),
           schoolName: data.schoolName?.trim() || '',
           supervisorName: data.principalName?.trim() || '',
-          supervisorNip: data.principalNip?.trim() || '-',
+          supervisorNip: data.principalNip.trim(),
         },
       }
     );

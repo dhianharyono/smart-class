@@ -54,6 +54,16 @@ export async function loginTeacher(data: { email: string; password: string; reca
       throw new Error('Username/email atau password salah.');
     }
 
+    // Check if user's email is verified
+    if (teacher.isEmailVerified === false && teacher.emailVerificationToken) {
+      return {
+        success: false,
+        requiresEmailVerification: true,
+        email: teacher.email,
+        error: 'Email Anda belum diverifikasi. Silakan masukkan kode OTP yang telah dikirim ke email Anda.',
+      };
+    }
+
     // Check if user is an admin
     const isAdminUser = await AdminUser.exists({
       $or: [{ username: teacher.email }, { username: teacher.username || '' }],
@@ -159,6 +169,9 @@ export async function registerTeacher(data: {
       }
     }
 
+    // Generate 6-digit OTP code for email verification
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+
     const newTeacher = new Teacher({
       name: name.trim(),
       username: normalizedUsername,
@@ -167,35 +180,26 @@ export async function registerTeacher(data: {
       schoolName: trimmedSchoolName,
       className: className?.trim(),
       isFirstLogin: true,
+      isEmailVerified: false,
+      emailVerificationToken: otpCode,
+      emailVerificationExpires: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes
       enabledMenus: ['/dashboard', '/siswa', '/absensi', '/nilai', '/tabungan', '/jurnal'],
     });
     await newTeacher.save();
 
-    // Check if user is an admin
-    const isAdminUser = await AdminUser.exists({
-      $or: [{ username: normalizedEmail }, { username: normalizedUsername }],
-    });
-
-    // Sign session token & log user in
-    const token = await signSession({
-      userId: newTeacher._id.toString(),
-      email: newTeacher.email,
+    // Kirim email verifikasi OTP via Nodemailer
+    await sendVerificationEmail({
+      to: newTeacher.email,
       name: newTeacher.name,
-      isAdmin: !!isAdminUser,
-    });
-
-    const cookieStore = await cookies();
-    cookieStore.set('session', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 7 * 24 * 60 * 60, // 7 days
+      otp: otpCode,
     });
 
     return {
       success: true,
-      isAdmin: !!isAdminUser,
+      requiresEmailVerification: true,
+      email: newTeacher.email,
+      demoOtp: otpCode,
+      message: 'Pendaftaran berhasil! Silakan periksa email Anda untuk memasukkan kode OTP verifikasi.',
     };
   } catch (error: any) {
     return { success: false, error: error.message || 'Gagal mendaftar.' };

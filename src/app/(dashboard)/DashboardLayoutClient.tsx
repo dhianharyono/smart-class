@@ -31,6 +31,7 @@ import {
   ArrowLeft,
   IdCard,
   UserCheck,
+  AlertCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -179,11 +180,74 @@ export default function DashboardLayoutClient({
   );
   const [schoolsList, setSchoolsList] = useState<any[]>([]);
   const [loadingSchools, setLoadingSchools] = useState(false);
+  const [onboardingErrors, setOnboardingErrors] = useState<Record<string, string>>({});
 
   const [selectedOnboardingMenus, setSelectedOnboardingMenus] = useState<string[]>(
     ALL_CONFIGURABLE_HREFS
   );
   const [isSavingOnboarding, setIsSavingOnboarding] = useState(false);
+
+  const validateOnboardingStep1 = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    const cleanName = onboardingName.trim();
+    if (!cleanName) {
+      errors.name = 'Nama lengkap & gelar wajib diisi.';
+    } else if (cleanName.length < 3) {
+      errors.name = 'Nama lengkap & gelar minimal 3 karakter.';
+    }
+
+    const cleanNip = onboardingNip.trim();
+    if (!cleanNip || cleanNip === '-') {
+      errors.nip = 'NIP/NUPTK wajib diisi dengan NIP/NUPTK yang valid (tidak boleh "-").';
+    } else if (cleanNip.length < 3) {
+      errors.nip = 'NIP/NUPTK minimal 3 karakter.';
+    }
+
+    const finalSchoolName =
+      onboardingSchool === '__NEW_SCHOOL__'
+        ? onboardingCustomSchool.trim()
+        : onboardingSchool.trim();
+
+    if (onboardingSchool === '__NEW_SCHOOL__') {
+      if (!onboardingCustomSchool.trim()) {
+        errors.school = 'Nama sekolah baru wajib diisi.';
+      } else if (onboardingCustomSchool.trim().length < 3) {
+        errors.school = 'Nama sekolah baru minimal 3 karakter.';
+      }
+    } else if (!finalSchoolName) {
+      errors.school = 'Silakan pilih atau isi nama sekolah Anda.';
+    }
+
+    const cleanClass = onboardingClass.trim();
+    if (!cleanClass) {
+      errors.className = 'Kelas diajar wajib diisi (contoh: 5A / VI B).';
+    }
+
+    const cleanPrincipalName = onboardingPrincipalName.trim();
+    if (!cleanPrincipalName) {
+      errors.principalName = 'Nama kepala sekolah wajib diisi.';
+    } else if (cleanPrincipalName.length < 3) {
+      errors.principalName = 'Nama kepala sekolah minimal 3 karakter.';
+    }
+
+    const cleanPrincipalNip = onboardingPrincipalNip.trim();
+    if (!cleanPrincipalNip || cleanPrincipalNip === '-') {
+      errors.principalNip = 'NIP kepala sekolah wajib diisi dengan NIP yang valid (tidak boleh "-").';
+    } else if (cleanPrincipalNip.length < 3) {
+      errors.principalNip = 'NIP kepala sekolah minimal 3 karakter.';
+    }
+
+    setOnboardingErrors(errors);
+    const isValid = Object.keys(errors).length === 0;
+
+    if (!isValid) {
+      const firstErrorMsg = Object.values(errors)[0];
+      toast.error(firstErrorMsg);
+    }
+
+    return isValid;
+  };
 
   React.useEffect(() => {
     if (isProfileIncomplete) {
@@ -236,85 +300,20 @@ export default function DashboardLayoutClient({
   };
 
   const handleNextStep = () => {
-    const finalSchoolName =
-      onboardingSchool === '__NEW_SCHOOL__'
-        ? onboardingCustomSchool.trim()
-        : onboardingSchool.trim();
-
-    if (!onboardingName.trim()) {
-      toast.error('Nama lengkap & gelar wajib diisi.');
-      return;
-    }
-
-    if (!onboardingNip.trim()) {
-      toast.error('NIP/NUPTK wajib diisi.');
-      return;
-    }
-
-    if (!finalSchoolName) {
-      toast.error('Nama sekolah wajib diisi.');
-      return;
-    }
-
-    if (!onboardingClass.trim()) {
-      toast.error('Kelas diajar wajib diisi.');
-      return;
-    }
-
-    if (!onboardingPrincipalName.trim()) {
-      toast.error('Nama kepala sekolah wajib diisi.');
-      return;
-    }
-
-    if (!onboardingPrincipalNip.trim()) {
-      toast.error('NIP kepala sekolah wajib diisi.');
-      return;
-    }
-
+    if (!validateOnboardingStep1()) return;
     setOnboardingStep(2);
   };
 
   const handleSaveOnboarding = async () => {
+    if (!validateOnboardingStep1()) {
+      setOnboardingStep(1);
+      return;
+    }
+
     const finalSchoolName =
       onboardingSchool === '__NEW_SCHOOL__'
         ? onboardingCustomSchool.trim()
         : onboardingSchool.trim();
-
-    if (!onboardingName.trim()) {
-      toast.error('Nama lengkap & gelar wajib diisi.');
-      setOnboardingStep(1);
-      return;
-    }
-
-    if (!onboardingNip.trim()) {
-      toast.error('NIP/NUPTK wajib diisi.');
-      setOnboardingStep(1);
-      return;
-    }
-
-    if (!finalSchoolName) {
-      toast.error('Nama sekolah wajib diisi.');
-      setOnboardingStep(1);
-      return;
-    }
-
-    if (!onboardingClass.trim()) {
-      toast.error('Kelas diajar wajib diisi.');
-      setOnboardingStep(1);
-      return;
-    }
-
-    if (!onboardingPrincipalName.trim()) {
-      toast.error('Nama kepala sekolah wajib diisi.');
-      setOnboardingStep(1);
-      return;
-    }
-
-    if (!onboardingPrincipalNip.trim()) {
-      toast.error('NIP kepala sekolah wajib diisi.');
-      setOnboardingStep(1);
-      return;
-    }
 
     if (selectedOnboardingMenus.length === 0) {
       toast.error('Pilih setidaknya 1 menu fitur.');
@@ -417,8 +416,8 @@ export default function DashboardLayoutClient({
                               }))
                             }
                             className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer ${isChildActive
-                                ? 'bg-emerald-50/70 text-emerald-900 border border-emerald-200/80 font-bold'
-                                : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 border border-transparent'
+                              ? 'bg-emerald-50/70 text-emerald-900 border border-emerald-200/80 font-bold'
+                              : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 border border-transparent'
                               }`}
                           >
                             <div className='flex items-center gap-3'>
@@ -446,8 +445,8 @@ export default function DashboardLayoutClient({
                                     href={child.href}
                                     onClick={() => setMobileOpen(false)}
                                     className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all duration-200 ${isSubActive
-                                        ? 'bg-emerald-600 text-white font-bold shadow-xs'
-                                        : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium'
+                                      ? 'bg-emerald-600 text-white font-bold shadow-xs'
+                                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium'
                                       }`}
                                   >
                                     <SubIcon
@@ -472,8 +471,8 @@ export default function DashboardLayoutClient({
                         href={item.href!}
                         onClick={() => setMobileOpen(false)}
                         className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group ${isActive
-                            ? 'bg-emerald-50/90 text-emerald-800 border border-emerald-200/80 shadow-xs font-bold'
-                            : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 border border-transparent'
+                          ? 'bg-emerald-50/90 text-emerald-800 border border-emerald-200/80 shadow-xs font-bold'
+                          : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 border border-transparent'
                           }`}
                       >
                         <Icon
@@ -518,7 +517,7 @@ export default function DashboardLayoutClient({
             size='icon'
             onClick={() => setShowLogoutConfirm(true)}
             title='Keluar Aplikasi'
-            className='h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 rounded-xl cursor-pointer shrink-0 transition-colors ml-1'
+            className='h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-xl cursor-pointer shrink-0 transition-colors ml-1'
           >
             <LogOut className='h-4 w-4' />
             <span className='sr-only'>Keluar Aplikasi</span>
@@ -614,7 +613,7 @@ export default function DashboardLayoutClient({
                 type='button'
                 variant='ghost'
                 onClick={() => setShowLogoutConfirm(true)}
-                className='text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl px-3 py-1.5 h-8 gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap'
+                className='text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200/80 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-rose-300 rounded-xl px-3 py-1.5 h-8 gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap shadow-2xs'
               >
                 <LogOut className='h-3.5 w-3.5 shrink-0' />
                 <span>Keluar</span>
@@ -640,8 +639,8 @@ export default function DashboardLayoutClient({
                 type='button'
                 onClick={() => setOnboardingStep(1)}
                 className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer min-w-0 ${onboardingStep === 1
-                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
-                    : 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
+                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                  : 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
                   }`}
               >
                 <span
@@ -657,8 +656,8 @@ export default function DashboardLayoutClient({
                 type='button'
                 onClick={() => handleNextStep()}
                 className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer min-w-0 ${onboardingStep === 2
-                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
-                    : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100 hover:text-slate-600'
+                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                  : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100 hover:text-slate-600'
                   }`}
               >
                 <span
@@ -689,10 +688,22 @@ export default function DashboardLayoutClient({
                     required
                     placeholder='Contoh: Drs. Ahmad Dahlan, M.Pd'
                     value={onboardingName}
-                    onChange={(e) => setOnboardingName(e.target.value)}
-                    className='w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:outline-none rounded-xl text-sm font-medium transition-all'
+                    onChange={(e) => {
+                      setOnboardingName(e.target.value);
+                      if (onboardingErrors.name) setOnboardingErrors((prev) => ({ ...prev, name: '' }));
+                    }}
+                    className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${onboardingErrors.name
+                      ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
+                      : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
+                      } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
                   />
                 </div>
+                {onboardingErrors.name && (
+                  <p className='text-[11px] text-rose-500 font-medium flex items-center gap-1 mt-1'>
+                    <AlertCircle className='h-3.5 w-3.5 shrink-0' />
+                    <span>{onboardingErrors.name}</span>
+                  </p>
+                )}
               </div>
 
               {/* NIP / NUPTK */}
@@ -709,14 +720,26 @@ export default function DashboardLayoutClient({
                     required
                     placeholder='Misal: 19850101 201001 1 001 / NUPTK'
                     value={onboardingNip}
-                    onChange={(e) => setOnboardingNip(e.target.value)}
-                    className='w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:outline-none rounded-xl text-sm font-medium transition-all'
+                    onChange={(e) => {
+                      setOnboardingNip(e.target.value);
+                      if (onboardingErrors.nip) setOnboardingErrors((prev) => ({ ...prev, nip: '' }));
+                    }}
+                    className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${onboardingErrors.nip
+                      ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
+                      : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
+                      } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
                   />
                 </div>
+                {onboardingErrors.nip && (
+                  <p className='text-[11px] text-rose-500 font-medium flex items-center gap-1 mt-1'>
+                    <AlertCircle className='h-3.5 w-3.5 shrink-0' />
+                    <span>{onboardingErrors.nip}</span>
+                  </p>
+                )}
               </div>
 
               {/* Sekolah & Kelas – 2 column grid */}
-              <div className='grid grid-cols-2 gap-3'>
+              <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
                 <div className='space-y-1.5'>
                   <label className='text-xs font-bold uppercase tracking-wider text-slate-700 block'>
                     SEKOLAH <span className='text-rose-500'>*</span>
@@ -727,9 +750,15 @@ export default function DashboardLayoutClient({
                     </div>
                     <select
                       value={onboardingSchool}
-                      onChange={(e) => setOnboardingSchool(e.target.value)}
+                      onChange={(e) => {
+                        setOnboardingSchool(e.target.value);
+                        if (onboardingErrors.school) setOnboardingErrors((prev) => ({ ...prev, school: '' }));
+                      }}
                       disabled={loadingSchools}
-                      className='w-full pl-10 pr-8 py-2.5 bg-slate-50/50 border border-slate-200 text-slate-900 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:outline-none rounded-xl text-sm font-medium appearance-none cursor-pointer transition-all'
+                      className={`w-full pl-10 pr-8 py-2.5 bg-slate-50/50 border ${onboardingErrors.school
+                        ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
+                        : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
+                        } text-slate-900 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium appearance-none cursor-pointer transition-all`}
                     >
                       {loadingSchools ? (
                         <option value=''>Memuat...</option>
@@ -748,6 +777,12 @@ export default function DashboardLayoutClient({
                       <ChevronDown className='h-4 w-4' />
                     </div>
                   </div>
+                  {onboardingErrors.school && (
+                    <p className='text-[11px] text-rose-500 font-medium flex items-center gap-1 mt-1'>
+                      <AlertCircle className='h-3.5 w-3.5 shrink-0' />
+                      <span>{onboardingErrors.school}</span>
+                    </p>
+                  )}
                 </div>
 
                 <div className='space-y-1.5'>
@@ -763,10 +798,22 @@ export default function DashboardLayoutClient({
                       required
                       placeholder='Misal: 5A / VI B'
                       value={onboardingClass}
-                      onChange={(e) => setOnboardingClass(e.target.value)}
-                      className='w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:outline-none rounded-xl text-sm font-medium transition-all'
+                      onChange={(e) => {
+                        setOnboardingClass(e.target.value);
+                        if (onboardingErrors.className) setOnboardingErrors((prev) => ({ ...prev, className: '' }));
+                      }}
+                      className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${onboardingErrors.className
+                        ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
+                        : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
+                        } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
                     />
                   </div>
+                  {onboardingErrors.className && (
+                    <p className='text-[11px] text-rose-500 font-medium flex items-center gap-1 mt-1'>
+                      <AlertCircle className='h-3.5 w-3.5 shrink-0' />
+                      <span>{onboardingErrors.className}</span>
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -781,9 +828,21 @@ export default function DashboardLayoutClient({
                     required
                     placeholder='Masukkan nama sekolah lengkap Anda'
                     value={onboardingCustomSchool}
-                    onChange={(e) => setOnboardingCustomSchool(e.target.value)}
-                    className='w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:outline-none rounded-xl text-sm font-medium transition-all'
+                    onChange={(e) => {
+                      setOnboardingCustomSchool(e.target.value);
+                      if (onboardingErrors.school) setOnboardingErrors((prev) => ({ ...prev, school: '' }));
+                    }}
+                    className={`w-full px-4 py-2.5 bg-slate-50/50 border ${onboardingErrors.school
+                      ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
+                      : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
+                      } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
                   />
+                  {onboardingErrors.school && (
+                    <p className='text-[11px] text-rose-500 font-medium flex items-center gap-1 mt-1'>
+                      <AlertCircle className='h-3.5 w-3.5 shrink-0' />
+                      <span>{onboardingErrors.school}</span>
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -802,10 +861,22 @@ export default function DashboardLayoutClient({
                       required
                       placeholder='Contoh: Dr. H. Ahmad Dahlan, M.Pd'
                       value={onboardingPrincipalName}
-                      onChange={(e) => setOnboardingPrincipalName(e.target.value)}
-                      className='w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:outline-none rounded-xl text-sm font-medium transition-all'
+                      onChange={(e) => {
+                        setOnboardingPrincipalName(e.target.value);
+                        if (onboardingErrors.principalName) setOnboardingErrors((prev) => ({ ...prev, principalName: '' }));
+                      }}
+                      className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${onboardingErrors.principalName
+                        ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
+                        : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
+                        } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
                     />
                   </div>
+                  {onboardingErrors.principalName && (
+                    <p className='text-[11px] text-rose-500 font-medium flex items-center gap-1 mt-1'>
+                      <AlertCircle className='h-3.5 w-3.5 shrink-0' />
+                      <span>{onboardingErrors.principalName}</span>
+                    </p>
+                  )}
                 </div>
 
                 <div className='space-y-1.5'>
@@ -821,10 +892,22 @@ export default function DashboardLayoutClient({
                       required
                       placeholder='Misal: 19700101 199503 1 002'
                       value={onboardingPrincipalNip}
-                      onChange={(e) => setOnboardingPrincipalNip(e.target.value)}
-                      className='w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:outline-none rounded-xl text-sm font-medium transition-all'
+                      onChange={(e) => {
+                        setOnboardingPrincipalNip(e.target.value);
+                        if (onboardingErrors.principalNip) setOnboardingErrors((prev) => ({ ...prev, principalNip: '' }));
+                      }}
+                      className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${onboardingErrors.principalNip
+                        ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
+                        : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
+                        } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
                     />
                   </div>
+                  {onboardingErrors.principalNip && (
+                    <p className='text-[11px] text-rose-500 font-medium flex items-center gap-1 mt-1'>
+                      <AlertCircle className='h-3.5 w-3.5 shrink-0' />
+                      <span>{onboardingErrors.principalNip}</span>
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -853,14 +936,14 @@ export default function DashboardLayoutClient({
                         }
                       }}
                       className={`flex items-start gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer select-none ${isChecked
-                          ? 'bg-emerald-50/80 border-emerald-300 text-emerald-950 shadow-2xs'
-                          : 'bg-slate-50/60 border-slate-200 text-slate-600 hover:border-slate-300'
+                        ? 'bg-emerald-50/80 border-emerald-300 text-emerald-950 shadow-2xs'
+                        : 'bg-slate-50/60 border-slate-200 text-slate-600 hover:border-slate-300'
                         }`}
                     >
                       <div
                         className={`mt-0.5 h-5 w-5 rounded-lg border flex items-center justify-center shrink-0 transition-colors ${isChecked
-                            ? 'bg-emerald-600 border-emerald-600 text-white shadow-2xs'
-                            : 'border-slate-300 bg-white'
+                          ? 'bg-emerald-600 border-emerald-600 text-white shadow-2xs'
+                          : 'border-slate-300 bg-white'
                           }`}
                       >
                         {isChecked && <Check className='h-3.5 w-3.5 stroke-[3]' />}
@@ -893,8 +976,7 @@ export default function DashboardLayoutClient({
                   onClick={handleNextStep}
                   className='bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs sm:text-sm px-6 h-10 gap-2 shadow-md shadow-emerald-600/20 cursor-pointer transition-all'
                 >
-                  <span>Pilih Menu Fitur</span>
-                  <ArrowRight className='h-4 w-4' />
+                  <span>Selanjutnya</span>
                 </Button>
               </>
             ) : (

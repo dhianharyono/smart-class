@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   LogOut,
   Home,
+  User,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ConfirmDialog from '@/components/ConfirmDialog';
@@ -40,6 +41,10 @@ const adminMenuGroups: SidebarGroup[] = [
       { name: 'Kelola Wali Kelas', href: '/admin/guru', icon: Users },
       { name: 'Kelola Sekolah', href: '/admin/sekolah', icon: School },
     ],
+  },
+  {
+    category: 'PENGATURAN AKUN',
+    items: [{ name: 'Profil Admin', href: '/admin/profile', icon: User }],
   },
 ];
 
@@ -110,16 +115,14 @@ export default function AdminLayoutClient({ children, admin }: AdminLayoutClient
                       key={item.href}
                       href={item.href}
                       onClick={() => setMobileOpen(false)}
-                      className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group ${
-                        isActive
+                      className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group ${isActive
                           ? 'bg-indigo-50 text-indigo-700 border border-indigo-200/70 shadow-xs font-bold'
                           : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-transparent'
-                      }`}
+                        }`}
                     >
                       <Icon
-                        className={`h-4.5 w-4.5 transition-transform duration-200 group-hover:scale-110 ${
-                          isActive ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-700'
-                        }`}
+                        className={`h-4.5 w-4.5 transition-transform duration-200 group-hover:scale-110 ${isActive ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-700'
+                          }`}
                       />
                       <span>{item.name}</span>
                       {isActive && (
@@ -137,25 +140,30 @@ export default function AdminLayoutClient({ children, admin }: AdminLayoutClient
       {/* Footer / User Profile section */}
       <div className="border-t border-slate-200 pt-4 px-1">
         <div className="flex items-center justify-between p-2 rounded-2xl bg-slate-50 border border-slate-200 hover:bg-slate-100/60 transition-colors group">
-          <div className="flex items-center gap-2.5 min-w-0 flex-1">
-            <div className="h-9 w-9 shrink-0 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-xs">
+          <Link
+            href="/admin/profile"
+            onClick={() => setMobileOpen(false)}
+            className="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer"
+            title="Edit Profil Admin"
+          >
+            <div className="h-9 w-9 shrink-0 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-xs group-hover:scale-105 transition-transform">
               {initialName}
             </div>
             <div className="flex flex-col min-w-0 flex-1">
-              <span className="text-xs font-bold text-slate-900 truncate">
+              <span className="text-xs font-bold text-slate-900 truncate group-hover:text-indigo-600 transition-colors">
                 {admin.name || 'Administrator'}
               </span>
               <span className="text-[10px] text-slate-500 truncate font-medium">
                 {admin.email || ''}
               </span>
             </div>
-          </div>
+          </Link>
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setShowLogoutConfirm(true)}
             title="Keluar Aplikasi"
-            className="h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 rounded-xl cursor-pointer shrink-0 transition-colors ml-1"
+            className="h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-xl cursor-pointer shrink-0 transition-colors ml-1"
           >
             <LogOut className="h-4 w-4" />
             <span className="sr-only">Keluar Aplikasi</span>

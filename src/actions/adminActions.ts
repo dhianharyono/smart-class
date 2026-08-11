@@ -10,8 +10,9 @@ import Journal from '@/models/Journal';
 import AdminUser from '@/models/AdminUser';
 import School from '@/models/School';
 import { cookies } from 'next/headers';
-import { verifySession } from '@/lib/auth';
+import { signSession, verifySession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 import { hashPassword } from '@/lib/password';
 import { isRedirectError, escapeRegExp } from '@/lib/utils';
 
@@ -428,3 +429,141 @@ export async function deleteSchool(id: string) {
     return { success: false, error: error.message || 'Gagal menghapus sekolah.' };
   }
 }
+
+/**
+ * Mengambil data profil pengguna Administrator.
+ */
+export async function getAdminProfile() {
+  try {
+    await dbConnect();
+    const adminId = await requireAdminAuth();
+
+    const teacher = await Teacher.findById(adminId).lean();
+    if (!teacher) {
+      throw new Error('Data pengguna admin tidak ditemukan.');
+    }
+
+    return JSON.parse(
+      JSON.stringify({
+        _id: teacher._id.toString(),
+        name: teacher.name,
+        username: teacher.username || '',
+        email: teacher.email,
+        createdAt: teacher.createdAt ? new Date(teacher.createdAt).toISOString() : new Date().toISOString(),
+      })
+    );
+  } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+    console.error('Error fetching admin profile:', error);
+    throw new Error(error.message || 'Gagal mengambil data profil admin.');
+  }
+}
+
+/**
+ * Mengubah profil Administrator (Nama, Username, Email).
+ */
+export async function updateAdminProfile(data: {
+  name: string;
+  username: string;
+  email: string;
+}) {
+  try {
+    await dbConnect();
+    const adminId = await requireAdminAuth();
+
+    const { name, username, email } = data;
+
+    if (!name || name.trim().length < 3) {
+      throw new Error('Nama lengkap & gelar minimal 3 karakter.');
+    }
+
+    const normalizedUsername = username?.toLowerCase().trim();
+    const USERNAME_REGEX = /^[a-zA-Z0-9_]{3,20}$/;
+    if (!normalizedUsername || !USERNAME_REGEX.test(normalizedUsername)) {
+      throw new Error('Username hanya boleh berisi huruf, angka, dan garis bawah (_) minimal 3-20 karakter.');
+    }
+
+    const normalizedEmail = email?.toLowerCase().trim();
+    const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!normalizedEmail || !EMAIL_REGEX.test(normalizedEmail)) {
+      throw new Error('Format email tidak valid.');
+    }
+
+    const currentTeacher = await Teacher.findById(adminId);
+    if (!currentTeacher) {
+      throw new Error('Pengguna admin tidak ditemukan.');
+    }
+
+    const oldEmail = currentTeacher.email.toLowerCase().trim();
+    const oldUsername = (currentTeacher.username || '').toLowerCase().trim();
+
+    // Cek keunikan username
+    const usernameExists = await Teacher.findOne({
+      username: normalizedUsername,
+      _id: { $ne: adminId },
+    });
+    if (usernameExists) {
+      throw new Error('Username ini sudah digunakan oleh akun lain.');
+    }
+
+    // Cek keunikan email
+    const emailExists = await Teacher.findOne({
+      email: normalizedEmail,
+      _id: { $ne: adminId },
+    });
+    if (emailExists) {
+      throw new Error('Email ini sudah terdaftar pada akun lain.');
+    }
+
+    // Update Teacher document
+    currentTeacher.name = name.trim();
+    currentTeacher.username = normalizedUsername;
+    currentTeacher.email = normalizedEmail;
+    await currentTeacher.save();
+
+    // Sinkronkan data di AdminUser agar sesi admin tetap valid
+    await AdminUser.findOneAndUpdate(
+      { $or: [{ username: oldEmail }, { username: oldUsername }] },
+      { username: normalizedEmail }
+    );
+
+    // Perbarui session cookie dengan nama & email baru
+    const token = await signSession({
+      userId: currentTeacher._id.toString(),
+      email: currentTeacher.email,
+      name: currentTeacher.name,
+      isAdmin: true,
+    });
+
+    const cookieStore = await cookies();
+    cookieStore.set('session', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 7 * 24 * 60 * 60,
+    });
+
+    revalidatePath('/admin');
+    revalidatePath('/admin/profile');
+
+    return {
+      success: true,
+      admin: {
+        _id: currentTeacher._id.toString(),
+        name: currentTeacher.name,
+        username: currentTeacher.username,
+        email: currentTeacher.email,
+      },
+    };
+  } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+    console.error('Error updating admin profile:', error);
+    return { success: false, error: error.message || 'Gagal mengubah profil admin.' };
+  }
+}
+

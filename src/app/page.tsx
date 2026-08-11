@@ -27,6 +27,13 @@ import {
   Loader2,
   Calendar,
   CheckSquare,
+  Printer,
+  FileSpreadsheet,
+  FileText,
+  ShieldCheck,
+  Sparkles,
+  Download,
+  Award,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getCurrentUserSession, logoutTeacher } from '@/actions/authActions';
@@ -75,8 +82,8 @@ export default function LandingPage() {
   };
 
   const [activeTab, setActiveTab] = useState<
-    'jadwal' | 'piket' | 'absensi' | 'nilai' | 'tabungan' | 'jurnal' | 'siswa'
-  >('jadwal');
+    'absensi' | 'nilai' | 'jurnal' | 'tabungan' | 'jadwal'
+  >('absensi');
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -368,6 +375,7 @@ export default function LandingPage() {
       <main className='relative z-10'>
         {/* ==================== HERO SECTION ==================== */}
         <section className='relative pt-12 sm:pt-20 lg:pt-24 pb-16 sm:pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center flex flex-col items-center justify-center'>
+
           {/* Main Title H1 */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
@@ -389,7 +397,7 @@ export default function LandingPage() {
             className='mt-5 sm:mt-6 text-base sm:text-lg md:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed font-normal px-2'
           >
             Satu sistem terpadu untuk pencatatan presensi siswa, penilaian KKM,
-            buku tabungan digital, agenda jurnal KBM harian, dan laporan kelas
+            agenda jurnal KBM harian, dan laporan kelas
             otomatis.
           </motion.p>
 
@@ -485,9 +493,11 @@ export default function LandingPage() {
                   Smart Class — Dashboard Wali Kelas
                 </span>
               </div>
-              <div className='flex items-center gap-2 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 shrink-0'>
-                <span className='w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse' />
-                <span>Tampilan Responsive</span>
+              <div className='flex items-center gap-2 shrink-0'>
+                <div className='hidden sm:flex items-center gap-1.5 text-[11px] font-bold text-teal-700 bg-teal-50 px-3 py-1 rounded-full border border-teal-200'>
+                  <span className='w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse' />
+                  <span>Responsive</span>
+                </div>
               </div>
             </div>
 
@@ -547,6 +557,31 @@ export default function LandingPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Card 4: Feature Highlight Banner */}
+              <div className='sm:col-span-3 p-3.5 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border border-emerald-200/90 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs'>
+                <div className='flex items-center gap-3'>
+                  <div className='p-2 rounded-xl bg-emerald-600 text-white shadow-xs shrink-0'>
+                    <Printer className='h-4 w-4' />
+                  </div>
+                  <div>
+                    <div className='text-xs font-extrabold text-slate-900 flex items-center gap-1.5'>
+                      <span>Pratinjau Cetak & Ekspor Laporan</span>
+                    </div>
+                    <div className='text-[11px] text-slate-600 font-medium'>
+                      Dinamis dan siap cetak lengkap dengan TTD Wali Kelas, Kepala Sekolah & NIP/NUPTK.
+                    </div>
+                  </div>
+                </div>
+                <div className='flex items-center gap-2 text-[11px] font-extrabold self-end sm:self-center shrink-0'>
+                  <span className='px-2.5 py-1 rounded-lg bg-emerald-600 text-white flex items-center gap-1 shadow-xs'>
+                    <Download className='h-3 w-3' /> PDF Ready
+                  </span>
+                  <span className='px-2.5 py-1 rounded-lg bg-teal-700 text-white flex items-center gap-1 shadow-xs'>
+                    <FileSpreadsheet className='h-3 w-3' /> Excel Export
+                  </span>
+                </div>
+              </div>
             </div>
           </motion.div>
         </section>
@@ -561,24 +596,24 @@ export default function LandingPage() {
               {[
                 {
                   num: '100%',
-                  title: 'Paperless System',
-                  desc: 'Bebas buku fisik & kertas rekap manual',
+                  title: 'Paperless & Printable',
+                  desc: 'Input digital & cetak laporan sah kapan saja',
                   color: 'text-emerald-600',
                 },
                 {
-                  num: '5+ Modul',
+                  num: '7+ Modul',
                   title: 'Terintegrasi Sempurna',
-                  desc: 'Absensi, Nilai, Tabungan, Jurnal & Siswa',
+                  desc: 'Jadwal, Piket, Absensi, Nilai, Tabungan, Jurnal & Cetak',
                   color: 'text-teal-600',
                 },
                 {
-                  num: '80% Efisien',
-                  title: 'Efisiensi Administrasi',
-                  desc: 'Rekap bulanan/semester serba otomatis',
+                  num: 'PDF & Excel',
+                  title: 'Ekspor Laporan 1-Klik',
+                  desc: 'Lengkap TTD Wali Kelas & Kepala Sekolah',
                   color: 'text-indigo-600',
                 },
                 {
-                  num: 'Safe Auth',
+                  num: 'Safe & Secure',
                   title: 'Perlindungan Data',
                   desc: 'Privasi data siswa tersimpan aman',
                   color: 'text-emerald-600',
@@ -640,16 +675,14 @@ export default function LandingPage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className='flex items-center justify-start sm:justify-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar pb-3 sm:pb-0 mb-8 sm:mb-10 max-w-full px-1'
+            className='flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-8 sm:mb-10 max-w-full px-1'
           >
             {[
-              { id: 'jadwal', label: 'Jadwal & Alokasi', icon: Calendar },
-              { id: 'piket', label: 'Piket Kelas', icon: CheckSquare },
               { id: 'absensi', label: 'Absensi Kelas', icon: CalendarCheck2 },
               { id: 'nilai', label: 'Nilai Akademik', icon: GraduationCap },
-              { id: 'tabungan', label: 'Tabungan Siswa', icon: Wallet },
               { id: 'jurnal', label: 'Jurnal KBM', icon: BookMarked },
-              { id: 'siswa', label: 'Data Siswa', icon: Users },
+              { id: 'tabungan', label: 'Tabungan Siswa', icon: Wallet },
+              { id: 'jadwal', label: 'Jadwal & Alokasi', icon: Calendar },
             ].map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -658,11 +691,10 @@ export default function LandingPage() {
                   key={tab.id}
                   whileTap={{ scale: 0.96 }}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer border ${
-                    isActive
-                      ? 'bg-emerald-600 text-white border-emerald-500 shadow-xs'
-                      : 'bg-white text-slate-600 hover:bg-slate-100 border-slate-200'
-                  }`}
+                  className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer border ${isActive
+                    ? 'bg-emerald-600 text-white border-emerald-500 shadow-xs'
+                    : 'bg-white text-slate-600 hover:bg-slate-100 border-slate-200'
+                    }`}
                 >
                   <Icon className='h-4 w-4' />
                   <span>{tab.label}</span>
@@ -681,140 +713,6 @@ export default function LandingPage() {
               transition={{ duration: 0.35, ease: 'easeOut' }}
               className='bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-10 shadow-xs'
             >
-              {activeTab === 'jadwal' && (
-                <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 items-center'>
-                  <div className='space-y-6'>
-                    <div className='inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200'>
-                      <Calendar className='h-3.5 w-3.5' />
-                      <span>Jadwal & Alokasi Pelajaran AI</span>
-                    </div>
-                    <h3 className='text-2xl sm:text-3xl font-extrabold text-slate-900'>
-                      Plotting Jam Mengajar & AI Generator Schedule
-                    </h3>
-                    <p className='text-slate-600 text-sm leading-relaxed font-medium'>
-                      Atur alokasi jam mingguan per mata pelajaran, gunakan
-                      generator AI untuk memplot jadwal otomatis tanpa bentrok,
-                      dan cetak jadwal dinding kelas siap tempel.
-                    </p>
-                    <ul className='space-y-3 text-sm text-slate-700 font-medium'>
-                      <li className='flex items-center gap-3'>
-                        <Check className='h-4 w-4 text-emerald-600' />
-                        <span>Generator Jadwal Pelajaran AI Otomatis</span>
-                      </li>
-                      <li className='flex items-center gap-3'>
-                        <Check className='h-4 w-4 text-emerald-600' />
-                        <span>
-                          Tracker alokasi baseline jam mengajar mingguan
-                        </span>
-                      </li>
-                      <li className='flex items-center gap-3'>
-                        <Check className='h-4 w-4 text-emerald-600' />
-                        <span>
-                          Toggle jam istirahat interaktif & cetak poster dinding
-                        </span>
-                      </li>
-                    </ul>
-                  </div>
-                  {/* Visual Card */}
-                  <div className='bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4 shadow-xs'>
-                    <div className='flex items-center justify-between border-b border-slate-200 pb-3'>
-                      <span className='text-xs font-extrabold text-slate-900'>
-                        Preview Plotting Jadwal Mingguan
-                      </span>
-                      <span className='text-[11px] text-emerald-700 font-bold bg-emerald-100/70 px-2 py-0.5 rounded-full'>
-                        AI Auto-Plot
-                      </span>
-                    </div>
-                    <div className='space-y-2 text-xs'>
-                      <div className='flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 shadow-xs'>
-                        <span className='font-bold text-slate-800'>
-                          Jam 1-2 (07.00 - 08.20)
-                        </span>
-                        <span className='text-emerald-700 font-extrabold'>
-                          Matematika
-                        </span>
-                      </div>
-                      <div className='flex items-center justify-between p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 shadow-xs font-bold'>
-                        <span>Jam 3 (08.20 - 08.40)</span>
-                        <span>☕ Istirahat Pertama</span>
-                      </div>
-                      <div className='flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 shadow-xs'>
-                        <span className='font-bold text-slate-800'>
-                          Jam 4-5 (08.40 - 10.00)
-                        </span>
-                        <span className='text-teal-700 font-extrabold'>
-                          IPA & Eksperimen
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'piket' && (
-                <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 items-center'>
-                  <div className='space-y-6'>
-                    <div className='inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold border border-indigo-200'>
-                      <CheckSquare className='h-3.5 w-3.5' />
-                      <span>Manajemen Piket Kebersihan</span>
-                    </div>
-                    <h3 className='text-2xl sm:text-3xl font-extrabold text-slate-900'>
-                      Pembagian Petugas Piket Harian Teratur
-                    </h3>
-                    <p className='text-slate-600 text-sm leading-relaxed font-medium'>
-                      Bagi kelompok piket kebersihan harian (Senin - Sabtu)
-                      secara adil. Cetak jadwal poster piket dengan format
-                      visual menarik untuk papan kelas.
-                    </p>
-                    <ul className='space-y-3 text-sm text-slate-700 font-medium'>
-                      <li className='flex items-center gap-3'>
-                        <Check className='h-4 w-4 text-indigo-600' />
-                        <span>Visualisasi avatar tag petugas per hari</span>
-                      </li>
-                      <li className='flex items-center gap-3'>
-                        <Check className='h-4 w-4 text-indigo-600' />
-                        <span>
-                          Pengeditan nama petugas piket cepat & fleksibel
-                        </span>
-                      </li>
-                      <li className='flex items-center gap-3'>
-                        <Check className='h-4 w-4 text-indigo-600' />
-                        <span>
-                          Format cetak siap tempel di papan informasi kelas
-                        </span>
-                      </li>
-                    </ul>
-                  </div>
-                  {/* Visual Card */}
-                  <div className='bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4 shadow-xs'>
-                    <div className='flex items-center justify-between border-b border-slate-200 pb-3'>
-                      <span className='text-xs font-extrabold text-slate-900'>
-                        Petugas Piket Hari Senin
-                      </span>
-                      <span className='text-[11px] text-indigo-700 font-bold bg-indigo-100/70 px-2 py-0.5 rounded-full'>
-                        4 Petugas
-                      </span>
-                    </div>
-                    <div className='flex flex-wrap gap-2 py-1'>
-                      {[
-                        'Ahmad Supriyadi',
-                        'Budi Santoso',
-                        'Citra Lestari',
-                        'Dewi Anggraini',
-                      ].map((n, i) => (
-                        <span
-                          key={i}
-                          className='px-3 py-1.5 bg-white border border-indigo-200 text-indigo-900 font-bold text-xs rounded-xl shadow-xs flex items-center gap-1.5'
-                        >
-                          <span className='w-2 h-2 rounded-full bg-indigo-500' />
-                          {n}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
               {activeTab === 'absensi' && (
                 <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 items-center'>
                   <div className='space-y-6'>
@@ -823,12 +721,12 @@ export default function LandingPage() {
                       <span>Presensi & Absensi Harian</span>
                     </div>
                     <h3 className='text-2xl sm:text-3xl font-extrabold text-slate-900'>
-                      Pencatatan Presensi Cepat Tanpa Ribet
+                      Pencatatan Presensi Cepat & Cetak Rekapitulasi
                     </h3>
                     <p className='text-slate-600 text-sm leading-relaxed font-medium'>
                       Input kehadiran siswa harian (Hadir, Sakit, Izin, Alpa)
                       secara praktis. Sistem akan mengalkulasi persentase
-                      kehadiran bulanan dan semesteran secara otomatis.
+                      kehadiran bulanan dan mendukung Pratinjau Cetak / Ekspor PDF & Excel.
                     </p>
                     <ul className='space-y-3 text-sm text-slate-700 font-medium'>
                       <li className='flex items-center gap-3'>
@@ -846,7 +744,7 @@ export default function LandingPage() {
                       <li className='flex items-center gap-3'>
                         <Check className='h-4 w-4 text-emerald-600' />
                         <span>
-                          Rekapitulasi otomatis untuk laporan wali kelas
+                          Pratinjau cetak rekapitulasi & ekspor Excel / PDF
                         </span>
                       </li>
                     </ul>
@@ -904,7 +802,7 @@ export default function LandingPage() {
                     <p className='text-slate-600 text-sm leading-relaxed font-medium'>
                       Input nilai per mata pelajaran, set nilai KKM standar, dan
                       biarkan Smart Class mengalkulasi rata-rata serta
-                      memberikan notifikasi siswa yang perlu perhatian khusus.
+                      menyediakan lembar pratinjau cetak laporan nilai lengkap TTD.
                     </p>
                     <ul className='space-y-3 text-sm text-slate-700 font-medium'>
                       <li className='flex items-center gap-3'>
@@ -919,7 +817,7 @@ export default function LandingPage() {
                       </li>
                       <li className='flex items-center gap-3'>
                         <Check className='h-4 w-4 text-teal-600' />
-                        <span>Export laporan nilai kelas dengan rapi</span>
+                        <span>Pratinjau Cetak & Export Laporan Nilai Ke Excel/PDF</span>
                       </li>
                     </ul>
                   </div>
@@ -949,6 +847,61 @@ export default function LandingPage() {
                         <span className='font-mono font-extrabold text-rose-600 text-sm'>
                           68 (Perlu Remedial)
                         </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'jurnal' && (
+                <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 items-center'>
+                  <div className='space-y-6'>
+                    <div className='inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200'>
+                      <BookMarked className='h-3.5 w-3.5' />
+                      <span>Jurnal Harian Wali Kelas</span>
+                    </div>
+                    <h3 className='text-2xl sm:text-3xl font-extrabold text-slate-900'>
+                      Agenda KBM Harian Terintegrasi Presensi
+                    </h3>
+                    <p className='text-slate-600 text-sm leading-relaxed font-medium'>
+                      Dokumentasikan agenda kegiatan mengajar harian, materi
+                      pembelajaran, serta absensi per siswa secara langsung
+                      dalam satu formulir jurnal.
+                    </p>
+                    <ul className='space-y-3 text-sm text-slate-700 font-medium'>
+                      <li className='flex items-center gap-3'>
+                        <Check className='h-4 w-4 text-emerald-600' />
+                        <span>
+                          Input jam pelajaran, mata pelajaran, & topik KBM
+                        </span>
+                      </li>
+                      <li className='flex items-center gap-3'>
+                        <Check className='h-4 w-4 text-emerald-600' />
+                        <span>Input presensi per siswa langsung di jurnal</span>
+                      </li>
+                      <li className='flex items-center gap-3'>
+                        <Check className='h-4 w-4 text-emerald-600' />
+                        <span>Arsip agenda harian wali kelas terorganisir</span>
+                      </li>
+                    </ul>
+                  </div>
+                  {/* Visual Card */}
+                  <div className='bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4 shadow-xs'>
+                    <div className='flex items-center justify-between border-b border-slate-200 pb-3'>
+                      <span className='text-xs font-extrabold text-slate-900'>
+                        Jurnal KBM - Jam 1-2
+                      </span>
+                      <span className='text-[11px] text-emerald-700 font-bold'>
+                        Bahasa Indonesia
+                      </span>
+                    </div>
+                    <div className='p-3.5 rounded-xl bg-white border border-slate-200 text-xs space-y-2 shadow-xs'>
+                      <div className='font-bold text-slate-900'>
+                        Materi: Membaca Puisi & Struktur Bait
+                      </div>
+                      <div className='text-[11px] text-slate-600 font-medium'>
+                        Catatan: Siswa antusias mengikuti latihan membaca depan
+                        kelas.
                       </div>
                     </div>
                   </div>
@@ -1029,35 +982,37 @@ export default function LandingPage() {
                 </div>
               )}
 
-              {activeTab === 'jurnal' && (
+              {activeTab === 'jadwal' && (
                 <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 items-center'>
                   <div className='space-y-6'>
                     <div className='inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200'>
-                      <BookMarked className='h-3.5 w-3.5' />
-                      <span>Jurnal Harian Wali Kelas</span>
+                      <Calendar className='h-3.5 w-3.5' />
+                      <span>Jadwal & Alokasi Pelajaran AI</span>
                     </div>
                     <h3 className='text-2xl sm:text-3xl font-extrabold text-slate-900'>
-                      Agenda KBM Harian Terintegrasi Presensi
+                      Plotting Jam Mengajar & AI Generator Schedule
                     </h3>
                     <p className='text-slate-600 text-sm leading-relaxed font-medium'>
-                      Dokumentasikan agenda kegiatan mengajar harian, materi
-                      pembelajaran, serta absensi per siswa secara langsung
-                      dalam satu formulir jurnal.
+                      Atur alokasi jam mingguan per mata pelajaran, gunakan
+                      generator AI untuk memplot jadwal otomatis tanpa bentrok,
+                      dan cetak jadwal dinding kelas siap tempel.
                     </p>
                     <ul className='space-y-3 text-sm text-slate-700 font-medium'>
                       <li className='flex items-center gap-3'>
                         <Check className='h-4 w-4 text-emerald-600' />
+                        <span>Generator Jadwal Pelajaran AI Otomatis</span>
+                      </li>
+                      <li className='flex items-center gap-3'>
+                        <Check className='h-4 w-4 text-emerald-600' />
                         <span>
-                          Input jam pelajaran, mata pelajaran, & topik KBM
+                          Tracker alokasi baseline jam mengajar mingguan
                         </span>
                       </li>
                       <li className='flex items-center gap-3'>
                         <Check className='h-4 w-4 text-emerald-600' />
-                        <span>Input presensi per siswa langsung di jurnal</span>
-                      </li>
-                      <li className='flex items-center gap-3'>
-                        <Check className='h-4 w-4 text-emerald-600' />
-                        <span>Arsip agenda harian wali kelas terorganisir</span>
+                        <span>
+                          Toggle jam istirahat interaktif & cetak poster dinding
+                        </span>
                       </li>
                     </ul>
                   </div>
@@ -1065,74 +1020,32 @@ export default function LandingPage() {
                   <div className='bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4 shadow-xs'>
                     <div className='flex items-center justify-between border-b border-slate-200 pb-3'>
                       <span className='text-xs font-extrabold text-slate-900'>
-                        Jurnal KBM - Jam 1-2
+                        Preview Plotting Jadwal Mingguan
                       </span>
-                      <span className='text-[11px] text-emerald-700 font-bold'>
-                        Bahasa Indonesia
-                      </span>
-                    </div>
-                    <div className='p-3.5 rounded-xl bg-white border border-slate-200 text-xs space-y-2 shadow-xs'>
-                      <div className='font-bold text-slate-900'>
-                        Materi: Membaca Puisi & Struktur Bait
-                      </div>
-                      <div className='text-[11px] text-slate-600 font-medium'>
-                        Catatan: Siswa antusias mengikuti latihan membaca depan
-                        kelas.
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'siswa' && (
-                <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 items-center'>
-                  <div className='space-y-6'>
-                    <div className='inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-50 text-teal-700 text-xs font-bold border border-teal-200'>
-                      <Users className='h-3.5 w-3.5' />
-                      <span>Database Siswa Terpusat</span>
-                    </div>
-                    <h3 className='text-2xl sm:text-3xl font-extrabold text-slate-900'>
-                      Kelola Profil & Informasi Siswa Terstruktur
-                    </h3>
-                    <p className='text-slate-600 text-sm leading-relaxed font-medium'>
-                      Database profil siswa lengkap mencakup NIS/NISN, jenis
-                      kelamin, alamat, data kontak orang tua/wali, serta status
-                      keaktifan siswa.
-                    </p>
-                    <ul className='space-y-3 text-sm text-slate-700 font-medium'>
-                      <li className='flex items-center gap-3'>
-                        <Check className='h-4 w-4 text-teal-600' />
-                        <span>Pencarian & filter data siswa cepat</span>
-                      </li>
-                      <li className='flex items-center gap-3'>
-                        <Check className='h-4 w-4 text-teal-600' />
-                        <span>Kontak orang tua/wali tercatat rapi</span>
-                      </li>
-                      <li className='flex items-center gap-3'>
-                        <Check className='h-4 w-4 text-teal-600' />
-                        <span>Ekspor daftar siswa ke Excel/PDF</span>
-                      </li>
-                    </ul>
-                  </div>
-                  {/* Visual Card */}
-                  <div className='bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4 shadow-xs'>
-                    <div className='flex items-center justify-between border-b border-slate-200 pb-3'>
-                      <span className='text-xs font-extrabold text-slate-900'>
-                        Profil Siswa - Class 5A
-                      </span>
-                      <span className='text-[11px] text-teal-700 font-bold uppercase'>
-                        Active
+                      <span className='text-[11px] text-emerald-700 font-bold bg-emerald-100/70 px-2 py-0.5 rounded-full'>
+                        AI Auto-Plot
                       </span>
                     </div>
-                    <div className='p-3.5 rounded-xl bg-white border border-slate-200 text-xs space-y-1.5 shadow-xs'>
-                      <div className='font-extrabold text-slate-900'>
-                        Ahmad Fauzi Rahmat
+                    <div className='space-y-2 text-xs'>
+                      <div className='flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 shadow-xs'>
+                        <span className='font-bold text-slate-800'>
+                          Jam 1-2 (07.00 - 08.20)
+                        </span>
+                        <span className='text-emerald-700 font-extrabold'>
+                          Matematika
+                        </span>
                       </div>
-                      <div className='text-slate-600 font-medium'>
-                        NISN: 0081234567 • Laki-laki
+                      <div className='flex items-center justify-between p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 shadow-xs font-bold'>
+                        <span>Jam 3 (08.20 - 08.40)</span>
+                        <span>☕ Istirahat Pertama</span>
                       </div>
-                      <div className='text-slate-500 text-[11px] font-medium'>
-                        Wali: Bpk. Rahmat (0812-3456-7890)
+                      <div className='flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 shadow-xs'>
+                        <span className='font-bold text-slate-800'>
+                          Jam 4-5 (08.40 - 10.00)
+                        </span>
+                        <span className='text-teal-700 font-extrabold'>
+                          IPA & Eksperimen
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -1140,6 +1053,25 @@ export default function LandingPage() {
               )}
             </motion.div>
           </AnimatePresence>
+
+          {/* Additional Features Text Banner */}
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className='mt-6 p-4 rounded-2xl bg-white border border-slate-200/80 text-xs sm:text-sm text-slate-600 font-medium flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left shadow-2xs'
+          >
+            <div className='flex items-center gap-2.5'>
+              <Sparkles className='h-4 w-4 text-emerald-600 shrink-0' />
+              <span>
+                <strong className='text-slate-900 font-bold'>Modul Lengkap Lainnya:</strong> Manajemen Piket Kebersihan, Database Profil Siswa, Pratinjau Cetak Rekapitulasi Sah, serta Ekspor PDF & Excel.
+              </span>
+            </div>
+            <div className='flex items-center gap-1.5 shrink-0 font-extrabold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200'>
+              <span>7+ Modul Terintegrasi</span>
+            </div>
+          </motion.div>
         </section>
 
         {/* ==================== KEY BENEFITS SECTION ==================== */}
@@ -1159,32 +1091,32 @@ export default function LandingPage() {
                 Mengapa Memilih Smart Class
               </h2>
               <p className='text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight'>
-                Memudahkan Tugas Wali Kelas
+                Smart Class Memudahkan Tugas Wali Kelas
               </p>
             </motion.div>
 
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-8'>
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
               {[
                 {
-                  icon: Zap,
-                  title: 'Hemat Waktu Administrasi',
-                  desc: 'Tidak ada lagi kalkulasi manual nilai atau rekap absensi berjam-jam. Semuanya terakumulasi secara otomatis real-time.',
+                  icon: Printer,
+                  title: 'Cetak Laporan & Ekspor',
+                  desc: 'Pratinjau cetak rekap absensi & nilai akademik siap cetak lengkap TTD Wali Kelas, Kepala Sekolah & NIP/NUPTK. Dukung ekspor Excel & PDF.',
                   color: 'bg-emerald-100 text-emerald-700',
                   hoverBorder: 'hover:border-emerald-500/50',
                 },
                 {
-                  icon: Smartphone,
-                  title: 'Responsif Di Mana Saja',
-                  desc: 'Akses langsung dari HP di dalam ruang kelas, dari tablet, atau laptop di rumah. Tampilan menyesuaikan secara optimal.',
+                  icon: Zap,
+                  title: 'Hemat Waktu Administrasi',
+                  desc: 'Tidak ada lagi kalkulasi manual nilai atau rekap absensi berjam-jam. Semuanya terakumulasi secara otomatis real-time.',
                   color: 'bg-teal-100 text-teal-700',
                   hoverBorder: 'hover:border-teal-500/50',
                 },
                 {
-                  icon: Settings,
-                  title: 'Fleksibel & Kustom Menu',
-                  desc: 'Bebas mengaktifkan atau menyembunyikan modul sidebar sesuai kebutuhan spesifik wali kelas dan kebijakan sekolah.',
-                  color: 'bg-indigo-100 text-indigo-700',
-                  hoverBorder: 'hover:border-indigo-500/50',
+                  icon: Smartphone,
+                  title: 'Responsif & Lintas Perangkat',
+                  desc: 'Akses mudah dari layar HP di kelas, Tablet, maupun Laptop di rumah dengan tampilan yang nyaman & optimal.',
+                  color: 'bg-emerald-100 text-emerald-700',
+                  hoverBorder: 'hover:border-emerald-500/50',
                 },
               ].map((card, idx) => {
                 const Icon = card.icon;
@@ -1246,16 +1178,20 @@ export default function LandingPage() {
                 a: 'Ya, Smart Class dirancang dengan antarmuka yang fully responsive. Anda dapat menginput presensi, nilai, maupun jurnal harian dengan nyaman dari layar Smartphone, Tablet, maupun PC.',
               },
               {
+                q: 'Bagaimana keamanan akun dan data sekolah di Smart Class?',
+                a: 'Smart Class dilindungi oleh teknologi keamanan tingkat tinggi, termasuk integrasi Google reCAPTCHA v3 dan sistem Rate Limiting untuk mencegah akses unauthorized/bot, serta enkripsi data terproteksi.',
+              },
+              {
                 q: 'Apakah saya bisa menyesuaikan modul apa saja yang tampil di sidebar?',
                 a: 'Sangat bisa! Smart Class dilengkapi fitur Custom Menu Preferences. Anda dapat memilih modul mana saja yang aktif (misalnya hanya Absensi & Jurnal) sesuai kebutuhan kelas Anda.',
               },
               {
-                q: 'Bagaimana cara mendaftar dan mulai menggunakan aplikasi?',
-                a: 'Cukup klik tombol "Daftar Sekarang", isi nama lengkap, email, nama sekolah, dan kata sandi. Akun Anda akan langsung aktif dan siap digunakan.',
+                q: 'Apakah identitas Wali Kelas dan Kepala Sekolah bisa disesuaikan untuk dokumen cetak?',
+                a: 'Bisa. Di menu Pengaturan Profil & Wali Kelas, Anda dapat mengisi nama resmi serta nomor NIP atau NUPTK Wali Kelas dan Kepala Sekolah yang akan otomatis tersemat pada lembar cetak laporan.',
               },
               {
-                q: 'Apakah data absensi dan nilai siswa saya aman?',
-                a: 'Semua data disimpan dalam basis data terenkripsi dengan sesi autentikasi terproteksi. Hanya Anda sebagai wali kelas yang berhak mengelola data kelas Anda.',
+                q: 'Bagaimana cara mendaftar dan mulai menggunakan aplikasi?',
+                a: 'Cukup klik tombol "Daftar Sekarang", isi nama lengkap, email, nama sekolah, dan kata sandi. Akun Anda akan langsung aktif dan siap digunakan.',
               },
             ].map((item, idx) => (
               <motion.div
@@ -1272,9 +1208,8 @@ export default function LandingPage() {
                 >
                   <span>{item.q}</span>
                   <ChevronDown
-                    className={`h-5 w-5 text-slate-400 transition-transform duration-300 flex-shrink-0 ${
-                      openFaq === idx ? 'rotate-180 text-emerald-600' : ''
-                    }`}
+                    className={`h-5 w-5 text-slate-400 transition-transform duration-300 flex-shrink-0 ${openFaq === idx ? 'rotate-180 text-emerald-600' : ''
+                      }`}
                   />
                 </button>
                 <AnimatePresence>
@@ -1311,7 +1246,7 @@ export default function LandingPage() {
           >
             <div className='relative z-10 space-y-6 max-w-3xl mx-auto'>
               <h2 className='text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight'>
-                Siap Tingkatkan Produktivitas <br /> Anda Hari Ini?
+                Siap Tingkatkan Produktivitas ?
               </h2>
               <p className='text-base sm:text-lg text-emerald-50 font-medium'>
                 Bergabunglah dengan wali kelas modern lainnya dalam mengelola
@@ -1328,7 +1263,7 @@ export default function LandingPage() {
                     >
                       <Button className='w-full sm:w-auto bg-white text-emerald-800 hover:bg-emerald-50 font-bold text-base px-8 py-6 rounded-2xl shadow-md transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer'>
                         <LayoutDashboard className='h-5 w-5' />
-                        <span>Buka Dashboard</span>
+                        <span>Dashboard</span>
                       </Button>
                     </motion.div>
                   </Link>
