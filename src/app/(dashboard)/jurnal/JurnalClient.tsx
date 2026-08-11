@@ -543,7 +543,7 @@ export default function JurnalClient() {
                     <span className='font-bold text-slate-900 print:text-black'>: {headerForm.teacherName || '-'}</span>
                   </div>
                   <div className='flex'>
-                    <span className='w-32 text-slate-500 font-bold shrink-0 print:text-black'>NIP Guru</span>
+                    <span className='w-32 text-slate-500 font-bold shrink-0 print:text-black'>NIP/NUPTK Guru</span>
                     <span className='font-bold text-slate-900 print:text-black'>: {headerForm.nip || '-'}</span>
                   </div>
                 </div>
@@ -672,7 +672,7 @@ export default function JurnalClient() {
                       {headerForm.teacherName || 'Nama Guru'}
                     </p>
                     <p className='text-[11px] text-slate-700 print:text-black mt-0.5'>
-                      NIP. {headerForm.nip || '-'}
+                      NIP/NUPTK. {headerForm.nip || '-'}
                     </p>
                   </div>
                 </div>
@@ -818,7 +818,7 @@ export default function JurnalClient() {
                   </span>
                 </div>
                 <div className='flex justify-between border-b border-slate-100 pb-1 print:border-zinc-300'>
-                  <span className='font-bold text-slate-500 print:text-black w-36'>NIP</span>
+                  <span className='font-bold text-slate-500 print:text-black w-36'>NIP/NUPTK</span>
                   <span className='font-bold text-slate-900 print:text-black flex-1'>
                     : {headerForm.nip || '-'}
                   </span>
@@ -1317,7 +1317,7 @@ export default function JurnalClient() {
                 </div>
 
                 <div className='space-y-1'>
-                  <Label className='text-slate-700 text-xs font-semibold'>NIP</Label>
+                  <Label className='text-slate-700 text-xs font-semibold'>NIP/NUPTK</Label>
                   <Input
                     placeholder='-'
                     value={headerForm.nip}

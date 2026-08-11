@@ -801,7 +801,7 @@ export default function NilaiClient({
                       </div>
                       <div className='space-y-1'>
                         <Label className='text-slate-700 font-semibold'>
-                          NIP Guru
+                          NIP/NUPTK Guru
                         </Label>
                         <Input
                           value={docHeader.nip}
@@ -1098,7 +1098,7 @@ export default function NilaiClient({
                 </div>
                 <div className='flex items-center gap-1.5'>
                   <span className='w-28 text-slate-500 font-bold shrink-0 print:text-black'>
-                    NIP
+                    NIP/NUPTK
                   </span>
                   <span className='text-slate-400 font-bold'>:</span>
                   <Input
@@ -1576,7 +1576,7 @@ export default function NilaiClient({
                       className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 w-full max-w-xs print:border-none print:p-0'
                     />
                     <div className='flex items-center gap-1 text-[11px] text-slate-700 print:text-black'>
-                      <span>NIP.</span>
+                      <span>NIP/NUPTK.</span>
                       <Input
                         value={signatureData.teacherNip}
                         onChange={(e) =>

@@ -48,7 +48,7 @@ function appendSignatureBlock(
   worksheet.getCell(`${rightCol}${sigRow + 4}`).value =
     signatureData?.teacherName || headerInfo?.teacherName || '';
   worksheet.getCell(`${rightCol}${sigRow + 5}`).value =
-    `NIP. ${teacherNipVal}`;
+    `NIP/NUPTK. ${teacherNipVal}`;
 
   // Fonts & Alignment
   const boldFont = { name: 'Arial', size: 10, bold: true };
@@ -571,7 +571,7 @@ export async function exportJournalToExcel(
 
   worksheet.getCell('A5').value = 'Kelas/Semester';
   worksheet.getCell('B5').value = `: ${headerInfo.classNameSemester || '-'}`;
-  worksheet.getCell('G5').value = 'NIP';
+  worksheet.getCell('G5').value = 'NIP/NUPTK';
   worksheet.getCell('H5').value = `: ${headerInfo.nip || '-'}`;
 
   worksheet.getCell('A6').value = 'Tahun Pelajaran';
@@ -754,7 +754,7 @@ export async function exportWeeklyAttendanceToExcel(
 
   worksheet.getCell('E3').value = 'Guru Kelas';
   worksheet.getCell('F3').value = `: ${headerInfo.teacherName || '-'}`;
-  worksheet.getCell('E4').value = 'NIP';
+  worksheet.getCell('E4').value = 'NIP/NUPTK';
   worksheet.getCell('F4').value = `: ${headerInfo.nip || '-'}`;
 
   ['A3', 'A4', 'E3', 'E4'].forEach((c) => {
@@ -920,7 +920,7 @@ export async function exportMonthlyAttendanceToExcel(
 
   worksheet.getCell('E3').value = 'Guru Kelas';
   worksheet.getCell('F3').value = `: ${headerInfo.teacherName || '-'}`;
-  worksheet.getCell('E4').value = 'NIP';
+  worksheet.getCell('E4').value = 'NIP/NUPTK';
   worksheet.getCell('F4').value = `: ${headerInfo.nip || '-'}`;
 
   ['A3', 'A4', 'E3', 'E4'].forEach((c) => {
@@ -1080,7 +1080,7 @@ export async function exportYearlyAttendanceToExcel(
 
   worksheet.getCell('E3').value = 'Guru Kelas';
   worksheet.getCell('F3').value = `: ${headerInfo.teacherName || '-'}`;
-  worksheet.getCell('E4').value = 'NIP';
+  worksheet.getCell('E4').value = 'NIP/NUPTK';
   worksheet.getCell('F4').value = `: ${headerInfo.nip || '-'}`;
 
   ['A3', 'A4', 'E3', 'E4'].forEach((c) => {

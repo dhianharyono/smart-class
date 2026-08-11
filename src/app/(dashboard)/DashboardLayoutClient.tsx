@@ -247,7 +247,7 @@ export default function DashboardLayoutClient({
     }
 
     if (!onboardingNip.trim()) {
-      toast.error('NIP (Nomor Induk Pegawai) wajib diisi.');
+      toast.error('NIP/NUPTK wajib diisi.');
       return;
     }
 
@@ -287,7 +287,7 @@ export default function DashboardLayoutClient({
     }
 
     if (!onboardingNip.trim()) {
-      toast.error('NIP (Nomor Induk Pegawai) wajib diisi.');
+      toast.error('NIP/NUPTK wajib diisi.');
       setOnboardingStep(1);
       return;
     }
@@ -695,10 +695,10 @@ export default function DashboardLayoutClient({
                 </div>
               </div>
 
-              {/* NIP */}
+              {/* NIP / NUPTK */}
               <div className='space-y-1.5'>
                 <label className='text-xs font-bold uppercase tracking-wider text-slate-700 block'>
-                  NIP (Nomor Induk Pegawai) <span className='text-rose-500'>*</span>
+                  NIP / NUPTK <span className='text-rose-500'>*</span>
                 </label>
                 <div className='relative'>
                   <div className='absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400'>
@@ -707,7 +707,7 @@ export default function DashboardLayoutClient({
                   <input
                     type='text'
                     required
-                    placeholder='Misal: 19850101 201001 1 001'
+                    placeholder='Misal: 19850101 201001 1 001 / NUPTK'
                     value={onboardingNip}
                     onChange={(e) => setOnboardingNip(e.target.value)}
                     className='w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:outline-none rounded-xl text-sm font-medium transition-all'

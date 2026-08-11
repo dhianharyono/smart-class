@@ -215,7 +215,7 @@ export default function ProfileClient() {
       return;
     }
     if (!profileForm.nip.trim() || profileForm.nip.trim() === '-') {
-      toast.error('NIP Guru wajib diisi.');
+      toast.error('NIP/NUPTK Guru wajib diisi.');
       return;
     }
     if (!profileForm.principalName.trim()) {
@@ -348,7 +348,7 @@ export default function ProfileClient() {
               Informasi Data Diri & Sekolah
             </CardTitle>
             <CardDescription className='text-xs text-slate-500 mt-1'>
-              Kelola nama lengkap, email login, identitas sekolah, dan NIP Anda.
+              Kelola nama lengkap, email login, identitas sekolah, dan NIP/NUPTK Anda.
             </CardDescription>
           </CardHeader>
 
@@ -429,10 +429,10 @@ export default function ProfileClient() {
             <div className='space-y-1.5 w-full sm:w-1/2'>
               <Label className='text-slate-700 text-xs font-semibold flex items-center gap-2'>
                 <FileCheck2 className='h-3.5 w-3.5 text-slate-400' />
-                <span>NIP Guru</span> <span className='text-rose-500'>*</span>
+                <span>NIP/NUPTK Guru</span> <span className='text-rose-500'>*</span>
               </Label>
               <Input
-                placeholder='Contoh: 19850101 201001 1 001'
+                placeholder='Contoh: 19850101 201001 1 001 / NUPTK'
                 value={profileForm.nip}
                 onChange={(e) =>
                   setProfileForm({ ...profileForm, nip: e.target.value })
