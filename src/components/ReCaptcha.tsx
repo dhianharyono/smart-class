@@ -70,8 +70,10 @@ export default function ReCaptcha({ onVerify, onExpire, resetTrigger, theme = 'l
   useEffect(() => {
     // Check if grecaptcha is already available globally (e.g. from previous navigation)
     if (window.grecaptcha && typeof window.grecaptcha.render === 'function') {
-      setIsLoaded(true);
-      renderWidget();
+      setTimeout(() => {
+        setIsLoaded(true);
+        renderWidget();
+      }, 0);
       return;
     }
 
@@ -101,7 +103,10 @@ export default function ReCaptcha({ onVerify, onExpire, resetTrigger, theme = 'l
 
   useEffect(() => {
     if (isLoaded) {
-      renderWidget();
+      const timer = setTimeout(() => {
+        renderWidget();
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [isLoaded]);
 
@@ -110,7 +115,7 @@ export default function ReCaptcha({ onVerify, onExpire, resetTrigger, theme = 'l
     if (widgetIdRef.current !== null && window.grecaptcha) {
       try {
         window.grecaptcha.reset(widgetIdRef.current);
-      } catch (e) {
+      } catch (_e) {
         // ignore
       }
     }

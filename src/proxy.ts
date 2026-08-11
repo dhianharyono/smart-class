@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { verifySession } from '@/lib/auth';
 
-const isPublicRoute = (path: string) => {
+const _isPublicRoute = (path: string) => {
   return path === '/' || path.startsWith('/sign-in') || path.startsWith('/sign-up');
 };
 

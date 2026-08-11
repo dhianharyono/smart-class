@@ -36,15 +36,29 @@ export async function getDashboardStats() {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
 
-    // Parallelize DB queries to cut down database response latency drastically
-    const [teacher, studentCount, monthlyAttendance, savingsTx, journals] = await Promise.all([
-      Teacher.findById(teacherId).select('kkm enabledMenus').lean(),
-      Student.countDocuments({ teacherId }),
+    const teacher = await Teacher.findById(teacherId).select('kkm enabledMenus activeClass className').lean();
+    const activeClass = teacher?.activeClass || teacher?.className || '';
+
+    const studentFilter: any = { teacherId };
+    if (activeClass) {
+      studentFilter.$or = [{ className: activeClass }, { className: { $exists: false } }, { className: '' }];
+    }
+
+    const [studentCount, activeStudents] = await Promise.all([
+      Student.countDocuments(studentFilter),
+      Student.find(studentFilter).select('_id').lean(),
+    ]);
+
+    const studentIds = activeStudents.map((s) => s._id.toString());
+
+    // Parallelize DB queries for active class student subset
+    const [monthlyAttendance, savingsTx, journals] = await Promise.all([
       Attendance.find({
         teacherId,
+        studentId: { $in: studentIds },
         date: { $gte: startOfMonth, $lte: endOfMonth },
       }).lean(),
-      Saving.find({ teacherId }).sort({ date: 1 }).lean(),
+      Saving.find({ teacherId, studentId: { $in: studentIds } }).sort({ date: 1 }).lean(),
       Journal.find({ teacherId }).sort({ date: 1 }).lean(),
     ]);
 
@@ -95,9 +109,10 @@ export async function getDashboardStats() {
       .slice(-10); // get last 10 points
 
     // 4. Low grade alerts (score < KKM)
-    // Find all grades < KKM, populate student name
+    // Find all grades < KKM for active class students
     const lowGrades = await Grade.find({
       teacherId,
+      studentId: { $in: studentIds },
       score: { $lt: kkm },
     })
       .sort({ score: 1 })

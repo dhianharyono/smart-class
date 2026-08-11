@@ -36,7 +36,7 @@ export async function getJournalHeader() {
     const teacherId = await requireAuth();
 
     const teacher = await Teacher.findById(teacherId).lean();
-    let header = await JournalHeader.findOne({ teacherId }).lean();
+    const header = await JournalHeader.findOne({ teacherId }).lean();
 
     const validNip =
       teacher?.nip && teacher.nip.trim() !== '' && teacher.nip !== '-'

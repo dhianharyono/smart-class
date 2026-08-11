@@ -35,13 +35,25 @@ export async function getProfile() {
       throw new Error('Pengguna tidak ditemukan.');
     }
 
+    const fallbackClassName = teacher.className || '';
+    const rawClasses = Array.isArray(teacher.classes) && teacher.classes.length > 0
+      ? teacher.classes.filter(Boolean)
+      : (fallbackClassName ? [fallbackClassName] : []);
+    const classes = Array.from(new Set(rawClasses));
+
+    const activeClass = (teacher.activeClass && classes.includes(teacher.activeClass))
+      ? teacher.activeClass
+      : (classes[0] || fallbackClassName);
+
     return JSON.parse(
       JSON.stringify({
         _id: teacher._id.toString(),
         name: teacher.name,
         email: teacher.email,
         schoolName: teacher.schoolName || '',
-        className: teacher.className || '',
+        className: activeClass || fallbackClassName,
+        classes,
+        activeClass,
         nip: teacher.nip || '-',
         principalName: teacher.principalName || '',
         principalNip: teacher.principalNip || '-',
@@ -63,6 +75,8 @@ export async function updateProfile(data: {
   email: string;
   schoolName?: string;
   className?: string;
+  classes?: string[];
+  activeClass?: string;
   nip?: string;
   principalName?: string;
   principalNip?: string;
@@ -83,9 +97,18 @@ export async function updateProfile(data: {
       throw new Error('Nama sekolah wajib diisi minimal 3 karakter.');
     }
 
-    if (!data.className || !data.className.trim()) {
-      throw new Error('Kelas diajar wajib diisi.');
+    const rawClasses = Array.isArray(data.classes) && data.classes.length > 0
+      ? data.classes.map((c) => c.trim()).filter(Boolean)
+      : (data.className?.trim() ? [data.className.trim()] : []);
+    
+    const uniqueClasses = Array.from(new Set(rawClasses));
+    if (uniqueClasses.length === 0) {
+      throw new Error('Setidaknya 1 kelas diajar wajib dimasukkan.');
     }
+
+    const selectedActiveClass = data.activeClass && uniqueClasses.includes(data.activeClass.trim())
+      ? data.activeClass.trim()
+      : uniqueClasses[0];
 
     if (!data.nip || data.nip.trim() === '-' || data.nip.trim().length < 3) {
       throw new Error('NIP/NUPTK Guru wajib diisi dengan NIP/NUPTK yang valid (tidak boleh "-").');
@@ -117,7 +140,9 @@ export async function updateProfile(data: {
           name: data.name.trim(),
           email: normalizedEmail,
           schoolName: data.schoolName?.trim() || '',
-          className: data.className?.trim() || '',
+          className: selectedActiveClass,
+          classes: uniqueClasses,
+          activeClass: selectedActiveClass,
           nip: data.nip.trim(),
           principalName: data.principalName?.trim() || '',
           principalNip: data.principalNip.trim(),
@@ -220,8 +245,6 @@ export async function updateMenuPreferences(
     });
 
     revalidatePath('/');
-    revalidatePath('/profile');
-
     return { success: true, enabledMenus: finalMenus };
   } catch (error: any) {
     if (isRedirectError(error)) {
@@ -229,5 +252,154 @@ export async function updateMenuPreferences(
     }
     console.error('Error updating menu preferences:', error);
     throw new Error(error.message || 'Gagal menyimpan pengaturan menu.');
+  }
+}
+
+/**
+ * Mengganti kelas aktif saat ini untuk wali kelas/guru.
+ */
+export async function switchActiveClass(newClass: string) {
+  try {
+    await dbConnect();
+    const teacherId = await requireAuth();
+
+    const cleanClass = newClass?.trim();
+    if (!cleanClass) {
+      throw new Error('Nama kelas tidak boleh kosong.');
+    }
+
+    const teacher = await Teacher.findById(teacherId);
+    if (!teacher) {
+      throw new Error('Pengguna tidak ditemukan.');
+    }
+
+    const rawClasses = Array.isArray(teacher.classes) && teacher.classes.length > 0
+      ? teacher.classes
+      : (teacher.className ? [teacher.className] : []);
+    const classes = Array.from(new Set(rawClasses));
+
+    if (!classes.includes(cleanClass)) {
+      classes.push(cleanClass);
+    }
+
+    teacher.className = cleanClass;
+    teacher.activeClass = cleanClass;
+    teacher.classes = classes;
+    await teacher.save();
+
+    revalidatePath('/');
+    revalidatePath('/profile');
+    revalidatePath('/siswa');
+    revalidatePath('/absensi');
+    revalidatePath('/nilai');
+    revalidatePath('/tabungan');
+    revalidatePath('/jurnal');
+
+    return { success: true, activeClass: cleanClass, classes };
+  } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+    console.error('Error switching active class:', error);
+    return { success: false, error: error.message || 'Gagal mengganti kelas aktif.' };
+  }
+}
+
+/**
+ * Menambahkan kelas baru ke daftar kelas yang diampu.
+ */
+export async function addClass(newClass: string) {
+  try {
+    await dbConnect();
+    const teacherId = await requireAuth();
+
+    const cleanClass = newClass?.trim();
+    if (!cleanClass) {
+      throw new Error('Nama kelas tidak boleh kosong.');
+    }
+
+    const teacher = await Teacher.findById(teacherId);
+    if (!teacher) {
+      throw new Error('Pengguna tidak ditemukan.');
+    }
+
+    const rawClasses = Array.isArray(teacher.classes) && teacher.classes.length > 0
+      ? teacher.classes
+      : (teacher.className ? [teacher.className] : []);
+    
+    const classes = Array.from(new Set([...rawClasses, cleanClass]));
+
+    teacher.className = cleanClass;
+    teacher.activeClass = cleanClass;
+    teacher.classes = classes;
+    await teacher.save();
+
+    revalidatePath('/');
+    revalidatePath('/profile');
+    revalidatePath('/siswa');
+    revalidatePath('/absensi');
+    revalidatePath('/nilai');
+    revalidatePath('/tabungan');
+    revalidatePath('/jurnal');
+
+    return { success: true, activeClass: cleanClass, classes };
+  } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+    console.error('Error adding class:', error);
+    return { success: false, error: error.message || 'Gagal menambahkan kelas baru.' };
+  }
+}
+
+/**
+ * Menghapus kelas dari daftar kelas yang diampu.
+ */
+export async function deleteClass(classToDelete: string) {
+  try {
+    await dbConnect();
+    const teacherId = await requireAuth();
+
+    const cleanClass = classToDelete?.trim();
+    const teacher = await Teacher.findById(teacherId);
+    if (!teacher) {
+      throw new Error('Pengguna tidak ditemukan.');
+    }
+
+    const rawClasses = Array.isArray(teacher.classes) && teacher.classes.length > 0
+      ? teacher.classes
+      : (teacher.className ? [teacher.className] : []);
+    
+    const remainingClasses = rawClasses.filter((c) => c !== cleanClass);
+
+    if (remainingClasses.length === 0) {
+      throw new Error('Tidak dapat menghapus kelas terakhir. Minimal harus memiliki 1 kelas.');
+    }
+
+    let newActiveClass = teacher.activeClass;
+    if (teacher.activeClass === cleanClass || !remainingClasses.includes(teacher.activeClass || '')) {
+      newActiveClass = remainingClasses[0];
+    }
+
+    teacher.className = newActiveClass;
+    teacher.activeClass = newActiveClass;
+    teacher.classes = remainingClasses;
+    await teacher.save();
+
+    revalidatePath('/');
+    revalidatePath('/profile');
+    revalidatePath('/siswa');
+    revalidatePath('/absensi');
+    revalidatePath('/nilai');
+    revalidatePath('/tabungan');
+    revalidatePath('/jurnal');
+
+    return { success: true, activeClass: newActiveClass, classes: remainingClasses };
+  } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+    console.error('Error deleting class:', error);
+    return { success: false, error: error.message || 'Gagal menghapus kelas.' };
   }
 }

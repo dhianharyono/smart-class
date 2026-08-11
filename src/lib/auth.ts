@@ -11,7 +11,6 @@ function getSecretKey(): string {
 }
 
 const encoder = new TextEncoder();
-const decoder = new TextDecoder();
 
 function base64urlEncode(str: string): string {
   return Buffer.from(str, 'utf-8').toString('base64url');
@@ -82,7 +81,7 @@ export async function verifySession(token: string): Promise<any | null> {
     }
 
     return payload;
-  } catch (error) {
+  } catch (_error) {
     return null;
   }
 }

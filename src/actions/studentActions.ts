@@ -11,6 +11,8 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { isRedirectError } from '@/lib/utils';
 
+import Teacher from '@/models/Teacher';
+
 // Helper to authenticate teacher and return teacherId
 async function requireAuth() {
   const cookieStore = await cookies();
@@ -30,7 +32,16 @@ export async function getStudents() {
   try {
     await dbConnect();
     const teacherId = await requireAuth();
-    const students = await Student.find({ teacherId }).sort({ name: 1 }).lean();
+
+    const teacher = await Teacher.findById(teacherId).lean();
+    const activeClass = teacher?.activeClass || teacher?.className || '';
+
+    const filter: any = { teacherId };
+    if (activeClass) {
+      filter.$or = [{ className: activeClass }, { className: { $exists: false } }, { className: '' }];
+    }
+
+    const students = await Student.find(filter).sort({ name: 1 }).lean();
     return JSON.parse(JSON.stringify(students));
   } catch (error: any) {
     if (isRedirectError(error)) {
@@ -63,20 +74,23 @@ export async function createStudent(data: Partial<IStudent>) {
   try {
     await dbConnect();
     const teacherId = await requireAuth();
+    const teacher = await Teacher.findById(teacherId).lean();
+    const activeClass = teacher?.activeClass || teacher?.className || data.className || '';
 
-    if (!data.nis || !data.name || !data.className || !data.gender) {
-      throw new Error('Nama, NIS, Kelas, dan Jenis Kelamin wajib diisi.');
+    if (!data.nis || !data.name || !data.gender) {
+      throw new Error('Nama, NIS, dan Jenis Kelamin wajib diisi.');
     }
 
-    // Check for NIS duplicate for this teacher
-    const existing = await Student.findOne({ teacherId, nis: data.nis });
+    // Check for NIS duplicate for this teacher in this class
+    const existing = await Student.findOne({ teacherId, nis: data.nis, className: activeClass });
     if (existing) {
-      throw new Error(`Siswa dengan NIS ${data.nis} sudah ada di kelas Anda.`);
+      throw new Error(`Siswa dengan NIS ${data.nis} sudah ada di Kelas ${activeClass}.`);
     }
 
     const newStudent = new Student({
       ...data,
       teacherId,
+      className: data.className || activeClass,
     });
 
     await newStudent.save();

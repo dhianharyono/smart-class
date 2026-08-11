@@ -7,6 +7,8 @@ export interface ITeacher extends Document {
   name: string;
   schoolName?: string;
   className?: string;
+  classes?: string[];
+  activeClass?: string;
   nip?: string;
   principalName?: string;
   principalNip?: string;
@@ -37,6 +39,8 @@ const TeacherSchema = new Schema<ITeacher>({
   name: { type: String, required: true },
   schoolName: { type: String },
   className: { type: String },
+  classes: { type: [String], default: [] },
+  activeClass: { type: String },
   nip: { type: String, default: '-' },
   principalName: { type: String, default: '' },
   principalNip: { type: String, default: '-' },
@@ -51,7 +55,7 @@ const TeacherSchema = new Schema<ITeacher>({
   createdAt: { type: Date, default: Date.now },
 });
 
-if (mongoose.models.Teacher && !mongoose.models.Teacher.schema.path('principalName')) {
+if (mongoose.models.Teacher && (!mongoose.models.Teacher.schema.path('classes') || !mongoose.models.Teacher.schema.path('activeClass') || !mongoose.models.Teacher.schema.path('principalName'))) {
   delete (mongoose.models as any).Teacher;
 }
 

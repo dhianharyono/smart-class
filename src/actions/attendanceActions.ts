@@ -46,9 +46,11 @@ export async function getAttendanceHeaderInfo() {
           ? journalHeader.nip.trim()
           : '-';
 
+    const activeClass = teacher?.activeClass || teacher?.className || journalHeader?.classNameSemester || 'Kelas Utama';
+
     return {
       schoolName: teacher?.schoolName || journalHeader?.schoolName || 'SMK Negeri 1',
-      className: teacher?.className || journalHeader?.classNameSemester || 'Kelas Utama',
+      className: activeClass,
       teacherName: teacher?.name || journalHeader?.teacherName || '',
       nip: validNip,
       principalName: teacher?.principalName || '',
@@ -59,9 +61,8 @@ export async function getAttendanceHeaderInfo() {
     if (isRedirectError(error)) {
       throw error;
     }
-    console.error('Error fetching attendance header info:', error);
     return {
-      schoolName: 'Sekolah Smart Class',
+      schoolName: 'SMK Negeri 1',
       className: 'Kelas Utama',
       teacherName: 'Guru Kelas',
       nip: '-',
@@ -74,10 +75,17 @@ export async function getAttendanceByDate(dateStr: string) {
   try {
     await dbConnect();
     const teacherId = await requireAuth();
+    const teacher = await Teacher.findById(teacherId).lean();
+    const activeClass = teacher?.activeClass || teacher?.className || '';
     const targetDate = parseLocalDate(dateStr);
 
-    // Fetch all students for this teacher
-    const students = await Student.find({ teacherId }).sort({ name: 1 }).lean();
+    const studentFilter: any = { teacherId };
+    if (activeClass) {
+      studentFilter.className = activeClass;
+    }
+
+    // Fetch students for active class
+    const students = await Student.find(studentFilter).sort({ name: 1 }).lean();
     
     // Fetch all attendance for this date
     const attendanceRecords = await Attendance.find({
@@ -114,19 +122,26 @@ export async function getWeeklyAttendanceReport(startDateStr: string, endDateStr
   try {
     await dbConnect();
     const teacherId = await requireAuth();
+    const teacher = await Teacher.findById(teacherId).lean();
+    const activeClass = teacher?.activeClass || teacher?.className || '';
 
     const startDate = parseLocalDate(startDateStr);
     const [endY, endM, endD] = endDateStr.split('-').map(Number);
     const endDate = new Date(Date.UTC(endY, endM - 1, endD, 23, 59, 59, 999));
 
-    const students = await Student.find({ teacherId }).sort({ name: 1 }).lean();
+    const studentFilter: any = { teacherId };
+    if (activeClass) {
+      studentFilter.className = activeClass;
+    }
+
+    const students = await Student.find(studentFilter).sort({ name: 1 }).lean();
     const attendanceRecords = await Attendance.find({
       teacherId,
       date: { $gte: startDate, $lte: endDate },
     }).lean();
 
     const datesList: string[] = [];
-    let curr = new Date(startDate);
+    const curr = new Date(startDate);
     while (curr <= endDate) {
       const year = curr.getUTCFullYear();
       const month = String(curr.getUTCMonth() + 1).padStart(2, '0');
@@ -205,12 +220,19 @@ export async function getMonthlyAttendanceReport(year: number, month: number) {
   try {
     await dbConnect();
     const teacherId = await requireAuth();
+    const teacher = await Teacher.findById(teacherId).lean();
+    const activeClass = teacher?.activeClass || teacher?.className || '';
 
     const startDate = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0, 0));
     const endDate = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
     const daysInMonth = new Date(year, month, 0).getDate();
 
-    const students = await Student.find({ teacherId }).sort({ name: 1 }).lean();
+    const studentFilter: any = { teacherId };
+    if (activeClass) {
+      studentFilter.className = activeClass;
+    }
+
+    const students = await Student.find(studentFilter).sort({ name: 1 }).lean();
     const attendanceRecords = await Attendance.find({
       teacherId,
       date: { $gte: startDate, $lte: endDate },

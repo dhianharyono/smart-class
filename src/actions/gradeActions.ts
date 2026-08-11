@@ -9,6 +9,8 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { isRedirectError } from '@/lib/utils';
 
+import Teacher from '@/models/Teacher';
+
 async function requireAuth() {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get('session')?.value;
@@ -46,9 +48,16 @@ export async function getGradesByFilter(subject: string, category: 'Tugas' | 'UH
   try {
     await dbConnect();
     const teacherId = await requireAuth();
+    const teacher = await Teacher.findById(teacherId).lean();
+    const activeClass = teacher?.activeClass || teacher?.className || '';
 
-    // Fetch all students
-    const students = await Student.find({ teacherId }).sort({ name: 1 }).lean();
+    const studentFilter: any = { teacherId };
+    if (activeClass) {
+      studentFilter.className = activeClass;
+    }
+
+    // Fetch students for active class
+    const students = await Student.find(studentFilter).sort({ name: 1 }).lean();
 
     // Fetch grades matching subject and category
     const grades = await Grade.find({
@@ -152,8 +161,15 @@ export async function getAllGradesRecap(subject: string) {
   try {
     await dbConnect();
     const teacherId = await requireAuth();
+    const teacher = await Teacher.findById(teacherId).lean();
+    const activeClass = teacher?.activeClass || teacher?.className || '';
 
-    const students = await Student.find({ teacherId }).sort({ name: 1 }).lean();
+    const studentFilter: any = { teacherId };
+    if (activeClass) {
+      studentFilter.className = activeClass;
+    }
+
+    const students = await Student.find(studentFilter).sort({ name: 1 }).lean();
 
     const grades = await Grade.find({
       teacherId,

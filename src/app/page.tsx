@@ -34,6 +34,9 @@ import {
   Sparkles,
   Download,
   Award,
+  School,
+  MailCheck,
+  Layers,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getCurrentUserSession, logoutTeacher } from '@/actions/authActions';
@@ -82,7 +85,7 @@ export default function LandingPage() {
   };
 
   const [activeTab, setActiveTab] = useState<
-    'absensi' | 'nilai' | 'jurnal' | 'tabungan' | 'jadwal'
+    'absensi' | 'nilai' | 'jurnal' | 'tabungan' | 'jadwal' | 'multikelas'
   >('absensi');
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -375,6 +378,16 @@ export default function LandingPage() {
       <main className='relative z-10'>
         {/* ==================== HERO SECTION ==================== */}
         <section className='relative pt-12 sm:pt-20 lg:pt-24 pb-16 sm:pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center flex flex-col items-center justify-center'>
+          {/* Feature Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className='inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-extrabold mb-4 shadow-2xs'
+          >
+            <span className='flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse' />
+            <span>FITUR BARU: Dukungan Multi-Kelas & Active Switcher</span>
+          </motion.div>
 
           {/* Main Title H1 */}
           <motion.h1
@@ -683,6 +696,7 @@ export default function LandingPage() {
               { id: 'jurnal', label: 'Jurnal KBM', icon: BookMarked },
               { id: 'tabungan', label: 'Tabungan Siswa', icon: Wallet },
               { id: 'jadwal', label: 'Jadwal & Alokasi', icon: Calendar },
+              { id: 'multikelas', label: 'Multi-Kelas Guru', icon: School },
             ].map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -1051,6 +1065,74 @@ export default function LandingPage() {
                   </div>
                 </div>
               )}
+
+              {activeTab === 'multikelas' && (
+                <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 items-center'>
+                  <div className='space-y-6'>
+                    <div className='inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200'>
+                      <School className='h-3.5 w-3.5' />
+                      <span>Dukungan Multi-Kelas & Active Class Switcher</span>
+                    </div>
+                    <h3 className='text-2xl sm:text-3xl font-extrabold text-slate-900'>
+                      Ampu Lebih dari 1 Kelas dalam 1 Akun Terpadu
+                    </h3>
+                    <p className='text-slate-600 text-sm leading-relaxed font-medium'>
+                      Wali kelas / Guru kini dapat mengampu dan mengelola multiple kelas (seperti Kelas 5A, 5B, 6A) tanpa perlu membuat akun terpisah. Berpindah kelas aktif dalam 1-klik dengan isolasi data mandiri.
+                    </p>
+                    <ul className='space-y-3 text-sm text-slate-700 font-medium'>
+                      <li className='flex items-center gap-3'>
+                        <Check className='h-4 w-4 text-emerald-600' />
+                        <span>
+                          Active Class Switcher dropdown 1-klik di header topbar
+                        </span>
+                      </li>
+                      <li className='flex items-center gap-3'>
+                        <Check className='h-4 w-4 text-emerald-600' />
+                        <span>
+                          Isolasi data mandiri per-kelas (Siswa, Presensi, Nilai, Tabungan & Jurnal)
+                        </span>
+                      </li>
+                      <li className='flex items-center gap-3'>
+                        <Check className='h-4 w-4 text-emerald-600' />
+                        <span>
+                          Input tag multi-kelas cepat saat onboarding awal & halaman profil
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+                  {/* Visual Card */}
+                  <div className='bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4 shadow-xs'>
+                    <div className='flex items-center justify-between border-b border-slate-200 pb-3'>
+                      <span className='text-xs font-extrabold text-slate-900 flex items-center gap-2'>
+                        <School className='h-4 w-4 text-emerald-600' />
+                        <span>Active Class Switcher</span>
+                      </span>
+                      <span className='text-[11px] text-emerald-700 font-bold bg-emerald-100/70 px-2 py-0.5 rounded-full'>
+                        Multi-Kelas Active
+                      </span>
+                    </div>
+                    <div className='space-y-2 text-xs'>
+                      <div className='flex items-center justify-between p-3 rounded-xl bg-emerald-600 text-white font-bold shadow-xs'>
+                        <div className='flex items-center gap-2'>
+                          <School className='h-4 w-4 text-white' />
+                          <span>Kelas 11A</span>
+                        </div>
+                        <span className='text-[10px] bg-white/20 px-2 py-0.5 rounded font-extrabold'>✓ KELAS AKTIF</span>
+                      </div>
+                      <div className='flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200 text-slate-700 font-bold shadow-xs hover:bg-slate-100'>
+                        <div className='flex items-center gap-2'>
+                          <School className='h-4 w-4 text-slate-500' />
+                          <span>Kelas 12B</span>
+                        </div>
+                        <span className='text-[10px] text-slate-400 font-bold'>Beralih ›</span>
+                      </div>
+                      <div className='p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-semibold text-center'>
+                        + Tambah Kelas Pengampuan Baru
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </motion.div>
           </AnimatePresence>
 
@@ -1174,6 +1256,10 @@ export default function LandingPage() {
           <div className='space-y-4'>
             {[
               {
+                q: 'Bagaimana cara mendaftar dan mulai menggunakan aplikasi?',
+                a: 'Cukup klik tombol "Daftar Sekarang", isi nama lengkap, email, nama sekolah, dan kata sandi. Akun Anda akan langsung aktif dan siap digunakan.',
+              },
+              {
                 q: 'Apakah Smart Class bisa diakses langsung melalui Smartphone/HP?',
                 a: 'Ya, Smart Class dirancang dengan antarmuka yang fully responsive. Anda dapat menginput presensi, nilai, maupun jurnal harian dengan nyaman dari layar Smartphone, Tablet, maupun PC.',
               },
@@ -1190,8 +1276,8 @@ export default function LandingPage() {
                 a: 'Bisa. Di menu Pengaturan Profil & Wali Kelas, Anda dapat mengisi nama resmi serta nomor NIP atau NUPTK Wali Kelas dan Kepala Sekolah yang akan otomatis tersemat pada lembar cetak laporan.',
               },
               {
-                q: 'Bagaimana cara mendaftar dan mulai menggunakan aplikasi?',
-                a: 'Cukup klik tombol "Daftar Sekarang", isi nama lengkap, email, nama sekolah, dan kata sandi. Akun Anda akan langsung aktif dan siap digunakan.',
+                q: 'Apakah seorang guru / wali kelas dapat mengampu lebih dari 1 kelas?',
+                a: 'Sangat bisa! Fitur Multi-Kelas memungkinkan Anda mengampu beberapa kelas sekaligus (seperti Kelas 5A, 5B, 6A, dll.) dalam 1 akun terpadu. Pengalihan kelas dapat dilakukan dalam 1-klik via Active Class Switcher di header topbar dengan isolasi data mandiri.',
               },
             ].map((item, idx) => (
               <motion.div

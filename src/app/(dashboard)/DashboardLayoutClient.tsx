@@ -32,6 +32,9 @@ import {
   IdCard,
   UserCheck,
   AlertCircle,
+  Plus,
+  Loader2,
+  Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -43,7 +46,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import ConfirmDialog from '@/components/ConfirmDialog';
-import { updateMenuPreferences, updateProfile } from '@/actions/profileActions';
+import { updateMenuPreferences, updateProfile, switchActiveClass, addClass, deleteClass } from '@/actions/profileActions';
 import { getSchools } from '@/actions/adminActions';
 
 interface SidebarSubItem {
@@ -115,10 +118,13 @@ const CONFIGURABLE_MENUS = [
 interface DashboardLayoutClientProps {
   children: React.ReactNode;
   teacher: {
+    _id?: string;
     name: string;
     email: string;
     schoolName?: string;
     className?: string;
+    classes?: string[];
+    activeClass?: string;
     nip?: string;
     principalName?: string;
     principalNip?: string;
@@ -161,6 +167,42 @@ export default function DashboardLayoutClient({
     return !!teacher.isFirstLogin || isNipInvalid || isPrincipalNameInvalid || isPrincipalNipInvalid || isBasicInfoInvalid;
   }, [teacher]);
 
+  // Active Teacher Multi-Class State
+  const [currentClasses, setCurrentClasses] = useState<string[]>(() => {
+    if (Array.isArray(teacher.classes) && teacher.classes.length > 0) {
+      return Array.from(new Set(teacher.classes.filter(Boolean)));
+    }
+    return teacher.className ? [teacher.className] : [];
+  });
+
+  const [currentActiveClass, setCurrentActiveClass] = useState<string>(() => {
+    if (teacher.activeClass && currentClasses.includes(teacher.activeClass)) return teacher.activeClass;
+    if (teacher.className) return teacher.className;
+    return currentClasses[0] || '';
+  });
+
+  const [isClassDropdownOpen, setIsClassDropdownOpen] = useState(false);
+  const [isSwitchingClass, setIsSwitchingClass] = useState(false);
+  const [isAddClassModalOpen, setIsAddClassModalOpen] = useState(false);
+  const [newClassNameInput, setNewClassNameInput] = useState('');
+  const [isAddingClass, setIsAddingClass] = useState(false);
+  const [deleteClassConfirm, setDeleteClassConfirm] = useState<{ open: boolean; className: string }>({
+    open: false,
+    className: '',
+  });
+
+  // Sync state if teacher prop changes
+  React.useEffect(() => {
+    if (Array.isArray(teacher.classes) && teacher.classes.length > 0) {
+      setCurrentClasses(Array.from(new Set(teacher.classes.filter(Boolean))));
+    }
+    if (teacher.activeClass) {
+      setCurrentActiveClass(teacher.activeClass);
+    } else if (teacher.className) {
+      setCurrentActiveClass(teacher.className);
+    }
+  }, [teacher.classes, teacher.activeClass, teacher.className]);
+
   // Onboarding Modal state
   const ALL_CONFIGURABLE_HREFS = CONFIGURABLE_MENUS.map((m) => m.href);
   const [onboardingOpen, setOnboardingOpen] = useState<boolean>(isProfileIncomplete);
@@ -168,7 +210,16 @@ export default function DashboardLayoutClient({
   const [onboardingName, setOnboardingName] = useState(teacher.name || '');
   const [onboardingSchool, setOnboardingSchool] = useState(teacher.schoolName || '');
   const [onboardingCustomSchool, setOnboardingCustomSchool] = useState('');
-  const [onboardingClass, setOnboardingClass] = useState(teacher.className || '');
+
+  // Onboarding Multi-Class Tags State
+  const [onboardingClasses, setOnboardingClasses] = useState<string[]>(() => {
+    if (Array.isArray(teacher.classes) && teacher.classes.length > 0) {
+      return Array.from(new Set(teacher.classes.filter(Boolean)));
+    }
+    return teacher.className ? [teacher.className] : [];
+  });
+  const [classInputText, setClassInputText] = useState('');
+
   const [onboardingNip, setOnboardingNip] = useState(
     teacher.nip && teacher.nip !== '-' ? teacher.nip : ''
   );
@@ -186,6 +237,116 @@ export default function DashboardLayoutClient({
     ALL_CONFIGURABLE_HREFS
   );
   const [isSavingOnboarding, setIsSavingOnboarding] = useState(false);
+
+  // Onboarding Class Tag Handlers with comma/slash auto-split
+  const parseClassInput = (text: string): string[] => {
+    return text
+      .split(/[,/]/)
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+  };
+
+  const handleAddOnboardingClassTag = () => {
+    const parsed = parseClassInput(classInputText);
+    if (parsed.length === 0) return;
+    setOnboardingClasses((prev) => {
+      const next = [...prev];
+      parsed.forEach((c) => {
+        if (!next.includes(c)) next.push(c);
+      });
+      return next;
+    });
+    setClassInputText('');
+    if (onboardingErrors.className) {
+      setOnboardingErrors((prev) => ({ ...prev, className: '' }));
+    }
+  };
+
+  const handleRemoveOnboardingClassTag = (clsToRemove: string) => {
+    setOnboardingClasses((prev) => prev.filter((c) => c !== clsToRemove));
+  };
+
+  // Switch Active Class Handler
+  const handleSwitchClass = async (targetClass: string) => {
+    if (targetClass === currentActiveClass || isSwitchingClass) return;
+    setIsSwitchingClass(true);
+    setIsClassDropdownOpen(false);
+    try {
+      const res = await switchActiveClass(targetClass);
+      if (res.success) {
+        setCurrentActiveClass(res.activeClass || targetClass);
+        if (res.classes) setCurrentClasses(res.classes);
+        toast.success(`Berhasil beralih ke Kelas ${targetClass}`);
+        window.location.reload();
+      } else {
+        toast.error(res.error || 'Gagal mengganti kelas.');
+        setIsSwitchingClass(false);
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Gagal mengganti kelas.');
+      setIsSwitchingClass(false);
+    }
+  };
+
+  // Add New Class Handler (from Topbar Dropdown)
+  const handleAddNewClassSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const clean = newClassNameInput.trim();
+    if (!clean) {
+      toast.error('Nama kelas tidak boleh kosong.');
+      return;
+    }
+    setIsAddingClass(true);
+    try {
+      const res = await addClass(clean);
+      if (res.success) {
+        setCurrentActiveClass(res.activeClass || clean);
+        if (res.classes) setCurrentClasses(res.classes);
+        setNewClassNameInput('');
+        setIsAddClassModalOpen(false);
+        toast.success(`Kelas ${clean} berhasil ditambahkan & menjadi kelas aktif!`);
+        router.refresh();
+      } else {
+        toast.error(res.error || 'Gagal menambahkan kelas baru.');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Gagal menambahkan kelas baru.');
+    } finally {
+      setIsAddingClass(false);
+    }
+  };
+
+  // Delete Class Handler (from Topbar Dropdown)
+  const promptDeleteClassHeader = (classToDelete: string) => {
+    if (currentClasses.length <= 1) {
+      toast.error('Minimal harus memiliki 1 kelas.');
+      return;
+    }
+    setDeleteClassConfirm({ open: true, className: classToDelete });
+  };
+
+  const handleConfirmDeleteClassHeader = async () => {
+    const classToDelete = deleteClassConfirm.className;
+    if (!classToDelete) return;
+    setIsSwitchingClass(true);
+    setIsClassDropdownOpen(false);
+    try {
+      const res = await deleteClass(classToDelete);
+      if (res.success) {
+        setCurrentActiveClass(res.activeClass || '');
+        if (res.classes) setCurrentClasses(res.classes);
+        toast.success(`Kelas ${classToDelete} berhasil dihapus.`);
+        setDeleteClassConfirm({ open: false, className: '' });
+        window.location.reload();
+      } else {
+        toast.error(res.error || 'Gagal menghapus kelas.');
+        setIsSwitchingClass(false);
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Gagal menghapus kelas.');
+      setIsSwitchingClass(false);
+    }
+  };
 
   const validateOnboardingStep1 = (): boolean => {
     const errors: Record<string, string> = {};
@@ -219,9 +380,19 @@ export default function DashboardLayoutClient({
       errors.school = 'Silakan pilih atau isi nama sekolah Anda.';
     }
 
-    const cleanClass = onboardingClass.trim();
-    if (!cleanClass) {
-      errors.className = 'Kelas diajar wajib diisi (contoh: 5A / VI B).';
+    // Auto add typed class if user forgot to click + Tambah
+    const finalClasses = [...onboardingClasses];
+    if (classInputText.trim()) {
+      const parsed = parseClassInput(classInputText);
+      parsed.forEach((c) => {
+        if (!finalClasses.includes(c)) finalClasses.push(c);
+      });
+      setOnboardingClasses(finalClasses);
+      setClassInputText('');
+    }
+
+    if (finalClasses.length === 0) {
+      errors.className = 'Kelas diajar wajib dimasukkan minimal 1 kelas (contoh: 5A).';
     }
 
     const cleanPrincipalName = onboardingPrincipalName.trim();
@@ -321,14 +492,21 @@ export default function DashboardLayoutClient({
       return;
     }
 
+    const finalClasses = [...onboardingClasses];
+    if (classInputText.trim() && !finalClasses.includes(classInputText.trim())) {
+      finalClasses.push(classInputText.trim());
+    }
+
     setIsSavingOnboarding(true);
     try {
-      // 1. Update Profile (Nama, Sekolah, Kelas, NIP, Principal Name & NIP)
+      // 1. Update Profile (Nama, Sekolah, Classes, NIP, Principal Name & NIP)
       await updateProfile({
         name: onboardingName.trim(),
         email: teacher.email,
         schoolName: finalSchoolName,
-        className: onboardingClass.trim(),
+        className: finalClasses[0] || '5A',
+        classes: finalClasses,
+        activeClass: finalClasses[0] || '5A',
         nip: onboardingNip.trim() || '-',
         principalName: onboardingPrincipalName.trim(),
         principalNip: onboardingPrincipalNip.trim(),
@@ -527,6 +705,83 @@ export default function DashboardLayoutClient({
     </div>
   );
 
+  const renderClassSwitcherPill = (isMobile = false) => (
+    <div className='relative'>
+      <button
+        type='button'
+        onClick={() => setIsClassDropdownOpen(!isClassDropdownOpen)}
+        disabled={isSwitchingClass}
+        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100/90 border border-emerald-200/90 text-emerald-900 text-xs font-bold transition-all cursor-pointer shadow-2xs ${isSwitchingClass ? 'opacity-50' : ''
+          }`}
+      >
+        <School className='h-4 w-4 text-emerald-600 shrink-0' />
+        <span className='truncate max-w-[120px] sm:max-w-none'>
+          {isMobile ? `Kelas ${currentActiveClass || '-'}` : `Kelas Aktif: ${currentActiveClass || '-'}`}
+        </span>
+        {isSwitchingClass ? (
+          <Loader2 className='h-3.5 w-3.5 text-emerald-600 animate-spin shrink-0' />
+        ) : (
+          <ChevronDown className='h-3.5 w-3.5 text-emerald-600 shrink-0' />
+        )}
+      </button>
+
+      {isClassDropdownOpen && (
+        <>
+          <div
+            className='fixed inset-0 z-40'
+            onClick={() => setIsClassDropdownOpen(false)}
+          />
+          <div className='absolute right-0 sm:left-0 mt-2 w-56 bg-white rounded-2xl border border-slate-200 shadow-xl z-50 p-2 animate-in fade-in-50 zoom-in-95 duration-150'>
+            <div className='px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-slate-400'>
+              PILIH KELAS AKTIF
+            </div>
+            <div className='space-y-1 max-h-48 overflow-y-auto my-1'>
+              {currentClasses.map((cls) => {
+                const isActive = cls === currentActiveClass;
+                return (
+                  <div
+                    key={cls}
+                    className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${isActive
+                      ? 'bg-emerald-600 text-white shadow-2xs'
+                      : 'text-slate-700 hover:bg-slate-100'
+                      }`}
+                  >
+                    <button
+                      type='button'
+                      onClick={() => handleSwitchClass(cls)}
+                      className='w-full flex items-center gap-1.5 text-left cursor-pointer'
+                    >
+                      <School className={`h-3.5 w-3.5 ${isActive ? 'text-white' : 'text-emerald-600'}`} />
+                      <span>Kelas {cls}</span>
+                      {isActive && (
+                        <span className='text-[9px] bg-white/20 text-white px-1.5 py-0.2 rounded font-extrabold ml-1'>
+                          AKTIF
+                        </span>
+                      )}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+            <div className='border-t border-slate-100 pt-1.5 mt-1 space-y-0.5'>
+              <button
+                type='button'
+                onClick={() => {
+                  setIsClassDropdownOpen(false);
+                  setIsAddClassModalOpen(true);
+                }}
+                className='w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-emerald-700 hover:bg-emerald-50 transition-colors cursor-pointer'
+              >
+                <Plus className='h-4 w-4 text-emerald-600 shrink-0' />
+                <span>Tambah Kelas Baru</span>
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+
   return (
     <div className='flex min-h-screen bg-slate-50 text-slate-900'>
       {/* Desktop Sidebar */}
@@ -536,26 +791,43 @@ export default function DashboardLayoutClient({
 
       {/* Main Content Area */}
       <div className='flex-1 md:pl-64 flex flex-col min-w-0 max-w-full print:pl-0 print:m-0'>
+        {/* Desktop Top Header Bar */}
+        <header className='hidden md:flex h-16 items-center justify-between border-b border-slate-200/80 px-8 bg-white/80 backdrop-blur-md sticky top-0 z-30 print:hidden'>
+          <div className='flex items-center gap-4'>
+            {renderClassSwitcherPill(false)}
+          </div>
+          <div className='flex items-center gap-3 text-xs text-slate-500 font-medium'>
+            {teacher.schoolName && (
+              <span className='px-3 py-1 rounded-full bg-slate-100 border border-slate-200/80 text-slate-700 font-semibold'>
+                {teacher.schoolName}
+              </span>
+            )}
+          </div>
+        </header>
+
         {/* Mobile Top Header */}
         <header className='flex h-16 items-center justify-between border-b border-slate-200/80 px-4 md:hidden bg-white/90 backdrop-blur-md sticky top-0 z-40 print:hidden'>
           <div className='flex items-center gap-2'>
-            <BookOpen className='h-5 w-5 text-emerald-600' />
-            <span className='font-bold text-emerald-700 text-sm'>
+            <BookOpen className='h-5 w-5 text-emerald-600 shrink-0' />
+            <span className='font-bold text-emerald-700 text-sm hidden xs:inline'>
               Smart Class
             </span>
           </div>
-          <Button
-            variant='ghost'
-            size='icon'
-            onClick={toggleSidebar}
-            className='text-slate-600 hover:text-slate-900'
-          >
-            {mobileOpen ? (
-              <X className='h-6 w-6' />
-            ) : (
-              <Menu className='h-6 w-6' />
-            )}
-          </Button>
+          <div className='flex items-center gap-2'>
+            {renderClassSwitcherPill(true)}
+            <Button
+              variant='ghost'
+              size='icon'
+              onClick={toggleSidebar}
+              className='text-slate-600 hover:text-slate-900'
+            >
+              {mobileOpen ? (
+                <X className='h-6 w-6' />
+              ) : (
+                <Menu className='h-6 w-6' />
+              )}
+            </Button>
+          </div>
         </header>
 
         {/* Mobile Navigation Drawer */}
@@ -578,6 +850,76 @@ export default function DashboardLayoutClient({
           {children}
         </main>
       </div>
+
+      {/* Add New Class Modal */}
+      <Dialog open={isAddClassModalOpen} onOpenChange={setIsAddClassModalOpen}>
+        <DialogContent className='bg-white border border-slate-200 text-slate-900 rounded-3xl max-w-md p-6 shadow-2xl'>
+          <DialogHeader>
+            <DialogTitle className='text-lg font-black text-slate-900 flex items-center gap-2'>
+              <School className='h-5 w-5 text-emerald-600' />
+              <span>Tambah Kelas Baru</span>
+            </DialogTitle>
+            <DialogDescription className='text-xs text-slate-500 font-medium'>
+              Masukkan nama kelas baru yang diampu (contoh: 5B, 6A, VII C). Kelas baru akan langsung diaktifkan.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleAddNewClassSubmit} className='space-y-4 pt-2'>
+            <div className='space-y-1.5'>
+              <label className='text-xs font-bold uppercase tracking-wider text-slate-700 block'>
+                NAMA KELAS <span className='text-rose-500'>*</span>
+              </label>
+              <input
+                type='text'
+                required
+                placeholder='Contoh: 5B'
+                value={newClassNameInput}
+                onChange={(e) => setNewClassNameInput(e.target.value)}
+                disabled={isAddingClass}
+                className='w-full px-4 py-2.5 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none rounded-xl text-sm font-medium transition-all'
+              />
+            </div>
+
+            <DialogFooter className='pt-2'>
+              <Button
+                type='button'
+                variant='outline'
+                onClick={() => setIsAddClassModalOpen(false)}
+                disabled={isAddingClass}
+                className='rounded-xl text-xs font-semibold cursor-pointer'
+              >
+                Batal
+              </Button>
+              <Button
+                type='submit'
+                disabled={isAddingClass || !newClassNameInput.trim()}
+                className='bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs px-5 shadow-sm shadow-emerald-600/20 cursor-pointer'
+              >
+                {isAddingClass ? (
+                  <>
+                    <Loader2 className='h-4 w-4 animate-spin mr-1' />
+                    <span>Menambahkan...</span>
+                  </>
+                ) : (
+                  <span>Simpan & Aktifkan</span>
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Class Switching Full-Screen Loading Overlay */}
+      {isSwitchingClass && (
+        <div className='fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex flex-col items-center justify-center gap-3 text-white animate-in fade-in duration-200'>
+          <div className='h-12 w-12 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-md flex items-center justify-center shadow-2xl'>
+            <Loader2 className='h-6 w-6 animate-spin text-emerald-400' />
+          </div>
+          <p className='text-sm font-bold tracking-wide text-emerald-100'>
+            Beralih ke Data Kelas...
+          </p>
+        </div>
+      )}
 
       <ConfirmDialog
         open={showLogoutConfirm}
@@ -666,7 +1008,7 @@ export default function DashboardLayoutClient({
                 >
                   2
                 </span>
-                <span className='whitespace-nowrap'>Kustomisasi Sidebar</span>
+                <span className='whitespace-nowrap'>Kustomisasi Menu</span>
               </button>
             </div>
           </DialogHeader>
@@ -785,29 +1127,72 @@ export default function DashboardLayoutClient({
                   )}
                 </div>
 
-                <div className='space-y-1.5'>
-                  <label className='text-xs font-bold uppercase tracking-wider text-slate-700 block'>
-                    KELAS DIAJAR <span className='text-rose-500'>*</span>
-                  </label>
-                  <div className='relative'>
-                    <div className='absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400'>
-                      <GraduationCap className='h-4 w-4' />
-                    </div>
-                    <input
-                      type='text'
-                      required
-                      placeholder='Misal: 5A / VI B'
-                      value={onboardingClass}
-                      onChange={(e) => {
-                        setOnboardingClass(e.target.value);
-                        if (onboardingErrors.className) setOnboardingErrors((prev) => ({ ...prev, className: '' }));
-                      }}
-                      className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${onboardingErrors.className
-                        ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
-                        : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
-                        } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
-                    />
+                <div className='space-y-1.5 sm:col-span-2'>
+                  <div className='flex items-center justify-between'>
+                    <label className='text-xs font-bold uppercase tracking-wider text-slate-700 block'>
+                      KELAS DIAJAR <span className='text-rose-500'>*</span>
+                    </label>
+                    <span className='text-[10px] text-slate-500 font-medium'>
+                      (Bisa lebih dari 1 kelas. Tekan Enter atau klik + Tambah)
+                    </span>
                   </div>
+                  <div className='flex gap-2'>
+                    <div className='relative flex-1'>
+                      <div className='absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400'>
+                        <GraduationCap className='h-4 w-4' />
+                      </div>
+                      <input
+                        type='text'
+                        placeholder='Misal: 5A / 5B / VI C'
+                        value={classInputText}
+                        onChange={(e) => setClassInputText(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddOnboardingClassTag();
+                          }
+                        }}
+                        className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${onboardingErrors.className
+                          ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
+                          : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
+                          } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
+                      />
+                    </div>
+                    <Button
+                      type='button'
+                      onClick={handleAddOnboardingClassTag}
+                      className='bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 rounded-xl text-xs shrink-0 cursor-pointer h-[42px]'
+                    >
+                      + Tambah
+                    </Button>
+                  </div>
+
+                  {/* Class Badge Tags */}
+                  {onboardingClasses.length > 0 && (
+                    <div className='flex flex-wrap gap-1.5 pt-1.5'>
+                      {onboardingClasses.map((cls, idx) => (
+                        <span
+                          key={cls}
+                          className='inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold shadow-2xs'
+                        >
+                          <span>Kelas {cls}</span>
+                          {idx === 0 && (
+                            <span className='text-[9px] bg-emerald-600 text-white px-1.5 py-0.2 rounded-md font-semibold'>
+                              Utama
+                            </span>
+                          )}
+                          <button
+                            type='button'
+                            onClick={() => handleRemoveOnboardingClassTag(cls)}
+                            className='hover:text-rose-600 text-slate-400 transition-colors ml-0.5 cursor-pointer'
+                          >
+                            <X className='h-3.5 w-3.5' />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
                   {onboardingErrors.className && (
                     <p className='text-[11px] text-rose-500 font-medium flex items-center gap-1 mt-1'>
                       <AlertCircle className='h-3.5 w-3.5 shrink-0' />
@@ -1001,7 +1386,6 @@ export default function DashboardLayoutClient({
                   ) : (
                     <>
                       <span>Simpan & Masuk Dashboard</span>
-                      <Sliders className='h-4 w-4' />
                     </>
                   )}
                 </Button>
@@ -1010,6 +1394,19 @@ export default function DashboardLayoutClient({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Modal Confirm Hapus Kelas */}
+      <ConfirmDialog
+        open={deleteClassConfirm.open}
+        onOpenChange={(open) => setDeleteClassConfirm((prev) => ({ ...prev, open }))}
+        title="Hapus Kelas"
+        description={`Apakah Anda yakin ingin menghapus Kelas ${deleteClassConfirm.className} dari daftar kelas Anda?`}
+        confirmText="Hapus Kelas"
+        cancelText="Batal"
+        variant="danger"
+        isLoading={isSwitchingClass}
+        onConfirm={handleConfirmDeleteClassHeader}
+      />
     </div>
   );
 }

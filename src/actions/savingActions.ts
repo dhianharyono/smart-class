@@ -9,6 +9,8 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { isRedirectError } from '@/lib/utils';
 
+import Teacher from '@/models/Teacher';
+
 async function requireAuth() {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get('session')?.value;
@@ -27,9 +29,16 @@ export async function getSavingsSummary() {
   try {
     await dbConnect();
     const teacherId = await requireAuth();
+    const teacher = await Teacher.findById(teacherId).lean();
+    const activeClass = teacher?.activeClass || teacher?.className || '';
 
-    // Fetch all students
-    const students = await Student.find({ teacherId }).sort({ name: 1 }).lean();
+    // Fetch students for active class
+    const studentFilter: any = { teacherId };
+    if (activeClass) {
+      studentFilter.$or = [{ className: activeClass }, { className: { $exists: false } }, { className: '' }];
+    }
+
+    const students = await Student.find(studentFilter).sort({ name: 1 }).lean();
 
     // Fetch all savings transactions for this teacher
     const transactions = await Saving.find({ teacherId }).lean();

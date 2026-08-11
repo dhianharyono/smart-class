@@ -20,7 +20,7 @@ export function verifyPassword(password: string, storedHash: string): boolean {
     }
 
     return crypto.timingSafeEqual(hashBuf, verifyBuf);
-  } catch (error) {
+  } catch (_error) {
     return false;
   }
 }

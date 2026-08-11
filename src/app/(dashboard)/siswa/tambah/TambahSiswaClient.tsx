@@ -25,7 +25,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 
-export default function TambahSiswaClient() {
+interface TambahSiswaClientProps {
+  defaultClassName?: string;
+}
+
+export default function TambahSiswaClient({ defaultClassName = '' }: TambahSiswaClientProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -37,7 +41,7 @@ export default function TambahSiswaClient() {
     name: '',
     nisn: '',
     nis: '',
-    className: 'Kelas 4',
+    className: defaultClassName || '',
     gender: 'L' as 'L' | 'P',
     birthPlace: '',
     birthDate: '',
@@ -50,8 +54,8 @@ export default function TambahSiswaClient() {
     guardianName: '',
     guardianJob: '',
     entryDate: new Date().toISOString().split('T')[0],
-    entryClass: 'Kelas 4',
-    entryAcademicYear: '2026/2027',
+    entryClass: defaultClassName || '',
+    entryAcademicYear: `${new Date().getFullYear()}/${new Date().getFullYear() + 1}`,
     previousSchool: '',
     status: 'Aktif' as 'Aktif' | 'Mutasi' | 'Lulus' | 'Non-Aktif',
   });
@@ -307,7 +311,7 @@ export default function TambahSiswaClient() {
                     </Label>
                     <Input
                       required
-                      placeholder='Kelas 4'
+                      placeholder={defaultClassName ? `Contoh: ${defaultClassName}` : 'Contoh: 5A'}
                       value={formData.className}
                       onChange={(e) => setFormData({ ...formData, className: e.target.value })}
                       className='bg-slate-50 border-slate-200 focus:border-emerald-500 rounded-xl text-xs h-10 text-slate-900'

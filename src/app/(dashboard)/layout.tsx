@@ -42,6 +42,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
         email: teacher.email,
         schoolName: teacher.schoolName || '',
         className: teacher.className || '',
+        classes:
+          Array.isArray(teacher.classes) && teacher.classes.length > 0
+            ? (teacher.classes as string[])
+            : teacher.className
+            ? [teacher.className]
+            : [],
+        activeClass: teacher.activeClass || teacher.className || '',
         nip: teacher.nip || '-',
         principalName: teacher.principalName || '',
         principalNip: teacher.principalNip || '-',

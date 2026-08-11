@@ -11,14 +11,11 @@ import {
   verifyEmailOTP,
   resendVerificationOTP,
 } from '@/actions/authActions';
-import { getSchools } from '@/actions/adminActions';
 import { toast } from 'sonner';
 import {
   Mail,
   Lock,
   User,
-  School,
-  GraduationCap,
   BookOpen,
   Loader2,
   ArrowLeft,
@@ -28,7 +25,6 @@ import {
   Check,
   X,
   ShieldCheck,
-  AlertCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import LoadingScreen from '@/components/LoadingScreen';
@@ -81,7 +77,7 @@ export default function AuthSlider({
   const [otpCodeInput, setOtpCodeInput] = useState('');
   const [otpLoading, setOtpLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
-  const [demoOtpCode, setDemoOtpCode] = useState<string | null>(null);
+  const [_demoOtpCode, setDemoOtpCode] = useState<string | null>(null);
 
   // Countdown timer for OTP Resend
   useEffect(() => {

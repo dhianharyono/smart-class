@@ -1,16 +1,18 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   getProfile,
   updateProfile,
   changePassword,
   updateMenuPreferences,
+  addClass,
+  deleteClass,
+  switchActiveClass,
 } from '@/actions/profileActions';
 import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   User,
   ShieldCheck,
@@ -30,6 +32,10 @@ import {
   BookMarked,
   LayoutDashboard,
   Calendar,
+  School,
+  Plus,
+  Trash2,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -41,6 +47,7 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card';
+import ConfirmDialog from '@/components/ConfirmDialog';
 
 const ALL_MENUS = [
   {
@@ -84,10 +91,19 @@ const ALL_MENUS = [
 export default function ProfileClient() {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get('tab');
 
-  const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'menus'>(
-    'profile',
-  );
+  const [activeTab, setActiveTab] = useState<'profile' | 'classes' | 'security'>(() => {
+    if (tabParam === 'classes' || tabParam === 'security') return tabParam;
+    return 'profile';
+  });
+
+  React.useEffect(() => {
+    if (tabParam === 'classes' || tabParam === 'security' || tabParam === 'profile') {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
 
   // Query Profile Data
   const { data: profile, isLoading } = useQuery({
@@ -116,6 +132,85 @@ export default function ProfileClient() {
   // Enabled Menus State
   const [selectedMenus, setSelectedMenus] = useState<string[]>([]);
 
+  // Multi-Class Management State on Profile
+  const [newClassInput, setNewClassInput] = useState('');
+  const [isClassActionPending, setIsClassActionPending] = useState(false);
+
+  const handleAddClassOnProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const clean = newClassInput.trim();
+    if (!clean) {
+      toast.error('Nama kelas tidak boleh kosong.');
+      return;
+    }
+    setIsClassActionPending(true);
+    try {
+      const res = await addClass(clean);
+      if (res.success) {
+        toast.success(`Kelas ${clean} berhasil ditambahkan!`);
+        setNewClassInput('');
+        queryClient.invalidateQueries({ queryKey: ['profile'] });
+        router.refresh();
+      } else {
+        toast.error(res.error || 'Gagal menambahkan kelas.');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Gagal menambahkan kelas.');
+    } finally {
+      setIsClassActionPending(false);
+    }
+  };
+
+  const [deleteClassConfirm, setDeleteClassConfirm] = useState<{ open: boolean; className: string }>({
+    open: false,
+    className: '',
+  });
+
+  const promptDeleteClassOnProfile = (clsToDelete: string) => {
+    if (isClassActionPending) return;
+    setDeleteClassConfirm({ open: true, className: clsToDelete });
+  };
+
+  const handleConfirmDeleteClassOnProfile = async () => {
+    const clsToDelete = deleteClassConfirm.className;
+    if (!clsToDelete || isClassActionPending) return;
+    setIsClassActionPending(true);
+    try {
+      const res = await deleteClass(clsToDelete);
+      if (res.success) {
+        toast.success(`Kelas ${clsToDelete} berhasil dihapus.`);
+        setDeleteClassConfirm({ open: false, className: '' });
+        queryClient.invalidateQueries({ queryKey: ['profile'] });
+        window.location.reload();
+      } else {
+        toast.error(res.error || 'Gagal menghapus kelas.');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Gagal menghapus kelas.');
+    } finally {
+      setIsClassActionPending(false);
+    }
+  };
+
+  const handleSwitchClassOnProfile = async (targetClass: string) => {
+    if (isClassActionPending) return;
+    setIsClassActionPending(true);
+    try {
+      const res = await switchActiveClass(targetClass);
+      if (res.success) {
+        toast.success(`Berhasil mengganti kelas aktif ke Kelas ${targetClass}`);
+        queryClient.invalidateQueries({ queryKey: ['profile'] });
+        router.refresh();
+      } else {
+        toast.error(res.error || 'Gagal mengganti kelas.');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Gagal mengganti kelas.');
+    } finally {
+      setIsClassActionPending(false);
+    }
+  };
+
   // Sync state when profile is loaded
   React.useEffect(() => {
     if (profile) {
@@ -123,7 +218,7 @@ export default function ProfileClient() {
         name: profile.name || '',
         email: profile.email || '',
         schoolName: profile.schoolName || '',
-        className: profile.className || '',
+        className: profile.activeClass || profile.className || '',
         nip: profile.nip || '-',
         principalName: profile.principalName || '',
         principalNip: profile.principalNip || '-',
@@ -313,7 +408,7 @@ export default function ProfileClient() {
       </Card>
 
       {/* Tabs Switcher */}
-      <div className='grid grid-cols-2 gap-2 sm:flex sm:items-center sm:gap-2 border-b border-slate-200 pb-3'>
+      <div className='grid grid-cols-1 sm:flex sm:items-center sm:gap-2 border-b border-slate-200 pb-3 gap-2'>
         <Button
           onClick={() => setActiveTab('profile')}
           variant='ghost'
@@ -324,6 +419,18 @@ export default function ProfileClient() {
         >
           <User className='h-4 w-4 shrink-0' />
           <span className='truncate'>Data Diri & Sekolah</span>
+        </Button>
+
+        <Button
+          onClick={() => setActiveTab('classes')}
+          variant='ghost'
+          className={`rounded-xl text-xs font-semibold h-10 px-3 sm:px-4 gap-1.5 sm:gap-2 transition-all cursor-pointer w-full sm:w-auto justify-center ${activeTab === 'classes'
+            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-xs'
+            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
+        >
+          <School className='h-4 w-4 shrink-0' />
+          <span className='truncate'>Daftar Kelas Diampu</span>
         </Button>
 
         <Button
@@ -352,8 +459,8 @@ export default function ProfileClient() {
             </CardDescription>
           </CardHeader>
 
-          <form onSubmit={handleProfileSubmit} className='space-y-2'>
-            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+          <form onSubmit={handleProfileSubmit} className='space-y-4 pt-2'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5'>
               <div className='space-y-1.5'>
                 <Label className='text-slate-700 text-xs font-semibold flex items-center gap-2'>
                   <User className='h-3.5 w-3.5 text-slate-400' />
@@ -366,7 +473,7 @@ export default function ProfileClient() {
                   onChange={(e) =>
                     setProfileForm({ ...profileForm, name: e.target.value })
                   }
-                  className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-10'
+                  className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs sm:text-sm h-10 px-3.5'
                 />
               </div>
 
@@ -383,12 +490,12 @@ export default function ProfileClient() {
                   onChange={(e) =>
                     setProfileForm({ ...profileForm, email: e.target.value })
                   }
-                  className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-10'
+                  className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs sm:text-sm h-10 px-3.5'
                 />
               </div>
             </div>
 
-            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5'>
               <div className='space-y-1.5'>
                 <Label className='text-slate-700 text-xs font-semibold flex items-center gap-2'>
                   <Building className='h-3.5 w-3.5 text-slate-400' />
@@ -403,7 +510,7 @@ export default function ProfileClient() {
                       schoolName: e.target.value,
                     })
                   }
-                  className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-10'
+                  className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs sm:text-sm h-10 px-3.5'
                 />
               </div>
 
@@ -421,28 +528,30 @@ export default function ProfileClient() {
                       className: e.target.value,
                     })
                   }
-                  className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-10'
+                  className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs sm:text-sm h-10 px-3.5'
                 />
               </div>
             </div>
 
-            <div className='space-y-1.5 w-full sm:w-1/2'>
-              <Label className='text-slate-700 text-xs font-semibold flex items-center gap-2'>
-                <FileCheck2 className='h-3.5 w-3.5 text-slate-400' />
-                <span>NIP/NUPTK Guru</span> <span className='text-rose-500'>*</span>
-              </Label>
-              <Input
-                placeholder='Contoh: 19850101 201001 1 001 / NUPTK'
-                value={profileForm.nip}
-                onChange={(e) =>
-                  setProfileForm({ ...profileForm, nip: e.target.value })
-                }
-                className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-10'
-              />
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5'>
+              <div className='space-y-1.5'>
+                <Label className='text-slate-700 text-xs font-semibold flex items-center gap-2'>
+                  <FileCheck2 className='h-3.5 w-3.5 text-slate-400' />
+                  <span>NIP/NUPTK Guru</span> <span className='text-rose-500'>*</span>
+                </Label>
+                <Input
+                  placeholder='Contoh: 19850101 201001 1 001 / NUPTK'
+                  value={profileForm.nip}
+                  onChange={(e) =>
+                    setProfileForm({ ...profileForm, nip: e.target.value })
+                  }
+                  className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs sm:text-sm h-10 px-3.5'
+                />
+              </div>
             </div>
 
             {/* Sub-Section: Data Kepala Sekolah */}
-            <div className='pt-4 border-t border-slate-200 space-y-3'>
+            <div className='pt-5 mt-2 border-t border-slate-200 space-y-4'>
               <div>
                 <h4 className='text-xs font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1.5'>
                   <Building className='h-3.5 w-3.5 text-emerald-600' />
@@ -453,7 +562,7 @@ export default function ProfileClient() {
                 </p>
               </div>
 
-              <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+              <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5'>
                 <div className='space-y-1.5'>
                   <Label className='text-slate-700 text-xs font-semibold flex items-center gap-2'>
                     <User className='h-3.5 w-3.5 text-slate-400' />
@@ -468,7 +577,7 @@ export default function ProfileClient() {
                         principalName: e.target.value,
                       })
                     }
-                    className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-10'
+                    className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs sm:text-sm h-10 px-3.5'
                   />
                 </div>
 
@@ -486,13 +595,13 @@ export default function ProfileClient() {
                         principalNip: e.target.value,
                       })
                     }
-                    className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-10'
+                    className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs sm:text-sm h-10 px-3.5'
                   />
                 </div>
               </div>
             </div>
 
-            <div className='pt-4 flex justify-end border-t border-slate-200'>
+            <div className='pt-5 mt-2 flex justify-end border-t border-slate-200'>
               <Button
                 type='submit'
                 disabled={updateProfileMutation.isPending}
@@ -512,6 +621,104 @@ export default function ProfileClient() {
         </Card>
       )}
 
+      {/* TAB 2: DAFTAR KELAS YANG DIAMPU */}
+      {activeTab === 'classes' && (
+        <Card className='bg-white border-slate-200/80 rounded-2xl shadow-xs p-6'>
+          <CardHeader className='p-0 pb-5 border-b border-slate-200 mb-4'>
+            <CardTitle className='text-lg font-bold text-slate-900 flex items-center gap-2'>
+              <School className='h-5 w-5 text-emerald-600' />
+              Daftar Kelas yang Diampu (Multi-Kelas)
+            </CardTitle>
+            <CardDescription className='text-xs text-slate-500 mt-1'>
+              Kelola seluruh kelas yang Anda ampu. Klik badge kelas untuk mengaktifkan konteks data kelas tersebut.
+            </CardDescription>
+          </CardHeader>
+
+          <div className='space-y-4'>
+            {/* Active / Available Classes List */}
+            <div className='space-y-2'>
+              <Label className='text-slate-700 text-xs font-semibold block'>
+                DAFTAR KELAS SAAT INI
+              </Label>
+              <div className='flex flex-wrap gap-2'>
+                {((profile?.classes && profile.classes.length > 0) ? profile.classes : [profile?.className || '5A']).map((cls: string) => {
+                  const isActive = cls === (profile?.activeClass || profile?.className);
+                  return (
+                    <div
+                      key={cls}
+                      className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl border text-xs font-bold transition-all shadow-2xs ${isActive
+                          ? 'bg-emerald-600 border-emerald-600 text-white shadow-emerald-600/20'
+                          : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-emerald-300'
+                        }`}
+                    >
+                      <button
+                        type='button'
+                        onClick={() => handleSwitchClassOnProfile(cls)}
+                        disabled={isClassActionPending}
+                        className='cursor-pointer hover:underline flex items-center gap-1.5'
+                        title={isActive ? 'Kelas Sedang Aktif' : `Beralih ke Kelas ${cls}`}
+                      >
+                        <School className='h-3.5 w-3.5 shrink-0' />
+                        <span>Kelas {cls}</span>
+                        {isActive && (
+                          <span className='text-[9px] bg-white/20 text-white px-1.5 py-0.2 rounded-md font-extrabold'>
+                            AKTIF
+                          </span>
+                        )}
+                      </button>
+
+                      {/* Delete button (only if more than 1 class) */}
+                      {((profile?.classes?.length || 1) > 1) && (
+                        <button
+                          type='button'
+                          onClick={() => promptDeleteClassOnProfile(cls)}
+                          disabled={isClassActionPending}
+                          title={`Hapus Kelas ${cls}`}
+                          className={`ml-1 hover:scale-110 transition-transform cursor-pointer ${isActive ? 'text-white/80 hover:text-white' : 'text-slate-400 hover:text-rose-600'
+                            }`}
+                        >
+                          <Trash2 className='h-3.5 w-3.5' />
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Form Tambah Kelas Baru di Halaman Profile */}
+            <form onSubmit={handleAddClassOnProfile} className='pt-2 border-t border-slate-100 space-y-2'>
+              <Label className='text-slate-700 text-xs font-semibold block'>
+                TAMBAH KELAS BARU
+              </Label>
+              <div className='flex gap-2 max-w-md'>
+                <Input
+                  placeholder='Contoh: 5B, 6A, VII C'
+                  value={newClassInput}
+                  onChange={(e) => setNewClassInput(e.target.value)}
+                  disabled={isClassActionPending}
+                  className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-10'
+                />
+                <Button
+                  type='submit'
+                  disabled={isClassActionPending || !newClassInput.trim()}
+                  className='bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs px-4 h-10 shrink-0 gap-1.5 cursor-pointer shadow-2xs'
+                >
+                  {isClassActionPending ? (
+                    <Loader2 className='h-4 w-4 animate-spin' />
+                  ) : (
+                    <>
+                      <Plus className='h-4 w-4' />
+                      <span>Tambah Kelas</span>
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </Card>
+      )}
+
       {/* TAB 2: KEAMANAN & PASSWORD */}
       {activeTab === 'security' && (
         <Card className='bg-white border-slate-200/80 rounded-2xl shadow-xs p-6'>
@@ -525,7 +732,7 @@ export default function ProfileClient() {
             </CardDescription>
           </CardHeader>
 
-          <form onSubmit={handlePasswordSubmit} className='space-y-4 max-w-md'>
+          <form onSubmit={handlePasswordSubmit} className='space-y-4 max-w-md pt-2'>
             <div className='space-y-1.5'>
               <Label className='text-slate-700 text-xs font-semibold flex items-center gap-2'>
                 <KeyRound className='h-3.5 w-3.5 text-slate-400' />
@@ -542,7 +749,7 @@ export default function ProfileClient() {
                     currentPassword: e.target.value,
                   })
                 }
-                className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-10'
+                className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs sm:text-sm h-10 px-3.5'
               />
             </div>
 
@@ -562,7 +769,7 @@ export default function ProfileClient() {
                     newPassword: e.target.value,
                   })
                 }
-                className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-10'
+                className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs sm:text-sm h-10 px-3.5'
               />
             </div>
 
@@ -582,7 +789,7 @@ export default function ProfileClient() {
                     confirmPassword: e.target.value,
                   })
                 }
-                className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-10'
+                className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs sm:text-sm h-10 px-3.5'
               />
             </div>
 
@@ -605,6 +812,19 @@ export default function ProfileClient() {
           </form>
         </Card>
       )}
+
+      {/* Modal Confirm Hapus Kelas di Profile */}
+      <ConfirmDialog
+        open={deleteClassConfirm.open}
+        onOpenChange={(open) => setDeleteClassConfirm((prev) => ({ ...prev, open }))}
+        title="Hapus Kelas"
+        description={`Apakah Anda yakin ingin menghapus Kelas ${deleteClassConfirm.className} dari daftar kelas Anda?`}
+        confirmText="Hapus Kelas"
+        cancelText="Batal"
+        variant="danger"
+        isLoading={isClassActionPending}
+        onConfirm={handleConfirmDeleteClassOnProfile}
+      />
     </div>
   );
 }
