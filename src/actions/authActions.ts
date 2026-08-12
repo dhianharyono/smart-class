@@ -3,15 +3,14 @@
 import dbConnect from '@/lib/db';
 import Teacher from '@/models/Teacher';
 import AdminUser from '@/models/AdminUser';
-import School from '@/models/School';
 import { hashPassword, verifyPassword } from '@/lib/password';
 import { signSession, verifySession } from '@/lib/auth';
 import { cookies } from 'next/headers';
-import { escapeRegExp } from '@/lib/utils';
 import { checkRateLimit } from '@/lib/rateLimit';
 import { verifyRecaptchaToken } from '@/lib/recaptcha';
 
 import { sendVerificationEmail } from '@/lib/email';
+import { ensureSchoolExists } from '@/actions/adminActions';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -177,14 +176,9 @@ export async function registerTeacher(data: {
 
     let trimmedSchoolName = schoolName?.trim();
     if (trimmedSchoolName) {
-      const safePattern = escapeRegExp(trimmedSchoolName);
-      const schoolExists = await School.findOne({
-        name: { $regex: new RegExp(`^${safePattern}$`, 'i') },
-      });
-      if (!schoolExists) {
-        await School.create({ name: trimmedSchoolName });
-      } else {
-        trimmedSchoolName = schoolExists.name;
+      const schoolObj = await ensureSchoolExists(trimmedSchoolName);
+      if (schoolObj?.name) {
+        trimmedSchoolName = schoolObj.name;
       }
     }
 

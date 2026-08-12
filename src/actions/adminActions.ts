@@ -7,6 +7,7 @@ import Attendance from '@/models/Attendance';
 import Grade from '@/models/Grade';
 import Saving from '@/models/Saving';
 import Journal from '@/models/Journal';
+import JournalHeader from '@/models/JournalHeader';
 import AdminUser from '@/models/AdminUser';
 import School from '@/models/School';
 import { cookies } from 'next/headers';
@@ -59,6 +60,18 @@ export async function getAdminStats() {
     const adminUsers = await AdminUser.find({}).lean();
     const adminEmails = adminUsers.map((a) => a.username);
 
+    // Dapatkan semua ID guru yang sah di database untuk auto-cleanup data yatim/orphan
+    const validTeachers = await Teacher.find({}).select('_id').lean();
+    const validTeacherIds = validTeachers.map((t) => t._id.toString());
+
+    // Auto-cleanup data yatim yang tersisa dari guru yang sudah dihapus sebelumnya
+    await Journal.deleteMany({ teacherId: { $nin: validTeacherIds } });
+    await JournalHeader.deleteMany({ teacherId: { $nin: validTeacherIds } });
+    await Student.deleteMany({ teacherId: { $nin: validTeacherIds } });
+    await Attendance.deleteMany({ teacherId: { $nin: validTeacherIds } });
+    await Grade.deleteMany({ teacherId: { $nin: validTeacherIds } });
+    await Saving.deleteMany({ teacherId: { $nin: validTeacherIds } });
+
     // 1. Hitung total data dasar (kecuali admin)
     const teacherCount = await Teacher.countDocuments({ email: { $nin: adminEmails } });
     const schoolCount = await School.countDocuments();
@@ -91,8 +104,8 @@ export async function getAdminStats() {
       alfaPct: totalAttendanceRecords > 0 ? Math.round((totalAlfa / totalAttendanceRecords) * 100) : 0,
     };
 
-    // 4. Activity Stream: Entri Jurnal Pembelajaran KBM Terkini
-    const recentJournalDocs = await Journal.find({})
+    // 4. Activity Stream: Entri Jurnal Pembelajaran KBM Terkini (Hanya dari guru aktif)
+    const recentJournalDocs = await Journal.find({ teacherId: { $in: validTeacherIds } })
       .sort({ createdAt: -1 })
       .limit(6)
       .lean();
@@ -101,18 +114,20 @@ export async function getAdminStats() {
     const journalTeachers = await Teacher.find({ _id: { $in: teacherIds } }).lean();
     const teacherMap = new Map(journalTeachers.map((t) => [t._id.toString(), t]));
 
-    const recentJournals = recentJournalDocs.map((j) => {
-      const t = teacherMap.get(j.teacherId);
-      return {
-        id: j._id.toString(),
-        teacherName: t?.name || 'Wali Kelas',
-        schoolName: t?.schoolName || '-',
-        className: j.className || t?.className || '-',
-        subject: j.subject || 'Umum',
-        material: j.material || '-',
-        date: j.date ? new Date(j.date).toISOString() : new Date(j.createdAt).toISOString(),
-      };
-    });
+    const recentJournals = recentJournalDocs
+      .flatMap((j) => {
+        const t = teacherMap.get(j.teacherId);
+        if (!t) return [];
+        return [{
+          id: j._id.toString(),
+          teacherName: t.name || 'Wali Kelas',
+          schoolName: t.schoolName || '-',
+          className: j.className || t.className || '-',
+          subject: j.subject || 'Umum',
+          material: j.material || '-',
+          date: j.date ? new Date(j.date).toISOString() : new Date(j.createdAt).toISOString(),
+        }];
+      });
 
     // 5. Ambil data statistik per guru (kecuali admin)
     const teachers = await Teacher.find({ email: { $nin: adminEmails } }).sort({ name: 1 }).lean();
@@ -162,25 +177,79 @@ export async function getAdminStats() {
       ? Math.round(teachersWithAttendance.reduce((acc, curr) => acc + curr.attendanceRate, 0) / teachersWithAttendance.length)
       : 0;
 
-    // 6. Dapatkan pengguna online (aktif dalam 5 menit terakhir)
+    // 6. Dapatkan pengguna online (aktif dalam 5 menit terakhir, khusus Wali Kelas / Guru non-admin)
     const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
     const activeTeachers = await Teacher.find({
+      email: { $nin: adminEmails },
       lastActiveAt: { $gte: fiveMinutesAgo }
     }).sort({ name: 1 }).lean();
 
     const onlineUsers = activeTeachers.map((u) => {
-      let role = (u as any).role || 'Wali Kelas';
-      if (adminEmails.includes(u.email.toLowerCase())) {
-        role = 'Admin';
-      }
       return {
         id: u._id.toString(),
         name: u.name,
         email: u.email,
-        role,
+        role: (u as any).role || 'Wali Kelas',
         lastActiveAt: u.lastActiveAt ? u.lastActiveAt.toISOString() : new Date().toISOString()
       };
     });
+
+    // 7. Hitung Tren Aktivitas Wali Kelas (7 hari terakhir)
+    const activityTrend: {
+      date: string;
+      day: string;
+      fullLabel: string;
+      jurnal: number;
+      presensi: number;
+      nilai: number;
+      tabungan: number;
+      total: number;
+    }[] = [];
+
+    const now = new Date();
+    const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(now.getDate() - i);
+
+      const startOfDay = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+      const endOfDay = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
+
+      const journalCount = await Journal.countDocuments({
+        teacherId: { $in: validTeacherIds },
+        createdAt: { $gte: startOfDay, $lte: endOfDay },
+      });
+
+      const attendanceCount = await Attendance.countDocuments({
+        teacherId: { $in: validTeacherIds },
+        createdAt: { $gte: startOfDay, $lte: endOfDay },
+      });
+
+      const gradeCount = await Grade.countDocuments({
+        teacherId: { $in: validTeacherIds },
+        createdAt: { $gte: startOfDay, $lte: endOfDay },
+      });
+
+      const savingCount = await Saving.countDocuments({
+        teacherId: { $in: validTeacherIds },
+        createdAt: { $gte: startOfDay, $lte: endOfDay },
+      });
+
+      const dayLabel = dayNames[d.getDay()];
+      const dateStr = `${d.getDate()}/${d.getMonth() + 1}`;
+
+      activityTrend.push({
+        date: dateStr,
+        day: dayLabel,
+        fullLabel: `${dayLabel}, ${dateStr}`,
+        jurnal: journalCount,
+        presensi: attendanceCount,
+        nilai: gradeCount,
+        tabungan: savingCount,
+        total: journalCount + attendanceCount + gradeCount + savingCount,
+      });
+    }
 
     return {
       teacherCount,
@@ -194,6 +263,7 @@ export async function getAdminStats() {
       recentJournals,
       teacherStats,
       onlineUsers,
+      activityTrend,
     };
   } catch (error: any) {
     if (isRedirectError(error)) {
@@ -247,6 +317,10 @@ export async function updateTeacher(id: string, data: {
       throw new Error('Nama dan email wajib diisi.');
     }
 
+    if (schoolName && schoolName.trim()) {
+      await ensureSchoolExists(schoolName.trim());
+    }
+
     const normalizedEmail = email.toLowerCase().trim();
     // Cek jika email dipakai guru lain
     const existing = await Teacher.findOne({ email: normalizedEmail, _id: { $ne: id } });
@@ -272,6 +346,10 @@ export async function updateTeacher(id: string, data: {
     }
 
     await Teacher.findByIdAndUpdate(id, updateFields);
+
+    revalidatePath('/admin/sekolah');
+    revalidatePath('/admin/guru');
+    revalidatePath('/admin');
 
     return { success: true };
   } catch (error: any) {
@@ -301,12 +379,18 @@ export async function deleteTeacher(id: string) {
       }
     }
 
-    // Lakukan cascade delete
+    // Lakukan cascade delete untuk seluruh data terkait guru ini
     await Teacher.findByIdAndDelete(id);
     await Student.deleteMany({ teacherId: id });
     await Attendance.deleteMany({ teacherId: id });
     await Grade.deleteMany({ teacherId: id });
     await Saving.deleteMany({ teacherId: id });
+    await Journal.deleteMany({ teacherId: id });
+    await JournalHeader.deleteMany({ teacherId: id });
+
+    revalidatePath('/admin/sekolah');
+    revalidatePath('/admin/guru');
+    revalidatePath('/admin');
 
     return { success: true };
   } catch (error: any) {
@@ -319,16 +403,71 @@ export async function deleteTeacher(id: string) {
 }
 
 /**
+ * Memastikan nama sekolah ada di koleksi Master Data Sekolah (School).
+ * Jika belum ada, akan ditambahkan secara otomatis.
+ */
+export async function ensureSchoolExists(name: string) {
+  if (!name || !name.trim()) return null;
+  const trimmed = name.trim();
+  const safePattern = escapeRegExp(trimmed);
+
+  await dbConnect();
+
+  const existing = await School.findOne({
+    name: { $regex: new RegExp(`^${safePattern}$`, 'i') },
+  });
+
+  if (!existing) {
+    try {
+      const created = await School.create({ name: trimmed });
+      return JSON.parse(JSON.stringify(created));
+    } catch (error: any) {
+      const found = await School.findOne({
+        name: { $regex: new RegExp(`^${safePattern}$`, 'i') },
+      });
+      return found ? JSON.parse(JSON.stringify(found)) : null;
+    }
+  }
+
+  return JSON.parse(JSON.stringify(existing));
+}
+
+/**
  * Mengambil daftar sekolah (Public - digunakan di Sign-Up & Admin).
+ * Otomatis menyinkronkan data sekolah dari koleksi Teacher ke koleksi Master Data School.
  */
 export async function getSchools() {
   try {
     await dbConnect();
-    const schools = await School.find({}).sort({ name: 1 }).lean();
-    
-    // Hitung jumlah guru untuk masing-masing sekolah (kecuali admin)
+
+    // Dapatkan semua email admin agar tidak terikut saat auto-sync sekolah
     const adminUsers = await AdminUser.find({}).lean();
-    const adminEmails = adminUsers.map((a) => a.username);
+    const adminEmails = adminUsers.map((a) => (a.username || '').toLowerCase().trim());
+
+    // Auto-sync: Sinkronisasi nama sekolah unik dari dokumen Teacher non-admin yang belum ada di koleksi School
+    const teacherSchoolNames: (string | null | undefined)[] = await Teacher.distinct('schoolName', {
+      email: { $nin: adminEmails },
+      schoolName: { $exists: true, $ne: '' },
+    });
+    for (const rawName of teacherSchoolNames) {
+      if (rawName && typeof rawName === 'string' && rawName.trim().length >= 2) {
+        const trimmed = rawName.trim();
+        const safePattern = escapeRegExp(trimmed);
+        const exists = await School.findOne({
+          name: { $regex: new RegExp(`^${safePattern}$`, 'i') },
+        });
+        if (!exists) {
+          try {
+            await School.create({ name: trimmed });
+            console.log(`[SYNC] Auto-created missing school from teacher record: "${trimmed}"`);
+          } catch (err) {
+            // Abaikan jika ada duplikasi concurrent
+          }
+        }
+      }
+    }
+
+    const schools = await School.find({}).sort({ name: 1 }).lean();
 
     const schoolsWithCount = await Promise.all(
       schools.map(async (school) => {
@@ -380,6 +519,9 @@ export async function createTeacher(data: {
       throw new Error('Semua field wajib diisi.');
     }
 
+    const trimmedSchool = schoolName.trim();
+    await ensureSchoolExists(trimmedSchool);
+
     const normalizedEmail = email.toLowerCase().trim();
     
     // Cek duplikasi email
@@ -399,7 +541,7 @@ export async function createTeacher(data: {
       name: name.trim(),
       email: normalizedEmail,
       password: hashedPassword,
-      schoolName: schoolName.trim(),
+      schoolName: trimmedSchool,
       className: parsedClasses[0] || className.trim(),
       classes: parsedClasses.length > 0 ? parsedClasses : [className.trim()],
       activeClass: parsedClasses[0] || className.trim(),
@@ -407,6 +549,10 @@ export async function createTeacher(data: {
     });
 
     await newTeacher.save();
+
+    revalidatePath('/admin/sekolah');
+    revalidatePath('/admin/guru');
+    revalidatePath('/admin');
 
     return { 
       success: true, 
@@ -451,6 +597,9 @@ export async function addSchool(name: string) {
     }
 
     const newSchool = await School.create({ name: trimmed });
+    revalidatePath('/admin/sekolah');
+    revalidatePath('/admin/guru');
+    revalidatePath('/admin');
     return { success: true, school: JSON.parse(JSON.stringify(newSchool)) };
   } catch (error: any) {
     if (isRedirectError(error)) {
@@ -488,6 +637,16 @@ export async function deleteSchool(id: string) {
     }
 
     await School.findByIdAndDelete(id);
+
+    // Bersihkan referensi nama sekolah ini pada dokumen Teacher (misal akun admin) agar tidak ter-sync kembali
+    await Teacher.updateMany(
+      { schoolName: school.name },
+      { $set: { schoolName: '' } }
+    );
+
+    revalidatePath('/admin/sekolah');
+    revalidatePath('/admin/guru');
+    revalidatePath('/admin');
     return { success: true };
   } catch (error: any) {
     if (isRedirectError(error)) {

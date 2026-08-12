@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import AdminUser from '@/models/AdminUser';
 import School from '@/models/School';
+import Teacher from '@/models/Teacher';
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
@@ -33,9 +34,10 @@ async function seedInitialData() {
       console.log(`[SEED] Default admin user created: ${defaultAdmin}`);
     }
 
-    // 2. Seed Sekolah default jika kosong
+    // 2. Seed Sekolah default jika database benar-benar kosong (0 sekolah & 0 guru)
     const schoolCount = await School.countDocuments();
-    if (schoolCount === 0) {
+    const teacherCount = await Teacher.countDocuments();
+    if (schoolCount === 0 && teacherCount === 0) {
       const defaultSchools = ['SDN 01 Jaya', 'SMPN 02 Smart', 'SMAN 03 Class'];
       await School.insertMany(defaultSchools.map(name => ({ name })));
       console.log(`[SEED] Default schools created: ${defaultSchools.join(', ')}`);

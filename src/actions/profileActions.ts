@@ -10,6 +10,7 @@ import { hashPassword, verifyPassword } from '@/lib/password';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { isRedirectError } from '@/lib/utils';
+import { ensureSchoolExists } from '@/actions/adminActions';
 
 async function requireAuth() {
   const cookieStore = await cookies();
@@ -128,6 +129,10 @@ export async function updateProfile(data: {
 
     const normalizedEmail = data.email.toLowerCase().trim();
 
+    if (data.schoolName && data.schoolName.trim()) {
+      await ensureSchoolExists(data.schoolName.trim());
+    }
+
     // Check email uniqueness if email changed
     const existing = await Teacher.findOne({
       email: normalizedEmail,
@@ -172,6 +177,9 @@ export async function updateProfile(data: {
     revalidatePath('/profile');
     revalidatePath('/');
     revalidatePath('/jurnal');
+    revalidatePath('/admin/sekolah');
+    revalidatePath('/admin/guru');
+    revalidatePath('/admin');
 
     return {
       success: true,

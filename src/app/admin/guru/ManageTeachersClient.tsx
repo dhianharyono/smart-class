@@ -432,7 +432,7 @@ export default function ManageTeachersClient({
                   onChange={(e) => setEditName(e.target.value)}
                   required
                   disabled={loading}
-                  className='w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-slate-900 disabled:opacity-50'
+                  className='w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 text-slate-900 disabled:opacity-50'
                 />
               </div>
               <div className='space-y-1'>
@@ -445,7 +445,7 @@ export default function ManageTeachersClient({
                   onChange={(e) => setEditEmail(e.target.value)}
                   required
                   disabled={loading}
-                  className='w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-slate-900 disabled:opacity-50'
+                  className='w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 text-slate-900 disabled:opacity-50'
                 />
               </div>
               <div className='space-y-1'>
@@ -457,7 +457,7 @@ export default function ManageTeachersClient({
                   onChange={(e) => setEditRole(e.target.value as any)}
                   required
                   disabled={loading}
-                  className='w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-slate-900 disabled:opacity-50 cursor-pointer font-medium'
+                  className='w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 text-slate-900 disabled:opacity-50 cursor-pointer font-medium'
                 >
                   <option
                     value='Wali Kelas'
@@ -483,7 +483,7 @@ export default function ManageTeachersClient({
                     onChange={(e) => setEditSchool(e.target.value)}
                     required
                     disabled={loading}
-                    className='w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 text-slate-900 disabled:opacity-50 cursor-pointer font-medium'
+                    className='w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 text-slate-900 disabled:opacity-50 cursor-pointer font-medium'
                   >
                     <option value='' disabled>
                       Pilih Sekolah
@@ -779,7 +779,7 @@ export default function ManageTeachersClient({
                   <Button
                     type='submit'
                     disabled={loading}
-                    className='bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl cursor-pointer text-xs font-semibold flex items-center gap-1.5 shadow-xs'
+                    className='bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl cursor-pointer text-xs font-semibold flex items-center gap-1.5 shadow-xs'
                   >
                     {loading ? (
                       <>

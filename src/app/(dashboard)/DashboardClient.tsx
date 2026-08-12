@@ -211,7 +211,7 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
             className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 self-start sm:self-auto cursor-pointer shadow-xs'
           >
             <Home className='h-4 w-4 text-emerald-600' />
-            <span>Kembali Ke Halaman Utama</span>
+            <span>Halaman Utama</span>
           </Button>
         </Link>
       </div>

@@ -45,16 +45,9 @@ export default function LoadingScreen({
     return () => clearInterval(interval);
   }, [message, defaultMessages]);
 
-  const glowColor =
-    variant === 'admin' ? 'bg-indigo-500/10' : 'bg-emerald-500/10';
-  const logoBg =
-    variant === 'admin'
-      ? 'from-indigo-600 to-violet-600'
-      : 'from-emerald-600 to-teal-600';
-  const textGradient =
-    variant === 'admin'
-      ? 'from-indigo-600 to-violet-600'
-      : 'from-emerald-600 to-teal-600';
+  const glowColor = 'bg-emerald-500/10';
+  const logoBg = 'from-emerald-600 to-teal-600';
+  const textGradient = 'from-emerald-600 to-teal-600';
 
   return (
     <div className='fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-50 transition-all duration-300'>
@@ -86,7 +79,7 @@ export default function LoadingScreen({
         {/* Spinner & Message */}
         <div className='flex flex-col items-center space-y-3 pt-4'>
           <Loader2
-            className={`h-6 w-6 animate-spin ${variant === 'admin' ? 'text-indigo-600' : 'text-emerald-600'}`}
+            className='h-6 w-6 animate-spin text-emerald-600'
           />
           <p className='text-slate-700 text-sm font-medium animate-pulse'>
             {displayMessage}

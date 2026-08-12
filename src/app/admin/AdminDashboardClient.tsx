@@ -28,9 +28,32 @@ import {
   BarChart3,
   CalendarCheck2,
 } from 'lucide-react';
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+} from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+
+export interface ActivityTrendItem {
+  date: string;
+  day: string;
+  fullLabel: string;
+  jurnal: number;
+  presensi: number;
+  nilai: number;
+  tabungan: number;
+  total: number;
+}
 
 interface TeacherStat {
   id: string;
@@ -99,6 +122,7 @@ interface AdminDashboardClientProps {
     recentJournals?: RecentJournal[];
     teacherStats: TeacherStat[];
     onlineUsers?: OnlineUser[];
+    activityTrend?: ActivityTrendItem[];
   };
   schools: SchoolStat[];
 }
@@ -160,23 +184,6 @@ export default function AdminDashboardClient({ stats, schools }: AdminDashboardC
       color: 'bg-white border-slate-200/80 text-teal-700 shadow-xs',
       iconColor: 'bg-teal-50 border-teal-200 text-teal-700',
     },
-    {
-      title: 'Total Siswa Terdata',
-      value: stats.studentCount,
-      description: 'Siswa di seluruh kelas',
-      icon: Users,
-      color: 'bg-white border-slate-200/80 text-blue-700 shadow-xs',
-      iconColor: 'bg-blue-50 border-blue-200 text-blue-700',
-    },
-    {
-      title: 'Saldo Tabungan Siswa',
-      value: formatIDR(stats.totalSavingsBalance || 0),
-      description: 'Total akumulasi saldo kas',
-      icon: Wallet,
-      color: 'bg-white border-slate-200/80 text-amber-700 shadow-xs',
-      iconColor: 'bg-amber-50 border-amber-200 text-amber-700',
-      isCurrency: true,
-    },
   ];
 
   // Filtered teachers list based on search term
@@ -206,22 +213,25 @@ export default function AdminDashboardClient({ stats, schools }: AdminDashboardC
     alfaPct: 0,
   };
 
+  // Activity trend metrics
+  const trendData = stats.activityTrend || [];
+  const totalTrend7Days = trendData.reduce((acc, curr) => acc + curr.total, 0);
+  const peakDay = trendData.length > 0
+    ? [...trendData].sort((a, b) => b.total - a.total)[0]
+    : null;
+  const peakDayLabel = peakDay ? peakDay.day : '-';
+  const peakDayTotal = peakDay ? peakDay.total : 0;
+
   return (
     <div className="space-y-8">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <ShieldCheck className="h-5 w-5 text-emerald-600 shrink-0" />
-            <span className="text-xs font-bold text-emerald-700 tracking-wider uppercase block">
-              Ringkasan Sistem
-            </span>
-          </div>
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900">
-            Dashboard Admin
-          </h2>
-          <p className="text-slate-600 text-xs sm:text-sm mt-1">
-            Ikhtisar operasional, statistik presensi, aktivitas KBM terkini, dan sekolah terdaftar di seluruh sistem.
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Dashboard Administrator
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
+            Ikhtisar operasional, tren aktivitas wali kelas, presensi, dan sekolah terdaftar di seluruh sistem.
           </p>
         </div>
         <Link href="/" className="w-full sm:w-auto">
@@ -230,13 +240,13 @@ export default function AdminDashboardClient({ stats, schools }: AdminDashboardC
             className="w-full sm:w-auto border-slate-200 bg-white hover:bg-emerald-50 hover:border-emerald-200 text-slate-700 hover:text-emerald-800 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-colors"
           >
             <Home className="h-4 w-4 text-emerald-600" />
-            <span>Kembali Ke Halaman Utama</span>
+            <span>Halaman Utama</span>
           </Button>
         </Link>
       </div>
 
       {/* Grid Utama 4 Stat Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
         {statCards.map((card, i) => {
           const Icon = card.icon;
           return (
@@ -253,7 +263,7 @@ export default function AdminDashboardClient({ stats, schools }: AdminDashboardC
                 </div>
               </div>
               <div>
-                <div className={`font-black tracking-tight text-slate-900 mb-1 leading-none ${card.isCurrency ? 'text-lg sm:text-xl' : 'text-2xl sm:text-3xl'}`}>
+                <div className="font-black tracking-tight text-slate-900 mb-1 leading-none text-2xl sm:text-3xl">
                   {card.value}
                 </div>
                 <p className="text-[11px] text-slate-500 font-medium truncate">{card.description}</p>
@@ -281,24 +291,24 @@ export default function AdminDashboardClient({ stats, schools }: AdminDashboardC
             <CardContent className="px-6 pb-6">
               {schools.length > 0 ? (
                 <div className="overflow-x-auto min-w-0 max-w-full">
-                  <table className="w-full min-w-[400px] text-left text-sm text-slate-700 border-collapse">
+                  <table className="w-full text-left text-xs text-slate-700 border-collapse">
                     <thead>
-                      <tr className="border-b border-slate-200 text-slate-700 text-xs font-bold uppercase tracking-wider bg-slate-50">
-                        <th className="py-3 px-3">Nama Sekolah</th>
-                        <th className="py-3 px-3 text-center">Guru</th>
-                        <th className="py-3 px-3 text-center">Siswa</th>
+                      <tr className="border-b border-slate-200/80 text-slate-700 uppercase tracking-wider text-[10px] font-bold">
+                        <th className="py-2.5 px-2">Nama Sekolah</th>
+                        <th className="py-2.5 px-2 text-center">Guru</th>
+                        <th className="py-2.5 px-2 text-right">Siswa</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {schools.map((school) => (
                         <tr key={school._id} className="hover:bg-slate-50/80 transition-colors group">
-                          <td className="py-3 px-3 font-bold text-slate-900 group-hover:text-emerald-700 transition-colors">
+                          <td className="py-2.5 px-2 font-bold text-slate-900 truncate max-w-[150px]">
                             {school.name}
                           </td>
-                          <td className="py-3 px-3 text-center text-slate-600 font-medium">
+                          <td className="py-2.5 px-2 text-center font-medium">
                             {school.teacherCount || 0} Guru
                           </td>
-                          <td className="py-3 px-3 text-center text-slate-600 font-medium">
+                          <td className="py-2.5 px-2 text-right font-bold text-emerald-700">
                             {school.studentCount || 0} Siswa
                           </td>
                         </tr>
@@ -318,29 +328,27 @@ export default function AdminDashboardClient({ stats, schools }: AdminDashboardC
         {/* Pengguna Online */}
         <Card className="bg-white border-slate-200/80 rounded-2xl shadow-xs flex flex-col justify-between">
           <div>
-            <CardHeader className="p-6 pb-4">
-              <CardTitle className="text-md font-bold text-slate-900 flex items-center gap-2">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-                </span>
-                <span>Pengguna Online ({stats.onlineUsers?.length || 0})</span>
-              </CardTitle>
-              <CardDescription className="text-xs text-slate-500 mt-1">
-                Pengguna aktif 5 menit terakhir beserta peran (role).
-              </CardDescription>
+            <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-6 pb-4">
+              <div>
+                <CardTitle className="text-md font-bold text-slate-900 flex items-center gap-2">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                  </span>
+                  <span>Wali Kelas Online ({stats.onlineUsers?.length || 0})</span>
+                </CardTitle>
+                <CardDescription className="text-xs text-slate-500 mt-1">
+                  Wali kelas aktif 5 menit terakhir beserta peran (role).
+                </CardDescription>
+              </div>
             </CardHeader>
             <CardContent className="px-6 pb-6">
               {stats.onlineUsers && stats.onlineUsers.length > 0 ? (
                 <div className="space-y-2.5 max-h-[220px] overflow-y-auto pr-1">
                   {stats.onlineUsers.map((user) => {
-                    let badgeColor = "bg-slate-100 border-slate-200 text-slate-600";
-                    if (user.role === 'Admin') {
-                      badgeColor = "bg-emerald-50 text-emerald-700 border-emerald-200";
-                    } else if (user.role === 'Kepala Sekolah') {
+                    let badgeColor = "bg-emerald-50 text-emerald-700 border-emerald-200";
+                    if (user.role === 'Kepala Sekolah') {
                       badgeColor = "bg-violet-50 text-violet-700 border-violet-200";
-                    } else if (user.role === 'Wali Kelas') {
-                      badgeColor = "bg-teal-50 text-teal-700 border-teal-200";
                     }
 
                     return (
@@ -358,7 +366,7 @@ export default function AdminDashboardClient({ stats, schools }: AdminDashboardC
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-8 text-slate-400 text-xs">
-                  Tidak ada pengguna online.
+                  Belum ada wali kelas yang online.
                 </div>
               )}
             </CardContent>
@@ -366,58 +374,122 @@ export default function AdminDashboardClient({ stats, schools }: AdminDashboardC
         </Card>
       </div>
 
-      {/* Section Data Baru & Fitur Pemantauan: Aktivitas KBM Terkini */}
-      <div className="grid gap-6 md:grid-cols-1">
-        {/* Umpan Aktivitas KBM (Jurnal Pembelajaran Terbaru) */}
-        <Card className="bg-white border-slate-200/80 rounded-2xl shadow-xs flex flex-col justify-between">
-          <div>
-            <CardHeader className="flex flex-row items-center justify-between p-6 pb-4">
-              <div>
-                <CardTitle className="text-md font-bold text-slate-900 flex items-center gap-2">
-                  <Activity className="h-5 w-5 text-teal-600" />
-                  <span>Aktivitas KBM Terkini</span>
-                </CardTitle>
-                <CardDescription className="text-xs text-slate-500 mt-1">
-                  Entri jurnal mengajar terbaru yang diinput oleh wali kelas.
-                </CardDescription>
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Section Grafik Tren Aktivitas Wali Kelas */}
+        <Card className="bg-white border-slate-200/80 rounded-2xl shadow-xs">
+          <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 pb-2">
+            <div>
+              <CardTitle className="text-md font-bold text-slate-900 flex items-center gap-2">
+                <span>Tren Aktivitas Wali Kelas (7 Hari Terakhir)</span>
+              </CardTitle>
+              <CardDescription className="text-xs text-slate-500 mt-1">
+                Grafik penginputan Jurnal KBM, Presensi Siswa, Nilai Akademik, & Tabungan oleh seluruh wali kelas.
+              </CardDescription>
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 flex items-center gap-2">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total 7 Hari</span>
+                <span className="text-xs font-black text-slate-900">{totalTrend7Days} Aktivitas</span>
               </div>
-            </CardHeader>
-            <CardContent className="px-6 pb-6">
-              {stats.recentJournals && stats.recentJournals.length > 0 ? (
-                <div className="space-y-2.5 max-h-[220px] overflow-y-auto pr-1">
-                  {stats.recentJournals.map((journal) => (
-                    <div
-                      key={journal.id}
-                      className="p-2.5 bg-slate-50 border border-slate-200/90 rounded-xl hover:border-teal-300 hover:bg-teal-50/30 transition-colors"
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span className="font-bold text-xs text-slate-900 truncate">
-                            {journal.teacherName}
-                          </span>
-                          <span className="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold shrink-0">
-                            {journal.className}
+              <div className="bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-1.5 flex items-center gap-2">
+                <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Puncak</span>
+                <span className="text-xs font-black text-emerald-800">{peakDayLabel} ({peakDayTotal})</span>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6 pt-2">
+            <div className="h-[280px] w-full pt-4">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorJurnal" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#059669" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="#059669" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="colorPresensi" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#0d9488" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="#0d9488" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="colorNilai" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#0284c7" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="#0284c7" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="colorTabungan" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                  <XAxis dataKey="fullLabel" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: '#64748b' }} />
+                  <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: '#64748b' }} allowDecimals={false} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
+                    labelStyle={{ fontWeight: 'bold', color: '#0f172a', marginBottom: '4px', fontSize: '12px' }}
+                  />
+                  <Legend iconType="circle" wrapperStyle={{ paddingTop: '12px', fontSize: '11px' }} />
+                  <Area type="monotone" dataKey="jurnal" name="Jurnal KBM" stroke="#059669" strokeWidth={2.5} fillOpacity={1} fill="url(#colorJurnal)" />
+                  <Area type="monotone" dataKey="presensi" name="Presensi Siswa" stroke="#0d9488" strokeWidth={2.5} fillOpacity={1} fill="url(#colorPresensi)" />
+                  <Area type="monotone" dataKey="nilai" name="Input Nilai" stroke="#0284c7" strokeWidth={2.5} fillOpacity={1} fill="url(#colorNilai)" />
+                  <Area type="monotone" dataKey="tabungan" name="Tabungan" stroke="#8b5cf6" strokeWidth={2.5} fillOpacity={1} fill="url(#colorTabungan)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Section Data Baru & Fitur Pemantauan: Aktivitas KBM Terkini */}
+        <div className="grid gap-6 md:grid-cols-1">
+          {/* Umpan Aktivitas KBM (Jurnal Pembelajaran Terbaru) */}
+          <Card className="bg-white border-slate-200/80 rounded-2xl shadow-xs flex flex-col justify-between">
+            <div>
+              <CardHeader className="flex flex-row items-center justify-between p-6 pb-4">
+                <div>
+                  <CardTitle className="text-md font-bold text-slate-900 flex items-center gap-2">
+                    <span>Aktivitas KBM Terkini</span>
+                  </CardTitle>
+                  <CardDescription className="text-xs text-slate-500 mt-1">
+                    Entri jurnal mengajar terbaru yang diinput oleh wali kelas.
+                  </CardDescription>
+                </div>
+              </CardHeader>
+              <CardContent className="px-6 pb-6">
+                {stats.recentJournals && stats.recentJournals.length > 0 ? (
+                  <div className="space-y-2.5 max-h-[220px] overflow-y-auto pr-1">
+                    {stats.recentJournals.map((journal) => (
+                      <div
+                        key={journal.id}
+                        className="p-2.5 bg-slate-50 border border-slate-200/90 rounded-xl hover:border-teal-300 hover:bg-teal-50/30 transition-colors"
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="font-bold text-xs text-slate-900 truncate">
+                              {journal.teacherName}
+                            </span>
+                            <span className="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold shrink-0">
+                              {journal.className}
+                            </span>
+                          </div>
+                          <span className="text-[10px] text-slate-500 flex items-center gap-1 shrink-0">
+                            <Clock className="h-3 w-3 text-slate-400" />
+                            {formatDate(journal.date)}
                           </span>
                         </div>
-                        <span className="text-[10px] text-slate-500 flex items-center gap-1 shrink-0">
-                          <Clock className="h-3 w-3 text-slate-400" />
-                          {formatDate(journal.date)}
-                        </span>
+                        <p className="text-xs text-slate-700 font-semibold truncate">
+                          {journal.subject} &bull; <span className="font-normal text-slate-600">{journal.material}</span>
+                        </p>
                       </div>
-                      <p className="text-xs text-slate-700 font-semibold truncate">
-                        {journal.subject} &bull; <span className="font-normal text-slate-600">{journal.material}</span>
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-8 text-slate-400 text-xs">
-                  Belum ada aktivitas jurnal mengajar.
-                </div>
-              )}
-            </CardContent>
-          </div>
-        </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-8 text-slate-400 text-xs">
+                    Belum ada aktivitas jurnal mengajar.
+                  </div>
+                )}
+              </CardContent>
+            </div>
+          </Card>
+        </div>
       </div>
 
       {/* Detail & Statistik Wali Kelas (Guru) dengan Search Bar */}
@@ -425,7 +497,6 @@ export default function AdminDashboardClient({ stats, schools }: AdminDashboardC
         <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between p-6 pb-4">
           <div>
             <CardTitle className="text-md font-bold text-slate-900 flex items-center gap-2">
-              <GraduationCap className="h-5 w-5 text-emerald-600" />
               <span>Statistik & Pemantauan Wali Kelas</span>
             </CardTitle>
             <CardDescription className="text-xs text-slate-500 mt-1">
@@ -484,7 +555,7 @@ export default function AdminDashboardClient({ stats, schools }: AdminDashboardC
             </div>
 
             <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 shrink-0">
+              <div className="p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 shrink-0">
                 <FileText className="h-4 w-4" />
               </div>
               <div className="min-w-0">
@@ -578,7 +649,7 @@ export default function AdminDashboardClient({ stats, schools }: AdminDashboardC
                         </td>
                         <td className="py-3.5 px-4 text-center">
                           <span className="inline-flex items-center gap-1.5 text-xs text-slate-700 font-semibold bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-lg">
-                            <FileText className="h-3.5 w-3.5 text-indigo-600" />
+                            <FileText className="h-3.5 w-3.5 text-emerald-600" />
                             {teacher.gradeCount || 0}
                           </span>
                         </td>

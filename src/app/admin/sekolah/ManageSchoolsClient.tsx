@@ -117,12 +117,6 @@ export default function ManageSchoolsClient({ initialSchools }: ManageSchoolsCli
       {/* Header Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Building className="h-5 w-5 text-emerald-600 shrink-0" />
-            <span className="text-xs font-bold text-emerald-700 tracking-wider uppercase block">
-              Master Data Sekolah
-            </span>
-          </div>
           <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900">
             Kelola Daftar Sekolah
           </h2>

@@ -33,7 +33,7 @@ interface SidebarGroup {
 const adminMenuGroups: SidebarGroup[] = [
   {
     category: 'MENU UTAMA',
-    items: [{ name: 'Ringkasan', href: '/admin', icon: LayoutDashboard }],
+    items: [{ name: 'Dashboard', href: '/admin', icon: LayoutDashboard }],
   },
   {
     category: 'MANAJEMEN MASTER',
