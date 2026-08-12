@@ -947,13 +947,13 @@ export default function DashboardLayoutClient({
           setOnboardingOpen(open);
         }}
       >
-        <DialogContent showCloseButton={false} className='bg-white border border-slate-200 text-slate-900 rounded-3xl max-w-2xl sm:max-w-2xl p-5 sm:p-7 shadow-2xl overflow-hidden'>
+        <DialogContent showCloseButton={false} className='bg-white border border-slate-200 text-slate-900 rounded-3xl w-[calc(100vw-1.5rem)] sm:w-full sm:max-w-2xl p-4 sm:p-7 shadow-2xl overflow-hidden text-left'>
           <DialogHeader className='pb-3 border-b border-slate-100'>
             {/* Top Bar with Badge & Logout Option */}
-            <div className='flex items-center justify-between gap-2 pb-1 flex-wrap'>
-              <div className='flex items-center gap-1.5 text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200/80 shadow-2xs shrink-0'>
+            <div className='flex items-center justify-between gap-2 pb-1'>
+              <div className='flex items-center gap-1.5 text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200/80 shadow-2xs shrink-0 max-w-[70%] sm:max-w-none'>
                 <Sparkles className='h-3.5 w-3.5 text-emerald-600 shrink-0' />
-                <span className='text-[11px] font-extrabold uppercase tracking-wide whitespace-nowrap'>
+                <span className='text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wide truncate sm:whitespace-nowrap'>
                   {teacher.isFirstLogin ? 'Aktivasi Akun Wali Kelas' : 'Lengkapi Data Profil & Sekolah'}
                 </span>
               </div>
@@ -961,7 +961,7 @@ export default function DashboardLayoutClient({
                 type='button'
                 variant='ghost'
                 onClick={() => setShowLogoutConfirm(true)}
-                className='text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200/80 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-rose-300 rounded-xl px-3 py-1.5 h-8 gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap shadow-2xs'
+                className='text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200/80 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-rose-300 rounded-xl px-2.5 sm:px-3 py-1.5 h-8 gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap shadow-2xs'
               >
                 <LogOut className='h-3.5 w-3.5 shrink-0' />
                 <span>Keluar</span>
@@ -969,7 +969,7 @@ export default function DashboardLayoutClient({
             </div>
 
             <div className='pt-2 space-y-1 text-left'>
-              <DialogTitle className='text-xl sm:text-2xl font-black text-slate-900 tracking-tight'>
+              <DialogTitle className='text-lg sm:text-2xl font-black text-slate-900 tracking-tight'>
                 {onboardingStep === 1
                   ? 'Lengkapi Informasi Diri & Sekolah'
                   : 'Pilih Menu Fitur Utama Sidebar'}
@@ -982,12 +982,12 @@ export default function DashboardLayoutClient({
             </div>
 
             {/* Step Wizard Tabs */}
-            <div className='flex items-center gap-2 pt-3 pb-0.5'>
+            <div className='grid grid-cols-2 gap-1.5 sm:flex sm:items-center sm:gap-2 pt-3 pb-0.5 w-full'>
               <button
                 type='button'
                 onClick={() => setOnboardingStep(1)}
-                className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer min-w-0 ${onboardingStep === 1
-                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                className={`w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-xl border text-[11px] sm:text-xs font-bold transition-all cursor-pointer min-w-0 ${onboardingStep === 1
+                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
                   : 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
                   }`}
               >
@@ -997,14 +997,14 @@ export default function DashboardLayoutClient({
                 >
                   1
                 </span>
-                <span className='whitespace-nowrap'>Data Profil & Sekolah</span>
+                <span className='truncate sm:whitespace-nowrap'>Data Profil & Sekolah</span>
               </button>
-              <ChevronRight className='h-3.5 w-3.5 text-slate-300 shrink-0' />
+              <ChevronRight className='hidden sm:block h-3.5 w-3.5 text-slate-300 shrink-0' />
               <button
                 type='button'
                 onClick={() => handleNextStep()}
-                className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer min-w-0 ${onboardingStep === 2
-                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                className={`w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-xl border text-[11px] sm:text-xs font-bold transition-all cursor-pointer min-w-0 ${onboardingStep === 2
+                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
                   : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100 hover:text-slate-600'
                   }`}
               >
@@ -1014,7 +1014,7 @@ export default function DashboardLayoutClient({
                 >
                   2
                 </span>
-                <span className='whitespace-nowrap'>Kustomisasi Menu</span>
+                <span className='truncate sm:whitespace-nowrap'>Kustomisasi Menu</span>
               </button>
             </div>
           </DialogHeader>
@@ -1134,7 +1134,7 @@ export default function DashboardLayoutClient({
                 </div>
 
                 <div className='space-y-1.5 sm:col-span-2'>
-                  <div className='flex items-center justify-between'>
+                  <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-0.5 sm:gap-2'>
                     <label className='text-xs font-bold uppercase tracking-wider text-slate-700 block'>
                       KELAS DIAJAR <span className='text-rose-500'>*</span>
                     </label>
@@ -1355,17 +1355,17 @@ export default function DashboardLayoutClient({
           )}
 
           {/* FOOTER BUTTONS */}
-          <DialogFooter className='pt-4 border-t border-slate-100 flex items-center justify-between sm:justify-between w-full gap-3'>
+          <DialogFooter className='pt-4 border-t border-slate-100 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between w-full gap-2.5 sm:gap-3'>
             {onboardingStep === 1 ? (
               <>
-                <div className='text-[11px] text-slate-400 font-medium flex items-center gap-1'>
+                <div className='text-[11px] text-slate-400 font-medium flex items-center justify-center sm:justify-start gap-1 text-center sm:text-left'>
                   <span className='text-rose-500'>*</span>
                   <span>Wajib diisi sebelum masuk dashboard</span>
                 </div>
                 <Button
                   type='button'
                   onClick={handleNextStep}
-                  className='bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs sm:text-sm px-6 h-10 gap-2 shadow-md shadow-emerald-600/20 cursor-pointer transition-all'
+                  className='bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs sm:text-sm px-6 h-10 gap-2 shadow-md shadow-emerald-600/20 cursor-pointer transition-all w-full sm:w-auto justify-center'
                 >
                   <span>Selanjutnya</span>
                 </Button>
@@ -1376,7 +1376,7 @@ export default function DashboardLayoutClient({
                   type='button'
                   variant='outline'
                   onClick={() => setOnboardingStep(1)}
-                  className='rounded-xl text-xs sm:text-sm px-5 h-10 gap-2 cursor-pointer border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold'
+                  className='rounded-xl text-xs sm:text-sm px-5 h-10 gap-2 cursor-pointer border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold w-full sm:w-auto justify-center'
                 >
                   <ArrowLeft className='h-4 w-4' />
                   <span>Kembali</span>
@@ -1385,7 +1385,7 @@ export default function DashboardLayoutClient({
                   type='button'
                   onClick={handleSaveOnboarding}
                   disabled={isSavingOnboarding}
-                  className='bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs sm:text-sm px-6 h-10 gap-2 shadow-md shadow-emerald-600/20 cursor-pointer transition-all disabled:opacity-50'
+                  className='bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs sm:text-sm px-6 h-10 gap-2 shadow-md shadow-emerald-600/20 cursor-pointer transition-all disabled:opacity-50 w-full sm:w-auto justify-center'
                 >
                   {isSavingOnboarding ? (
                     <span>Menyimpan Data...</span>

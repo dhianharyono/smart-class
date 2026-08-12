@@ -15,12 +15,18 @@ import { sendVerificationEmail } from '@/lib/email';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export async function loginTeacher(data: { email: string; password: string; recaptchaToken?: string }) {
+export async function loginTeacher(data: {
+  email: string;
+  password: string;
+  recaptchaToken?: string;
+}) {
   try {
     // 1. Rate Limiting Check (Max 5 attempts per minute)
     const rateLimit = await checkRateLimit('login', 5, 60 * 1000);
     if (!rateLimit.allowed) {
-      throw new Error(`Terlalu banyak percobaan login. Silakan coba lagi dalam ${rateLimit.retryAfterSeconds} detik.`);
+      throw new Error(
+        `Terlalu banyak percobaan login. Silakan coba lagi dalam ${rateLimit.retryAfterSeconds} detik.`,
+      );
     }
 
     // 2. Google reCAPTCHA Check (Verified if token is provided)
@@ -60,7 +66,8 @@ export async function loginTeacher(data: { email: string; password: string; reca
         success: false,
         requiresEmailVerification: true,
         email: teacher.email,
-        error: 'Email Anda belum diverifikasi. Silakan masukkan kode OTP yang telah dikirim ke email Anda.',
+        error:
+          'Email Anda belum diverifikasi. Silakan masukkan kode OTP yang telah dikirim ke email Anda.',
       };
     }
 
@@ -106,7 +113,9 @@ export async function registerTeacher(data: {
     // 1. Rate Limiting Check (Max 5 attempts per minute)
     const rateLimit = await checkRateLimit('register', 5, 60 * 1000);
     if (!rateLimit.allowed) {
-      throw new Error(`Terlalu banyak percobaan pendaftaran. Silakan coba lagi dalam ${rateLimit.retryAfterSeconds} detik.`);
+      throw new Error(
+        `Terlalu banyak percobaan pendaftaran. Silakan coba lagi dalam ${rateLimit.retryAfterSeconds} detik.`,
+      );
     }
 
     // 2. Google reCAPTCHA Check
@@ -125,12 +134,16 @@ export async function registerTeacher(data: {
     const normalizedUsername = username.toLowerCase().trim();
     const USERNAME_REGEX = /^[a-zA-Z0-9_]{3,20}$/;
     if (!USERNAME_REGEX.test(normalizedUsername)) {
-      throw new Error('Username hanya boleh berisi huruf, angka, dan garis bawah (_) minimal 3-20 karakter.');
+      throw new Error(
+        'Username hanya boleh berisi huruf, angka, dan garis bawah (_) minimal 3-20 karakter.',
+      );
     }
 
     const normalizedEmail = email.toLowerCase().trim();
     if (!EMAIL_REGEX.test(normalizedEmail)) {
-      throw new Error('Format email tidak valid. Silakan gunakan alamat email yang aktif (misal: nama@gmail.com).');
+      throw new Error(
+        'Format email tidak valid. Silakan gunakan alamat email yang aktif (misal: nama@gmail.com).',
+      );
     }
 
     if (password.length < 6) {
@@ -146,9 +159,13 @@ export async function registerTeacher(data: {
     }
 
     // Check if username is already taken by another teacher
-    const usernameExists = await Teacher.findOne({ username: normalizedUsername });
+    const usernameExists = await Teacher.findOne({
+      username: normalizedUsername,
+    });
     if (usernameExists) {
-      throw new Error('Username ini sudah digunakan. Silakan pilih username lain.');
+      throw new Error(
+        'Username ini sudah digunakan. Silakan pilih username lain.',
+      );
     }
 
     const existingEmail = await Teacher.findOne({ email: normalizedEmail });
@@ -161,7 +178,9 @@ export async function registerTeacher(data: {
     let trimmedSchoolName = schoolName?.trim();
     if (trimmedSchoolName) {
       const safePattern = escapeRegExp(trimmedSchoolName);
-      const schoolExists = await School.findOne({ name: { $regex: new RegExp(`^${safePattern}$`, 'i') } });
+      const schoolExists = await School.findOne({
+        name: { $regex: new RegExp(`^${safePattern}$`, 'i') },
+      });
       if (!schoolExists) {
         await School.create({ name: trimmedSchoolName });
       } else {
@@ -183,7 +202,14 @@ export async function registerTeacher(data: {
       isEmailVerified: false,
       emailVerificationToken: otpCode,
       emailVerificationExpires: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes
-      enabledMenus: ['/dashboard', '/siswa', '/absensi', '/nilai', '/tabungan', '/jurnal'],
+      enabledMenus: [
+        '/dashboard',
+        '/siswa',
+        '/absensi',
+        '/nilai',
+        '/tabungan',
+        '/jurnal',
+      ],
     });
     await newTeacher.save();
 
@@ -194,7 +220,8 @@ export async function registerTeacher(data: {
       otp: otpCode,
     });
 
-    let message = 'Pendaftaran berhasil! Silakan periksa inbox atau folder Spam email Anda untuk kode OTP verifikasi.';
+    let message =
+      'Pendaftaran berhasil! Silakan periksa inbox / folder Spam email Anda untuk kode OTP verifikasi.';
     if (!emailResult.success) {
       console.warn('Gagal mengirim email verifikasi:', emailResult.error);
       message = `Pendaftaran berhasil! Namun email OTP gagal terkirim: ${emailResult.error}. Silakan klik kirim ulang OTP.`;
@@ -220,7 +247,9 @@ export async function verifyEmailOTP(data: { email: string; otp: string }) {
     });
 
     if (!teacher) {
-      throw new Error('Pengguna tidak ditemukan. Silakan periksa kembali email atau username Anda.');
+      throw new Error(
+        'Pengguna tidak ditemukan. Silakan periksa kembali email atau username Anda.',
+      );
     }
 
     if (!teacher.isEmailVerified) {
@@ -228,11 +257,18 @@ export async function verifyEmailOTP(data: { email: string; otp: string }) {
       const userOtp = String(data.otp || '').trim();
 
       if (!dbOtp || dbOtp !== userOtp) {
-        throw new Error('Kode OTP verifikasi tidak cocok. Periksa kembali email Anda.');
+        throw new Error(
+          'Kode OTP verifikasi tidak cocok. Periksa kembali email Anda.',
+        );
       }
 
-      if (teacher.emailVerificationExpires && new Date(teacher.emailVerificationExpires) < new Date()) {
-        throw new Error('Kode OTP telah kadaluarsa. Silakan minta kode verifikasi baru.');
+      if (
+        teacher.emailVerificationExpires &&
+        new Date(teacher.emailVerificationExpires) < new Date()
+      ) {
+        throw new Error(
+          'Kode OTP telah kadaluarsa. Silakan minta kode verifikasi baru.',
+        );
       }
 
       // Mark as verified
@@ -266,7 +302,10 @@ export async function verifyEmailOTP(data: { email: string; otp: string }) {
 
     return { success: true, isAdmin: !!isAdminUser };
   } catch (error: any) {
-    return { success: false, error: error.message || 'Gagal memverifikasi OTP.' };
+    return {
+      success: false,
+      error: error.message || 'Gagal memverifikasi OTP.',
+    };
   }
 }
 
@@ -291,14 +330,21 @@ export async function resendVerificationOTP(data: { email: string }) {
     teacher.emailVerificationExpires = new Date(Date.now() + 15 * 60 * 1000);
     await teacher.save();
 
-    const emailResult = await sendVerificationEmail({ to: teacher.email, name: teacher.name, otp: otpCode });
+    const emailResult = await sendVerificationEmail({
+      to: teacher.email,
+      name: teacher.name,
+      otp: otpCode,
+    });
     if (!emailResult.success) {
       throw new Error(`Gagal mengirim email: ${emailResult.error}`);
     }
 
     return { success: true };
   } catch (error: any) {
-    return { success: false, error: error.message || 'Gagal mengirim ulang kode OTP.' };
+    return {
+      success: false,
+      error: error.message || 'Gagal mengirim ulang kode OTP.',
+    };
   }
 }
 
