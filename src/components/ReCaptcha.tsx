@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import Script from 'next/script';
 import { ShieldCheck, AlertCircle, Loader2 } from 'lucide-react';
 
@@ -27,7 +27,7 @@ export default function ReCaptcha({ onVerify, onExpire, resetTrigger, theme = 'l
 
   const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 
-  const renderWidget = () => {
+  const renderWidget = useCallback(() => {
     if (!siteKey || !containerRef.current || !window.grecaptcha || typeof window.grecaptcha.render !== 'function') {
       return false;
     }
@@ -39,7 +39,7 @@ export default function ReCaptcha({ onVerify, onExpire, resetTrigger, theme = 'l
         return true;
       }
 
-      // Clear container in case of re-mount
+      // Clear container inner HTML before render
       containerRef.current.innerHTML = '';
 
       const widgetId = window.grecaptcha.render(containerRef.current, {
@@ -65,50 +65,26 @@ export default function ReCaptcha({ onVerify, onExpire, resetTrigger, theme = 'l
       console.error('Error rendering reCAPTCHA:', err);
       return false;
     }
-  };
+  }, [siteKey, theme, onVerify, onExpire]);
 
   useEffect(() => {
-    // Check if grecaptcha is already available globally (e.g. from previous navigation)
-    if (window.grecaptcha && typeof window.grecaptcha.render === 'function') {
-      setTimeout(() => {
-        setIsLoaded(true);
-        renderWidget();
-      }, 0);
-      return;
-    }
-
-    // Set callback on window
     window.onReCaptchaLoadCallback = () => {
       setIsLoaded(true);
     };
 
-    // Polling fallback to check if script loaded without firing callback
-    const interval = setInterval(() => {
-      if (window.grecaptcha && typeof window.grecaptcha.render === 'function') {
-        setIsLoaded(true);
-        renderWidget();
-        clearInterval(interval);
-      }
-    }, 150);
-
-    const timeout = setTimeout(() => {
-      clearInterval(interval);
-    }, 8000);
-
-    return () => {
-      clearInterval(interval);
-      clearTimeout(timeout);
-    };
+    if (window.grecaptcha && typeof window.grecaptcha.render === 'function') {
+      setIsLoaded(true);
+    }
   }, []);
 
   useEffect(() => {
-    if (isLoaded) {
+    if (isLoaded && !isReady) {
       const timer = setTimeout(() => {
         renderWidget();
-      }, 0);
+      }, 50);
       return () => clearTimeout(timer);
     }
-  }, [isLoaded]);
+  }, [isLoaded, isReady, renderWidget]);
 
   // Reset widget when resetTrigger changes
   useEffect(() => {
@@ -138,9 +114,8 @@ export default function ReCaptcha({ onVerify, onExpire, resetTrigger, theme = 'l
       <Script
         src="https://www.google.com/recaptcha/api.js?onload=onReCaptchaLoadCallback&render=explicit"
         strategy="afterInteractive"
-        onReady={() => {
+        onLoad={() => {
           setIsLoaded(true);
-          renderWidget();
         }}
       />
       {!isReady && !error && (
@@ -149,7 +124,12 @@ export default function ReCaptcha({ onVerify, onExpire, resetTrigger, theme = 'l
           <span>Memuat verifikasi reCAPTCHA...</span>
         </div>
       )}
-      <div ref={containerRef} className={`min-h-[78px] flex items-center justify-center ${!isReady ? 'hidden' : 'block'}`} />
+      <div
+        ref={containerRef}
+        className={`min-h-[78px] flex items-center justify-center transition-opacity duration-200 ${
+          !isReady ? 'opacity-0 pointer-events-none absolute' : 'opacity-100 relative'
+        }`}
+      />
       {error && (
         <div className="flex items-center gap-1.5 mt-2 text-xs text-rose-400">
           <AlertCircle className="h-3.5 w-3.5" />
@@ -159,4 +139,3 @@ export default function ReCaptcha({ onVerify, onExpire, resetTrigger, theme = 'l
     </div>
   );
 }
-

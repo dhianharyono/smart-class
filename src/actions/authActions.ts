@@ -1,5 +1,6 @@
 'use server';
 
+import crypto from 'crypto';
 import dbConnect from '@/lib/db';
 import Teacher from '@/models/Teacher';
 import AdminUser from '@/models/AdminUser';
@@ -7,7 +8,7 @@ import { hashPassword, verifyPassword } from '@/lib/password';
 import { signSession, verifySession } from '@/lib/auth';
 import { cookies } from 'next/headers';
 import { checkRateLimit } from '@/lib/rateLimit';
-import { verifyRecaptchaToken } from '@/lib/recaptcha';
+import { verifyRecaptchaToken, isRecaptchaConfigured } from '@/lib/recaptcha';
 
 import { sendVerificationEmail } from '@/lib/email';
 import { ensureSchoolExists } from '@/actions/adminActions';
@@ -28,8 +29,11 @@ export async function loginTeacher(data: {
       );
     }
 
-    // 2. Google reCAPTCHA Check (Verified if token is provided)
-    if (data.recaptchaToken) {
+    // 2. Strict Google reCAPTCHA Check for Login
+    // If token is provided, ALWAYS verify it.
+    // If token is omitted, enforce reCAPTCHA if failed attempt count >= 2 (matching client CAPTCHA_THRESHOLD)
+    const recaptchaRequired = rateLimit.attemptCount >= 2;
+    if (data.recaptchaToken || recaptchaRequired) {
       const recaptchaRes = await verifyRecaptchaToken(data.recaptchaToken);
       if (!recaptchaRes.success) {
         throw new Error(recaptchaRes.error || 'Verifikasi reCAPTCHA gagal.');
@@ -117,7 +121,7 @@ export async function registerTeacher(data: {
       );
     }
 
-    // 2. Google reCAPTCHA Check
+    // 2. Google reCAPTCHA Check for Registration (Always required)
     const recaptchaRes = await verifyRecaptchaToken(data.recaptchaToken);
     if (!recaptchaRes.success) {
       throw new Error(recaptchaRes.error || 'Verifikasi reCAPTCHA gagal.');
@@ -182,8 +186,8 @@ export async function registerTeacher(data: {
       }
     }
 
-    // Generate 6-digit OTP code for email verification
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    // Cryptographically secure 6-digit OTP code for email verification
+    const otpCode = crypto.randomInt(100000, 1000000).toString();
 
     const newTeacher = new Teacher({
       name: name.trim(),
@@ -234,6 +238,14 @@ export async function registerTeacher(data: {
 
 export async function verifyEmailOTP(data: { email: string; otp: string }) {
   try {
+    // Rate limit OTP verification attempts to prevent brute-force attacks (Max 5 attempts / min)
+    const rateLimit = await checkRateLimit('verify_otp', 5, 60 * 1000);
+    if (!rateLimit.allowed) {
+      throw new Error(
+        `Terlalu banyak percobaan verifikasi OTP. Silakan coba lagi dalam ${rateLimit.retryAfterSeconds} detik.`,
+      );
+    }
+
     await dbConnect();
     const normalizedInput = data.email.toLowerCase().trim();
     const teacher = await Teacher.findOne({
@@ -305,6 +317,14 @@ export async function verifyEmailOTP(data: { email: string; otp: string }) {
 
 export async function resendVerificationOTP(data: { email: string }) {
   try {
+    // Rate limit resend OTP requests (Max 3 attempts per minute)
+    const rateLimit = await checkRateLimit('resend_otp', 3, 60 * 1000);
+    if (!rateLimit.allowed) {
+      throw new Error(
+        `Terlalu banyak permintaan kode OTP. Silakan coba lagi dalam ${rateLimit.retryAfterSeconds} detik.`,
+      );
+    }
+
     await dbConnect();
     const normalizedInput = data.email.toLowerCase().trim();
     const teacher = await Teacher.findOne({
@@ -319,7 +339,8 @@ export async function resendVerificationOTP(data: { email: string }) {
       throw new Error('Email Anda sudah terverifikasi.');
     }
 
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    // Cryptographically secure 6-digit OTP code
+    const otpCode = crypto.randomInt(100000, 1000000).toString();
     teacher.emailVerificationToken = otpCode;
     teacher.emailVerificationExpires = new Date(Date.now() + 15 * 60 * 1000);
     await teacher.save();
