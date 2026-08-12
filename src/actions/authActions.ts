@@ -198,7 +198,6 @@ export async function registerTeacher(data: {
       success: true,
       requiresEmailVerification: true,
       email: newTeacher.email,
-      demoOtp: otpCode,
       message: 'Pendaftaran berhasil! Silakan periksa email Anda untuk memasukkan kode OTP verifikasi.',
     };
   } catch (error: any) {
@@ -288,7 +287,7 @@ export async function resendVerificationOTP(data: { email: string }) {
 
     await sendVerificationEmail({ to: teacher.email, name: teacher.name, otp: otpCode });
 
-    return { success: true, demoOtp: otpCode };
+    return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message || 'Gagal mengirim ulang kode OTP.' };
   }

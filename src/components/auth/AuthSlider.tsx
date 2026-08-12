@@ -77,7 +77,6 @@ export default function AuthSlider({
   const [otpCodeInput, setOtpCodeInput] = useState('');
   const [otpLoading, setOtpLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
-  const [_demoOtpCode, setDemoOtpCode] = useState<string | null>(null);
 
   // Countdown timer for OTP Resend
   useEffect(() => {
@@ -244,7 +243,6 @@ export default function AuthSlider({
             'Pendaftaran berhasil! Kode OTP verifikasi telah dikirim ke email Anda.',
         );
         setOtpEmail(res.email);
-        if (res.demoOtp) setDemoOtpCode(res.demoOtp);
         setShowOtpModal(true);
         setResendCooldown(60);
         setLoading(false);
@@ -318,7 +316,6 @@ export default function AuthSlider({
         toast.success(
           'Kode OTP verifikasi baru telah dikirimkan ke email Anda.',
         );
-        if (res.demoOtp) setDemoOtpCode(res.demoOtp);
         setResendCooldown(60);
       } else {
         toast.error(res.error || 'Gagal mengirim ulang kode OTP.');
