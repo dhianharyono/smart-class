@@ -188,17 +188,23 @@ export async function registerTeacher(data: {
     await newTeacher.save();
 
     // Kirim email verifikasi OTP via Nodemailer
-    await sendVerificationEmail({
+    const emailResult = await sendVerificationEmail({
       to: newTeacher.email,
       name: newTeacher.name,
       otp: otpCode,
     });
 
+    let message = 'Pendaftaran berhasil! Silakan periksa email Anda untuk memasukkan kode OTP verifikasi.';
+    if (!emailResult.success) {
+      console.warn('Gagal mengirim email verifikasi:', emailResult.error);
+      message = `Pendaftaran berhasil! Namun email OTP gagal terkirim: ${emailResult.error}. Silakan klik kirim ulang OTP.`;
+    }
+
     return {
       success: true,
       requiresEmailVerification: true,
       email: newTeacher.email,
-      message: 'Pendaftaran berhasil! Silakan periksa email Anda untuk memasukkan kode OTP verifikasi.',
+      message,
     };
   } catch (error: any) {
     return { success: false, error: error.message || 'Gagal mendaftar.' };
@@ -285,7 +291,10 @@ export async function resendVerificationOTP(data: { email: string }) {
     teacher.emailVerificationExpires = new Date(Date.now() + 15 * 60 * 1000);
     await teacher.save();
 
-    await sendVerificationEmail({ to: teacher.email, name: teacher.name, otp: otpCode });
+    const emailResult = await sendVerificationEmail({ to: teacher.email, name: teacher.name, otp: otpCode });
+    if (!emailResult.success) {
+      throw new Error(`Gagal mengirim email: ${emailResult.error}`);
+    }
 
     return { success: true };
   } catch (error: any) {

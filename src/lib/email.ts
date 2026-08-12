@@ -10,19 +10,33 @@ export async function sendVerificationEmail({ to, name, otp }: SendVerificationE
   try {
     const smtpHost = process.env.SMTP_HOST;
     const smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
-    const smtpUser = process.env.SMTP_USER;
-    const smtpPass = process.env.SMTP_PASS;
-    const smtpFrom = process.env.SMTP_FROM || '"Smart Class" <no-reply@smartclass.sch.id>';
+    const smtpUser = process.env.SMTP_USER?.trim();
+    // Trim spaces from App Password
+    const smtpPass = process.env.SMTP_PASS?.replace(/\s+/g, '');
+    let smtpFrom = process.env.SMTP_FROM?.trim() || '"Smart Class" <mysmartclassindonesia@gmail.com>';
+
+    // Clean up outer quotes if present from Vercel UI
+    if (smtpFrom.startsWith('"') && smtpFrom.endsWith('"')) {
+      smtpFrom = smtpFrom.slice(1, -1);
+    }
 
     if (smtpHost && smtpUser && smtpPass) {
+      const isGmail = smtpHost.includes('gmail');
+      // On serverless platforms like Vercel, port 465 (SSL) is much more reliable than port 587 (STARTTLS)
+      const secure = smtpPort === 465 || (isGmail && smtpPort !== 587);
+      const actualPort = isGmail && smtpPort === 587 ? 465 : smtpPort;
+
       const transporter = nodemailer.createTransport({
         host: smtpHost,
-        port: smtpPort,
-        secure: smtpPort === 465,
+        port: actualPort,
+        secure: actualPort === 465,
         auth: {
           user: smtpUser,
           pass: smtpPass,
         },
+        connectionTimeout: 10000,
+        greetingTimeout: 10000,
+        socketTimeout: 15000,
       });
 
       await transporter.sendMail({
@@ -30,7 +44,7 @@ export async function sendVerificationEmail({ to, name, otp }: SendVerificationE
         to,
         subject: `[Smart Class] Kode Verifikasi Email Anda: ${otp}`,
         html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; rounded-radius: 16px;">
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 16px;">
             <h2 style="color: #059669; margin-bottom: 8px;">Verifikasi Email Akun Smart Class</h2>
             <p style="color: #475569; font-size: 14px;">Halo <strong>${name}</strong>,</p>
             <p style="color: #475569; font-size: 14px; line-height: 1.6;">
@@ -48,14 +62,13 @@ export async function sendVerificationEmail({ to, name, otp }: SendVerificationE
         `,
       });
       console.log(`[EMAIL SENT] Kode OTP ${otp} berhasil dikirim via SMTP ke ${to}`);
+      return { success: true };
     } else {
-      console.log(`[EMAIL SIMULATION] SMTP tidak dikonfigurasi. Kode OTP untuk ${to} (${name}) adalah: ${otp}`);
+      console.warn(`[EMAIL SIMULATION] SMTP tidak lengkap (Host: ${!!smtpHost}, User: ${!!smtpUser}, Pass: ${!!smtpPass}). Kode OTP untuk ${to}: ${otp}`);
+      return { success: false, error: 'SMTP Environment Variables tidak lengkap di Server.' };
     }
-
-    return { success: true };
   } catch (error: any) {
     console.error('Error sending verification email:', error);
-    // Return success: true so app doesn't crash if SMTP fails, but log error
-    return { success: true, warning: 'Gagal mengirim email secara otomatis, gunakan kode OTP yang ditampilkan.' };
+    return { success: false, error: error?.message || 'Gagal mengirim email verifikasi via SMTP.' };
   }
 }
