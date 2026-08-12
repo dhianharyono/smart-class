@@ -134,24 +134,111 @@ export async function getAdminStats() {
     const teacherStats = await Promise.all(
       teachers.map(async (t) => {
         const teacherIdStr = t._id.toString();
-        const classStudentCount = await Student.countDocuments({ teacherId: teacherIdStr });
-        const teacherSavings = await Saving.find({ teacherId: teacherIdStr }).lean();
-        
-        let classSavingsBalance = 0;
-        teacherSavings.forEach((tx) => {
-          classSavingsBalance += tx.type === 'Kredit' ? tx.amount : -tx.amount;
-        });
-
-        const journalCount = await Journal.countDocuments({ teacherId: teacherIdStr });
-        const gradeCount = await Grade.countDocuments({ teacherId: teacherIdStr });
-
-        const totalAttendance = await Attendance.countDocuments({ teacherId: teacherIdStr });
-        const hadirAttendance = await Attendance.countDocuments({ teacherId: teacherIdStr, status: 'Hadir' });
-        const attendanceRate = totalAttendance > 0 ? Math.round((hadirAttendance / totalAttendance) * 100) : 0;
 
         const teacherClasses = Array.isArray(t.classes) && t.classes.length > 0
           ? Array.from(new Set(t.classes.filter(Boolean)))
           : (t.className ? [t.className] : []);
+
+        // 1. Fetch Students per teacher
+        const teacherStudents = await Student.find({ teacherId: teacherIdStr }, { _id: 1, className: 1 }).lean();
+        const studentClassMap = new Map<string, string>();
+        const studentCountByClass = new Map<string, number>();
+
+        teacherStudents.forEach((s) => {
+          const sId = s._id.toString();
+          const cls = s.className || '-';
+          studentClassMap.set(sId, cls);
+          studentCountByClass.set(cls, (studentCountByClass.get(cls) || 0) + 1);
+        });
+
+        // 2. Fetch Journals per teacher
+        const journals = await Journal.find({ teacherId: teacherIdStr }, { className: 1 }).lean();
+        const journalCountByClass = new Map<string, number>();
+        journals.forEach((j) => {
+          const cls = j.className || (teacherClasses[0] || '-');
+          journalCountByClass.set(cls, (journalCountByClass.get(cls) || 0) + 1);
+        });
+
+        const allClasses = Array.from(
+          new Set([
+            ...teacherClasses,
+            ...Array.from(studentCountByClass.keys()),
+            ...Array.from(journalCountByClass.keys()),
+          ])
+        );
+
+        const classStudentCounts = allClasses.map((cls) => ({
+          className: cls,
+          count: studentCountByClass.get(cls) || 0,
+        }));
+        const classStudentCount = teacherStudents.length;
+
+        // 3. Fetch Attendance per teacher
+        const attendances = await Attendance.find({ teacherId: teacherIdStr }, { studentId: 1, status: 1 }).lean();
+        const classAttMap = new Map<string, { total: number; hadir: number }>();
+        let hadirAttendance = 0;
+
+        attendances.forEach((att) => {
+          if (att.status === 'Hadir') hadirAttendance++;
+          const sId = att.studentId?.toString();
+          const clsName = (sId ? studentClassMap.get(sId) : null) || teacherClasses[0] || '-';
+          const curr = classAttMap.get(clsName) || { total: 0, hadir: 0 };
+          curr.total += 1;
+          if (att.status === 'Hadir') curr.hadir += 1;
+          classAttMap.set(clsName, curr);
+        });
+
+        const totalAttendance = attendances.length;
+        const attendanceRate = totalAttendance > 0 ? Math.round((hadirAttendance / totalAttendance) * 100) : 0;
+
+        const classAttendanceRates = allClasses.map((cls) => {
+          const data = classAttMap.get(cls);
+          return {
+            className: cls,
+            rate: data && data.total > 0 ? Math.round((data.hadir / data.total) * 100) : null,
+            total: data?.total || 0,
+          };
+        });
+
+        // 4. Class Journal Counts
+        const classJournalCounts = allClasses.map((cls) => ({
+          className: cls,
+          count: journalCountByClass.get(cls) || 0,
+        }));
+        const journalCount = journals.length;
+
+        // 5. Fetch Grades per teacher
+        const grades = await Grade.find({ teacherId: teacherIdStr }, { studentId: 1 }).lean();
+        const gradeCountByClass = new Map<string, number>();
+        grades.forEach((g) => {
+          const sId = g.studentId?.toString();
+          const cls = (sId ? studentClassMap.get(sId) : null) || teacherClasses[0] || '-';
+          gradeCountByClass.set(cls, (gradeCountByClass.get(cls) || 0) + 1);
+        });
+
+        const classGradeCounts = allClasses.map((cls) => ({
+          className: cls,
+          count: gradeCountByClass.get(cls) || 0,
+        }));
+        const gradeCount = grades.length;
+
+        // 6. Fetch Savings per teacher
+        const teacherSavings = await Saving.find({ teacherId: teacherIdStr }, { studentId: 1, type: 1, amount: 1 }).lean();
+        const savingsByClass = new Map<string, number>();
+        let classSavingsBalance = 0;
+
+        teacherSavings.forEach((tx) => {
+          const amt = tx.type === 'Kredit' ? tx.amount : -tx.amount;
+          classSavingsBalance += amt;
+          const sId = tx.studentId?.toString();
+          const cls = (sId ? studentClassMap.get(sId) : null) || teacherClasses[0] || '-';
+          savingsByClass.set(cls, (savingsByClass.get(cls) || 0) + amt);
+        });
+
+        const classSavings = allClasses.map((cls) => ({
+          className: cls,
+          amount: savingsByClass.get(cls) || 0,
+        }));
 
         return {
           id: teacherIdStr,
@@ -160,6 +247,11 @@ export async function getAdminStats() {
           schoolName: t.schoolName || '-',
           className: t.className || (teacherClasses[0] || '-'),
           classes: teacherClasses,
+          classStudentCounts,
+          classAttendanceRates,
+          classJournalCounts,
+          classGradeCounts,
+          classSavings,
           studentCount: classStudentCount,
           totalSavings: classSavingsBalance,
           journalCount,

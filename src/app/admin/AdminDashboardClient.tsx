@@ -20,7 +20,10 @@ import {
   Home,
   Search,
   Clock,
+  ChevronDown,
+  Layers,
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import {
   ResponsiveContainer,
   AreaChart,
@@ -52,6 +55,32 @@ export interface ActivityTrendItem {
   total: number;
 }
 
+export interface ClassStudentCount {
+  className: string;
+  count: number;
+}
+
+export interface ClassAttendanceRate {
+  className: string;
+  rate: number | null;
+  total: number;
+}
+
+export interface ClassJournalCount {
+  className: string;
+  count: number;
+}
+
+export interface ClassGradeCount {
+  className: string;
+  count: number;
+}
+
+export interface ClassSaving {
+  className: string;
+  amount: number;
+}
+
 interface TeacherStat {
   id: string;
   name: string;
@@ -59,6 +88,11 @@ interface TeacherStat {
   schoolName: string;
   className: string;
   classes?: string[];
+  classStudentCounts?: ClassStudentCount[];
+  classAttendanceRates?: ClassAttendanceRate[];
+  classJournalCounts?: ClassJournalCount[];
+  classGradeCounts?: ClassGradeCount[];
+  classSavings?: ClassSaving[];
   studentCount: number;
   totalSavings: number;
   journalCount?: number;
@@ -130,6 +164,15 @@ export default function AdminDashboardClient({
 }: AdminDashboardClientProps) {
   const mounted = useIsMounted();
   const [searchTerm, setSearchTerm] = useState('');
+  const [expandedTeacherIds, setExpandedTeacherIds] = useState<string[]>([]);
+
+  const toggleExpandTeacher = (teacherId: string) => {
+    setExpandedTeacherIds((prev) =>
+      prev.includes(teacherId)
+        ? prev.filter((id) => id !== teacherId)
+        : [...prev, teacherId]
+    );
+  };
 
   if (!mounted) {
     return (
@@ -154,6 +197,18 @@ export default function AdminDashboardClient({
       currency: 'IDR',
       minimumFractionDigits: 0,
     }).format(num);
+  };
+
+  const formatCompactIDR = (amount: number) => {
+    if (Math.abs(amount) >= 1_000_000) {
+      const val = amount / 1_000_000;
+      return `Rp ${val % 1 === 0 ? val : val.toFixed(1)}jt`;
+    }
+    if (Math.abs(amount) >= 1_000) {
+      const val = amount / 1_000;
+      return `Rp ${val % 1 === 0 ? val : val.toFixed(0)}rb`;
+    }
+    return `Rp ${amount}`;
   };
 
   const formatDate = (dateStr: string) => {
@@ -711,7 +766,7 @@ export default function AdminDashboardClient({
           {/* Tabel Statistik Wali Kelas */}
           {filteredTeacherStats.length > 0 ? (
             <div className='overflow-x-auto min-w-0 max-w-full rounded-xl border border-slate-200'>
-              <table className='w-full min-w-[650px] text-left text-sm text-slate-700 border-collapse'>
+              <table className='w-full min-w-[750px] text-left text-sm text-slate-700 border-collapse'>
                 <thead>
                   <tr className='bg-slate-50 border-b border-slate-200 text-slate-700 text-[11px] font-bold uppercase tracking-wider'>
                     <th className='py-3 px-4'>Nama Guru</th>
@@ -721,12 +776,20 @@ export default function AdminDashboardClient({
                     <th className='py-3 px-4 text-center'>Jurnal</th>
                     <th className='py-3 px-4 text-center'>Nilai</th>
                     <th className='py-3 px-4 text-right'>Tabungan Kelas</th>
+                    <th className='py-3 px-4 text-center'>Rincian</th>
                   </tr>
                 </thead>
                 <tbody className='divide-y divide-slate-100'>
                   {filteredTeacherStats.map((teacher) => {
                     const rate = teacher.attendanceRate ?? 0;
                     const hasAttendance = (teacher.totalAttendance ?? 0) > 0;
+                    const isExpanded = expandedTeacherIds.includes(teacher.id);
+
+                    const teacherClasses = teacher.classes && teacher.classes.length > 0
+                      ? teacher.classes
+                      : [teacher.className || '-'];
+
+                    const isMultiClass = teacherClasses.length > 1;
 
                     let rateBadgeClass =
                       'bg-slate-100 text-slate-600 border-slate-200';
@@ -743,81 +806,231 @@ export default function AdminDashboardClient({
                       }
                     }
 
+                    const teacherClassesData = teacherClasses.map((clsName) => {
+                      const sCount = teacher.classStudentCounts?.find((c) => c.className === clsName)?.count ?? 0;
+                      const attData = teacher.classAttendanceRates?.find((c) => c.className === clsName);
+                      const jCount = teacher.classJournalCounts?.find((c) => c.className === clsName)?.count ?? 0;
+                      const gCount = teacher.classGradeCounts?.find((c) => c.className === clsName)?.count ?? 0;
+                      const savAmt = teacher.classSavings?.find((c) => c.className === clsName)?.amount ?? 0;
+
+                      return {
+                        className: clsName,
+                        studentCount: sCount,
+                        attendanceRate: attData?.rate ?? null,
+                        journalCount: jCount,
+                        gradeCount: gCount,
+                        savings: savAmt,
+                      };
+                    });
+
                     return (
-                      <tr
-                        key={teacher.id}
-                        className='hover:bg-slate-50/80 transition-colors group'
-                      >
-                        <td className='py-3.5 px-4'>
-                          <div className='flex flex-col'>
-                            <span className='font-bold text-slate-900 group-hover:text-emerald-700 transition-colors'>
-                              {teacher.name}
-                            </span>
-                            <span className='text-xs text-slate-500 font-medium'>
-                              {teacher.email}
-                            </span>
-                          </div>
-                        </td>
-                        <td className='py-3.5 px-4'>
-                          <div className='flex flex-col gap-1 items-start'>
-                            <span className='text-slate-800 font-semibold text-xs'>
-                              {teacher.schoolName}
-                            </span>
-                            <div className='flex flex-wrap gap-1 items-center'>
-                              {teacher.classes && teacher.classes.length > 0 ? (
-                                teacher.classes.map((cls, idx) => (
-                                  <span
-                                    key={idx}
-                                    className='bg-emerald-50 border border-emerald-200/90 text-emerald-800 px-2 py-0.5 rounded text-[11px] font-mono font-bold'
-                                  >
-                                    Kelas {cls}
+                      <React.Fragment key={teacher.id}>
+                        <tr
+                          className={cn(
+                            'hover:bg-slate-50/80 transition-colors group',
+                            isExpanded && 'bg-slate-50/50'
+                          )}
+                        >
+                          <td className='py-3.5 px-4'>
+                            <div className='flex flex-col'>
+                              <span className='font-bold text-slate-900 group-hover:text-emerald-700 transition-colors'>
+                                {teacher.name}
+                              </span>
+                              <span className='text-xs text-slate-500 font-medium'>
+                                {teacher.email}
+                              </span>
+                            </div>
+                          </td>
+                          <td className='py-3.5 px-4'>
+                            <div className='flex flex-col gap-1 items-start'>
+                              <span className='text-slate-800 font-semibold text-xs'>
+                                {teacher.schoolName}
+                              </span>
+                              <div className='flex flex-wrap gap-1 items-center'>
+                                {teacherClasses.length > 0 ? (
+                                  <>
+                                    {teacherClasses.slice(0, 2).map((cls, idx) => (
+                                      <span
+                                        key={idx}
+                                        className='bg-emerald-50 border border-emerald-200/90 text-emerald-800 px-2 py-0.5 rounded text-[11px] font-mono font-bold'
+                                      >
+                                        Kelas {cls}
+                                      </span>
+                                    ))}
+                                    {teacherClasses.length > 2 && (
+                                      <span
+                                        className='bg-slate-100 border border-slate-200 text-slate-600 px-1.5 py-0.5 rounded text-[10px] font-medium cursor-help'
+                                        title={`Semua Kelas (${teacherClasses.length}): ${teacherClasses.map((c) => `Kelas ${c}`).join(', ')}`}
+                                      >
+                                        +{teacherClasses.length - 2} kelas
+                                      </span>
+                                    )}
+                                  </>
+                                ) : (
+                                  <span className='bg-slate-100 border border-slate-200 text-slate-700 px-2 py-0.5 rounded text-[11px] font-mono font-medium'>
+                                    Kelas -
                                   </span>
-                                ))
-                              ) : (
-                                <span className='bg-slate-100 border border-slate-200 text-slate-700 px-2 py-0.5 rounded text-[11px] font-mono font-medium'>
-                                  Kelas {teacher.className || '-'}
+                                )}
+                              </div>
+                            </div>
+                          </td>
+                          <td className='py-3.5 px-4 text-center'>
+                            <div className='inline-flex items-center gap-1.5'>
+                              <span className='inline-flex items-center gap-1 text-xs font-extrabold text-slate-900 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200'>
+                                <Users className='h-3.5 w-3.5 text-emerald-600' />
+                                {teacher.studentCount} Siswa
+                              </span>
+                              {isMultiClass && (
+                                <span
+                                  className='bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-bold px-1.5 py-0.5 rounded cursor-help'
+                                  title={teacherClassesData.map(c => `Kelas ${c.className}: ${c.studentCount} siswa`).join('\n')}
+                                >
+                                  {teacherClasses.length} Kelas
                                 </span>
                               )}
                             </div>
-                          </div>
-                        </td>
-                        <td className='py-3.5 px-4 text-center'>
-                          <span className='inline-flex items-center gap-1 text-xs font-bold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200'>
-                            <Users className='h-3 w-3 text-emerald-600' />
-                            {teacher.studentCount}
-                          </span>
-                        </td>
-                        <td className='py-3.5 px-4 text-center'>
-                          {hasAttendance ? (
-                            <span
-                              className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-lg border ${rateBadgeClass}`}
-                            >
-                              {rate}% Hadir
+                          </td>
+                          <td className='py-3.5 px-4 text-center'>
+                            {hasAttendance ? (
+                              <span
+                                className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-lg border ${rateBadgeClass}`}
+                              >
+                                {rate}% Hadir
+                              </span>
+                            ) : (
+                              <span className='text-xs text-slate-400 italic'>
+                                Belum Ada Log
+                              </span>
+                            )}
+                          </td>
+                          <td className='py-3.5 px-4 text-center'>
+                            <span className='inline-flex items-center gap-1.5 text-xs text-slate-700 font-semibold bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-lg'>
+                              <BookOpen className='h-3.5 w-3.5 text-teal-600' />
+                              {teacher.journalCount || 0}
                             </span>
-                          ) : (
-                            <span className='text-xs text-slate-400 italic'>
-                              Belum Ada Log
+                          </td>
+                          <td className='py-3.5 px-4 text-center'>
+                            <span className='inline-flex items-center gap-1.5 text-xs text-slate-700 font-semibold bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-lg'>
+                              <FileText className='h-3.5 w-3.5 text-emerald-600' />
+                              {teacher.gradeCount || 0}
                             </span>
-                          )}
-                        </td>
-                        <td className='py-3.5 px-4 text-center'>
-                          <span className='inline-flex items-center gap-1.5 text-xs text-slate-700 font-semibold bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-lg'>
-                            <BookOpen className='h-3.5 w-3.5 text-teal-600' />
-                            {teacher.journalCount || 0}
-                          </span>
-                        </td>
-                        <td className='py-3.5 px-4 text-center'>
-                          <span className='inline-flex items-center gap-1.5 text-xs text-slate-700 font-semibold bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-lg'>
-                            <FileText className='h-3.5 w-3.5 text-emerald-600' />
-                            {teacher.gradeCount || 0}
-                          </span>
-                        </td>
-                        <td className='py-3.5 px-4 text-right'>
-                          <span className='text-xs font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg'>
-                            {formatIDR(teacher.totalSavings || 0)}
-                          </span>
-                        </td>
-                      </tr>
+                          </td>
+                          <td className='py-3.5 px-4 text-right'>
+                            <span className='text-xs font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg'>
+                              {formatIDR(teacher.totalSavings || 0)}
+                            </span>
+                          </td>
+                          <td className='py-3.5 px-4 text-center'>
+                            {isMultiClass ? (
+                              <button
+                                type='button'
+                                onClick={() => toggleExpandTeacher(teacher.id)}
+                                className={cn(
+                                  'inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold rounded-lg border transition-all cursor-pointer',
+                                  isExpanded
+                                    ? 'bg-emerald-700 text-white border-emerald-700 shadow-xs'
+                                    : 'bg-emerald-50 text-emerald-700 border-emerald-200/90 hover:bg-emerald-100/90'
+                                )}
+                              >
+                                <span>{isExpanded ? 'Tutup' : 'Rincian'}</span>
+                                <ChevronDown
+                                  className={cn(
+                                    'h-3.5 w-3.5 transition-transform duration-200',
+                                    isExpanded && 'rotate-180'
+                                  )}
+                                />
+                              </button>
+                            ) : (
+                              <span className='text-[11px] text-slate-400 font-medium'>
+                                1 Kelas
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+
+                        {isExpanded && (
+                          <tr className='bg-slate-50/80 border-b border-slate-200'>
+                            <td colSpan={8} className='p-3 sm:p-4 pl-4 sm:pl-8'>
+                              <div className='bg-white border border-slate-200/90 rounded-xl p-3.5 sm:p-4 shadow-sm space-y-3'>
+                                <div className='flex items-center justify-between border-b border-slate-100 pb-2.5'>
+                                  <div className='flex items-center gap-2'>
+                                    <div className='p-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700'>
+                                      <Layers className='h-4 w-4' />
+                                    </div>
+                                    <div>
+                                      <h4 className='text-xs font-bold text-slate-900'>
+                                        Rincian Statistik Per Kelas — {teacher.name}
+                                      </h4>
+                                      <p className='text-[11px] text-slate-500'>
+                                        {teacher.schoolName} • Total {teacherClasses.length} Kelas
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <span className='text-xs font-extrabold text-slate-700 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-lg'>
+                                    Total {teacher.studentCount} Siswa
+                                  </span>
+                                </div>
+
+                                <div className='overflow-x-auto rounded-lg border border-slate-200/80'>
+                                  <table className='w-full text-left text-xs'>
+                                    <thead>
+                                      <tr className='bg-slate-50 text-[10px] font-bold text-slate-600 uppercase tracking-wider border-b border-slate-200'>
+                                        <th className='py-2.5 px-3.5'>Nama Kelas</th>
+                                        <th className='py-2.5 px-3.5 text-center'>Jumlah Siswa</th>
+                                        <th className='py-2.5 px-3.5 text-center'>Tingkat Kehadiran</th>
+                                        <th className='py-2.5 px-3.5 text-center'>Jurnal Mengajar</th>
+                                        <th className='py-2.5 px-3.5 text-center'>Input Nilai</th>
+                                        <th className='py-2.5 px-3.5 text-right'>Tabungan Kelas</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody className='divide-y divide-slate-100 text-slate-700'>
+                                      {teacherClassesData.map((clsData) => (
+                                        <tr key={clsData.className} className='hover:bg-slate-50/70 transition-colors'>
+                                          <td className='py-2.5 px-3.5 font-bold text-slate-900 font-mono'>
+                                            <span className='bg-emerald-50 border border-emerald-200 text-emerald-800 px-2 py-0.5 rounded text-[11px] font-bold'>
+                                              Kelas {clsData.className}
+                                            </span>
+                                          </td>
+                                          <td className='py-2.5 px-3.5 text-center'>
+                                            <span className='inline-flex items-center gap-1 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md text-[11px] font-bold text-slate-800'>
+                                              <Users className='h-3 w-3 text-emerald-600' />
+                                              {clsData.studentCount} Siswa
+                                            </span>
+                                          </td>
+                                          <td className='py-2.5 px-3.5 text-center'>
+                                            {clsData.attendanceRate !== null ? (
+                                              <span className='inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-md text-[11px] font-bold'>
+                                                {clsData.attendanceRate}% Hadir
+                                              </span>
+                                            ) : (
+                                              <span className='text-slate-400 italic text-[11px]'>Belum Ada Log</span>
+                                            )}
+                                          </td>
+                                          <td className='py-2.5 px-3.5 text-center'>
+                                            <span className='inline-flex items-center gap-1 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md text-[11px] font-semibold text-slate-700'>
+                                              <BookOpen className='h-3 w-3 text-teal-600' />
+                                              {clsData.journalCount} Entri
+                                            </span>
+                                          </td>
+                                          <td className='py-2.5 px-3.5 text-center'>
+                                            <span className='inline-flex items-center gap-1 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md text-[11px] font-semibold text-slate-700'>
+                                              <FileText className='h-3 w-3 text-emerald-600' />
+                                              {clsData.gradeCount} Nilai
+                                            </span>
+                                          </td>
+                                          <td className='py-2.5 px-3.5 text-right font-extrabold text-emerald-700'>
+                                            {formatIDR(clsData.savings)}
+                                          </td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
                     );
                   })}
                 </tbody>
