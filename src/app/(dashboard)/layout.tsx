@@ -31,7 +31,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
     { returnDocument: 'after' }
   ).lean();
 
-  if (!teacher) {
+  // Validate session tokenVersion against DB tokenVersion to enforce token revocation after logout
+  if (!teacher || (session.tokenVersion !== undefined && (teacher.tokenVersion ?? 0) !== session.tokenVersion)) {
     redirect('/sign-in?clear=1');
   }
 

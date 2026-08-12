@@ -19,6 +19,7 @@ export interface ITeacher extends Document {
   isEmailVerified?: boolean;
   emailVerificationToken?: string;
   emailVerificationExpires?: Date;
+  tokenVersion?: number;
   lastActiveAt?: Date;
   createdAt: Date;
 }
@@ -52,11 +53,18 @@ const TeacherSchema = new Schema<ITeacher>({
   isEmailVerified: { type: Boolean, default: false },
   emailVerificationToken: { type: String },
   emailVerificationExpires: { type: Date },
+  tokenVersion: { type: Number, default: 0 },
   lastActiveAt: { type: Date, default: Date.now },
   createdAt: { type: Date, default: Date.now },
 });
 
-if (mongoose.models.Teacher && (!mongoose.models.Teacher.schema.path('classes') || !mongoose.models.Teacher.schema.path('activeClass') || !mongoose.models.Teacher.schema.path('principalName'))) {
+if (
+  mongoose.models.Teacher &&
+  (!mongoose.models.Teacher.schema.path('classes') ||
+    !mongoose.models.Teacher.schema.path('activeClass') ||
+    !mongoose.models.Teacher.schema.path('principalName') ||
+    !mongoose.models.Teacher.schema.path('tokenVersion'))
+) {
   delete (mongoose.models as any).Teacher;
 }
 

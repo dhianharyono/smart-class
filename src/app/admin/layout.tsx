@@ -29,7 +29,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     { returnDocument: 'after' }
   ).lean();
 
-  if (!adminUser) {
+  // Validate session tokenVersion against DB tokenVersion to enforce token revocation after logout
+  if (!adminUser || (session.tokenVersion !== undefined && (adminUser.tokenVersion ?? 0) !== session.tokenVersion)) {
     redirect('/sign-in?clear=1');
   }
 

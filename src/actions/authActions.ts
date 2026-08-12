@@ -79,12 +79,13 @@ export async function loginTeacher(data: {
       $or: [{ username: teacher.email }, { username: teacher.username || '' }],
     });
 
-    // Sign session token
+    // Sign session token including tokenVersion for revocation support
     const token = await signSession({
       userId: teacher._id.toString(),
       email: teacher.email,
       name: teacher.name,
       isAdmin: !!isAdminUser,
+      tokenVersion: teacher.tokenVersion || 0,
     });
 
     // Set HTTP-only cookie
@@ -200,6 +201,7 @@ export async function registerTeacher(data: {
       isEmailVerified: false,
       emailVerificationToken: otpCode,
       emailVerificationExpires: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes
+      tokenVersion: 0,
       enabledMenus: [
         '/dashboard',
         '/siswa',
@@ -309,12 +311,13 @@ export async function verifyEmailOTP(data: { email: string; otp: string }) {
       $or: [{ username: teacher.email }, { username: teacher.username || '' }],
     });
 
-    // Sign session token & log user in
+    // Sign session token including tokenVersion
     const token = await signSession({
       userId: teacher._id.toString(),
       email: teacher.email,
       name: teacher.name,
       isAdmin: !!isAdminUser,
+      tokenVersion: teacher.tokenVersion || 0,
     });
 
     const cookieStore = await cookies();
@@ -397,6 +400,15 @@ export async function resendVerificationOTP(data: { email: string }) {
 export async function logoutTeacher() {
   try {
     const cookieStore = await cookies();
+    const token = cookieStore.get('session')?.value;
+    if (token) {
+      const payload = await verifySession(token);
+      if (payload?.userId) {
+        await dbConnect();
+        // Increment tokenVersion in database to invalidate all active JWT tokens for this user
+        await Teacher.findByIdAndUpdate(payload.userId, { $inc: { tokenVersion: 1 } });
+      }
+    }
     cookieStore.delete('session');
     return { success: true };
   } catch (error: any) {
@@ -416,6 +428,7 @@ export async function getCurrentUserSession() {
       name: (payload.name as string) || '',
       email: (payload.email as string) || '',
       isAdmin: !!payload.isAdmin,
+      tokenVersion: payload.tokenVersion ?? 0,
     };
   } catch (error) {
     return null;
