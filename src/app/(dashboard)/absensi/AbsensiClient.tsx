@@ -589,12 +589,12 @@ export default function AbsensiClient({
                 </TableBody>
               </Table>
             ) : (
-              <div className='flex flex-col items-center justify-center py-20 text-slate-500'>
-                <UserCheck className='h-10 w-10 text-slate-300 mb-2' />
-                <p className='text-sm font-bold text-slate-700'>
+              <div className='flex flex-col items-center justify-center py-12 sm:py-20 px-4 text-center text-slate-500 max-w-md mx-auto'>
+                <UserCheck className='h-10 w-10 text-slate-300 mb-2 shrink-0' />
+                <p className='text-sm sm:text-base font-extrabold text-slate-800 tracking-tight'>
                   Tidak ada siswa terdaftar di kelas.
                 </p>
-                <p className='text-xs text-slate-400 mt-1'>
+                <p className='text-xs sm:text-sm text-slate-500 mt-1 font-medium leading-relaxed'>
                   Silakan tambahkan siswa terlebih dahulu di halaman Data Siswa.
                 </p>
               </div>
@@ -629,14 +629,14 @@ export default function AbsensiClient({
             </div>
 
             {/* Rentang Laporan Pills + Dynamic Selectors + Actions */}
-            <div className='flex flex-wrap items-center gap-2.5'>
+            <div className='grid grid-cols-1 sm:flex sm:flex-wrap items-center gap-2.5 w-full lg:w-auto'>
               {/* Header Info Dialog Modal Trigger Button */}
               <Dialog open={headerModalOpen} onOpenChange={setHeaderModalOpen}>
                 <DialogTrigger
                   render={
                     <Button
                       variant='outline'
-                      className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl h-10 px-3.5 gap-2 shadow-xs cursor-pointer'
+                      className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl h-10 px-3.5 gap-2 shadow-xs cursor-pointer w-full sm:w-auto justify-center'
                     />
                   }
                 >
@@ -818,7 +818,7 @@ export default function AbsensiClient({
               </Dialog>
 
               {/* Rentang Laporan Pills */}
-              <div className='flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/80'>
+              <div className='grid grid-cols-3 sm:flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/80 w-full sm:w-auto'>
                 {(['mingguan', 'bulanan', 'tahunan'] as ExportPeriod[]).map(
                   (period) => {
                     const isActive = exportPeriod === period;
@@ -826,7 +826,7 @@ export default function AbsensiClient({
                       <button
                         key={period}
                         onClick={() => setExportPeriod(period)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-all cursor-pointer ${isActive
+                        className={`px-2 sm:px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-all cursor-pointer text-center justify-center flex items-center ${isActive
                           ? 'bg-emerald-600 text-white shadow-xs'
                           : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
                           }`}
@@ -903,29 +903,31 @@ export default function AbsensiClient({
                 </select>
               )}
 
-              <Button
-                onClick={handleExportExcel}
-                variant='outline'
-                className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-semibold rounded-xl h-10 px-4 gap-2 shadow-xs cursor-pointer'
-              >
-                <Download className='h-4 w-4 text-emerald-600' />
-                Ekspor Excel
-              </Button>
+              <div className='grid grid-cols-2 gap-2 w-full sm:w-auto'>
+                <Button
+                  onClick={handleExportExcel}
+                  variant='outline'
+                  className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-semibold rounded-xl h-10 px-3.5 gap-2 shadow-xs cursor-pointer w-full sm:w-auto justify-center'
+                >
+                  <Download className='h-4 w-4 text-emerald-600' />
+                  Ekspor Excel
+                </Button>
 
-              <Button
-                onClick={handlePrint}
-                variant='outline'
-                className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl h-10 px-4.5 gap-2 shadow-xs cursor-pointer'
-              >
-                <Printer className='h-4 w-4 text-blue-600' />
-                Cetak PDF
-              </Button>
+                <Button
+                  onClick={handlePrint}
+                  variant='outline'
+                  className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl h-10 px-3.5 gap-2 shadow-xs cursor-pointer w-full sm:w-auto justify-center'
+                >
+                  <Printer className='h-4 w-4 text-blue-600' />
+                  Cetak PDF
+                </Button>
+              </div>
             </div>
           </div>
 
           {/* Printable Document Wrapper (A4 Simulation with Interactive Dynamic Headers) */}
-          <div className='bg-slate-200/70 p-4 sm:p-10 rounded-2xl border border-slate-300/80 flex justify-center shadow-inner print:p-0 print:m-0 print:bg-white print:border-none'>
-            <div className='w-full max-w-[950px] bg-white text-slate-900 shadow-2xl rounded-sm border border-slate-300 p-8 sm:p-14 print:p-6 print:m-0 print:shadow-none print:border-none print:w-full print:max-w-none print:text-black font-sans leading-relaxed'>
+          <div className='bg-slate-200/70 p-2 sm:p-10 rounded-2xl border border-slate-300/80 flex justify-start sm:justify-center overflow-x-auto shadow-inner print:p-0 print:m-0 print:bg-white print:border-none'>
+            <div className='w-full max-w-[950px] min-w-[340px] bg-white text-slate-900 shadow-2xl rounded-sm border border-slate-300 p-4 sm:p-14 print:p-6 print:m-0 print:shadow-none print:border-none print:w-full print:max-w-none print:text-black font-sans leading-relaxed overflow-x-auto'>
               {/* Document KOP / Interactive Header Title */}
               <div className='text-center mb-6 border-b-2 border-slate-900 pb-4 print:border-black space-y-1'>
                 <Input

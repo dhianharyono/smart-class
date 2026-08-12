@@ -268,7 +268,7 @@ export default function EditSiswaClient({ id }: { id: string }) {
 
         {/* RIGHT COLUMN: 4 Numbered Sections (8 cols) */}
         <div className='lg:col-span-8 space-y-6'>
-          {/* SECTION 1: IDENTITAS UTAMA */}
+          {/* IDENTITAS UTAMA */}
           <Card className='bg-white border-slate-200/80 shadow-xs rounded-2xl p-6 relative overflow-hidden'>
             <CardContent className='p-0 space-y-5'>
               <div className='flex items-center gap-3 border-b border-slate-100 pb-4'>
@@ -277,7 +277,7 @@ export default function EditSiswaClient({ id }: { id: string }) {
                 </div>
                 <div>
                   <h3 className='font-black text-sm uppercase text-slate-900 tracking-wide'>
-                    SECTION 1: IDENTITAS UTAMA
+                    IDENTITAS UTAMA
                   </h3>
                   <p className='text-xs text-slate-500 mt-0.5'>
                     Nama lengkap dan nomor induk registrasi resmi peserta didik.
@@ -359,7 +359,7 @@ export default function EditSiswaClient({ id }: { id: string }) {
             </CardContent>
           </Card>
 
-          {/* SECTION 2: BIODATA PRIBADI */}
+          {/* BIODATA PRIBADI */}
           <Card className='bg-white border-slate-200/80 shadow-xs rounded-2xl p-6 relative overflow-hidden'>
             <CardContent className='p-0 space-y-5'>
               <div className='flex items-center gap-3 border-b border-slate-100 pb-4'>
@@ -368,7 +368,7 @@ export default function EditSiswaClient({ id }: { id: string }) {
                 </div>
                 <div>
                   <h3 className='font-black text-sm uppercase text-slate-900 tracking-wide'>
-                    SECTION 2: BIODATA PRIBADI
+                    BIODATA PRIBADI
                   </h3>
                   <p className='text-xs text-slate-500 mt-0.5'>
                     Keterangan domisili, kelahiran, serta kepercayaan peserta didik.
@@ -436,7 +436,7 @@ export default function EditSiswaClient({ id }: { id: string }) {
             </CardContent>
           </Card>
 
-          {/* SECTION 3: DATA ORANG TUA / WALI */}
+          {/* DATA ORANG TUA / WALI */}
           <Card className='bg-white border-slate-200/80 shadow-xs rounded-2xl p-6 relative overflow-hidden'>
             <CardContent className='p-0 space-y-5'>
               <div className='flex items-center gap-3 border-b border-slate-100 pb-4'>
@@ -445,7 +445,7 @@ export default function EditSiswaClient({ id }: { id: string }) {
                 </div>
                 <div>
                   <h3 className='font-black text-sm uppercase text-slate-900 tracking-wide'>
-                    SECTION 3: DATA ORANG TUA / WALI
+                    DATA ORANG TUA / WALI
                   </h3>
                   <p className='text-xs text-slate-500 mt-0.5'>Nama lengkap serta pekerjaan wali/orang tua siswa.</p>
                 </div>
@@ -533,7 +533,7 @@ export default function EditSiswaClient({ id }: { id: string }) {
             </CardContent>
           </Card>
 
-          {/* SECTION 4: RIWAYAT MASUK / MUTASI */}
+          {/* RIWAYAT MASUK / MUTASI */}
           <Card className='bg-white border-slate-200/80 shadow-xs rounded-2xl p-6 relative overflow-hidden'>
             <CardContent className='p-0 space-y-5'>
               <div className='flex items-center gap-3 border-b border-slate-100 pb-4'>
@@ -542,7 +542,7 @@ export default function EditSiswaClient({ id }: { id: string }) {
                 </div>
                 <div>
                   <h3 className='font-black text-sm uppercase text-slate-900 tracking-wide'>
-                    SECTION 4: RIWAYAT MASUK / MUTASI
+                    RIWAYAT MASUK / MUTASI
                   </h3>
                   <p className='text-xs text-slate-500 mt-0.5'>
                     Histori asal sekolah dan status akademik siswa saat ini.

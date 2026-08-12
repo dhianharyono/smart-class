@@ -197,7 +197,7 @@ export default function SiswaClient({ initialStudents }: SiswaClientProps) {
           </p>
         </div>
 
-        <div className='grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2.5 w-full sm:w-auto'>
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:flex md:flex-wrap items-center gap-2.5 w-full sm:w-auto'>
           <Button
             onClick={handleExcelExport}
             variant='outline'
@@ -370,16 +370,17 @@ export default function SiswaClient({ initialStudents }: SiswaClientProps) {
                 <TableRow>
                   <TableCell
                     colSpan={7}
-                    className='text-center py-16 text-slate-400'
+                    className='text-center py-12 sm:py-16 px-4 text-slate-400'
                   >
-                    <Users className='h-12 w-12 text-slate-300 mx-auto mb-3' />
-                    <p className='text-sm font-bold text-slate-700'>
-                      Belum ada data siswa.
-                    </p>
-                    <p className='text-xs text-slate-400 mt-1'>
-                      Klik tombol "Input Biodata Lengkap" untuk menambah
-                      registrasi siswa baru.
-                    </p>
+                    <div className='max-w-md mx-auto flex flex-col items-center justify-center'>
+                      <Users className='h-10 w-10 sm:h-12 sm:w-12 text-slate-300 mx-auto mb-2 shrink-0' />
+                      <p className='text-sm sm:text-base font-extrabold text-slate-800 tracking-tight'>
+                        Belum ada data siswa.
+                      </p>
+                      <p className='text-xs sm:text-sm text-slate-500 mt-1 font-medium leading-relaxed'>
+                        Klik tombol "Input Biodata Lengkap" untuk menambah registrasi siswa baru.
+                      </p>
+                    </div>
                   </TableCell>
                 </TableRow>
               )}

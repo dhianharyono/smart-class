@@ -307,12 +307,12 @@ export default function TabunganClient() {
               </TableBody>
             </Table>
           ) : (
-            <div className='flex flex-col items-center justify-center py-20 text-slate-500'>
-              <Wallet className='h-10 w-10 text-slate-300 mb-2' />
-              <p className='text-sm font-bold text-slate-700'>
+            <div className='flex flex-col items-center justify-center py-12 sm:py-20 px-4 text-center text-slate-500 max-w-md mx-auto'>
+              <Wallet className='h-10 w-10 text-slate-300 mb-2 shrink-0' />
+              <p className='text-sm sm:text-base font-extrabold text-slate-800 tracking-tight'>
                 Tidak ada siswa terdaftar di kelas.
               </p>
-              <p className='text-xs text-slate-400 mt-1'>
+              <p className='text-xs sm:text-sm text-slate-500 mt-1 font-medium leading-relaxed'>
                 Silakan tambahkan siswa terlebih dahulu di halaman Data Siswa.
               </p>
             </div>

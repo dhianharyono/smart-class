@@ -525,7 +525,7 @@ export default function NilaiClient({
                 value={selectedSubject}
                 onValueChange={(val) => val && setSelectedSubject(val)}
               >
-                <SelectTrigger className='bg-slate-50 border-slate-200 text-slate-900 rounded-xl h-10'>
+                <SelectTrigger className='bg-slate-50 border-slate-200 text-slate-900 rounded-xl h-10 w-full'>
                   <SelectValue placeholder='Pilih Mata Pelajaran' />
                 </SelectTrigger>
                 <SelectContent className='bg-white border-slate-200 text-slate-900 rounded-xl'>
@@ -540,7 +540,7 @@ export default function NilaiClient({
 
             {/* Add Subject Dialog */}
             <Dialog open={addSubjectOpen} onOpenChange={setAddSubjectOpen}>
-              <DialogTrigger className='border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl h-10 px-4 gap-2 flex items-center justify-center cursor-pointer font-medium text-xs sm:text-sm shrink-0'>
+              <DialogTrigger className='border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl h-10 px-4 gap-2 flex items-center justify-center cursor-pointer font-medium text-xs sm:text-sm w-full sm:w-auto shrink-0'>
                 <Plus className='h-4 w-4 text-emerald-600' />
                 Mata Pelajaran Baru
               </DialogTrigger>
@@ -698,12 +698,12 @@ export default function NilaiClient({
                 </TableBody>
               </Table>
             ) : (
-              <div className='flex flex-col items-center justify-center py-20 text-slate-500'>
-                <GraduationCap className='h-10 w-10 text-slate-300 mb-2' />
-                <p className='text-sm font-bold text-slate-700'>
+              <div className='flex flex-col items-center justify-center py-12 sm:py-20 px-4 text-center text-slate-500 max-w-md mx-auto'>
+                <GraduationCap className='h-10 w-10 text-slate-300 mb-2 shrink-0' />
+                <p className='text-sm sm:text-base font-extrabold text-slate-800 tracking-tight'>
                   Tidak ada siswa terdaftar di kelas.
                 </p>
-                <p className='text-xs text-slate-400 mt-1'>
+                <p className='text-xs sm:text-sm text-slate-500 mt-1 font-medium leading-relaxed'>
                   Silakan tambahkan siswa terlebih dahulu di halaman Data Siswa.
                 </p>
               </div>
@@ -738,14 +738,14 @@ export default function NilaiClient({
             </div>
 
             {/* Mode & Subject Selectors + Actions */}
-            <div className='flex flex-wrap items-center gap-2.5'>
+            <div className='grid grid-cols-1 sm:flex sm:flex-wrap items-center gap-2.5 w-full lg:w-auto'>
               {/* Header Info Dialog Modal Trigger Button */}
               <Dialog open={headerModalOpen} onOpenChange={setHeaderModalOpen}>
                 <DialogTrigger
                   render={
                     <Button
                       variant='outline'
-                      className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl h-10 px-3.5 gap-2 shadow-xs cursor-pointer'
+                      className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl h-10 px-3.5 gap-2 shadow-xs cursor-pointer w-full sm:w-auto justify-center'
                     />
                   }
                 >
@@ -926,36 +926,25 @@ export default function NilaiClient({
                 </DialogContent>
               </Dialog>
 
-              {/* Report View Mode Selector Pills */}
-              <div className='flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/80'>
-                <button
-                  onClick={() => setReportViewMode('all_subjects')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${reportViewMode === 'all_subjects'
-                    ? 'bg-emerald-600 text-white shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-                    }`}
-                >
-                  Semua Mapel (Leger)
-                </button>
-                <button
-                  onClick={() => setReportViewMode('recap')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${reportViewMode === 'recap'
-                    ? 'bg-emerald-600 text-white shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-                    }`}
-                >
-                  Per Mapel (Lengkap)
-                </button>
-                <button
-                  onClick={() => setReportViewMode('single')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${reportViewMode === 'single'
-                    ? 'bg-emerald-600 text-white shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-                    }`}
-                >
-                  Per Kategori
-                </button>
-              </div>
+              <Select
+                value={reportViewMode}
+                onValueChange={(val) => val && setReportViewMode(val as 'all_subjects' | 'recap' | 'single')}
+              >
+                <SelectTrigger className='bg-slate-50 border-slate-200 text-slate-900 rounded-xl h-10 w-full sm:w-52 text-xs font-bold shadow-xs cursor-pointer'>
+                  <SelectValue>
+                    {reportViewMode === 'all_subjects'
+                      ? 'Semua Mapel (Leger)'
+                      : reportViewMode === 'recap'
+                        ? 'Per Mapel (Lengkap)'
+                        : 'Per Kategori'}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent className='bg-white border-slate-200 text-slate-900 rounded-xl shadow-xl'>
+                  <SelectItem value='all_subjects' className='text-xs font-semibold cursor-pointer'>Semua Mapel (Leger)</SelectItem>
+                  <SelectItem value='recap' className='text-xs font-semibold cursor-pointer'>Per Mapel (Lengkap)</SelectItem>
+                  <SelectItem value='single' className='text-xs font-semibold cursor-pointer'>Per Kategori</SelectItem>
+                </SelectContent>
+              </Select>
 
               {/* Subject Selector (Visible in recap & single modes) */}
               {(reportViewMode === 'recap' || reportViewMode === 'single') && (
@@ -996,28 +985,30 @@ export default function NilaiClient({
                 </Select>
               )}
 
-              <Button
-                onClick={handleExcelExport}
-                variant='outline'
-                className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl h-10 px-3.5 gap-2 shadow-xs cursor-pointer'
-              >
-                <Download className='h-4 w-4 text-emerald-600' />
-                Ekspor Excel
-              </Button>
-              <Button
-                onClick={handlePrint}
-                variant='outline'
-                className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl h-10 px-4.5 gap-2 shadow-xs cursor-pointer'
-              >
-                <Printer className='h-4 w-4 text-blue-600' />
-                Cetak PDF
-              </Button>
+              <div className='grid grid-cols-2 gap-2 w-full sm:w-auto'>
+                <Button
+                  onClick={handleExcelExport}
+                  variant='outline'
+                  className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl h-10 px-3.5 gap-2 shadow-xs cursor-pointer w-full sm:w-auto justify-center'
+                >
+                  <Download className='h-4 w-4 text-emerald-600' />
+                  Ekspor Excel
+                </Button>
+                <Button
+                  onClick={handlePrint}
+                  variant='outline'
+                  className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl h-10 px-3.5 gap-2 shadow-xs cursor-pointer w-full sm:w-auto justify-center'
+                >
+                  <Printer className='h-4 w-4 text-blue-600' />
+                  Cetak PDF
+                </Button>
+              </div>
             </div>
           </div>
 
           {/* Printable A4 Document Wrapper (With Interactive Editable Dynamic Headers & Signatures) */}
-          <div className='bg-slate-200/70 p-4 sm:p-10 rounded-2xl border border-slate-300/80 flex justify-center shadow-inner print:p-0 print:bg-white print:border-none'>
-            <div className='w-full max-w-[950px] bg-white text-slate-900 shadow-2xl rounded-sm border border-slate-300 p-8 sm:p-14 print:p-0 print:shadow-none print:border-none print:w-full print:max-w-none print:text-black font-sans leading-relaxed'>
+          <div className='bg-slate-200/70 p-2 sm:p-10 rounded-2xl border border-slate-300/80 flex justify-start sm:justify-center overflow-x-auto shadow-inner print:p-0 print:bg-white print:border-none'>
+            <div className='w-full max-w-[950px] min-w-[340px] bg-white text-slate-900 shadow-2xl rounded-sm border border-slate-300 p-4 sm:p-14 print:p-0 print:shadow-none print:border-none print:w-full print:max-w-none print:text-black font-sans leading-relaxed overflow-x-auto'>
               {/* Document KOP / Interactive Header Title */}
               <div className='text-center mb-6 border-b-2 border-slate-900 pb-4 print:border-black space-y-1'>
                 <Input
