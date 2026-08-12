@@ -194,7 +194,7 @@ export async function registerTeacher(data: {
       otp: otpCode,
     });
 
-    let message = 'Pendaftaran berhasil! Silakan periksa email Anda untuk memasukkan kode OTP verifikasi.';
+    let message = 'Pendaftaran berhasil! Silakan periksa inbox atau folder Spam email Anda untuk kode OTP verifikasi.';
     if (!emailResult.success) {
       console.warn('Gagal mengirim email verifikasi:', emailResult.error);
       message = `Pendaftaran berhasil! Namun email OTP gagal terkirim: ${emailResult.error}. Silakan klik kirim ulang OTP.`;

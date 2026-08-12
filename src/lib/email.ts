@@ -41,8 +41,10 @@ export async function sendVerificationEmail({ to, name, otp }: SendVerificationE
 
       await transporter.sendMail({
         from: smtpFrom,
+        replyTo: smtpUser,
         to,
         subject: `[Smart Class] Kode Verifikasi Email Anda: ${otp}`,
+        text: `Halo ${name},\n\nTerima kasih telah mendaftar di Smart Class.\nKode OTP verifikasi email Anda adalah: ${otp}\n\nKode ini berlaku selama 15 menit.`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 16px;">
             <h2 style="color: #059669; margin-bottom: 8px;">Verifikasi Email Akun Smart Class</h2>
