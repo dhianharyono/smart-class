@@ -2,7 +2,7 @@
 
 import React, { useState, useSyncExternalStore } from 'react';
 
-const emptySubscribe = () => () => { };
+const emptySubscribe = () => () => {};
 const getSnapshot = () => true;
 const getServerSnapshot = () => false;
 
@@ -12,35 +12,32 @@ function useIsMounted() {
 import {
   Users,
   School,
-  Wallet,
   GraduationCap,
-  TrendingUp,
   ArrowRight,
-  ShieldCheck,
   BookOpen,
   CheckCircle2,
   FileText,
   Home,
-  Activity,
   Search,
   Clock,
-  PieChart,
-  BarChart3,
-  CalendarCheck2,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
   AreaChart,
   Area,
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   Legend,
 } from 'recharts';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
@@ -127,20 +124,26 @@ interface AdminDashboardClientProps {
   schools: SchoolStat[];
 }
 
-export default function AdminDashboardClient({ stats, schools }: AdminDashboardClientProps) {
+export default function AdminDashboardClient({
+  stats,
+  schools,
+}: AdminDashboardClientProps) {
   const mounted = useIsMounted();
   const [searchTerm, setSearchTerm] = useState('');
 
   if (!mounted) {
     return (
-      <div className="space-y-6">
-        <div className="h-10 w-48 bg-slate-200 rounded animate-pulse" />
-        <div className="grid gap-4 sm:grid-cols-4">
+      <div className='space-y-6'>
+        <div className='h-10 w-48 bg-slate-200 rounded animate-pulse' />
+        <div className='grid gap-4 sm:grid-cols-4'>
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-28 bg-white border border-slate-200 rounded-2xl animate-pulse" />
+            <div
+              key={i}
+              className='h-28 bg-white border border-slate-200 rounded-2xl animate-pulse'
+            />
           ))}
         </div>
-        <div className="h-96 bg-white border border-slate-200 rounded-2xl animate-pulse" />
+        <div className='h-96 bg-white border border-slate-200 rounded-2xl animate-pulse' />
       </div>
     );
   }
@@ -191,7 +194,8 @@ export default function AdminDashboardClient({ stats, schools }: AdminDashboardC
     const q = searchTerm.toLowerCase().trim();
     if (!q) return true;
     const matchesClass =
-      (teacher.classes && teacher.classes.some((c) => c.toLowerCase().includes(q))) ||
+      (teacher.classes &&
+        teacher.classes.some((c) => c.toLowerCase().includes(q))) ||
       teacher.className.toLowerCase().includes(q);
     return (
       teacher.name.toLowerCase().includes(q) ||
@@ -216,37 +220,39 @@ export default function AdminDashboardClient({ stats, schools }: AdminDashboardC
   // Activity trend metrics
   const trendData = stats.activityTrend || [];
   const totalTrend7Days = trendData.reduce((acc, curr) => acc + curr.total, 0);
-  const peakDay = trendData.length > 0
-    ? [...trendData].sort((a, b) => b.total - a.total)[0]
-    : null;
+  const peakDay =
+    trendData.length > 0
+      ? [...trendData].sort((a, b) => b.total - a.total)[0]
+      : null;
   const peakDayLabel = peakDay ? peakDay.day : '-';
   const peakDayTotal = peakDay ? peakDay.total : 0;
 
   return (
-    <div className="space-y-8">
+    <div className='space-y-8'>
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className='text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight'>
             Dashboard Administrator
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
-            Ikhtisar operasional, tren aktivitas wali kelas, presensi, dan sekolah terdaftar di seluruh sistem.
+          <p className='text-xs sm:text-sm text-slate-500 font-medium mt-1'>
+            Ikhtisar operasional, tren aktivitas wali kelas, presensi, dan
+            sekolah terdaftar di seluruh sistem.
           </p>
         </div>
-        <Link href="/" className="w-full sm:w-auto">
+        <Link href='/' className='w-full sm:w-auto'>
           <Button
-            variant="outline"
-            className="w-full sm:w-auto border-slate-200 bg-white hover:bg-emerald-50 hover:border-emerald-200 text-slate-700 hover:text-emerald-800 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-colors"
+            variant='outline'
+            className='w-full sm:w-auto border-slate-200 bg-white hover:bg-emerald-50 hover:border-emerald-200 text-slate-700 hover:text-emerald-800 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-colors'
           >
-            <Home className="h-4 w-4 text-emerald-600" />
+            <Home className='h-4 w-4 text-emerald-600' />
             <span>Halaman Utama</span>
           </Button>
         </Link>
       </div>
 
       {/* Grid Utama 4 Stat Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
+      <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-2'>
         {statCards.map((card, i) => {
           const Icon = card.icon;
           return (
@@ -254,19 +260,21 @@ export default function AdminDashboardClient({ stats, schools }: AdminDashboardC
               key={i}
               className={`${card.color} rounded-2xl relative overflow-hidden p-4 sm:p-4.5 flex flex-col justify-between border border-slate-200/70 shadow-xs transition-all duration-200 hover:shadow-sm`}
             >
-              <div className="flex items-center justify-between gap-2 mb-3">
-                <span className="text-xs font-extrabold text-slate-500 uppercase tracking-wider truncate">
+              <div className='flex items-center justify-between gap-2 mb-3'>
+                <span className='text-xs font-extrabold text-slate-500 uppercase tracking-wider truncate'>
                   {card.title}
                 </span>
                 <div className={`p-2 rounded-xl border ${card.iconColor}`}>
-                  <Icon className="h-4 w-4" />
+                  <Icon className='h-4 w-4' />
                 </div>
               </div>
               <div>
-                <div className="font-black tracking-tight text-slate-900 mb-1 leading-none text-2xl sm:text-3xl">
+                <div className='font-black tracking-tight text-slate-900 mb-1 leading-none text-2xl sm:text-3xl'>
                   {card.value}
                 </div>
-                <p className="text-[11px] text-slate-500 font-medium truncate">{card.description}</p>
+                <p className='text-[11px] text-slate-500 font-medium truncate'>
+                  {card.description}
+                </p>
               </div>
             </div>
           );
@@ -274,41 +282,51 @@ export default function AdminDashboardClient({ stats, schools }: AdminDashboardC
       </div>
 
       {/* 2-Column Section for Statistik Sekolah & Pengguna Online */}
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className='grid gap-6 md:grid-cols-2'>
         {/* Statistik Sekolah */}
-        <Card className="bg-white border-slate-200/80 rounded-2xl shadow-xs flex flex-col justify-between">
+        <Card className='bg-white border-slate-200/80 rounded-2xl shadow-xs flex flex-col justify-between'>
           <div>
-            <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-6 pb-4">
+            <CardHeader className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-6 pb-4'>
               <div>
-                <CardTitle className="text-md font-bold text-slate-900">Statistik Sekolah</CardTitle>
-                <CardDescription className="text-xs text-slate-500 mt-1">Jumlah guru dan siswa per sekolah terdaftar.</CardDescription>
+                <CardTitle className='text-md font-bold text-slate-900'>
+                  Statistik Sekolah
+                </CardTitle>
+                <CardDescription className='text-xs text-slate-500 mt-1'>
+                  Jumlah guru dan siswa per sekolah terdaftar.
+                </CardDescription>
               </div>
-              <Link href="/admin/sekolah" className="flex items-center gap-1.5 text-xs text-emerald-700 hover:text-emerald-800 font-bold transition-colors shrink-0">
+              <Link
+                href='/admin/sekolah'
+                className='flex items-center gap-1.5 text-xs text-emerald-700 hover:text-emerald-800 font-bold transition-colors shrink-0'
+              >
                 <span>Kelola Sekolah</span>
-                <ArrowRight className="h-3.5 w-3.5" />
+                <ArrowRight className='h-3.5 w-3.5' />
               </Link>
             </CardHeader>
-            <CardContent className="px-6 pb-6">
+            <CardContent className='px-6 pb-6'>
               {schools.length > 0 ? (
-                <div className="overflow-x-auto min-w-0 max-w-full">
-                  <table className="w-full text-left text-xs text-slate-700 border-collapse">
+                <div className='overflow-x-auto min-w-0 max-w-full'>
+                  <table className='w-full text-left text-xs text-slate-700 border-collapse'>
                     <thead>
-                      <tr className="border-b border-slate-200/80 text-slate-700 uppercase tracking-wider text-[10px] font-bold">
-                        <th className="py-2.5 px-2">Nama Sekolah</th>
-                        <th className="py-2.5 px-2 text-center">Guru</th>
-                        <th className="py-2.5 px-2 text-right">Siswa</th>
+                      <tr className='border-b border-slate-200/80 text-slate-700 uppercase tracking-wider text-[10px] font-bold'>
+                        <th className='py-2.5 px-2'>Nama Sekolah</th>
+                        <th className='py-2.5 px-2 text-center'>Guru</th>
+                        <th className='py-2.5 px-2 text-right'>Siswa</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className='divide-y divide-slate-100'>
                       {schools.map((school) => (
-                        <tr key={school._id} className="hover:bg-slate-50/80 transition-colors group">
-                          <td className="py-2.5 px-2 font-bold text-slate-900 truncate max-w-[150px]">
+                        <tr
+                          key={school._id}
+                          className='hover:bg-slate-50/80 transition-colors group'
+                        >
+                          <td className='py-2.5 px-2 font-bold text-slate-900 truncate max-w-[150px]'>
                             {school.name}
                           </td>
-                          <td className="py-2.5 px-2 text-center font-medium">
+                          <td className='py-2.5 px-2 text-center font-medium'>
                             {school.teacherCount || 0} Guru
                           </td>
-                          <td className="py-2.5 px-2 text-right font-bold text-emerald-700">
+                          <td className='py-2.5 px-2 text-right font-bold text-emerald-700'>
                             {school.studentCount || 0} Siswa
                           </td>
                         </tr>
@@ -317,7 +335,7 @@ export default function AdminDashboardClient({ stats, schools }: AdminDashboardC
                   </table>
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center py-8 text-slate-400 text-xs">
+                <div className='flex flex-col items-center justify-center py-8 text-slate-400 text-xs'>
                   Belum ada sekolah terdaftar.
                 </div>
               )}
@@ -326,38 +344,51 @@ export default function AdminDashboardClient({ stats, schools }: AdminDashboardC
         </Card>
 
         {/* Pengguna Online */}
-        <Card className="bg-white border-slate-200/80 rounded-2xl shadow-xs flex flex-col justify-between">
+        <Card className='bg-white border-slate-200/80 rounded-2xl shadow-xs flex flex-col justify-between'>
           <div>
-            <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-6 pb-4">
+            <CardHeader className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-6 pb-4'>
               <div>
-                <CardTitle className="text-md font-bold text-slate-900 flex items-center gap-2">
-                  <span className="relative flex h-2.5 w-2.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                <CardTitle className='text-md font-bold text-slate-900 flex items-center gap-2'>
+                  <span className='relative flex h-2.5 w-2.5'>
+                    <span className='animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75'></span>
+                    <span className='relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500'></span>
                   </span>
-                  <span>Wali Kelas Online ({stats.onlineUsers?.length || 0})</span>
+                  <span>
+                    Wali Kelas Online ({stats.onlineUsers?.length || 0})
+                  </span>
                 </CardTitle>
-                <CardDescription className="text-xs text-slate-500 mt-1">
+                <CardDescription className='text-xs text-slate-500 mt-1'>
                   Wali kelas aktif 5 menit terakhir beserta peran (role).
                 </CardDescription>
               </div>
             </CardHeader>
-            <CardContent className="px-6 pb-6">
+            <CardContent className='px-6 pb-6'>
               {stats.onlineUsers && stats.onlineUsers.length > 0 ? (
-                <div className="space-y-2.5 max-h-[220px] overflow-y-auto pr-1">
+                <div className='space-y-2.5 max-h-[220px] overflow-y-auto pr-1'>
                   {stats.onlineUsers.map((user) => {
-                    let badgeColor = "bg-emerald-50 text-emerald-700 border-emerald-200";
+                    let badgeColor =
+                      'bg-emerald-50 text-emerald-700 border-emerald-200';
                     if (user.role === 'Kepala Sekolah') {
-                      badgeColor = "bg-violet-50 text-violet-700 border-violet-200";
+                      badgeColor =
+                        'bg-violet-50 text-violet-700 border-violet-200';
                     }
 
                     return (
-                      <div key={user.id} className="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100/80 transition-colors">
-                        <div className="flex flex-col min-w-0">
-                          <span className="font-bold text-xs text-slate-900 truncate">{user.name}</span>
-                          <span className="text-[10px] text-slate-500 truncate">{user.email}</span>
+                      <div
+                        key={user.id}
+                        className='flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100/80 transition-colors'
+                      >
+                        <div className='flex flex-col min-w-0'>
+                          <span className='font-bold text-xs text-slate-900 truncate'>
+                            {user.name}
+                          </span>
+                          <span className='text-[10px] text-slate-500 truncate'>
+                            {user.email}
+                          </span>
                         </div>
-                        <span className={`px-2 py-0.5 border text-[9px] font-bold rounded-md uppercase tracking-wider shrink-0 ml-2 ${badgeColor}`}>
+                        <span
+                          className={`px-2 py-0.5 border text-[9px] font-bold rounded-md uppercase tracking-wider shrink-0 ml-2 ${badgeColor}`}
+                        >
                           {user.role}
                         </span>
                       </div>
@@ -365,7 +396,7 @@ export default function AdminDashboardClient({ stats, schools }: AdminDashboardC
                   })}
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center py-8 text-slate-400 text-xs">
+                <div className='flex flex-col items-center justify-center py-8 text-slate-400 text-xs'>
                   Belum ada wali kelas yang online.
                 </div>
               )}
@@ -374,64 +405,153 @@ export default function AdminDashboardClient({ stats, schools }: AdminDashboardC
         </Card>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className='grid gap-6 md:grid-cols-2'>
         {/* Section Grafik Tren Aktivitas Wali Kelas */}
-        <Card className="bg-white border-slate-200/80 rounded-2xl shadow-xs">
-          <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 pb-2">
+        <Card className='bg-white border-slate-200/80 rounded-2xl shadow-xs'>
+          <CardHeader className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 pb-2'>
             <div>
-              <CardTitle className="text-md font-bold text-slate-900 flex items-center gap-2">
+              <CardTitle className='text-md font-bold text-slate-900 flex items-center gap-2'>
                 <span>Tren Aktivitas Wali Kelas (7 Hari Terakhir)</span>
               </CardTitle>
-              <CardDescription className="text-xs text-slate-500 mt-1">
-                Grafik penginputan Jurnal KBM, Presensi Siswa, Nilai Akademik, & Tabungan oleh seluruh wali kelas.
+              <CardDescription className='text-xs text-slate-500 mt-1'>
+                Grafik penginputan Jurnal KBM, Presensi Siswa, Nilai Akademik, &
+                Tabungan oleh seluruh wali kelas.
               </CardDescription>
             </div>
 
-            <div className="flex items-center gap-2 flex-wrap">
-              <div className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 flex items-center gap-2">
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total 7 Hari</span>
-                <span className="text-xs font-black text-slate-900">{totalTrend7Days} Aktivitas</span>
+            <div className='flex items-center gap-2 flex-wrap'>
+              <div className='bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 flex items-center gap-2'>
+                <span className='text-[10px] font-bold text-slate-500 uppercase tracking-wider'>
+                  Total 7 Hari
+                </span>
+                <span className='text-xs font-black text-slate-900'>
+                  {totalTrend7Days} Aktivitas
+                </span>
               </div>
-              <div className="bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-1.5 flex items-center gap-2">
-                <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Puncak</span>
-                <span className="text-xs font-black text-emerald-800">{peakDayLabel} ({peakDayTotal})</span>
+              <div className='bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-1.5 flex items-center gap-2'>
+                <span className='text-[10px] font-bold text-emerald-700 uppercase tracking-wider'>
+                  Puncak
+                </span>
+                <span className='text-xs font-black text-emerald-800'>
+                  {peakDayLabel} ({peakDayTotal})
+                </span>
               </div>
             </div>
           </CardHeader>
-          <CardContent className="p-6 pt-2">
-            <div className="h-[280px] w-full pt-4">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+          <CardContent className='p-6 pt-2'>
+            <div className='h-[280px] w-full pt-4'>
+              <ResponsiveContainer width='100%' height='100%'>
+                <AreaChart
+                  data={trendData}
+                  margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                >
                   <defs>
-                    <linearGradient id="colorJurnal" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#059669" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="#059669" stopOpacity={0} />
+                    <linearGradient
+                      id='colorJurnal'
+                      x1='0'
+                      y1='0'
+                      x2='0'
+                      y2='1'
+                    >
+                      <stop offset='5%' stopColor='#059669' stopOpacity={0.4} />
+                      <stop offset='95%' stopColor='#059669' stopOpacity={0} />
                     </linearGradient>
-                    <linearGradient id="colorPresensi" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#0d9488" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="#0d9488" stopOpacity={0} />
+                    <linearGradient
+                      id='colorPresensi'
+                      x1='0'
+                      y1='0'
+                      x2='0'
+                      y2='1'
+                    >
+                      <stop offset='5%' stopColor='#0d9488' stopOpacity={0.4} />
+                      <stop offset='95%' stopColor='#0d9488' stopOpacity={0} />
                     </linearGradient>
-                    <linearGradient id="colorNilai" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#0284c7" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="#0284c7" stopOpacity={0} />
+                    <linearGradient id='colorNilai' x1='0' y1='0' x2='0' y2='1'>
+                      <stop offset='5%' stopColor='#0284c7' stopOpacity={0.4} />
+                      <stop offset='95%' stopColor='#0284c7' stopOpacity={0} />
                     </linearGradient>
-                    <linearGradient id="colorTabungan" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                    <linearGradient
+                      id='colorTabungan'
+                      x1='0'
+                      y1='0'
+                      x2='0'
+                      y2='1'
+                    >
+                      <stop offset='5%' stopColor='#8b5cf6' stopOpacity={0.4} />
+                      <stop offset='95%' stopColor='#8b5cf6' stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                  <XAxis dataKey="fullLabel" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: '#64748b' }} />
-                  <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: '#64748b' }} allowDecimals={false} />
-                  <Tooltip
-                    contentStyle={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
-                    labelStyle={{ fontWeight: 'bold', color: '#0f172a', marginBottom: '4px', fontSize: '12px' }}
+                  <CartesianGrid
+                    strokeDasharray='3 3'
+                    vertical={false}
+                    stroke='#e2e8f0'
                   />
-                  <Legend iconType="circle" wrapperStyle={{ paddingTop: '12px', fontSize: '11px' }} />
-                  <Area type="monotone" dataKey="jurnal" name="Jurnal KBM" stroke="#059669" strokeWidth={2.5} fillOpacity={1} fill="url(#colorJurnal)" />
-                  <Area type="monotone" dataKey="presensi" name="Presensi Siswa" stroke="#0d9488" strokeWidth={2.5} fillOpacity={1} fill="url(#colorPresensi)" />
-                  <Area type="monotone" dataKey="nilai" name="Input Nilai" stroke="#0284c7" strokeWidth={2.5} fillOpacity={1} fill="url(#colorNilai)" />
-                  <Area type="monotone" dataKey="tabungan" name="Tabungan" stroke="#8b5cf6" strokeWidth={2.5} fillOpacity={1} fill="url(#colorTabungan)" />
+                  <XAxis
+                    dataKey='fullLabel'
+                    tickLine={false}
+                    axisLine={false}
+                    tick={{ fontSize: 11, fill: '#64748b' }}
+                  />
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    tick={{ fontSize: 11, fill: '#64748b' }}
+                    allowDecimals={false}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#ffffff',
+                      borderRadius: '12px',
+                      border: '1px solid #e2e8f0',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                    }}
+                    labelStyle={{
+                      fontWeight: 'bold',
+                      color: '#0f172a',
+                      marginBottom: '4px',
+                      fontSize: '12px',
+                    }}
+                  />
+                  <Legend
+                    iconType='circle'
+                    wrapperStyle={{ paddingTop: '12px', fontSize: '11px' }}
+                  />
+                  <Area
+                    type='monotone'
+                    dataKey='jurnal'
+                    name='Jurnal KBM'
+                    stroke='#059669'
+                    strokeWidth={2.5}
+                    fillOpacity={1}
+                    fill='url(#colorJurnal)'
+                  />
+                  <Area
+                    type='monotone'
+                    dataKey='presensi'
+                    name='Presensi Siswa'
+                    stroke='#0d9488'
+                    strokeWidth={2.5}
+                    fillOpacity={1}
+                    fill='url(#colorPresensi)'
+                  />
+                  <Area
+                    type='monotone'
+                    dataKey='nilai'
+                    name='Input Nilai'
+                    stroke='#0284c7'
+                    strokeWidth={2.5}
+                    fillOpacity={1}
+                    fill='url(#colorNilai)'
+                  />
+                  <Area
+                    type='monotone'
+                    dataKey='tabungan'
+                    name='Tabungan'
+                    stroke='#8b5cf6'
+                    strokeWidth={2.5}
+                    fillOpacity={1}
+                    fill='url(#colorTabungan)'
+                  />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -439,50 +559,53 @@ export default function AdminDashboardClient({ stats, schools }: AdminDashboardC
         </Card>
 
         {/* Section Data Baru & Fitur Pemantauan: Aktivitas KBM Terkini */}
-        <div className="grid gap-6 md:grid-cols-1">
+        <div className='grid gap-6 md:grid-cols-1'>
           {/* Umpan Aktivitas KBM (Jurnal Pembelajaran Terbaru) */}
-          <Card className="bg-white border-slate-200/80 rounded-2xl shadow-xs flex flex-col justify-between">
+          <Card className='bg-white border-slate-200/80 rounded-2xl shadow-xs flex flex-col justify-between'>
             <div>
-              <CardHeader className="flex flex-row items-center justify-between p-6 pb-4">
+              <CardHeader className='flex flex-row items-center justify-between p-6 pb-4'>
                 <div>
-                  <CardTitle className="text-md font-bold text-slate-900 flex items-center gap-2">
+                  <CardTitle className='text-md font-bold text-slate-900 flex items-center gap-2'>
                     <span>Aktivitas KBM Terkini</span>
                   </CardTitle>
-                  <CardDescription className="text-xs text-slate-500 mt-1">
+                  <CardDescription className='text-xs text-slate-500 mt-1'>
                     Entri jurnal mengajar terbaru yang diinput oleh wali kelas.
                   </CardDescription>
                 </div>
               </CardHeader>
-              <CardContent className="px-6 pb-6">
+              <CardContent className='px-6 pb-6'>
                 {stats.recentJournals && stats.recentJournals.length > 0 ? (
-                  <div className="space-y-2.5 max-h-[220px] overflow-y-auto pr-1">
+                  <div className='space-y-2.5 max-h-[220px] overflow-y-auto pr-1'>
                     {stats.recentJournals.map((journal) => (
                       <div
                         key={journal.id}
-                        className="p-2.5 bg-slate-50 border border-slate-200/90 rounded-xl hover:border-teal-300 hover:bg-teal-50/30 transition-colors"
+                        className='p-2.5 bg-slate-50 border border-slate-200/90 rounded-xl hover:border-teal-300 hover:bg-teal-50/30 transition-colors'
                       >
-                        <div className="flex items-center justify-between mb-1">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span className="font-bold text-xs text-slate-900 truncate">
+                        <div className='flex items-center justify-between mb-1'>
+                          <div className='flex items-center gap-2 min-w-0'>
+                            <span className='font-bold text-xs text-slate-900 truncate'>
                               {journal.teacherName}
                             </span>
-                            <span className="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold shrink-0">
+                            <span className='bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold shrink-0'>
                               {journal.className}
                             </span>
                           </div>
-                          <span className="text-[10px] text-slate-500 flex items-center gap-1 shrink-0">
-                            <Clock className="h-3 w-3 text-slate-400" />
+                          <span className='text-[10px] text-slate-500 flex items-center gap-1 shrink-0'>
+                            <Clock className='h-3 w-3 text-slate-400' />
                             {formatDate(journal.date)}
                           </span>
                         </div>
-                        <p className="text-xs text-slate-700 font-semibold truncate">
-                          {journal.subject} &bull; <span className="font-normal text-slate-600">{journal.material}</span>
+                        <p className='text-xs text-slate-700 font-semibold truncate'>
+                          {journal.subject} &bull;{' '}
+                          <span className='font-normal text-slate-600'>
+                            {journal.material}
+                          </span>
                         </p>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center py-8 text-slate-400 text-xs">
+                  <div className='flex flex-col items-center justify-center py-8 text-slate-400 text-xs'>
                     Belum ada aktivitas jurnal mengajar.
                   </div>
                 )}
@@ -493,168 +616,204 @@ export default function AdminDashboardClient({ stats, schools }: AdminDashboardC
       </div>
 
       {/* Detail & Statistik Wali Kelas (Guru) dengan Search Bar */}
-      <Card className="bg-white border-slate-200/80 rounded-2xl shadow-xs">
-        <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between p-6 pb-4">
+      <Card className='bg-white border-slate-200/80 rounded-2xl shadow-xs'>
+        <CardHeader className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between p-6 pb-4'>
           <div>
-            <CardTitle className="text-md font-bold text-slate-900 flex items-center gap-2">
+            <CardTitle className='text-md font-bold text-slate-900 flex items-center gap-2'>
               <span>Statistik & Pemantauan Wali Kelas</span>
             </CardTitle>
-            <CardDescription className="text-xs text-slate-500 mt-1">
-              Ringkasan aktivitas pembelajaran, tingkat kehadiran siswa, jurnal, nilai, dan total tabungan kelas.
+            <CardDescription className='text-xs text-slate-500 mt-1'>
+              Ringkasan aktivitas pembelajaran, tingkat kehadiran siswa, jurnal,
+              nilai, dan total tabungan kelas.
             </CardDescription>
           </div>
-          <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className='flex items-center gap-3 w-full sm:w-auto'>
             {/* Search input for teachers */}
-            <div className="relative flex-1 sm:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+            <div className='relative flex-1 sm:w-64'>
+              <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400' />
               <input
-                type="text"
-                placeholder="Cari guru, sekolah, kelas..."
+                type='text'
+                placeholder='Cari guru, sekolah, kelas...'
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:bg-white transition-colors"
+                className='w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:bg-white transition-colors'
               />
             </div>
-            <Link href="/admin/guru" className="flex items-center gap-1.5 text-xs text-emerald-700 hover:text-emerald-800 font-bold transition-colors shrink-0">
+            <Link
+              href='/admin/guru'
+              className='flex items-center gap-1.5 text-xs text-emerald-700 hover:text-emerald-800 font-bold transition-colors shrink-0'
+            >
               <span>Kelola Guru</span>
-              <ArrowRight className="h-3.5 w-3.5" />
+              <ArrowRight className='h-3.5 w-3.5' />
             </Link>
           </div>
         </CardHeader>
-        <CardContent className="space-y-6 px-6 pb-6">
+        <CardContent className='space-y-6 px-6 pb-6'>
           {/* Mini KPI Ringkasan Aktivitas Sistem */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 shrink-0">
-                <Users className="h-4 w-4" />
+          <div className='grid grid-cols-2 sm:grid-cols-4 gap-3'>
+            <div className='bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center gap-3'>
+              <div className='p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 shrink-0'>
+                <Users className='h-4 w-4' />
               </div>
-              <div className="min-w-0">
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Siswa</p>
-                <p className="text-base font-extrabold text-slate-900">{stats.studentCount} Siswa</p>
-              </div>
-            </div>
-
-            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-teal-50 border border-teal-200 text-teal-700 shrink-0">
-                <CheckCircle2 className="h-4 w-4" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Rata2 Presensi</p>
-                <p className="text-base font-extrabold text-slate-900">{stats.overallAttendanceRate ?? 0}%</p>
+              <div className='min-w-0'>
+                <p className='text-[10px] font-bold text-slate-500 uppercase tracking-wider'>
+                  Total Siswa
+                </p>
+                <p className='text-base font-extrabold text-slate-900'>
+                  {stats.studentCount} Siswa
+                </p>
               </div>
             </div>
 
-            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 shrink-0">
-                <BookOpen className="h-4 w-4" />
+            <div className='bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center gap-3'>
+              <div className='p-2 rounded-lg bg-teal-50 border border-teal-200 text-teal-700 shrink-0'>
+                <CheckCircle2 className='h-4 w-4' />
               </div>
-              <div className="min-w-0">
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Jurnal</p>
-                <p className="text-base font-extrabold text-slate-900">{stats.totalJournalCount ?? 0} Entri</p>
+              <div className='min-w-0'>
+                <p className='text-[10px] font-bold text-slate-500 uppercase tracking-wider'>
+                  Rata2 Presensi
+                </p>
+                <p className='text-base font-extrabold text-slate-900'>
+                  {stats.overallAttendanceRate ?? 0}%
+                </p>
               </div>
             </div>
 
-            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 shrink-0">
-                <FileText className="h-4 w-4" />
+            <div className='bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center gap-3'>
+              <div className='p-2 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 shrink-0'>
+                <BookOpen className='h-4 w-4' />
               </div>
-              <div className="min-w-0">
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Nilai</p>
-                <p className="text-base font-extrabold text-slate-900">{stats.totalGradeCount ?? 0} Nilai</p>
+              <div className='min-w-0'>
+                <p className='text-[10px] font-bold text-slate-500 uppercase tracking-wider'>
+                  Total Jurnal
+                </p>
+                <p className='text-base font-extrabold text-slate-900'>
+                  {stats.totalJournalCount ?? 0} Entri
+                </p>
+              </div>
+            </div>
+
+            <div className='bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center gap-3'>
+              <div className='p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 shrink-0'>
+                <FileText className='h-4 w-4' />
+              </div>
+              <div className='min-w-0'>
+                <p className='text-[10px] font-bold text-slate-500 uppercase tracking-wider'>
+                  Total Nilai
+                </p>
+                <p className='text-base font-extrabold text-slate-900'>
+                  {stats.totalGradeCount ?? 0} Nilai
+                </p>
               </div>
             </div>
           </div>
 
           {/* Tabel Statistik Wali Kelas */}
           {filteredTeacherStats.length > 0 ? (
-            <div className="overflow-x-auto min-w-0 max-w-full rounded-xl border border-slate-200">
-              <table className="w-full min-w-[650px] text-left text-sm text-slate-700 border-collapse">
+            <div className='overflow-x-auto min-w-0 max-w-full rounded-xl border border-slate-200'>
+              <table className='w-full min-w-[650px] text-left text-sm text-slate-700 border-collapse'>
                 <thead>
-                  <tr className="bg-slate-50 border-b border-slate-200 text-slate-700 text-[11px] font-bold uppercase tracking-wider">
-                    <th className="py-3 px-4">Nama Guru</th>
-                    <th className="py-3 px-4">Sekolah / Kelas</th>
-                    <th className="py-3 px-4 text-center">Siswa</th>
-                    <th className="py-3 px-4 text-center">Tingkat Kehadiran</th>
-                    <th className="py-3 px-4 text-center">Jurnal</th>
-                    <th className="py-3 px-4 text-center">Nilai</th>
-                    <th className="py-3 px-4 text-right">Tabungan Kelas</th>
+                  <tr className='bg-slate-50 border-b border-slate-200 text-slate-700 text-[11px] font-bold uppercase tracking-wider'>
+                    <th className='py-3 px-4'>Nama Guru</th>
+                    <th className='py-3 px-4'>Sekolah / Kelas</th>
+                    <th className='py-3 px-4 text-center'>Siswa</th>
+                    <th className='py-3 px-4 text-center'>Tingkat Kehadiran</th>
+                    <th className='py-3 px-4 text-center'>Jurnal</th>
+                    <th className='py-3 px-4 text-center'>Nilai</th>
+                    <th className='py-3 px-4 text-right'>Tabungan Kelas</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className='divide-y divide-slate-100'>
                   {filteredTeacherStats.map((teacher) => {
                     const rate = teacher.attendanceRate ?? 0;
                     const hasAttendance = (teacher.totalAttendance ?? 0) > 0;
 
-                    let rateBadgeClass = "bg-slate-100 text-slate-600 border-slate-200";
+                    let rateBadgeClass =
+                      'bg-slate-100 text-slate-600 border-slate-200';
                     if (hasAttendance) {
                       if (rate >= 85) {
-                        rateBadgeClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
+                        rateBadgeClass =
+                          'bg-emerald-50 text-emerald-700 border-emerald-200';
                       } else if (rate >= 70) {
-                        rateBadgeClass = "bg-amber-50 text-amber-700 border-amber-200";
+                        rateBadgeClass =
+                          'bg-amber-50 text-amber-700 border-amber-200';
                       } else {
-                        rateBadgeClass = "bg-rose-50 text-rose-700 border-rose-200";
+                        rateBadgeClass =
+                          'bg-rose-50 text-rose-700 border-rose-200';
                       }
                     }
 
                     return (
-                      <tr key={teacher.id} className="hover:bg-slate-50/80 transition-colors group">
-                        <td className="py-3.5 px-4">
-                          <div className="flex flex-col">
-                            <span className="font-bold text-slate-900 group-hover:text-emerald-700 transition-colors">
+                      <tr
+                        key={teacher.id}
+                        className='hover:bg-slate-50/80 transition-colors group'
+                      >
+                        <td className='py-3.5 px-4'>
+                          <div className='flex flex-col'>
+                            <span className='font-bold text-slate-900 group-hover:text-emerald-700 transition-colors'>
                               {teacher.name}
                             </span>
-                            <span className="text-xs text-slate-500 font-medium">
+                            <span className='text-xs text-slate-500 font-medium'>
                               {teacher.email}
                             </span>
                           </div>
                         </td>
-                        <td className="py-3.5 px-4">
-                          <div className="flex flex-col gap-1 items-start">
-                            <span className="text-slate-800 font-semibold text-xs">{teacher.schoolName}</span>
-                            <div className="flex flex-wrap gap-1 items-center">
+                        <td className='py-3.5 px-4'>
+                          <div className='flex flex-col gap-1 items-start'>
+                            <span className='text-slate-800 font-semibold text-xs'>
+                              {teacher.schoolName}
+                            </span>
+                            <div className='flex flex-wrap gap-1 items-center'>
                               {teacher.classes && teacher.classes.length > 0 ? (
                                 teacher.classes.map((cls, idx) => (
-                                  <span key={idx} className="bg-emerald-50 border border-emerald-200/90 text-emerald-800 px-2 py-0.5 rounded text-[11px] font-mono font-bold">
+                                  <span
+                                    key={idx}
+                                    className='bg-emerald-50 border border-emerald-200/90 text-emerald-800 px-2 py-0.5 rounded text-[11px] font-mono font-bold'
+                                  >
                                     Kelas {cls}
                                   </span>
                                 ))
                               ) : (
-                                <span className="bg-slate-100 border border-slate-200 text-slate-700 px-2 py-0.5 rounded text-[11px] font-mono font-medium">
+                                <span className='bg-slate-100 border border-slate-200 text-slate-700 px-2 py-0.5 rounded text-[11px] font-mono font-medium'>
                                   Kelas {teacher.className || '-'}
                                 </span>
                               )}
                             </div>
                           </div>
                         </td>
-                        <td className="py-3.5 px-4 text-center">
-                          <span className="inline-flex items-center gap-1 text-xs font-bold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">
-                            <Users className="h-3 w-3 text-emerald-600" />
+                        <td className='py-3.5 px-4 text-center'>
+                          <span className='inline-flex items-center gap-1 text-xs font-bold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200'>
+                            <Users className='h-3 w-3 text-emerald-600' />
                             {teacher.studentCount}
                           </span>
                         </td>
-                        <td className="py-3.5 px-4 text-center">
+                        <td className='py-3.5 px-4 text-center'>
                           {hasAttendance ? (
-                            <span className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-lg border ${rateBadgeClass}`}>
+                            <span
+                              className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-lg border ${rateBadgeClass}`}
+                            >
                               {rate}% Hadir
                             </span>
                           ) : (
-                            <span className="text-xs text-slate-400 italic">Belum Ada Log</span>
+                            <span className='text-xs text-slate-400 italic'>
+                              Belum Ada Log
+                            </span>
                           )}
                         </td>
-                        <td className="py-3.5 px-4 text-center">
-                          <span className="inline-flex items-center gap-1.5 text-xs text-slate-700 font-semibold bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-lg">
-                            <BookOpen className="h-3.5 w-3.5 text-teal-600" />
+                        <td className='py-3.5 px-4 text-center'>
+                          <span className='inline-flex items-center gap-1.5 text-xs text-slate-700 font-semibold bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-lg'>
+                            <BookOpen className='h-3.5 w-3.5 text-teal-600' />
                             {teacher.journalCount || 0}
                           </span>
                         </td>
-                        <td className="py-3.5 px-4 text-center">
-                          <span className="inline-flex items-center gap-1.5 text-xs text-slate-700 font-semibold bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-lg">
-                            <FileText className="h-3.5 w-3.5 text-emerald-600" />
+                        <td className='py-3.5 px-4 text-center'>
+                          <span className='inline-flex items-center gap-1.5 text-xs text-slate-700 font-semibold bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-lg'>
+                            <FileText className='h-3.5 w-3.5 text-emerald-600' />
                             {teacher.gradeCount || 0}
                           </span>
                         </td>
-                        <td className="py-3.5 px-4 text-right">
-                          <span className="text-xs font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg">
+                        <td className='py-3.5 px-4 text-right'>
+                          <span className='text-xs font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg'>
                             {formatIDR(teacher.totalSavings || 0)}
                           </span>
                         </td>
@@ -665,11 +824,15 @@ export default function AdminDashboardClient({ stats, schools }: AdminDashboardC
               </table>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-12 text-slate-400 text-xs border border-dashed border-slate-200 rounded-xl">
-              <span className="text-emerald-700 font-bold mb-1">
-                {searchTerm ? 'Tidak ada guru yang cocok dengan pencarian' : 'Belum Ada Wali Kelas'}
+            <div className='flex flex-col items-center justify-center py-12 text-slate-400 text-xs border border-dashed border-slate-200 rounded-xl'>
+              <span className='text-emerald-700 font-bold mb-1'>
+                {searchTerm
+                  ? 'Tidak ada guru yang cocok dengan pencarian'
+                  : 'Belum Ada Wali Kelas'}
               </span>
-              {searchTerm ? 'Coba ubah kata kunci pencarian Anda.' : 'Wali kelas yang mendaftar akan muncul di sini beserta statistiknya.'}
+              {searchTerm
+                ? 'Coba ubah kata kunci pencarian Anda.'
+                : 'Wali kelas yang mendaftar akan muncul di sini beserta statistiknya.'}
             </div>
           )}
         </CardContent>

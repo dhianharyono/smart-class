@@ -4,7 +4,6 @@ import React, { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
-  Plus,
   Search,
   Pencil,
   Trash2,
@@ -15,16 +14,9 @@ import {
   UserPlus,
   Eye,
   User,
-  Calendar,
-  Building,
   GraduationCap,
-  MapPin,
   HeartHandshake,
-  CheckCircle2,
-  X,
-  CalendarCheck2,
 } from 'lucide-react';
-import AbsensiClient from '../absensi/AbsensiClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -43,14 +35,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
-import {
-  createStudent,
-  updateStudent,
-  deleteStudent,
-} from '@/actions/studentActions';
+import { createStudent, deleteStudent } from '@/actions/studentActions';
 import { exportStudentsToExcel } from '@/lib/excelExport';
 
 export interface StudentData {
@@ -378,7 +365,8 @@ export default function SiswaClient({ initialStudents }: SiswaClientProps) {
                         Belum ada data siswa.
                       </p>
                       <p className='text-xs sm:text-sm text-slate-500 mt-1 font-medium leading-relaxed'>
-                        Klik tombol "Input Biodata Lengkap" untuk menambah registrasi siswa baru.
+                        Klik tombol "Input Biodata Lengkap" untuk menambah
+                        registrasi siswa baru.
                       </p>
                     </div>
                   </TableCell>

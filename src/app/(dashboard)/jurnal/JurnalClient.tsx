@@ -18,30 +18,16 @@ import {
   Plus,
   Edit2,
   Trash2,
-  Download,
   Printer,
   Search,
   Loader2,
   Settings2,
-  Calendar,
   UserCheck,
   BookMarked,
   FileText,
-  TrendingUp,
-  BarChart3,
   Activity,
   CheckCircle2,
 } from 'lucide-react';
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-  CartesianGrid,
-} from 'recharts';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -94,16 +80,26 @@ export default function JurnalClient() {
   const [searchTerm, setSearchTerm] = useState('');
 
   // View Tab State (Data Management vs A4 Print Live Preview)
-  const [activeViewTab, setActiveViewTab] = useState<'data' | 'preview'>('data');
+  const [activeViewTab, setActiveViewTab] = useState<'data' | 'preview'>(
+    'data',
+  );
 
   // Interactive Document Header Title & Subtitle State for A4 Live Preview
-  const [docHeaderTitle, setDocHeaderTitle] = useState('AGENDA JURNAL HARIAN KBM');
-  const [docHeaderSubtitle, setDocHeaderSubtitle] = useState('SEMESTER I (GANJIL) TAHUN PELAJARAN 2026/2027');
+  const [docHeaderTitle, setDocHeaderTitle] = useState(
+    'AGENDA JURNAL HARIAN KBM',
+  );
+  const [docHeaderSubtitle, setDocHeaderSubtitle] = useState(
+    'SEMESTER I (GANJIL) TAHUN PELAJARAN 2026/2027',
+  );
 
   // Signature Block State for A4 Print Preview
   const [signatureData, setSignatureData] = useState({
     place: 'Bandung',
-    date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
+    date: new Date().toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    }),
     supervisorTitle: 'Mengetahui, Kepala Sekolah',
     supervisorName: '',
     supervisorNip: '-',
@@ -116,14 +112,18 @@ export default function JurnalClient() {
   const [editingEntry, setEditingEntry] = useState<JournalEntry | null>(null);
 
   // Form States for Journal Entry
-  const [formDate, setFormDate] = useState(new Date().toISOString().split('T')[0]);
+  const [formDate, setFormDate] = useState(
+    new Date().toISOString().split('T')[0],
+  );
   const [meetingNo, setMeetingNo] = useState<number>(1);
   const [basicCompetency, setBasicCompetency] = useState('');
   const [material, setMaterial] = useState('');
   const [learningActivity, setLearningActivity] = useState('');
 
   // Student Attendance States
-  const [studentAttendanceList, setStudentAttendanceList] = useState<StudentAttendanceItem[]>([]);
+  const [studentAttendanceList, setStudentAttendanceList] = useState<
+    StudentAttendanceItem[]
+  >([]);
   const [attendanceSearch, setAttendanceSearch] = useState('');
   const [isFetchingAttendance, setIsFetchingAttendance] = useState(false);
 
@@ -139,7 +139,9 @@ export default function JurnalClient() {
   });
 
   // Queries
-  const { data: journals, isLoading: isJournalsLoading } = useQuery<JournalEntry[]>({
+  const { data: journals, isLoading: isJournalsLoading } = useQuery<
+    JournalEntry[]
+  >({
     queryKey: ['journals'],
     queryFn: () => getJournals(),
   });
@@ -152,7 +154,8 @@ export default function JurnalClient() {
   // Keep headerForm synced with fetched header
   React.useEffect(() => {
     if (headerData) {
-      const activeNip = (headerData.nip && headerData.nip.trim() !== '') ? headerData.nip : '-';
+      const activeNip =
+        headerData.nip && headerData.nip.trim() !== '' ? headerData.nip : '-';
       setHeaderForm({
         schoolName: headerData.schoolName || '',
         subject: headerData.subject || '',
@@ -163,12 +166,17 @@ export default function JurnalClient() {
         nip: activeNip,
       });
       if (headerData.academicYear) {
-        setDocHeaderSubtitle(`SEMESTER I (GANJIL) TAHUN PELAJARAN ${headerData.academicYear}`);
+        setDocHeaderSubtitle(
+          `SEMESTER I (GANJIL) TAHUN PELAJARAN ${headerData.academicYear}`,
+        );
       }
       setSignatureData((prev) => ({
         ...prev,
         supervisorName: headerData.principalName || prev.supervisorName,
-        supervisorNip: (headerData.principalNip && headerData.principalNip.trim() !== '') ? headerData.principalNip : prev.supervisorNip,
+        supervisorNip:
+          headerData.principalNip && headerData.principalNip.trim() !== ''
+            ? headerData.principalNip
+            : prev.supervisorNip,
       }));
     }
   }, [headerData]);
@@ -199,9 +207,10 @@ export default function JurnalClient() {
     setFormDate(todayStr);
 
     // Auto calculate meeting number
-    const maxMeeting = journals && journals.length > 0
-      ? Math.max(...journals.map((j) => j.meetingNo || 0))
-      : 0;
+    const maxMeeting =
+      journals && journals.length > 0
+        ? Math.max(...journals.map((j) => j.meetingNo || 0))
+        : 0;
     setMeetingNo(maxMeeting + 1);
 
     setBasicCompetency('');
@@ -229,23 +238,36 @@ export default function JurnalClient() {
   };
 
   // Student Attendance Handlers
-  const handleStudentStatusChange = (studentId: string, status: AttendanceStatus) => {
+  const handleStudentStatusChange = (
+    studentId: string,
+    status: AttendanceStatus,
+  ) => {
     setStudentAttendanceList((prev) =>
-      prev.map((st) => (st.studentId === studentId ? { ...st, status } : st))
+      prev.map((st) => (st.studentId === studentId ? { ...st, status } : st)),
     );
   };
 
   const handleMarkAllHadir = () => {
-    setStudentAttendanceList((prev) => prev.map((st) => ({ ...st, status: 'Hadir' })));
+    setStudentAttendanceList((prev) =>
+      prev.map((st) => ({ ...st, status: 'Hadir' })),
+    );
     toast.success('Semua siswa ditandai Hadir');
   };
 
   // Calculated attendance metrics
   const currentCounts = React.useMemo(() => {
-    const hadir = studentAttendanceList.filter((s) => s.status === 'Hadir').length;
-    const sakit = studentAttendanceList.filter((s) => s.status === 'Sakit').length;
-    const izin = studentAttendanceList.filter((s) => s.status === 'Izin').length;
-    const alfa = studentAttendanceList.filter((s) => s.status === 'Alfa').length;
+    const hadir = studentAttendanceList.filter(
+      (s) => s.status === 'Hadir',
+    ).length;
+    const sakit = studentAttendanceList.filter(
+      (s) => s.status === 'Sakit',
+    ).length;
+    const izin = studentAttendanceList.filter(
+      (s) => s.status === 'Izin',
+    ).length;
+    const alfa = studentAttendanceList.filter(
+      (s) => s.status === 'Alfa',
+    ).length;
     return { hadir, sakit, izin, alfa };
   }, [studentAttendanceList]);
 
@@ -259,7 +281,9 @@ export default function JurnalClient() {
     if (!attendanceSearch.trim()) return studentAttendanceList;
     const q = attendanceSearch.toLowerCase();
     return studentAttendanceList.filter(
-      (st) => st.name.toLowerCase().includes(q) || (st.nis && st.nis.toLowerCase().includes(q))
+      (st) =>
+        st.name.toLowerCase().includes(q) ||
+        (st.nis && st.nis.toLowerCase().includes(q)),
     );
   }, [studentAttendanceList, attendanceSearch]);
 
@@ -306,7 +330,9 @@ export default function JurnalClient() {
       queryClient.invalidateQueries({ queryKey: ['journals'] });
       queryClient.invalidateQueries({ queryKey: ['attendance'] });
       toast.success(
-        editingEntry ? 'Catatan jurnal berhasil diperbarui!' : 'Catatan jurnal berhasil ditambahkan!'
+        editingEntry
+          ? 'Catatan jurnal berhasil diperbarui!'
+          : 'Catatan jurnal berhasil ditambahkan!',
       );
       setJournalModalOpen(false);
     },
@@ -342,30 +368,36 @@ export default function JurnalClient() {
   };
 
   // Filter Journals
-  const filteredJournals = journals?.filter((j) => {
-    const search = searchTerm.toLowerCase();
-    const formattedDate = new Date(j.date).toLocaleDateString('id-ID', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    }).toLowerCase();
+  const filteredJournals =
+    journals?.filter((j) => {
+      const search = searchTerm.toLowerCase();
+      const formattedDate = new Date(j.date)
+        .toLocaleDateString('id-ID', {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+        })
+        .toLowerCase();
 
-    return (
-      formattedDate.includes(search) ||
-      j.basicCompetency.toLowerCase().includes(search) ||
-      j.material.toLowerCase().includes(search) ||
-      j.learningActivity.toLowerCase().includes(search) ||
-      (j.notes && j.notes.toLowerCase().includes(search)) ||
-      j.meetingNo.toString().includes(search)
-    );
-  }) || [];
+      return (
+        formattedDate.includes(search) ||
+        j.basicCompetency.toLowerCase().includes(search) ||
+        j.material.toLowerCase().includes(search) ||
+        j.learningActivity.toLowerCase().includes(search) ||
+        (j.notes && j.notes.toLowerCase().includes(search)) ||
+        j.meetingNo.toString().includes(search)
+      );
+    }) || [];
 
   // Totals for stats
   const totalEntries = journals?.length || 0;
-  const totalS = journals?.reduce((acc, curr) => acc + (curr.absentS || 0), 0) || 0;
-  const totalI = journals?.reduce((acc, curr) => acc + (curr.absentI || 0), 0) || 0;
-  const totalA = journals?.reduce((acc, curr) => acc + (curr.absentA || 0), 0) || 0;
+  const totalS =
+    journals?.reduce((acc, curr) => acc + (curr.absentS || 0), 0) || 0;
+  const totalI =
+    journals?.reduce((acc, curr) => acc + (curr.absentI || 0), 0) || 0;
+  const totalA =
+    journals?.reduce((acc, curr) => acc + (curr.absentA || 0), 0) || 0;
   const totalAbsences = totalS + totalI + totalA;
 
   const thisMonthCount = React.useMemo(() => {
@@ -373,7 +405,9 @@ export default function JurnalClient() {
     const now = new Date();
     return journals.filter((j) => {
       const d = new Date(j.date);
-      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      return (
+        d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
+      );
     }).length;
   }, [journals]);
 
@@ -381,12 +415,21 @@ export default function JurnalClient() {
     if (!journals || journals.length === 0) return [];
     const map = new Map<
       string,
-      { month: string; Pertemuan: number; Sakit: number; Izin: number; Alpha: number }
+      {
+        month: string;
+        Pertemuan: number;
+        Sakit: number;
+        Izin: number;
+        Alpha: number;
+      }
     >();
 
     journals.forEach((j) => {
       const d = new Date(j.date);
-      const key = d.toLocaleDateString('id-ID', { month: 'short', year: '2-digit' });
+      const key = d.toLocaleDateString('id-ID', {
+        month: 'short',
+        year: '2-digit',
+      });
       const current = map.get(key) || {
         month: key,
         Pertemuan: 0,
@@ -413,7 +456,8 @@ export default function JurnalClient() {
             <span>Jurnal Wali Kelas</span>
           </h2>
           <p className='text-slate-600 text-xs sm:text-sm mt-1'>
-            Pencatatan agenda harian mengajar guru, materi, KBM, dan rekapitulasi ketidakhadiran siswa.
+            Pencatatan agenda harian mengajar guru, materi, KBM, dan
+            rekapitulasi ketidakhadiran siswa.
           </p>
         </div>
 
@@ -432,20 +476,22 @@ export default function JurnalClient() {
       <div className='grid grid-cols-2 sm:flex items-center gap-1.5 sm:gap-2 p-1.5 bg-slate-200/80 border border-slate-300/80 rounded-2xl w-full sm:w-fit print:hidden'>
         <button
           onClick={() => setActiveViewTab('data')}
-          className={`flex items-center justify-center text-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer w-full sm:w-auto ${activeViewTab === 'data'
-            ? 'bg-white text-emerald-700 shadow-xs'
-            : 'text-slate-600 hover:text-slate-900'
-            }`}
+          className={`flex items-center justify-center text-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer w-full sm:w-auto ${
+            activeViewTab === 'data'
+              ? 'bg-white text-emerald-700 shadow-xs'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
         >
           <BookOpen className='h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0' />
           <span className='truncate'>Data Jurnal & Rekap</span>
         </button>
         <button
           onClick={() => setActiveViewTab('preview')}
-          className={`flex items-center justify-center text-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer w-full sm:w-auto ${activeViewTab === 'preview'
-            ? 'bg-white text-emerald-700 shadow-xs'
-            : 'text-slate-600 hover:text-slate-900'
-            }`}
+          className={`flex items-center justify-center text-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer w-full sm:w-auto ${
+            activeViewTab === 'preview'
+              ? 'bg-white text-emerald-700 shadow-xs'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
         >
           <FileText className='h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0' />
           <span className='truncate'>Pratinjau Cetak (A4 PDF)</span>
@@ -471,7 +517,8 @@ export default function JurnalClient() {
                   </span>
                 </div>
                 <p className='text-xs text-slate-500 mt-0.5'>
-                  Tampilan pratinjau langsung dokumen A4 siap cetak dengan tata letak resmi dan blok tanda tangan.
+                  Tampilan pratinjau langsung dokumen A4 siap cetak dengan tata
+                  letak resmi dan blok tanda tangan.
                 </p>
               </div>
             </div>
@@ -499,7 +546,6 @@ export default function JurnalClient() {
           {/* Centered A4 Document Canvas Container */}
           <div className='bg-slate-200/70 p-4 sm:p-10 rounded-2xl border border-slate-300/80 overflow-x-auto min-h-[900px] flex justify-center shadow-inner print:p-0 print:bg-white print:border-none'>
             <div className='w-full max-w-[850px] bg-white text-slate-900 shadow-2xl rounded-sm border border-slate-300 p-8 sm:p-14 print:p-0 print:shadow-none print:border-none print:w-full print:max-w-none print:text-black font-sans leading-relaxed'>
-
               {/* Document Header Title (Interactive Inputs) */}
               <div className='text-center mb-8 border-b-2 border-slate-900 pb-4 print:border-black space-y-1'>
                 <Input
@@ -520,31 +566,55 @@ export default function JurnalClient() {
               <div className='grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-8 text-xs font-semibold text-slate-800 print:text-black mb-6 border-b border-slate-200 pb-4 print:border-zinc-300'>
                 <div className='space-y-1.5'>
                   <div className='flex'>
-                    <span className='w-32 text-slate-500 font-bold shrink-0 print:text-black'>Nama Sekolah</span>
-                    <span className='font-bold text-slate-900 print:text-black'>: {headerForm.schoolName || '-'}</span>
+                    <span className='w-32 text-slate-500 font-bold shrink-0 print:text-black'>
+                      Nama Sekolah
+                    </span>
+                    <span className='font-bold text-slate-900 print:text-black'>
+                      : {headerForm.schoolName || '-'}
+                    </span>
                   </div>
                   <div className='flex'>
-                    <span className='w-32 text-slate-500 font-bold shrink-0 print:text-black'>Kelas / Semester</span>
-                    <span className='font-bold text-slate-900 print:text-black'>: {headerForm.classNameSemester || '-'}</span>
+                    <span className='w-32 text-slate-500 font-bold shrink-0 print:text-black'>
+                      Kelas / Semester
+                    </span>
+                    <span className='font-bold text-slate-900 print:text-black'>
+                      : {headerForm.classNameSemester || '-'}
+                    </span>
                   </div>
                   <div className='flex'>
-                    <span className='w-32 text-slate-500 font-bold shrink-0 print:text-black'>Mata Pelajaran</span>
-                    <span className='font-bold text-slate-900 print:text-black'>: {headerForm.subject || '-'}</span>
+                    <span className='w-32 text-slate-500 font-bold shrink-0 print:text-black'>
+                      Mata Pelajaran
+                    </span>
+                    <span className='font-bold text-slate-900 print:text-black'>
+                      : {headerForm.subject || '-'}
+                    </span>
                   </div>
                 </div>
 
                 <div className='space-y-1.5'>
                   <div className='flex'>
-                    <span className='w-32 text-slate-500 font-bold shrink-0 print:text-black'>Kurikulum</span>
-                    <span className='font-bold text-slate-900 print:text-black'>: {headerForm.curriculum || '-'}</span>
+                    <span className='w-32 text-slate-500 font-bold shrink-0 print:text-black'>
+                      Kurikulum
+                    </span>
+                    <span className='font-bold text-slate-900 print:text-black'>
+                      : {headerForm.curriculum || '-'}
+                    </span>
                   </div>
                   <div className='flex'>
-                    <span className='w-32 text-slate-500 font-bold shrink-0 print:text-black'>Nama Guru</span>
-                    <span className='font-bold text-slate-900 print:text-black'>: {headerForm.teacherName || '-'}</span>
+                    <span className='w-32 text-slate-500 font-bold shrink-0 print:text-black'>
+                      Nama Guru
+                    </span>
+                    <span className='font-bold text-slate-900 print:text-black'>
+                      : {headerForm.teacherName || '-'}
+                    </span>
                   </div>
                   <div className='flex'>
-                    <span className='w-32 text-slate-500 font-bold shrink-0 print:text-black'>NIP/NUPTK Guru</span>
-                    <span className='font-bold text-slate-900 print:text-black'>: {headerForm.nip || '-'}</span>
+                    <span className='w-32 text-slate-500 font-bold shrink-0 print:text-black'>
+                      NIP/NUPTK Guru
+                    </span>
+                    <span className='font-bold text-slate-900 print:text-black'>
+                      : {headerForm.nip || '-'}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -554,46 +624,90 @@ export default function JurnalClient() {
                 <table className='w-full border-collapse border border-slate-900 text-xs text-left print:border-black'>
                   <thead>
                     <tr className='bg-slate-100 print:bg-zinc-200 border-b border-slate-900 font-bold text-slate-900 print:text-black print:border-black text-[11px]'>
-                      <th className='border border-slate-900 p-2 text-center w-8 print:border-black'>NO</th>
-                      <th className='border border-slate-900 p-2 w-28 print:border-black'>HARI / TGL</th>
-                      <th className='border border-slate-900 p-2 text-center w-10 print:border-black'>KE-</th>
-                      <th className='border border-slate-900 p-2 print:border-black'>KD / CAPAIAN (TP)</th>
-                      <th className='border border-slate-900 p-2 print:border-black'>MATERI KBM</th>
-                      <th className='border border-slate-900 p-2 print:border-black'>KEGIATAN KBM</th>
-                      <th className='border border-slate-900 p-1 text-center w-16 print:border-black'>ABSEN (S/I/A)</th>
-                      <th className='border border-slate-900 p-2 w-28 print:border-black'>CATATAN / PARAF</th>
+                      <th className='border border-slate-900 p-2 text-center w-8 print:border-black'>
+                        NO
+                      </th>
+                      <th className='border border-slate-900 p-2 w-28 print:border-black'>
+                        HARI / TGL
+                      </th>
+                      <th className='border border-slate-900 p-2 text-center w-10 print:border-black'>
+                        KE-
+                      </th>
+                      <th className='border border-slate-900 p-2 print:border-black'>
+                        KD / CAPAIAN (TP)
+                      </th>
+                      <th className='border border-slate-900 p-2 print:border-black'>
+                        MATERI KBM
+                      </th>
+                      <th className='border border-slate-900 p-2 print:border-black'>
+                        KEGIATAN KBM
+                      </th>
+                      <th className='border border-slate-900 p-1 text-center w-16 print:border-black'>
+                        ABSEN (S/I/A)
+                      </th>
+                      <th className='border border-slate-900 p-2 w-28 print:border-black'>
+                        CATATAN / PARAF
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredJournals && filteredJournals.length > 0 ? (
                       filteredJournals.map((j, idx) => {
-                        const dStr = new Date(j.date).toLocaleDateString('id-ID', {
-                          day: 'numeric',
-                          month: 'short',
-                          year: '2-digit',
-                        });
-                        const absSummary = [
-                          j.absentS > 0 ? `${j.absentS}S` : '',
-                          j.absentI > 0 ? `${j.absentI}I` : '',
-                          j.absentA > 0 ? `${j.absentA}A` : '',
-                        ].filter(Boolean).join(' ') || '-';
+                        const dStr = new Date(j.date).toLocaleDateString(
+                          'id-ID',
+                          {
+                            day: 'numeric',
+                            month: 'short',
+                            year: '2-digit',
+                          },
+                        );
+                        const absSummary =
+                          [
+                            j.absentS > 0 ? `${j.absentS}S` : '',
+                            j.absentI > 0 ? `${j.absentI}I` : '',
+                            j.absentA > 0 ? `${j.absentA}A` : '',
+                          ]
+                            .filter(Boolean)
+                            .join(' ') || '-';
 
                         return (
-                          <tr key={j._id} className='border-b border-slate-900 print:border-black text-[11px]'>
-                            <td className='border border-slate-900 p-2 text-center font-bold print:border-black'>{idx + 1}</td>
-                            <td className='border border-slate-900 p-2 font-semibold print:border-black'>{dStr}</td>
-                            <td className='border border-slate-900 p-2 text-center font-bold print:border-black'>{j.meetingNo}</td>
-                            <td className='border border-slate-900 p-2 whitespace-pre-line print:border-black'>{j.basicCompetency}</td>
-                            <td className='border border-slate-900 p-2 whitespace-pre-line print:border-black'>{j.material}</td>
-                            <td className='border border-slate-900 p-2 whitespace-pre-line print:border-black'>{j.learningActivity}</td>
-                            <td className='border border-slate-900 p-1 text-center font-bold print:border-black'>{absSummary}</td>
-                            <td className='border border-slate-900 p-2 italic text-slate-600 print:text-black print:border-black'>{j.notes || '-'}</td>
+                          <tr
+                            key={j._id}
+                            className='border-b border-slate-900 print:border-black text-[11px]'
+                          >
+                            <td className='border border-slate-900 p-2 text-center font-bold print:border-black'>
+                              {idx + 1}
+                            </td>
+                            <td className='border border-slate-900 p-2 font-semibold print:border-black'>
+                              {dStr}
+                            </td>
+                            <td className='border border-slate-900 p-2 text-center font-bold print:border-black'>
+                              {j.meetingNo}
+                            </td>
+                            <td className='border border-slate-900 p-2 whitespace-pre-line print:border-black'>
+                              {j.basicCompetency}
+                            </td>
+                            <td className='border border-slate-900 p-2 whitespace-pre-line print:border-black'>
+                              {j.material}
+                            </td>
+                            <td className='border border-slate-900 p-2 whitespace-pre-line print:border-black'>
+                              {j.learningActivity}
+                            </td>
+                            <td className='border border-slate-900 p-1 text-center font-bold print:border-black'>
+                              {absSummary}
+                            </td>
+                            <td className='border border-slate-900 p-2 italic text-slate-600 print:text-black print:border-black'>
+                              {j.notes || '-'}
+                            </td>
                           </tr>
                         );
                       })
                     ) : (
                       <tr>
-                        <td colSpan={8} className='border border-slate-900 p-4 text-center text-slate-500 italic'>
+                        <td
+                          colSpan={8}
+                          className='border border-slate-900 p-4 text-center text-slate-500 italic'
+                        >
                           Belum ada data jurnal.
                         </td>
                       </tr>
@@ -601,10 +715,16 @@ export default function JurnalClient() {
                   </tbody>
                   <tfoot>
                     <tr className='bg-slate-100 font-bold border-t-2 border-slate-900 print:bg-zinc-100 print:border-black text-[11px]'>
-                      <td colSpan={3} className='border border-slate-900 p-2 text-center print:border-black'>
+                      <td
+                        colSpan={3}
+                        className='border border-slate-900 p-2 text-center print:border-black'
+                      >
                         JUMLAH PERTEMUAN: {totalEntries}
                       </td>
-                      <td colSpan={3} className='border border-slate-900 p-2 text-right print:border-black'>
+                      <td
+                        colSpan={3}
+                        className='border border-slate-900 p-2 text-right print:border-black'
+                      >
                         TOTAL REKAP ABSENSI SISWA:
                       </td>
                       <td className='border border-slate-900 p-2 text-center print:border-black'>
@@ -622,10 +742,17 @@ export default function JurnalClient() {
               <div className='grid grid-cols-1 sm:grid-cols-2 gap-8 pt-6 mt-8 text-xs text-slate-900 print:text-black font-semibold'>
                 {/* Left Column: Supervisor / School Principal */}
                 <div className='space-y-1.5'>
-                  <p className='font-bold text-slate-800 print:text-black'>Mengetahui,</p>
+                  <p className='font-bold text-slate-800 print:text-black'>
+                    Mengetahui,
+                  </p>
                   <Input
                     value={signatureData.supervisorTitle}
-                    onChange={(e) => setSignatureData({ ...signatureData, supervisorTitle: e.target.value })}
+                    onChange={(e) =>
+                      setSignatureData({
+                        ...signatureData,
+                        supervisorTitle: e.target.value,
+                      })
+                    }
                     className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 w-full max-w-xs print:border-none print:p-0'
                   />
                   <div className='h-20' /> {/* Signature Blank Space */}
@@ -633,7 +760,12 @@ export default function JurnalClient() {
                     <Input
                       placeholder='Ketik nama kepsek...'
                       value={signatureData.supervisorName}
-                      onChange={(e) => setSignatureData({ ...signatureData, supervisorName: e.target.value })}
+                      onChange={(e) =>
+                        setSignatureData({
+                          ...signatureData,
+                          supervisorName: e.target.value,
+                        })
+                      }
                       className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 w-full max-w-xs print:border-none print:p-0'
                     />
                     <div className='flex items-center gap-1 text-[11px] text-slate-700 print:text-black'>
@@ -641,7 +773,12 @@ export default function JurnalClient() {
                       <Input
                         placeholder='Ketik NIP kepsek...'
                         value={signatureData.supervisorNip}
-                        onChange={(e) => setSignatureData({ ...signatureData, supervisorNip: e.target.value })}
+                        onChange={(e) =>
+                          setSignatureData({
+                            ...signatureData,
+                            supervisorNip: e.target.value,
+                          })
+                        }
                         className='text-[11px] border-b border-slate-300 border-x-0 border-t-0 rounded-none h-5 px-0 focus:border-emerald-600 w-44 print:border-none print:p-0'
                       />
                     </div>
@@ -653,19 +790,35 @@ export default function JurnalClient() {
                   <div className='flex items-center gap-1 mb-1'>
                     <Input
                       value={signatureData.place}
-                      onChange={(e) => setSignatureData({ ...signatureData, place: e.target.value })}
-                      style={{ width: `${Math.max((signatureData.place || '').length * 7.5 + 4, 60)}px` }}
+                      onChange={(e) =>
+                        setSignatureData({
+                          ...signatureData,
+                          place: e.target.value,
+                        })
+                      }
+                      style={{
+                        width: `${Math.max((signatureData.place || '').length * 7.5 + 4, 60)}px`,
+                      }}
                       className='text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 print:border-none'
                     />
                     <span>,</span>
                     <Input
                       value={signatureData.date}
-                      onChange={(e) => setSignatureData({ ...signatureData, date: e.target.value })}
-                      style={{ width: `${Math.max((signatureData.date || '').length * 7.5 + 4, 80)}px` }}
+                      onChange={(e) =>
+                        setSignatureData({
+                          ...signatureData,
+                          date: e.target.value,
+                        })
+                      }
+                      style={{
+                        width: `${Math.max((signatureData.date || '').length * 7.5 + 4, 80)}px`,
+                      }}
                       className='text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 print:border-none'
                     />
                   </div>
-                  <p className='font-bold text-slate-800 print:text-black'>Guru Kelas / Wali Kelas,</p>
+                  <p className='font-bold text-slate-800 print:text-black'>
+                    Guru Kelas / Wali Kelas,
+                  </p>
                   <div className='h-20' /> {/* Signature Blank Space */}
                   <div>
                     <p className='font-bold underline text-slate-900 print:text-black'>
@@ -677,7 +830,6 @@ export default function JurnalClient() {
                   </div>
                 </div>
               </div>
-
             </div>
           </div>
         </div>
@@ -719,7 +871,9 @@ export default function JurnalClient() {
                   <div className='text-2xl font-bold tracking-tight text-slate-900 mb-1'>
                     {totalS} Siswa
                   </div>
-                  <p className='text-[10px] text-slate-500'>Akumulasi siswa sakit</p>
+                  <p className='text-[10px] text-slate-500'>
+                    Akumulasi siswa sakit
+                  </p>
                 </CardContent>
               </Card>
 
@@ -736,7 +890,9 @@ export default function JurnalClient() {
                   <div className='text-2xl font-bold tracking-tight text-slate-900 mb-1'>
                     {totalI} Siswa
                   </div>
-                  <p className='text-[10px] text-slate-500'>Akumulasi siswa izin</p>
+                  <p className='text-[10px] text-slate-500'>
+                    Akumulasi siswa izin
+                  </p>
                 </CardContent>
               </Card>
 
@@ -753,7 +909,9 @@ export default function JurnalClient() {
                   <div className='text-2xl font-bold tracking-tight text-slate-900 mb-1'>
                     {totalA} Siswa
                   </div>
-                  <p className='text-[10px] text-slate-500'>Total tanpa keterangan</p>
+                  <p className='text-[10px] text-slate-500'>
+                    Total tanpa keterangan
+                  </p>
                 </CardContent>
               </Card>
             </div>
@@ -779,25 +937,33 @@ export default function JurnalClient() {
             <div className='grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-8 text-xs text-slate-700 print:text-black print:grid-cols-2 print:text-sm'>
               <div className='space-y-1.5'>
                 <div className='flex justify-between border-b border-slate-100 pb-1 print:border-zinc-300'>
-                  <span className='font-bold text-slate-500 print:text-black w-36'>Sekolah</span>
+                  <span className='font-bold text-slate-500 print:text-black w-36'>
+                    Sekolah
+                  </span>
                   <span className='font-bold text-slate-900 print:text-black flex-1'>
                     : {headerForm.schoolName || '-'}
                   </span>
                 </div>
                 <div className='flex justify-between border-b border-slate-100 pb-1 print:border-zinc-300'>
-                  <span className='font-bold text-slate-500 print:text-black w-36'>Mata Pelajaran</span>
+                  <span className='font-bold text-slate-500 print:text-black w-36'>
+                    Mata Pelajaran
+                  </span>
                   <span className='font-bold text-slate-900 print:text-black flex-1'>
                     : {headerForm.subject || '-'}
                   </span>
                 </div>
                 <div className='flex justify-between border-b border-slate-100 pb-1 print:border-zinc-300'>
-                  <span className='font-bold text-slate-500 print:text-black w-36'>Kelas/Semester</span>
+                  <span className='font-bold text-slate-500 print:text-black w-36'>
+                    Kelas/Semester
+                  </span>
                   <span className='font-bold text-slate-900 print:text-black flex-1'>
                     : {headerForm.classNameSemester || '-'}
                   </span>
                 </div>
                 <div className='flex justify-between border-b border-slate-100 pb-1 print:border-zinc-300'>
-                  <span className='font-bold text-slate-500 print:text-black w-36'>Tahun Pelajaran</span>
+                  <span className='font-bold text-slate-500 print:text-black w-36'>
+                    Tahun Pelajaran
+                  </span>
                   <span className='font-bold text-slate-900 print:text-black flex-1'>
                     : {headerForm.academicYear || '-'}
                   </span>
@@ -806,19 +972,25 @@ export default function JurnalClient() {
 
               <div className='space-y-1.5'>
                 <div className='flex justify-between border-b border-slate-100 pb-1 print:border-zinc-300'>
-                  <span className='font-bold text-slate-500 print:text-black w-36'>Kurikulum</span>
+                  <span className='font-bold text-slate-500 print:text-black w-36'>
+                    Kurikulum
+                  </span>
                   <span className='font-bold text-slate-900 print:text-black flex-1'>
                     : {headerForm.curriculum || '-'}
                   </span>
                 </div>
                 <div className='flex justify-between border-b border-slate-100 pb-1 print:border-zinc-300'>
-                  <span className='font-bold text-slate-500 print:text-black w-36'>Nama Guru</span>
+                  <span className='font-bold text-slate-500 print:text-black w-36'>
+                    Nama Guru
+                  </span>
                   <span className='font-bold text-slate-900 print:text-black flex-1'>
                     : {headerForm.teacherName || '-'}
                   </span>
                 </div>
                 <div className='flex justify-between border-b border-slate-100 pb-1 print:border-zinc-300'>
-                  <span className='font-bold text-slate-500 print:text-black w-36'>NIP/NUPTK</span>
+                  <span className='font-bold text-slate-500 print:text-black w-36'>
+                    NIP/NUPTK
+                  </span>
                   <span className='font-bold text-slate-900 print:text-black flex-1'>
                     : {headerForm.nip || '-'}
                   </span>
@@ -848,31 +1020,58 @@ export default function JurnalClient() {
                   <Table className='print:text-black print:border-collapse print:w-full'>
                     <TableHeader className='bg-slate-50/80 border-b border-slate-200 print:bg-zinc-200'>
                       <TableRow className='border-b border-slate-200 text-xs font-bold text-slate-700 print:text-black print:border-black'>
-                        <TableHead rowSpan={2} className='w-12 text-center text-slate-700 font-bold border-r border-slate-200 print:border-black print:text-black'>
+                        <TableHead
+                          rowSpan={2}
+                          className='w-12 text-center text-slate-700 font-bold border-r border-slate-200 print:border-black print:text-black'
+                        >
                           No
                         </TableHead>
-                        <TableHead rowSpan={2} className='w-36 text-slate-700 font-bold border-r border-slate-200 print:border-black print:text-black'>
+                        <TableHead
+                          rowSpan={2}
+                          className='w-36 text-slate-700 font-bold border-r border-slate-200 print:border-black print:text-black'
+                        >
                           Hari / Tanggal
                         </TableHead>
-                        <TableHead rowSpan={2} className='w-24 text-center text-slate-700 font-bold border-r border-slate-200 print:border-black print:text-black'>
+                        <TableHead
+                          rowSpan={2}
+                          className='w-24 text-center text-slate-700 font-bold border-r border-slate-200 print:border-black print:text-black'
+                        >
                           Pertemuan ke-
                         </TableHead>
-                        <TableHead rowSpan={2} className='w-64 text-slate-700 font-bold border-r border-slate-200 print:border-black print:text-black'>
+                        <TableHead
+                          rowSpan={2}
+                          className='w-64 text-slate-700 font-bold border-r border-slate-200 print:border-black print:text-black'
+                        >
                           Kompetensi Dasar / CP
                         </TableHead>
-                        <TableHead rowSpan={2} className='w-52 text-slate-700 font-bold border-r border-slate-200 print:border-black print:text-black'>
+                        <TableHead
+                          rowSpan={2}
+                          className='w-52 text-slate-700 font-bold border-r border-slate-200 print:border-black print:text-black'
+                        >
                           Materi Pembelajaran
                         </TableHead>
-                        <TableHead rowSpan={2} className='w-64 text-slate-700 font-bold border-r border-slate-200 print:border-black print:text-black'>
+                        <TableHead
+                          rowSpan={2}
+                          className='w-64 text-slate-700 font-bold border-r border-slate-200 print:border-black print:text-black'
+                        >
                           Kegiatan KBM
                         </TableHead>
-                        <TableHead colSpan={3} className='text-center text-slate-700 font-bold border-b border-r border-slate-200 print:border-black print:text-black'>
+                        <TableHead
+                          colSpan={3}
+                          className='text-center text-slate-700 font-bold border-b border-r border-slate-200 print:border-black print:text-black'
+                        >
                           Absensi Siswa
                         </TableHead>
-                        <TableHead rowSpan={2} className='w-48 text-slate-700 font-bold border-r border-slate-200 print:border-black print:text-black'>
+                        <TableHead
+                          rowSpan={2}
+                          className='w-48 text-slate-700 font-bold border-r border-slate-200 print:border-black print:text-black'
+                        >
                           Catatan / Keterangan
                         </TableHead>
-                        <TableHead rowSpan={2} className='w-24 text-center text-slate-700 font-bold print:hidden'>
+                        <TableHead
+                          rowSpan={2}
+                          className='w-24 text-center text-slate-700 font-bold print:hidden'
+                        >
                           Aksi
                         </TableHead>
                       </TableRow>
@@ -890,7 +1089,9 @@ export default function JurnalClient() {
                     </TableHeader>
                     <TableBody>
                       {filteredJournals.map((entry, index) => {
-                        const formattedDate = new Date(entry.date).toLocaleDateString('id-ID', {
+                        const formattedDate = new Date(
+                          entry.date,
+                        ).toLocaleDateString('id-ID', {
                           weekday: 'long',
                           day: 'numeric',
                           month: 'long',
@@ -961,9 +1162,12 @@ export default function JurnalClient() {
               ) : (
                 <div className='flex flex-col items-center justify-center py-12 sm:py-20 px-4 text-center text-slate-500 max-w-md mx-auto'>
                   <BookMarked className='h-10 w-10 sm:h-12 sm:w-12 text-slate-300 mb-2 shrink-0' />
-                  <p className='text-sm sm:text-base font-extrabold text-slate-800 tracking-tight'>Belum ada catatan jurnal.</p>
+                  <p className='text-sm sm:text-base font-extrabold text-slate-800 tracking-tight'>
+                    Belum ada catatan jurnal.
+                  </p>
                   <p className='text-xs sm:text-sm text-slate-500 mt-1 font-medium leading-relaxed'>
-                    Klik tombol "+ Tambah Jurnal" untuk mencatat agenda pembelajaran harian Anda.
+                    Klik tombol "+ Tambah Jurnal" untuk mencatat agenda
+                    pembelajaran harian Anda.
                   </p>
                 </div>
               )}
@@ -985,10 +1189,15 @@ export default function JurnalClient() {
             <DialogHeader className='p-4 sm:p-6 pb-3 sm:pb-4 border-b border-slate-200 shrink-0 bg-white relative'>
               <DialogTitle className='text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2 pr-8'>
                 <BookOpen className='h-5 w-5 text-emerald-600 shrink-0' />
-                <span>{editingEntry ? 'Edit Catatan Jurnal' : 'Tambah Jurnal Harian Guru'}</span>
+                <span>
+                  {editingEntry
+                    ? 'Edit Catatan Jurnal'
+                    : 'Tambah Jurnal Harian Guru'}
+                </span>
               </DialogTitle>
               <DialogDescription className='text-xs text-slate-500 mt-0.5 pr-6'>
-                Isi rincian pertemuan, materi, kegiatan pembelajaran, dan absensi siswa.
+                Isi rincian pertemuan, materi, kegiatan pembelajaran, dan
+                absensi siswa.
               </DialogDescription>
             </DialogHeader>
 
@@ -1000,7 +1209,8 @@ export default function JurnalClient() {
                     <span>Hari / Tanggal</span>
                     {isFetchingAttendance && (
                       <span className='text-[10px] text-emerald-600 flex items-center gap-1'>
-                        <Loader2 className='h-3 w-3 animate-spin' /> Cek Absensi...
+                        <Loader2 className='h-3 w-3 animate-spin' /> Cek
+                        Absensi...
                       </span>
                     )}
                   </Label>
@@ -1014,7 +1224,9 @@ export default function JurnalClient() {
                 </div>
 
                 <div className='space-y-1.5 w-full min-w-0'>
-                  <Label className='text-slate-700 text-xs font-semibold'>Pertemuan ke-</Label>
+                  <Label className='text-slate-700 text-xs font-semibold'>
+                    Pertemuan ke-
+                  </Label>
                   <Input
                     type='number'
                     required
@@ -1029,7 +1241,9 @@ export default function JurnalClient() {
               {/* Row 2: Kompetensi Dasar & Materi Pembelajaran */}
               <div className='grid grid-cols-1 md:grid-cols-2 gap-4 w-full min-w-0'>
                 <div className='space-y-1.5 w-full min-w-0'>
-                  <Label className='text-slate-700 text-xs font-semibold'>Kompetensi Dasar / Capaian Pembelajaran</Label>
+                  <Label className='text-slate-700 text-xs font-semibold'>
+                    Kompetensi Dasar / Capaian Pembelajaran
+                  </Label>
                   <textarea
                     rows={3}
                     required
@@ -1041,7 +1255,9 @@ export default function JurnalClient() {
                 </div>
 
                 <div className='space-y-1.5 w-full min-w-0'>
-                  <Label className='text-slate-700 text-xs font-semibold'>Materi Pembelajaran</Label>
+                  <Label className='text-slate-700 text-xs font-semibold'>
+                    Materi Pembelajaran
+                  </Label>
                   <textarea
                     rows={3}
                     required
@@ -1055,7 +1271,9 @@ export default function JurnalClient() {
 
               {/* Row 3: Kegiatan Belajar Mengajar */}
               <div className='space-y-1.5 w-full min-w-0'>
-                <Label className='text-slate-700 text-xs font-semibold'>Kegiatan Belajar Mengajar (KBM)</Label>
+                <Label className='text-slate-700 text-xs font-semibold'>
+                  Kegiatan Belajar Mengajar (KBM)
+                </Label>
                 <textarea
                   rows={3}
                   required
@@ -1075,20 +1293,29 @@ export default function JurnalClient() {
                       <span>Input Absensi Siswa</span>
                     </Label>
                     <p className='text-[11px] text-slate-500 mt-0.5'>
-                      Pilih siswa dan tentukan status kehadirannya untuk tanggal ini.
+                      Pilih siswa dan tentukan status kehadirannya untuk tanggal
+                      ini.
                     </p>
                   </div>
 
                   <div className='flex items-center gap-2 flex-wrap min-w-0'>
                     {/* Badge Counters */}
                     <div className='flex flex-wrap items-center gap-1.5 sm:gap-2 bg-slate-50 px-2.5 sm:px-3 py-1.5 rounded-xl border border-slate-200 text-[10px] sm:text-[11px] font-bold'>
-                      <span className='text-emerald-700'>Hadir: {currentCounts.hadir}</span>
+                      <span className='text-emerald-700'>
+                        Hadir: {currentCounts.hadir}
+                      </span>
                       <span className='text-slate-300'>|</span>
-                      <span className='text-amber-700'>Sakit: {currentCounts.sakit}</span>
+                      <span className='text-amber-700'>
+                        Sakit: {currentCounts.sakit}
+                      </span>
                       <span className='text-slate-300'>|</span>
-                      <span className='text-blue-700'>Izin: {currentCounts.izin}</span>
+                      <span className='text-blue-700'>
+                        Izin: {currentCounts.izin}
+                      </span>
                       <span className='text-slate-300'>|</span>
-                      <span className='text-rose-700'>Alfa: {currentCounts.alfa}</span>
+                      <span className='text-rose-700'>
+                        Alfa: {currentCounts.alfa}
+                      </span>
                     </div>
 
                     <Button
@@ -1126,7 +1353,8 @@ export default function JurnalClient() {
                     </div>
                   ) : studentAttendanceList.length === 0 ? (
                     <div className='text-center py-6 text-slate-400 text-xs'>
-                      Belum ada data siswa di kelas. Tambahkan siswa di menu Data Siswa.
+                      Belum ada data siswa di kelas. Tambahkan siswa di menu
+                      Data Siswa.
                     </div>
                   ) : (
                     <div className='divide-y divide-slate-200/80 w-full min-w-0'>
@@ -1140,7 +1368,9 @@ export default function JurnalClient() {
                               {idx + 1}
                             </span>
                             <div className='truncate min-w-0'>
-                              <p className='font-bold text-slate-900 truncate'>{st.name}</p>
+                              <p className='font-bold text-slate-900 truncate'>
+                                {st.name}
+                              </p>
                               <p className='text-[10px] text-slate-500 font-mono truncate'>
                                 {st.nis ? `NIS: ${st.nis}` : st.className || ''}
                               </p>
@@ -1151,41 +1381,53 @@ export default function JurnalClient() {
                           <div className='flex items-center gap-1 shrink-0 self-start sm:self-auto'>
                             <button
                               type='button'
-                              onClick={() => handleStudentStatusChange(st.studentId, 'Hadir')}
-                              className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all cursor-pointer ${st.status === 'Hadir'
-                                ? 'bg-emerald-600 text-white shadow-xs'
-                                : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200'
-                                }`}
+                              onClick={() =>
+                                handleStudentStatusChange(st.studentId, 'Hadir')
+                              }
+                              className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all cursor-pointer ${
+                                st.status === 'Hadir'
+                                  ? 'bg-emerald-600 text-white shadow-xs'
+                                  : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200'
+                              }`}
                             >
                               Hadir
                             </button>
                             <button
                               type='button'
-                              onClick={() => handleStudentStatusChange(st.studentId, 'Sakit')}
-                              className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all cursor-pointer ${st.status === 'Sakit'
-                                ? 'bg-amber-600 text-white shadow-xs'
-                                : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200'
-                                }`}
+                              onClick={() =>
+                                handleStudentStatusChange(st.studentId, 'Sakit')
+                              }
+                              className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all cursor-pointer ${
+                                st.status === 'Sakit'
+                                  ? 'bg-amber-600 text-white shadow-xs'
+                                  : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200'
+                              }`}
                             >
                               Sakit
                             </button>
                             <button
                               type='button'
-                              onClick={() => handleStudentStatusChange(st.studentId, 'Izin')}
-                              className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all cursor-pointer ${st.status === 'Izin'
-                                ? 'bg-blue-600 text-white shadow-xs'
-                                : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200'
-                                }`}
+                              onClick={() =>
+                                handleStudentStatusChange(st.studentId, 'Izin')
+                              }
+                              className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all cursor-pointer ${
+                                st.status === 'Izin'
+                                  ? 'bg-blue-600 text-white shadow-xs'
+                                  : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200'
+                              }`}
                             >
                               Izin
                             </button>
                             <button
                               type='button'
-                              onClick={() => handleStudentStatusChange(st.studentId, 'Alfa')}
-                              className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all cursor-pointer ${st.status === 'Alfa'
-                                ? 'bg-rose-600 text-white shadow-xs'
-                                : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200'
-                                }`}
+                              onClick={() =>
+                                handleStudentStatusChange(st.studentId, 'Alfa')
+                              }
+                              className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all cursor-pointer ${
+                                st.status === 'Alfa'
+                                  ? 'bg-rose-600 text-white shadow-xs'
+                                  : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200'
+                              }`}
                             >
                               Alfa
                             </button>
@@ -1240,41 +1482,57 @@ export default function JurnalClient() {
                 Pengaturan Header Informasi Jurnal
               </DialogTitle>
               <DialogDescription className='text-xs text-slate-500'>
-                Sesuaikan metadata identitas jurnal harian guru untuk keperluan laporan dan cetak.
+                Sesuaikan metadata identitas jurnal harian guru untuk keperluan
+                laporan dan cetak.
               </DialogDescription>
             </DialogHeader>
 
             <div className='space-y-3.5 py-4 text-xs'>
               <div className='space-y-1'>
-                <Label className='text-slate-700 text-xs font-semibold'>Nama Sekolah</Label>
+                <Label className='text-slate-700 text-xs font-semibold'>
+                  Nama Sekolah
+                </Label>
                 <Input
                   required
                   placeholder='Contoh: SMK 17 Seyegan'
                   value={headerForm.schoolName}
-                  onChange={(e) => setHeaderForm({ ...headerForm, schoolName: e.target.value })}
+                  onChange={(e) =>
+                    setHeaderForm({ ...headerForm, schoolName: e.target.value })
+                  }
                   className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-9'
                 />
               </div>
 
               <div className='grid grid-cols-2 gap-3'>
                 <div className='space-y-1'>
-                  <Label className='text-slate-700 text-xs font-semibold'>Mata Pelajaran</Label>
+                  <Label className='text-slate-700 text-xs font-semibold'>
+                    Mata Pelajaran
+                  </Label>
                   <Input
                     required
                     placeholder='Contoh: Sistem Operasi'
                     value={headerForm.subject}
-                    onChange={(e) => setHeaderForm({ ...headerForm, subject: e.target.value })}
+                    onChange={(e) =>
+                      setHeaderForm({ ...headerForm, subject: e.target.value })
+                    }
                     className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-9'
                   />
                 </div>
 
                 <div className='space-y-1'>
-                  <Label className='text-slate-700 text-xs font-semibold'>Kelas / Semester</Label>
+                  <Label className='text-slate-700 text-xs font-semibold'>
+                    Kelas / Semester
+                  </Label>
                   <Input
                     required
                     placeholder='Contoh: XTKJ/Genap'
                     value={headerForm.classNameSemester}
-                    onChange={(e) => setHeaderForm({ ...headerForm, classNameSemester: e.target.value })}
+                    onChange={(e) =>
+                      setHeaderForm({
+                        ...headerForm,
+                        classNameSemester: e.target.value,
+                      })
+                    }
                     className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-9'
                   />
                 </div>
@@ -1282,23 +1540,37 @@ export default function JurnalClient() {
 
               <div className='grid grid-cols-2 gap-3'>
                 <div className='space-y-1'>
-                  <Label className='text-slate-700 text-xs font-semibold'>Tahun Pelajaran</Label>
+                  <Label className='text-slate-700 text-xs font-semibold'>
+                    Tahun Pelajaran
+                  </Label>
                   <Input
                     required
                     placeholder='Contoh: 2022/2023'
                     value={headerForm.academicYear}
-                    onChange={(e) => setHeaderForm({ ...headerForm, academicYear: e.target.value })}
+                    onChange={(e) =>
+                      setHeaderForm({
+                        ...headerForm,
+                        academicYear: e.target.value,
+                      })
+                    }
                     className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-9'
                   />
                 </div>
 
                 <div className='space-y-1'>
-                  <Label className='text-slate-700 text-xs font-semibold'>Kurikulum</Label>
+                  <Label className='text-slate-700 text-xs font-semibold'>
+                    Kurikulum
+                  </Label>
                   <Input
                     required
                     placeholder='Contoh: 2013 / Merdeka'
                     value={headerForm.curriculum}
-                    onChange={(e) => setHeaderForm({ ...headerForm, curriculum: e.target.value })}
+                    onChange={(e) =>
+                      setHeaderForm({
+                        ...headerForm,
+                        curriculum: e.target.value,
+                      })
+                    }
                     className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-9'
                   />
                 </div>
@@ -1306,22 +1578,33 @@ export default function JurnalClient() {
 
               <div className='grid grid-cols-2 gap-3'>
                 <div className='space-y-1'>
-                  <Label className='text-slate-700 text-xs font-semibold'>Nama Guru</Label>
+                  <Label className='text-slate-700 text-xs font-semibold'>
+                    Nama Guru
+                  </Label>
                   <Input
                     required
                     placeholder='Nama lengkap guru'
                     value={headerForm.teacherName}
-                    onChange={(e) => setHeaderForm({ ...headerForm, teacherName: e.target.value })}
+                    onChange={(e) =>
+                      setHeaderForm({
+                        ...headerForm,
+                        teacherName: e.target.value,
+                      })
+                    }
                     className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-9'
                   />
                 </div>
 
                 <div className='space-y-1'>
-                  <Label className='text-slate-700 text-xs font-semibold'>NIP/NUPTK</Label>
+                  <Label className='text-slate-700 text-xs font-semibold'>
+                    NIP/NUPTK
+                  </Label>
                   <Input
                     placeholder='-'
                     value={headerForm.nip}
-                    onChange={(e) => setHeaderForm({ ...headerForm, nip: e.target.value })}
+                    onChange={(e) =>
+                      setHeaderForm({ ...headerForm, nip: e.target.value })
+                    }
                     className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-9'
                   />
                 </div>

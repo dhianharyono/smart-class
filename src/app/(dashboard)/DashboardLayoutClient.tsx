@@ -19,22 +19,18 @@ import {
   User,
   CheckSquare,
   Sparkles,
-  Sliders,
   Check,
   Settings,
-  Home,
   ChevronDown,
   ChevronRight,
   Calendar,
   School,
-  ArrowRight,
   ArrowLeft,
   IdCard,
   UserCheck,
   AlertCircle,
   Plus,
   Loader2,
-  Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -46,7 +42,13 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import ConfirmDialog from '@/components/ConfirmDialog';
-import { updateMenuPreferences, updateProfile, switchActiveClass, addClass, deleteClass } from '@/actions/profileActions';
+import {
+  updateMenuPreferences,
+  updateProfile,
+  switchActiveClass,
+  addClass,
+  deleteClass,
+} from '@/actions/profileActions';
 import { getSchools } from '@/actions/adminActions';
 
 interface SidebarSubItem {
@@ -107,14 +109,46 @@ const sidebarMenuGroups: SidebarGroup[] = [
 ];
 
 const CONFIGURABLE_MENUS = [
-  { href: '/kelas', label: 'Daftar Kelas', desc: 'Kelola daftar kelas yang diampu (multi-kelas)' },
-  { href: '/siswa', label: 'Data Siswa', desc: 'Manajemen data profil dan informasi siswa' },
-  { href: '/absensi', label: 'Absensi Kelas', desc: 'Pencatatan daftar hadir harian & rekap presensi kelas' },
-  { href: '/nilai', label: 'Nilai Akademik', desc: 'Penginputan nilai mata pelajaran & KKM' },
-  { href: '/tabungan', label: 'Tabungan Siswa', desc: 'Pencatatan setoran & penarikan kas siswa' },
-  { href: '/jadwal', label: 'Jadwal & Alokasi', desc: 'Plotting jadwal pelajaran mingguan kelas' },
-  { href: '/piket', label: 'Piket Kelas', desc: 'Pengaturan kelompok petugas piket harian siswa' },
-  { href: '/jurnal', label: 'Jurnal Wali Kelas', desc: 'Agenda harian mengajar guru & KBM' },
+  {
+    href: '/kelas',
+    label: 'Daftar Kelas',
+    desc: 'Kelola daftar kelas yang diampu (multi-kelas)',
+  },
+  {
+    href: '/siswa',
+    label: 'Data Siswa',
+    desc: 'Manajemen data profil dan informasi siswa',
+  },
+  {
+    href: '/absensi',
+    label: 'Absensi Kelas',
+    desc: 'Pencatatan daftar hadir harian & rekap presensi kelas',
+  },
+  {
+    href: '/nilai',
+    label: 'Nilai Akademik',
+    desc: 'Penginputan nilai mata pelajaran & KKM',
+  },
+  {
+    href: '/tabungan',
+    label: 'Tabungan Siswa',
+    desc: 'Pencatatan setoran & penarikan kas siswa',
+  },
+  {
+    href: '/jadwal',
+    label: 'Jadwal & Alokasi',
+    desc: 'Plotting jadwal pelajaran mingguan kelas',
+  },
+  {
+    href: '/piket',
+    label: 'Piket Kelas',
+    desc: 'Pengaturan kelompok petugas piket harian siswa',
+  },
+  {
+    href: '/jurnal',
+    label: 'Jurnal Wali Kelas',
+    desc: 'Agenda harian mengajar guru & KBM',
+  },
 ];
 
 interface DashboardLayoutClientProps {
@@ -149,7 +183,19 @@ export default function DashboardLayoutClient({
     const base =
       teacher.enabledMenus && teacher.enabledMenus.length > 0
         ? teacher.enabledMenus
-        : ['/dashboard', '/kelas', '/siswa', '/absensi', '/nilai', '/tabungan', '/jadwal', '/piket', '/jurnal', '/profile', '/settings'];
+        : [
+            '/dashboard',
+            '/kelas',
+            '/siswa',
+            '/absensi',
+            '/nilai',
+            '/tabungan',
+            '/jadwal',
+            '/piket',
+            '/jurnal',
+            '/profile',
+            '/settings',
+          ];
     return base.includes('/kelas') ? base : [...base, '/kelas'];
   });
 
@@ -165,12 +211,24 @@ export default function DashboardLayoutClient({
 
   // Check if teacher profile data is incomplete (including NIP & Principal info)
   const isProfileIncomplete = React.useMemo(() => {
-    const isNipInvalid = !teacher.nip || teacher.nip.trim() === '' || teacher.nip.trim() === '-';
-    const isPrincipalNameInvalid = !teacher.principalName || teacher.principalName.trim() === '';
-    const isPrincipalNipInvalid = !teacher.principalNip || teacher.principalNip.trim() === '' || teacher.principalNip.trim() === '-';
-    const isBasicInfoInvalid = !teacher.name || !teacher.schoolName || !teacher.className;
+    const isNipInvalid =
+      !teacher.nip || teacher.nip.trim() === '' || teacher.nip.trim() === '-';
+    const isPrincipalNameInvalid =
+      !teacher.principalName || teacher.principalName.trim() === '';
+    const isPrincipalNipInvalid =
+      !teacher.principalNip ||
+      teacher.principalNip.trim() === '' ||
+      teacher.principalNip.trim() === '-';
+    const isBasicInfoInvalid =
+      !teacher.name || !teacher.schoolName || !teacher.className;
 
-    return !!teacher.isFirstLogin || isNipInvalid || isPrincipalNameInvalid || isPrincipalNipInvalid || isBasicInfoInvalid;
+    return (
+      !!teacher.isFirstLogin ||
+      isNipInvalid ||
+      isPrincipalNameInvalid ||
+      isPrincipalNipInvalid ||
+      isBasicInfoInvalid
+    );
   }, [teacher]);
 
   // Active Teacher Multi-Class State
@@ -182,7 +240,8 @@ export default function DashboardLayoutClient({
   });
 
   const [currentActiveClass, setCurrentActiveClass] = useState<string>(() => {
-    if (teacher.activeClass && currentClasses.includes(teacher.activeClass)) return teacher.activeClass;
+    if (teacher.activeClass && currentClasses.includes(teacher.activeClass))
+      return teacher.activeClass;
     if (teacher.className) return teacher.className;
     return currentClasses[0] || '';
   });
@@ -192,7 +251,10 @@ export default function DashboardLayoutClient({
   const [isAddClassModalOpen, setIsAddClassModalOpen] = useState(false);
   const [newClassNameInput, setNewClassNameInput] = useState('');
   const [isAddingClass, setIsAddingClass] = useState(false);
-  const [deleteClassConfirm, setDeleteClassConfirm] = useState<{ open: boolean; className: string }>({
+  const [deleteClassConfirm, setDeleteClassConfirm] = useState<{
+    open: boolean;
+    className: string;
+  }>({
     open: false,
     className: '',
   });
@@ -211,10 +273,13 @@ export default function DashboardLayoutClient({
 
   // Onboarding Modal state
   const ALL_CONFIGURABLE_HREFS = CONFIGURABLE_MENUS.map((m) => m.href);
-  const [onboardingOpen, setOnboardingOpen] = useState<boolean>(isProfileIncomplete);
+  const [onboardingOpen, setOnboardingOpen] =
+    useState<boolean>(isProfileIncomplete);
   const [onboardingStep, setOnboardingStep] = useState<1 | 2>(1);
   const [onboardingName, setOnboardingName] = useState(teacher.name || '');
-  const [onboardingSchool, setOnboardingSchool] = useState(teacher.schoolName || '');
+  const [onboardingSchool, setOnboardingSchool] = useState(
+    teacher.schoolName || '',
+  );
   const [onboardingCustomSchool, setOnboardingCustomSchool] = useState('');
 
   // Onboarding Multi-Class Tags State
@@ -227,21 +292,25 @@ export default function DashboardLayoutClient({
   const [classInputText, setClassInputText] = useState('');
 
   const [onboardingNip, setOnboardingNip] = useState(
-    teacher.nip && teacher.nip !== '-' ? teacher.nip : ''
+    teacher.nip && teacher.nip !== '-' ? teacher.nip : '',
   );
   const [onboardingPrincipalName, setOnboardingPrincipalName] = useState(
-    teacher.principalName || ''
+    teacher.principalName || '',
   );
   const [onboardingPrincipalNip, setOnboardingPrincipalNip] = useState(
-    teacher.principalNip && teacher.principalNip !== '-' ? teacher.principalNip : ''
+    teacher.principalNip && teacher.principalNip !== '-'
+      ? teacher.principalNip
+      : '',
   );
   const [schoolsList, setSchoolsList] = useState<any[]>([]);
   const [loadingSchools, setLoadingSchools] = useState(false);
-  const [onboardingErrors, setOnboardingErrors] = useState<Record<string, string>>({});
+  const [onboardingErrors, setOnboardingErrors] = useState<
+    Record<string, string>
+  >({});
 
-  const [selectedOnboardingMenus, setSelectedOnboardingMenus] = useState<string[]>(
-    ALL_CONFIGURABLE_HREFS
-  );
+  const [selectedOnboardingMenus, setSelectedOnboardingMenus] = useState<
+    string[]
+  >(ALL_CONFIGURABLE_HREFS);
   const [isSavingOnboarding, setIsSavingOnboarding] = useState(false);
 
   // Onboarding Class Tag Handlers with comma/slash auto-split
@@ -310,7 +379,9 @@ export default function DashboardLayoutClient({
         if (res.classes) setCurrentClasses(res.classes);
         setNewClassNameInput('');
         setIsAddClassModalOpen(false);
-        toast.success(`Kelas ${clean} berhasil ditambahkan & menjadi kelas aktif!`);
+        toast.success(
+          `Kelas ${clean} berhasil ditambahkan & menjadi kelas aktif!`,
+        );
         router.refresh();
       } else {
         toast.error(res.error || 'Gagal menambahkan kelas baru.');
@@ -366,7 +437,8 @@ export default function DashboardLayoutClient({
 
     const cleanNip = onboardingNip.trim();
     if (!cleanNip || cleanNip === '-') {
-      errors.nip = 'NIP/NUPTK wajib diisi dengan NIP/NUPTK yang valid (tidak boleh "-").';
+      errors.nip =
+        'NIP/NUPTK wajib diisi dengan NIP/NUPTK yang valid (tidak boleh "-").';
     } else if (cleanNip.length < 3) {
       errors.nip = 'NIP/NUPTK minimal 3 karakter.';
     }
@@ -398,7 +470,8 @@ export default function DashboardLayoutClient({
     }
 
     if (finalClasses.length === 0) {
-      errors.className = 'Kelas diajar wajib dimasukkan minimal 1 kelas (contoh: 5A).';
+      errors.className =
+        'Kelas diajar wajib dimasukkan minimal 1 kelas (contoh: 5A).';
     }
 
     const cleanPrincipalName = onboardingPrincipalName.trim();
@@ -410,7 +483,8 @@ export default function DashboardLayoutClient({
 
     const cleanPrincipalNip = onboardingPrincipalNip.trim();
     if (!cleanPrincipalNip || cleanPrincipalNip === '-') {
-      errors.principalNip = 'NIP kepala sekolah wajib diisi dengan NIP yang valid (tidak boleh "-").';
+      errors.principalNip =
+        'NIP kepala sekolah wajib diisi dengan NIP yang valid (tidak boleh "-").';
     } else if (cleanPrincipalNip.length < 3) {
       errors.principalNip = 'NIP kepala sekolah minimal 3 karakter.';
     }
@@ -499,7 +573,10 @@ export default function DashboardLayoutClient({
     }
 
     const finalClasses = [...onboardingClasses];
-    if (classInputText.trim() && !finalClasses.includes(classInputText.trim())) {
+    if (
+      classInputText.trim() &&
+      !finalClasses.includes(classInputText.trim())
+    ) {
       finalClasses.push(classInputText.trim());
     }
 
@@ -519,7 +596,12 @@ export default function DashboardLayoutClient({
       });
 
       // 2. Update Menu Preferences & mark first login done
-      const finalMenus = ['/dashboard', ...selectedOnboardingMenus, '/profile', '/settings'];
+      const finalMenus = [
+        '/dashboard',
+        ...selectedOnboardingMenus,
+        '/profile',
+        '/settings',
+      ];
       await updateMenuPreferences(finalMenus, true);
 
       setEnabledMenus(finalMenus);
@@ -546,7 +628,9 @@ export default function DashboardLayoutClient({
             <h1 className='text-lg font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent'>
               Smart Class
             </h1>
-            <p className='text-xs text-slate-500 font-medium'>Dashboard Wali Kelas</p>
+            <p className='text-xs text-slate-500 font-medium'>
+              Dashboard Wali Kelas
+            </p>
           </div>
         </div>
 
@@ -557,7 +641,7 @@ export default function DashboardLayoutClient({
               .map((item) => {
                 if (item.children) {
                   const visibleChildren = item.children.filter((child) =>
-                    enabledMenus.includes(child.href)
+                    enabledMenus.includes(child.href),
                   );
                   if (visibleChildren.length === 0) return null;
                   return { ...item, children: visibleChildren };
@@ -585,7 +669,7 @@ export default function DashboardLayoutClient({
                   {visibleItemsInGroup.map((item) => {
                     if (item.children && item.children.length > 0) {
                       const isChildActive = item.children.some(
-                        (child) => pathname === child.href
+                        (child) => pathname === child.href,
                       );
                       const isOpen = openMenus[item.name] ?? isChildActive;
                       const Icon = item.icon;
@@ -599,15 +683,19 @@ export default function DashboardLayoutClient({
                                 [item.name]: !isOpen,
                               }))
                             }
-                            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer ${isChildActive
-                              ? 'bg-emerald-50/70 text-emerald-900 border border-emerald-200/80 font-bold'
-                              : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 border border-transparent'
-                              }`}
+                            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer ${
+                              isChildActive
+                                ? 'bg-emerald-50/70 text-emerald-900 border border-emerald-200/80 font-bold'
+                                : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 border border-transparent'
+                            }`}
                           >
                             <div className='flex items-center gap-3'>
                               <Icon
-                                className={`h-4.5 w-4.5 transition-transform duration-200 ${isChildActive ? 'text-emerald-600' : 'text-slate-400'
-                                  }`}
+                                className={`h-4.5 w-4.5 transition-transform duration-200 ${
+                                  isChildActive
+                                    ? 'text-emerald-600'
+                                    : 'text-slate-400'
+                                }`}
                               />
                               <span>{item.name}</span>
                             </div>
@@ -628,14 +716,18 @@ export default function DashboardLayoutClient({
                                     key={child.href}
                                     href={child.href}
                                     onClick={() => setMobileOpen(false)}
-                                    className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all duration-200 ${isSubActive
-                                      ? 'bg-emerald-600 text-white font-bold shadow-xs'
-                                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium'
-                                      }`}
+                                    className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all duration-200 ${
+                                      isSubActive
+                                        ? 'bg-emerald-600 text-white font-bold shadow-xs'
+                                        : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium'
+                                    }`}
                                   >
                                     <SubIcon
-                                      className={`h-4 w-4 ${isSubActive ? 'text-white' : 'text-slate-400'
-                                        }`}
+                                      className={`h-4 w-4 ${
+                                        isSubActive
+                                          ? 'text-white'
+                                          : 'text-slate-400'
+                                      }`}
                                     />
                                     <span>{child.name}</span>
                                   </Link>
@@ -654,17 +746,23 @@ export default function DashboardLayoutClient({
                         key={item.href}
                         href={item.href!}
                         onClick={() => setMobileOpen(false)}
-                        className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group ${isActive
-                          ? 'bg-emerald-50/90 text-emerald-800 border border-emerald-200/80 shadow-xs font-bold'
-                          : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 border border-transparent'
-                          }`}
+                        className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group ${
+                          isActive
+                            ? 'bg-emerald-50/90 text-emerald-800 border border-emerald-200/80 shadow-xs font-bold'
+                            : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 border border-transparent'
+                        }`}
                       >
                         <Icon
-                          className={`h-4.5 w-4.5 transition-transform duration-200 group-hover:scale-110 ${isActive ? 'text-emerald-600' : 'text-slate-400 group-hover:text-slate-600'
-                            }`}
+                          className={`h-4.5 w-4.5 transition-transform duration-200 group-hover:scale-110 ${
+                            isActive
+                              ? 'text-emerald-600'
+                              : 'text-slate-400 group-hover:text-slate-600'
+                          }`}
                         />
                         <span>{item.name}</span>
-                        {isActive && <span className='ml-auto h-1.5 w-1.5 rounded-full bg-emerald-600' />}
+                        {isActive && (
+                          <span className='ml-auto h-1.5 w-1.5 rounded-full bg-emerald-600' />
+                        )}
                       </Link>
                     );
                   })}
@@ -717,12 +815,15 @@ export default function DashboardLayoutClient({
         type='button'
         onClick={() => setIsClassDropdownOpen(!isClassDropdownOpen)}
         disabled={isSwitchingClass}
-        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100/90 border border-emerald-200/90 text-emerald-900 text-xs font-bold transition-all cursor-pointer shadow-2xs ${isSwitchingClass ? 'opacity-50' : ''
-          }`}
+        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100/90 border border-emerald-200/90 text-emerald-900 text-xs font-bold transition-all cursor-pointer shadow-2xs ${
+          isSwitchingClass ? 'opacity-50' : ''
+        }`}
       >
         <School className='h-4 w-4 text-emerald-600 shrink-0' />
         <span className='truncate max-w-[120px] sm:max-w-none'>
-          {isMobile ? `Kelas ${currentActiveClass || '-'}` : `Kelas Aktif: ${currentActiveClass || '-'}`}
+          {isMobile
+            ? `Kelas ${currentActiveClass || '-'}`
+            : `Kelas Aktif: ${currentActiveClass || '-'}`}
         </span>
         {isSwitchingClass ? (
           <Loader2 className='h-3.5 w-3.5 text-emerald-600 animate-spin shrink-0' />
@@ -747,17 +848,20 @@ export default function DashboardLayoutClient({
                 return (
                   <div
                     key={cls}
-                    className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${isActive
-                      ? 'bg-emerald-600 text-white shadow-2xs'
-                      : 'text-slate-700 hover:bg-slate-100'
-                      }`}
+                    className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                      isActive
+                        ? 'bg-emerald-600 text-white shadow-2xs'
+                        : 'text-slate-700 hover:bg-slate-100'
+                    }`}
                   >
                     <button
                       type='button'
                       onClick={() => handleSwitchClass(cls)}
                       className='w-full flex items-center gap-1.5 text-left cursor-pointer whitespace-nowrap'
                     >
-                      <School className={`h-3.5 w-3.5 shrink-0 ${isActive ? 'text-white' : 'text-emerald-600'}`} />
+                      <School
+                        className={`h-3.5 w-3.5 shrink-0 ${isActive ? 'text-white' : 'text-emerald-600'}`}
+                      />
                       <span>Kelas {cls}</span>
                       {isActive && (
                         <span className='text-[9px] bg-white/20 text-white px-1.5 py-0.2 rounded font-extrabold ml-5 shrink-0'>
@@ -866,7 +970,8 @@ export default function DashboardLayoutClient({
               <span>Tambah Kelas Baru</span>
             </DialogTitle>
             <DialogDescription className='text-xs text-slate-500 font-medium'>
-              Masukkan nama kelas baru yang diampu (contoh: 5B, 6A, VII C). Kelas baru akan langsung diaktifkan.
+              Masukkan nama kelas baru yang diampu (contoh: 5B, 6A, VII C).
+              Kelas baru akan langsung diaktifkan.
             </DialogDescription>
           </DialogHeader>
 
@@ -930,11 +1035,11 @@ export default function DashboardLayoutClient({
       <ConfirmDialog
         open={showLogoutConfirm}
         onOpenChange={setShowLogoutConfirm}
-        title="Konfirmasi Keluar"
-        description="Apakah Anda yakin ingin keluar dari aplikasi Smart Class?"
-        confirmText="Ya, Keluar"
-        cancelText="Batal"
-        variant="danger"
+        title='Konfirmasi Keluar'
+        description='Apakah Anda yakin ingin keluar dari aplikasi Smart Class?'
+        confirmText='Ya, Keluar'
+        cancelText='Batal'
+        variant='danger'
         isLoading={isLoggingOut}
         onConfirm={handleLogoutSubmit}
       />
@@ -947,14 +1052,19 @@ export default function DashboardLayoutClient({
           setOnboardingOpen(open);
         }}
       >
-        <DialogContent showCloseButton={false} className='bg-white border border-slate-200 text-slate-900 rounded-3xl w-[calc(100vw-1.5rem)] sm:w-full sm:max-w-2xl p-4 sm:p-7 shadow-2xl overflow-hidden text-left'>
+        <DialogContent
+          showCloseButton={false}
+          className='bg-white border border-slate-200 text-slate-900 rounded-3xl w-[calc(100vw-1.5rem)] sm:w-full sm:max-w-2xl p-4 sm:p-7 shadow-2xl overflow-hidden text-left'
+        >
           <DialogHeader className='pb-3 border-b border-slate-100'>
             {/* Top Bar with Badge & Logout Option */}
             <div className='flex items-center justify-between gap-2 pb-1'>
               <div className='flex items-center gap-1.5 text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200/80 shadow-2xs shrink-0 max-w-[70%] sm:max-w-none'>
                 <Sparkles className='h-3.5 w-3.5 text-emerald-600 shrink-0' />
                 <span className='text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wide truncate sm:whitespace-nowrap'>
-                  {teacher.isFirstLogin ? 'Aktivasi Akun Wali Kelas' : 'Lengkapi Data Profil & Sekolah'}
+                  {teacher.isFirstLogin
+                    ? 'Aktivasi Akun Wali Kelas'
+                    : 'Lengkapi Data Profil & Sekolah'}
                 </span>
               </div>
               <Button
@@ -986,35 +1096,47 @@ export default function DashboardLayoutClient({
               <button
                 type='button'
                 onClick={() => setOnboardingStep(1)}
-                className={`w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-xl border text-[11px] sm:text-xs font-bold transition-all cursor-pointer min-w-0 ${onboardingStep === 1
-                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
-                  : 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
-                  }`}
+                className={`w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-xl border text-[11px] sm:text-xs font-bold transition-all cursor-pointer min-w-0 ${
+                  onboardingStep === 1
+                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                    : 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
+                }`}
               >
                 <span
-                  className={`h-5 w-5 rounded-lg flex items-center justify-center font-black text-[11px] shrink-0 ${onboardingStep === 1 ? 'bg-white/25 text-white' : 'bg-emerald-600 text-white'
-                    }`}
+                  className={`h-5 w-5 rounded-lg flex items-center justify-center font-black text-[11px] shrink-0 ${
+                    onboardingStep === 1
+                      ? 'bg-white/25 text-white'
+                      : 'bg-emerald-600 text-white'
+                  }`}
                 >
                   1
                 </span>
-                <span className='truncate sm:whitespace-nowrap'>Data Profil & Sekolah</span>
+                <span className='truncate sm:whitespace-nowrap'>
+                  Data Profil & Sekolah
+                </span>
               </button>
               <ChevronRight className='hidden sm:block h-3.5 w-3.5 text-slate-300 shrink-0' />
               <button
                 type='button'
                 onClick={() => handleNextStep()}
-                className={`w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-xl border text-[11px] sm:text-xs font-bold transition-all cursor-pointer min-w-0 ${onboardingStep === 2
-                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
-                  : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100 hover:text-slate-600'
-                  }`}
+                className={`w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-xl border text-[11px] sm:text-xs font-bold transition-all cursor-pointer min-w-0 ${
+                  onboardingStep === 2
+                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                    : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100 hover:text-slate-600'
+                }`}
               >
                 <span
-                  className={`h-5 w-5 rounded-lg flex items-center justify-center font-black text-[11px] shrink-0 ${onboardingStep === 2 ? 'bg-white/25 text-white' : 'bg-slate-200 text-slate-500'
-                    }`}
+                  className={`h-5 w-5 rounded-lg flex items-center justify-center font-black text-[11px] shrink-0 ${
+                    onboardingStep === 2
+                      ? 'bg-white/25 text-white'
+                      : 'bg-slate-200 text-slate-500'
+                  }`}
                 >
                   2
                 </span>
-                <span className='truncate sm:whitespace-nowrap'>Kustomisasi Menu</span>
+                <span className='truncate sm:whitespace-nowrap'>
+                  Kustomisasi Menu
+                </span>
               </button>
             </div>
           </DialogHeader>
@@ -1038,12 +1160,14 @@ export default function DashboardLayoutClient({
                     value={onboardingName}
                     onChange={(e) => {
                       setOnboardingName(e.target.value);
-                      if (onboardingErrors.name) setOnboardingErrors((prev) => ({ ...prev, name: '' }));
+                      if (onboardingErrors.name)
+                        setOnboardingErrors((prev) => ({ ...prev, name: '' }));
                     }}
-                    className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${onboardingErrors.name
-                      ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
-                      : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
-                      } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
+                    className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${
+                      onboardingErrors.name
+                        ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
+                        : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
+                    } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
                   />
                 </div>
                 {onboardingErrors.name && (
@@ -1070,12 +1194,14 @@ export default function DashboardLayoutClient({
                     value={onboardingNip}
                     onChange={(e) => {
                       setOnboardingNip(e.target.value);
-                      if (onboardingErrors.nip) setOnboardingErrors((prev) => ({ ...prev, nip: '' }));
+                      if (onboardingErrors.nip)
+                        setOnboardingErrors((prev) => ({ ...prev, nip: '' }));
                     }}
-                    className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${onboardingErrors.nip
-                      ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
-                      : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
-                      } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
+                    className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${
+                      onboardingErrors.nip
+                        ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
+                        : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
+                    } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
                   />
                 </div>
                 {onboardingErrors.nip && (
@@ -1100,13 +1226,18 @@ export default function DashboardLayoutClient({
                       value={onboardingSchool}
                       onChange={(e) => {
                         setOnboardingSchool(e.target.value);
-                        if (onboardingErrors.school) setOnboardingErrors((prev) => ({ ...prev, school: '' }));
+                        if (onboardingErrors.school)
+                          setOnboardingErrors((prev) => ({
+                            ...prev,
+                            school: '',
+                          }));
                       }}
                       disabled={loadingSchools}
-                      className={`w-full pl-10 pr-8 py-2.5 bg-slate-50/50 border ${onboardingErrors.school
-                        ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
-                        : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
-                        } text-slate-900 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium appearance-none cursor-pointer transition-all`}
+                      className={`w-full pl-10 pr-8 py-2.5 bg-slate-50/50 border ${
+                        onboardingErrors.school
+                          ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
+                          : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
+                      } text-slate-900 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium appearance-none cursor-pointer transition-all`}
                     >
                       {loadingSchools ? (
                         <option value=''>Memuat...</option>
@@ -1117,7 +1248,9 @@ export default function DashboardLayoutClient({
                               {s.name}
                             </option>
                           ))}
-                          <option value='__NEW_SCHOOL__'>+ Tambah Baru...</option>
+                          <option value='__NEW_SCHOOL__'>
+                            + Tambah Baru...
+                          </option>
                         </>
                       )}
                     </select>
@@ -1158,10 +1291,11 @@ export default function DashboardLayoutClient({
                             handleAddOnboardingClassTag();
                           }
                         }}
-                        className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${onboardingErrors.className
-                          ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
-                          : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
-                          } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
+                        className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${
+                          onboardingErrors.className
+                            ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
+                            : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
+                        } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
                       />
                     </div>
                     <Button
@@ -1221,12 +1355,17 @@ export default function DashboardLayoutClient({
                     value={onboardingCustomSchool}
                     onChange={(e) => {
                       setOnboardingCustomSchool(e.target.value);
-                      if (onboardingErrors.school) setOnboardingErrors((prev) => ({ ...prev, school: '' }));
+                      if (onboardingErrors.school)
+                        setOnboardingErrors((prev) => ({
+                          ...prev,
+                          school: '',
+                        }));
                     }}
-                    className={`w-full px-4 py-2.5 bg-slate-50/50 border ${onboardingErrors.school
-                      ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
-                      : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
-                      } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
+                    className={`w-full px-4 py-2.5 bg-slate-50/50 border ${
+                      onboardingErrors.school
+                        ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
+                        : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
+                    } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
                   />
                   {onboardingErrors.school && (
                     <p className='text-[11px] text-rose-500 font-medium flex items-center gap-1 mt-1'>
@@ -1254,12 +1393,17 @@ export default function DashboardLayoutClient({
                       value={onboardingPrincipalName}
                       onChange={(e) => {
                         setOnboardingPrincipalName(e.target.value);
-                        if (onboardingErrors.principalName) setOnboardingErrors((prev) => ({ ...prev, principalName: '' }));
+                        if (onboardingErrors.principalName)
+                          setOnboardingErrors((prev) => ({
+                            ...prev,
+                            principalName: '',
+                          }));
                       }}
-                      className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${onboardingErrors.principalName
-                        ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
-                        : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
-                        } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
+                      className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${
+                        onboardingErrors.principalName
+                          ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
+                          : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
+                      } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
                     />
                   </div>
                   {onboardingErrors.principalName && (
@@ -1285,12 +1429,17 @@ export default function DashboardLayoutClient({
                       value={onboardingPrincipalNip}
                       onChange={(e) => {
                         setOnboardingPrincipalNip(e.target.value);
-                        if (onboardingErrors.principalNip) setOnboardingErrors((prev) => ({ ...prev, principalNip: '' }));
+                        if (onboardingErrors.principalNip)
+                          setOnboardingErrors((prev) => ({
+                            ...prev,
+                            principalNip: '',
+                          }));
                       }}
-                      className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${onboardingErrors.principalNip
-                        ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
-                        : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
-                        } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
+                      className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${
+                        onboardingErrors.principalNip
+                          ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
+                          : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
+                      } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
                     />
                   </div>
                   {onboardingErrors.principalNip && (
@@ -1320,24 +1469,33 @@ export default function DashboardLayoutClient({
                             return;
                           }
                           setSelectedOnboardingMenus(
-                            selectedOnboardingMenus.filter((m) => m !== menu.href)
+                            selectedOnboardingMenus.filter(
+                              (m) => m !== menu.href,
+                            ),
                           );
                         } else {
-                          setSelectedOnboardingMenus([...selectedOnboardingMenus, menu.href]);
+                          setSelectedOnboardingMenus([
+                            ...selectedOnboardingMenus,
+                            menu.href,
+                          ]);
                         }
                       }}
-                      className={`flex items-start gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer select-none ${isChecked
-                        ? 'bg-emerald-50/80 border-emerald-300 text-emerald-950 shadow-2xs'
-                        : 'bg-slate-50/60 border-slate-200 text-slate-600 hover:border-slate-300'
-                        }`}
+                      className={`flex items-start gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer select-none ${
+                        isChecked
+                          ? 'bg-emerald-50/80 border-emerald-300 text-emerald-950 shadow-2xs'
+                          : 'bg-slate-50/60 border-slate-200 text-slate-600 hover:border-slate-300'
+                      }`}
                     >
                       <div
-                        className={`mt-0.5 h-5 w-5 rounded-lg border flex items-center justify-center shrink-0 transition-colors ${isChecked
-                          ? 'bg-emerald-600 border-emerald-600 text-white shadow-2xs'
-                          : 'border-slate-300 bg-white'
-                          }`}
+                        className={`mt-0.5 h-5 w-5 rounded-lg border flex items-center justify-center shrink-0 transition-colors ${
+                          isChecked
+                            ? 'bg-emerald-600 border-emerald-600 text-white shadow-2xs'
+                            : 'border-slate-300 bg-white'
+                        }`}
                       >
-                        {isChecked && <Check className='h-3.5 w-3.5 stroke-[3]' />}
+                        {isChecked && (
+                          <Check className='h-3.5 w-3.5 stroke-[3]' />
+                        )}
                       </div>
                       <div>
                         <span className='text-xs font-bold text-slate-900 block'>
@@ -1404,12 +1562,14 @@ export default function DashboardLayoutClient({
       {/* Modal Confirm Hapus Kelas */}
       <ConfirmDialog
         open={deleteClassConfirm.open}
-        onOpenChange={(open) => setDeleteClassConfirm((prev) => ({ ...prev, open }))}
-        title="Hapus Kelas"
+        onOpenChange={(open) =>
+          setDeleteClassConfirm((prev) => ({ ...prev, open }))
+        }
+        title='Hapus Kelas'
         description={`Apakah Anda yakin ingin menghapus Kelas ${deleteClassConfirm.className} dari daftar kelas Anda?`}
-        confirmText="Hapus Kelas"
-        cancelText="Batal"
-        variant="danger"
+        confirmText='Hapus Kelas'
+        cancelText='Batal'
+        variant='danger'
         isLoading={isSwitchingClass}
         onConfirm={handleConfirmDeleteClassHeader}
       />

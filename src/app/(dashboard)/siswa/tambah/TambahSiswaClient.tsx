@@ -7,18 +7,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createStudent } from '@/actions/studentActions';
 import { toast } from 'sonner';
 import {
-  UserPlus,
   ArrowLeft,
   Save,
   Upload,
   User,
   CheckCircle2,
-  Calendar,
-  Building,
-  GraduationCap,
   Loader2,
-  FileText,
-  ShieldAlert,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,7 +23,9 @@ interface TambahSiswaClientProps {
   defaultClassName?: string;
 }
 
-export default function TambahSiswaClient({ defaultClassName = '' }: TambahSiswaClientProps) {
+export default function TambahSiswaClient({
+  defaultClassName = '',
+}: TambahSiswaClientProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -80,15 +76,20 @@ export default function TambahSiswaClient({ defaultClassName = '' }: TambahSiswa
   // Mutation to Save Student
   const saveMutation = useMutation({
     mutationFn: async () => {
-      if (!formData.name.trim()) throw new Error('Nama lengkap siswa wajib diisi');
+      if (!formData.name.trim())
+        throw new Error('Nama lengkap siswa wajib diisi');
       if (!formData.nis.trim()) throw new Error('NIS wajib diisi');
       if (!formData.className.trim()) throw new Error('Kelas wajib diisi');
 
       const payload = {
         ...formData,
         photo: photoPreview || undefined,
-        birthDate: formData.birthDate ? new Date(formData.birthDate) : undefined,
-        entryDate: formData.entryDate ? new Date(formData.entryDate) : undefined,
+        birthDate: formData.birthDate
+          ? new Date(formData.birthDate)
+          : undefined,
+        entryDate: formData.entryDate
+          ? new Date(formData.entryDate)
+          : undefined,
       };
 
       return await createStudent(payload);
@@ -114,7 +115,10 @@ export default function TambahSiswaClient({ defaultClassName = '' }: TambahSiswa
       <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200/80 pb-4'>
         <div>
           <div className='flex items-center gap-2 text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wider'>
-            <Link href='/siswa' className='hover:text-emerald-600 transition-colors'>
+            <Link
+              href='/siswa'
+              className='hover:text-emerald-600 transition-colors'
+            >
               Data Siswa
             </Link>
             <span>&rsaquo;</span>
@@ -124,7 +128,8 @@ export default function TambahSiswaClient({ defaultClassName = '' }: TambahSiswa
             <span>Formulir Input Biodata Siswa</span>
           </h2>
           <p className='text-slate-600 text-xs sm:text-sm mt-1'>
-            Lengkapi data administrasi peserta didik sesuai dengan dokumen kependudukan resmi sekolah.
+            Lengkapi data administrasi peserta didik sesuai dengan dokumen
+            kependudukan resmi sekolah.
           </p>
         </div>
 
@@ -158,7 +163,10 @@ export default function TambahSiswaClient({ defaultClassName = '' }: TambahSiswa
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className='grid grid-cols-1 lg:grid-cols-12 gap-6'>
+      <form
+        onSubmit={handleSubmit}
+        className='grid grid-cols-1 lg:grid-cols-12 gap-6'
+      >
         {/* LEFT COLUMN: Photo Upload & Guidance (4 cols) */}
         <div className='lg:col-span-4 space-y-6'>
           {/* Photo Upload Card */}
@@ -171,7 +179,11 @@ export default function TambahSiswaClient({ defaultClassName = '' }: TambahSiswa
               <div className='flex justify-center'>
                 <div className='relative group w-36 h-36 rounded-full overflow-hidden bg-slate-100 border-4 border-slate-200/80 flex items-center justify-center shadow-inner'>
                   {photoPreview ? (
-                    <img src={photoPreview} alt='Preview Foto' className='w-full h-full object-cover' />
+                    <img
+                      src={photoPreview}
+                      alt='Preview Foto'
+                      className='w-full h-full object-cover'
+                    />
                   ) : (
                     <User className='h-20 w-20 text-slate-300' />
                   )}
@@ -182,7 +194,12 @@ export default function TambahSiswaClient({ defaultClassName = '' }: TambahSiswa
                 <label className='inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold cursor-pointer transition-all shadow-xs w-full'>
                   <Upload className='h-4 w-4 text-emerald-600' />
                   <span>Pilih File Gambar</span>
-                  <input type='file' accept='image/*' onChange={handlePhotoUpload} className='hidden' />
+                  <input
+                    type='file'
+                    accept='image/*'
+                    onChange={handlePhotoUpload}
+                    className='hidden'
+                  />
                 </label>
                 <p className='text-[11px] text-slate-400 leading-tight'>
                   Format PNG, JPG max. 1.5MB. Crop melingkar otomatis.
@@ -199,8 +216,12 @@ export default function TambahSiswaClient({ defaultClassName = '' }: TambahSiswa
                   <CheckCircle2 className='h-5 w-5' />
                 </div>
                 <div>
-                  <h4 className='font-extrabold text-sm text-emerald-950'>Panduan Pengisian Form</h4>
-                  <p className='text-[11px] text-emerald-700/80 font-medium'>Ketentuan registrasi data resmi</p>
+                  <h4 className='font-extrabold text-sm text-emerald-950'>
+                    Panduan Pengisian Form
+                  </h4>
+                  <p className='text-[11px] text-emerald-700/80 font-medium'>
+                    Ketentuan registrasi data resmi
+                  </p>
                 </div>
               </div>
 
@@ -215,11 +236,16 @@ export default function TambahSiswaClient({ defaultClassName = '' }: TambahSiswa
                 </li>
                 <li className='flex items-start gap-2.5'>
                   <CheckCircle2 className='h-4 w-4 text-emerald-600 shrink-0 mt-0.5' />
-                  <span>Sertakan alamat lengkap dengan RT/RW dan kode POS.</span>
+                  <span>
+                    Sertakan alamat lengkap dengan RT/RW dan kode POS.
+                  </span>
                 </li>
                 <li className='flex items-start gap-2.5'>
                   <CheckCircle2 className='h-4 w-4 text-emerald-600 shrink-0 mt-0.5' />
-                  <span>Tentukan tahun ajaran masuk sesuai format YYYY/YYYY (contoh: 2026/2027).</span>
+                  <span>
+                    Tentukan tahun ajaran masuk sesuai format YYYY/YYYY (contoh:
+                    2026/2027).
+                  </span>
                 </li>
               </ul>
             </CardContent>
@@ -254,7 +280,9 @@ export default function TambahSiswaClient({ defaultClassName = '' }: TambahSiswa
                     required
                     placeholder='Ahmad Ainur Rozikin'
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
                     className='bg-slate-50 border-slate-200 focus:border-emerald-500 rounded-xl text-xs h-10 text-slate-900'
                   />
                 </div>
@@ -268,20 +296,25 @@ export default function TambahSiswaClient({ defaultClassName = '' }: TambahSiswa
                       placeholder='0123456789'
                       maxLength={10}
                       value={formData.nisn}
-                      onChange={(e) => setFormData({ ...formData, nisn: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, nisn: e.target.value })
+                      }
                       className='bg-slate-50 border-slate-200 focus:border-emerald-500 rounded-xl text-xs h-10 text-slate-900'
                     />
                   </div>
 
                   <div className='space-y-1.5'>
                     <Label className='text-xs font-bold text-slate-700 uppercase tracking-wider'>
-                      NIS (NOMOR INDUK SISWA LOKAL) <span className='text-rose-500'>*</span>
+                      NIS (NOMOR INDUK SISWA LOKAL){' '}
+                      <span className='text-rose-500'>*</span>
                     </Label>
                     <Input
                       required
                       placeholder='23241001'
                       value={formData.nis}
-                      onChange={(e) => setFormData({ ...formData, nis: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, nis: e.target.value })
+                      }
                       className='bg-slate-50 border-slate-200 focus:border-emerald-500 rounded-xl text-xs h-10 text-slate-900'
                     />
                   </div>
@@ -294,7 +327,12 @@ export default function TambahSiswaClient({ defaultClassName = '' }: TambahSiswa
                     </Label>
                     <select
                       value={formData.gender}
-                      onChange={(e) => setFormData({ ...formData, gender: e.target.value as 'L' | 'P' })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          gender: e.target.value as 'L' | 'P',
+                        })
+                      }
                       className='w-full bg-slate-50 border border-slate-200 focus:border-emerald-500 rounded-xl text-xs h-10 px-3 text-slate-900 outline-none'
                     >
                       <option value='L'>Laki-laki (L)</option>
@@ -308,9 +346,15 @@ export default function TambahSiswaClient({ defaultClassName = '' }: TambahSiswa
                     </Label>
                     <Input
                       required
-                      placeholder={defaultClassName ? `Contoh: ${defaultClassName}` : 'Contoh: 5A'}
+                      placeholder={
+                        defaultClassName
+                          ? `Contoh: ${defaultClassName}`
+                          : 'Contoh: 5A'
+                      }
                       value={formData.className}
-                      onChange={(e) => setFormData({ ...formData, className: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, className: e.target.value })
+                      }
                       className='bg-slate-50 border-slate-200 focus:border-emerald-500 rounded-xl text-xs h-10 text-slate-900'
                     />
                   </div>
@@ -331,7 +375,8 @@ export default function TambahSiswaClient({ defaultClassName = '' }: TambahSiswa
                     BIODATA PRIBADI
                   </h3>
                   <p className='text-xs text-slate-500 mt-0.5'>
-                    Keterangan domisili, kelahiran, serta kepercayaan peserta didik.
+                    Keterangan domisili, kelahiran, serta kepercayaan peserta
+                    didik.
                   </p>
                 </div>
               </div>
@@ -345,7 +390,9 @@ export default function TambahSiswaClient({ defaultClassName = '' }: TambahSiswa
                     <Input
                       placeholder='Banyuwangi'
                       value={formData.birthPlace}
-                      onChange={(e) => setFormData({ ...formData, birthPlace: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, birthPlace: e.target.value })
+                      }
                       className='bg-slate-50 border-slate-200 focus:border-emerald-500 rounded-xl text-xs h-10 text-slate-900'
                     />
                   </div>
@@ -357,17 +404,23 @@ export default function TambahSiswaClient({ defaultClassName = '' }: TambahSiswa
                     <Input
                       type='date'
                       value={formData.birthDate}
-                      onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, birthDate: e.target.value })
+                      }
                       className='bg-slate-50 border-slate-200 focus:border-emerald-500 rounded-xl text-xs h-10 text-slate-900'
                     />
                   </div>
                 </div>
 
                 <div className='space-y-1.5'>
-                  <Label className='text-xs font-bold text-slate-700 uppercase tracking-wider'>AGAMA</Label>
+                  <Label className='text-xs font-bold text-slate-700 uppercase tracking-wider'>
+                    AGAMA
+                  </Label>
                   <select
                     value={formData.religion}
-                    onChange={(e) => setFormData({ ...formData, religion: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, religion: e.target.value })
+                    }
                     className='w-full bg-slate-50 border border-slate-200 focus:border-emerald-500 rounded-xl text-xs h-10 px-3 text-slate-900 outline-none'
                   >
                     <option value='Islam'>Islam</option>
@@ -388,7 +441,9 @@ export default function TambahSiswaClient({ defaultClassName = '' }: TambahSiswa
                     rows={3}
                     placeholder='Ketik jalan, RT/RW, nomor rumah, kelurahan, kecamatan, kota/kabupaten serta kode POS...'
                     value={formData.address}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, address: e.target.value })
+                    }
                     className='w-full bg-slate-50 border border-slate-200 focus:border-emerald-500 rounded-xl p-3 text-xs text-slate-900 outline-none transition-all'
                   />
                 </div>
@@ -407,7 +462,9 @@ export default function TambahSiswaClient({ defaultClassName = '' }: TambahSiswa
                   <h3 className='font-black text-sm uppercase text-slate-900 tracking-wide'>
                     DATA ORANG TUA / WALI
                   </h3>
-                  <p className='text-xs text-slate-500 mt-0.5'>Nama lengkap serta pekerjaan wali/orang tua siswa.</p>
+                  <p className='text-xs text-slate-500 mt-0.5'>
+                    Nama lengkap serta pekerjaan wali/orang tua siswa.
+                  </p>
                 </div>
               </div>
 
@@ -420,7 +477,9 @@ export default function TambahSiswaClient({ defaultClassName = '' }: TambahSiswa
                     <Input
                       placeholder='Budi Santoso'
                       value={formData.fatherName}
-                      onChange={(e) => setFormData({ ...formData, fatherName: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, fatherName: e.target.value })
+                      }
                       className='bg-slate-50 border-slate-200 focus:border-emerald-500 rounded-xl text-xs h-10 text-slate-900'
                     />
                   </div>
@@ -432,7 +491,9 @@ export default function TambahSiswaClient({ defaultClassName = '' }: TambahSiswa
                     <Input
                       placeholder='Karyawan Swasta'
                       value={formData.fatherJob}
-                      onChange={(e) => setFormData({ ...formData, fatherJob: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, fatherJob: e.target.value })
+                      }
                       className='bg-slate-50 border-slate-200 focus:border-emerald-500 rounded-xl text-xs h-10 text-slate-900'
                     />
                   </div>
@@ -446,7 +507,9 @@ export default function TambahSiswaClient({ defaultClassName = '' }: TambahSiswa
                     <Input
                       placeholder='Siti Aminah'
                       value={formData.motherName}
-                      onChange={(e) => setFormData({ ...formData, motherName: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, motherName: e.target.value })
+                      }
                       className='bg-slate-50 border-slate-200 focus:border-emerald-500 rounded-xl text-xs h-10 text-slate-900'
                     />
                   </div>
@@ -458,7 +521,9 @@ export default function TambahSiswaClient({ defaultClassName = '' }: TambahSiswa
                     <Input
                       placeholder='Ibu Rumah Tangga'
                       value={formData.motherJob}
-                      onChange={(e) => setFormData({ ...formData, motherJob: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, motherJob: e.target.value })
+                      }
                       className='bg-slate-50 border-slate-200 focus:border-emerald-500 rounded-xl text-xs h-10 text-slate-900'
                     />
                   </div>
@@ -472,7 +537,12 @@ export default function TambahSiswaClient({ defaultClassName = '' }: TambahSiswa
                     <Input
                       placeholder='Tidak Ada / Nama Wali'
                       value={formData.guardianName}
-                      onChange={(e) => setFormData({ ...formData, guardianName: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          guardianName: e.target.value,
+                        })
+                      }
                       className='bg-slate-50 border-slate-200 focus:border-emerald-500 rounded-xl text-xs h-10 text-slate-900'
                     />
                   </div>
@@ -484,7 +554,12 @@ export default function TambahSiswaClient({ defaultClassName = '' }: TambahSiswa
                     <Input
                       placeholder='Pekerjaan Wali'
                       value={formData.guardianJob}
-                      onChange={(e) => setFormData({ ...formData, guardianJob: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          guardianJob: e.target.value,
+                        })
+                      }
                       className='bg-slate-50 border-slate-200 focus:border-emerald-500 rounded-xl text-xs h-10 text-slate-900'
                     />
                   </div>
@@ -519,7 +594,9 @@ export default function TambahSiswaClient({ defaultClassName = '' }: TambahSiswa
                     <Input
                       type='date'
                       value={formData.entryDate}
-                      onChange={(e) => setFormData({ ...formData, entryDate: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, entryDate: e.target.value })
+                      }
                       className='bg-slate-50 border-slate-200 focus:border-emerald-500 rounded-xl text-xs h-10 text-slate-900'
                     />
                   </div>
@@ -531,7 +608,9 @@ export default function TambahSiswaClient({ defaultClassName = '' }: TambahSiswa
                     <Input
                       placeholder='Kelas 4'
                       value={formData.entryClass}
-                      onChange={(e) => setFormData({ ...formData, entryClass: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, entryClass: e.target.value })
+                      }
                       className='bg-slate-50 border-slate-200 focus:border-emerald-500 rounded-xl text-xs h-10 text-slate-900'
                     />
                   </div>
@@ -545,7 +624,12 @@ export default function TambahSiswaClient({ defaultClassName = '' }: TambahSiswa
                     <Input
                       placeholder='2026/2027'
                       value={formData.entryAcademicYear}
-                      onChange={(e) => setFormData({ ...formData, entryAcademicYear: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          entryAcademicYear: e.target.value,
+                        })
+                      }
                       className='bg-slate-50 border-slate-200 focus:border-emerald-500 rounded-xl text-xs h-10 text-slate-900'
                     />
                   </div>
@@ -557,7 +641,12 @@ export default function TambahSiswaClient({ defaultClassName = '' }: TambahSiswa
                     <Input
                       placeholder='TK Kartini Jakarta'
                       value={formData.previousSchool}
-                      onChange={(e) => setFormData({ ...formData, previousSchool: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          previousSchool: e.target.value,
+                        })
+                      }
                       className='bg-slate-50 border-slate-200 focus:border-emerald-500 rounded-xl text-xs h-10 text-slate-900'
                     />
                   </div>
@@ -572,7 +661,11 @@ export default function TambahSiswaClient({ defaultClassName = '' }: TambahSiswa
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        status: e.target.value as 'Aktif' | 'Mutasi' | 'Lulus' | 'Non-Aktif',
+                        status: e.target.value as
+                          | 'Aktif'
+                          | 'Mutasi'
+                          | 'Lulus'
+                          | 'Non-Aktif',
                       })
                     }
                     className='w-full bg-slate-50 border border-slate-200 focus:border-emerald-500 rounded-xl text-xs h-10 px-3 text-slate-900 outline-none'

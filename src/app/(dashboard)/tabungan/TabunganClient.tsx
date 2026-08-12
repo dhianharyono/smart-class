@@ -10,7 +10,6 @@ import {
   Wallet,
   ArrowDownRight,
   ArrowUpRight,
-  User,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -184,8 +183,8 @@ export default function TabunganClient() {
             Tabungan Siswa
           </h2>
           <p className='text-slate-600 text-xs sm:text-sm mt-1'>
-            Pantau tabungan siswa, catat setoran (Kredit), penarikan (Debit), dan
-            riwayat mutasi dana.
+            Pantau tabungan siswa, catat setoran (Kredit), penarikan (Debit),
+            dan riwayat mutasi dana.
           </p>
         </div>
 
@@ -262,11 +261,15 @@ export default function TabunganClient() {
                     <TableCell className='text-center font-medium'>
                       {index + 1}
                     </TableCell>
-                    <TableCell className='font-mono font-medium'>{row.nis}</TableCell>
+                    <TableCell className='font-mono font-medium'>
+                      {row.nis}
+                    </TableCell>
                     <TableCell className='font-bold text-slate-900'>
                       {row.name}
                     </TableCell>
-                    <TableCell className='font-medium'>{row.className}</TableCell>
+                    <TableCell className='font-medium'>
+                      {row.className}
+                    </TableCell>
                     <TableCell className='text-center'>
                       <span className='text-xs font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full'>
                         {row.transactionsCount} kali
@@ -274,8 +277,11 @@ export default function TabunganClient() {
                     </TableCell>
                     <TableCell>
                       <span
-                        className={`font-bold ${row.balance > 0 ? 'text-emerald-700' : 'text-slate-400'
-                          }`}
+                        className={`font-bold ${
+                          row.balance > 0
+                            ? 'text-emerald-700'
+                            : 'text-slate-400'
+                        }`}
                       >
                         {formatIDR(row.balance)}
                       </span>
@@ -469,10 +475,11 @@ export default function TabunganClient() {
                     >
                       <div className='flex items-center gap-3'>
                         <div
-                          className={`p-2 rounded-xl border ${isKredit
+                          className={`p-2 rounded-xl border ${
+                            isKredit
                               ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                               : 'bg-rose-50 text-rose-700 border-rose-200'
-                            }`}
+                          }`}
                         >
                           {isKredit ? (
                             <ArrowUpRight className='h-4 w-4' />
@@ -504,8 +511,9 @@ export default function TabunganClient() {
                       </div>
                       <div className='text-right'>
                         <span
-                          className={`text-sm font-extrabold ${isKredit ? 'text-emerald-700' : 'text-rose-700'
-                            }`}
+                          className={`text-sm font-extrabold ${
+                            isKredit ? 'text-emerald-700' : 'text-rose-700'
+                          }`}
                         >
                           {isKredit ? '+' : '-'} {formatIDR(tx.amount)}
                         </span>

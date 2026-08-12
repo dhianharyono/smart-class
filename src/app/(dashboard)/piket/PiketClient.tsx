@@ -1,17 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import {
-  CheckSquare,
-  Users,
-  Printer,
-  Save,
-  Plus,
-  Trash2,
-  Calendar,
-  Sparkles,
-  Info,
-} from 'lucide-react';
+import { Printer, Save, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
@@ -24,7 +14,7 @@ export default function PiketClient() {
     Selasa: 'Eko Prasetyo, Fani Rahmawati, Gita Gutawa, Hendra Pratama',
     Rabu: 'Indah Permata, Joko Widodo, Kartika Putri, Lani Wijaya',
     Kamis: 'Maman Abdurrahman, Nita Amelia, Oki Setiana, Putri Titian',
-    Jumat: 'Rian D\'Masiv, Siska Kohl, Tono Sudirjo, Utama Kencana',
+    Jumat: "Rian D'Masiv, Siska Kohl, Tono Sudirjo, Utama Kencana",
     Sabtu: 'Vina Panduwinata, Wahyu Hidayat, Yuni Shara, Zainal Abidin',
   });
 
@@ -45,7 +35,8 @@ export default function PiketClient() {
             <span>Jadwal Piket Kebersihan Kelas</span>
           </h2>
           <p className='text-slate-600 text-xs sm:text-sm mt-1'>
-            Atur dan kelola pembagian kelompok piket harian siswa untuk menjaga kebersihan dan kerapian kelas.
+            Atur dan kelola pembagian kelompok piket harian siswa untuk menjaga
+            kebersihan dan kerapian kelas.
           </p>
         </div>
 
@@ -72,7 +63,10 @@ export default function PiketClient() {
       <div className='bg-emerald-50/70 border border-emerald-200/80 rounded-2xl p-4 flex items-start gap-3 text-xs text-emerald-900 print:hidden'>
         <Info className='h-4 w-4 text-emerald-600 shrink-0 mt-0.5' />
         <p className='leading-relaxed'>
-          <strong>Petunjuk Pengisian:</strong> Masukkan nama-nama siswa petugas piket harian pada kolom hari masing-masing (pisahkan dengan koma). Hasil penataan ini dapat langsung dicetak untuk ditempel pada papan informasi dinding kelas.
+          <strong>Petunjuk Pengisian:</strong> Masukkan nama-nama siswa petugas
+          piket harian pada kolom hari masing-masing (pisahkan dengan koma).
+          Hasil penataan ini dapat langsung dicetak untuk ditempel pada papan
+          informasi dinding kelas.
         </p>
       </div>
 
@@ -80,7 +74,10 @@ export default function PiketClient() {
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
         {DAYS.map((day) => {
           const names = piketData[day]
-            ? piketData[day].split(',').map((n) => n.trim()).filter(Boolean)
+            ? piketData[day]
+                .split(',')
+                .map((n) => n.trim())
+                .filter(Boolean)
             : [];
 
           return (
@@ -120,7 +117,9 @@ export default function PiketClient() {
                       ))}
                     </div>
                   ) : (
-                    <p className='text-xs text-slate-400 italic py-1'>Belum ada siswa ditambahkan.</p>
+                    <p className='text-xs text-slate-400 italic py-1'>
+                      Belum ada siswa ditambahkan.
+                    </p>
                   )}
                 </div>
 
@@ -132,7 +131,9 @@ export default function PiketClient() {
                   <textarea
                     rows={3}
                     value={piketData[day] || ''}
-                    onChange={(e) => setPiketData({ ...piketData, [day]: e.target.value })}
+                    onChange={(e) =>
+                      setPiketData({ ...piketData, [day]: e.target.value })
+                    }
                     placeholder='Contoh: Ahmad, Budi, Citra, Dewi...'
                     className='w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-800 font-medium focus:border-emerald-500 leading-relaxed resize-none'
                   />

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import Script from 'next/script';
 import { ShieldCheck, AlertCircle, Loader2 } from 'lucide-react';
 
@@ -18,7 +18,12 @@ interface ReCaptchaProps {
   theme?: 'light' | 'dark';
 }
 
-export default function ReCaptcha({ onVerify, onExpire, resetTrigger, theme = 'light' }: ReCaptchaProps) {
+export default function ReCaptcha({
+  onVerify,
+  onExpire,
+  resetTrigger,
+  theme = 'light',
+}: ReCaptchaProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<number | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -28,7 +33,12 @@ export default function ReCaptcha({ onVerify, onExpire, resetTrigger, theme = 'l
   const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 
   const renderWidget = useCallback(() => {
-    if (!siteKey || !containerRef.current || !window.grecaptcha || typeof window.grecaptcha.render !== 'function') {
+    if (
+      !siteKey ||
+      !containerRef.current ||
+      !window.grecaptcha ||
+      typeof window.grecaptcha.render !== 'function'
+    ) {
       return false;
     }
 
@@ -100,39 +110,43 @@ export default function ReCaptcha({ onVerify, onExpire, resetTrigger, theme = 'l
   // Fallback if siteKey is missing (e.g. local dev without env)
   if (!siteKey) {
     return (
-      <div className="flex items-center gap-2 p-3 bg-slate-100 border border-slate-200 rounded-xl text-xs text-slate-600">
-        <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
+      <div className='flex items-center gap-2 p-3 bg-slate-100 border border-slate-200 rounded-xl text-xs text-slate-600'>
+        <ShieldCheck className='h-4 w-4 text-emerald-600 shrink-0' />
         <span>
-          <strong className="text-slate-800 font-medium">Dev Mode:</strong> Proteksi reCAPTCHA aktif (Bypass Mode karena Site Key belum diisi di .env.local).
+          <strong className='text-slate-800 font-medium'>Dev Mode:</strong>{' '}
+          Proteksi reCAPTCHA aktif (Bypass Mode karena Site Key belum diisi di
+          .env.local).
         </span>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center justify-center my-3 relative min-h-[78px] w-full">
+    <div className='flex flex-col items-center justify-center my-3 relative min-h-[78px] w-full'>
       <Script
-        src="https://www.google.com/recaptcha/api.js?onload=onReCaptchaLoadCallback&render=explicit"
-        strategy="afterInteractive"
+        src='https://www.google.com/recaptcha/api.js?onload=onReCaptchaLoadCallback&render=explicit'
+        strategy='afterInteractive'
         onLoad={() => {
           setIsLoaded(true);
         }}
       />
       {!isReady && !error && (
-        <div className="flex items-center justify-center gap-2 px-4 py-5 bg-slate-100 border border-slate-200 rounded-xl text-xs text-slate-600 w-full max-w-[304px] animate-pulse my-1">
-          <Loader2 className="h-4 w-4 animate-spin text-emerald-600 shrink-0" />
+        <div className='flex items-center justify-center gap-2 px-4 py-5 bg-slate-100 border border-slate-200 rounded-xl text-xs text-slate-600 w-full max-w-[304px] animate-pulse my-1'>
+          <Loader2 className='h-4 w-4 animate-spin text-emerald-600 shrink-0' />
           <span>Memuat verifikasi reCAPTCHA...</span>
         </div>
       )}
       <div
         ref={containerRef}
         className={`min-h-[78px] flex items-center justify-center transition-opacity duration-200 ${
-          !isReady ? 'opacity-0 pointer-events-none absolute' : 'opacity-100 relative'
+          !isReady
+            ? 'opacity-0 pointer-events-none absolute'
+            : 'opacity-100 relative'
         }`}
       />
       {error && (
-        <div className="flex items-center gap-1.5 mt-2 text-xs text-rose-400">
-          <AlertCircle className="h-3.5 w-3.5" />
+        <div className='flex items-center gap-1.5 mt-2 text-xs text-rose-400'>
+          <AlertCircle className='h-3.5 w-3.5' />
           <span>{error}</span>
         </div>
       )}

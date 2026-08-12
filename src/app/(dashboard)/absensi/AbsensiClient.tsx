@@ -11,13 +11,7 @@ import {
   Check,
   UserCheck,
   Printer,
-  Eye,
   FileText,
-  ChevronLeft,
-  Filter,
-  BarChart3,
-  TrendingUp,
-  Sparkles,
   Settings2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -57,7 +51,6 @@ import {
   getAttendanceHeaderInfo,
 } from '@/actions/attendanceActions';
 import {
-  exportAttendanceToExcel,
   exportWeeklyAttendanceToExcel,
   exportMonthlyAttendanceToExcel,
   exportYearlyAttendanceToExcel,
@@ -170,7 +163,8 @@ export default function AbsensiClient({
   // Sync headerInfo to docHeader & signatureData
   useEffect(() => {
     if (headerInfo) {
-      const activeNip = (headerInfo.nip && headerInfo.nip.trim() !== '') ? headerInfo.nip : '-';
+      const activeNip =
+        headerInfo.nip && headerInfo.nip.trim() !== '' ? headerInfo.nip : '-';
       setDocHeader((prev) => ({
         ...prev,
         schoolName: headerInfo.schoolName || prev.schoolName,
@@ -183,7 +177,10 @@ export default function AbsensiClient({
         teacherName: headerInfo.teacherName || prev.teacherName,
         teacherNip: activeNip,
         supervisorName: headerInfo.principalName || prev.supervisorName,
-        supervisorNip: (headerInfo.principalNip && headerInfo.principalNip.trim() !== '') ? headerInfo.principalNip : prev.supervisorNip,
+        supervisorNip:
+          headerInfo.principalNip && headerInfo.principalNip.trim() !== ''
+            ? headerInfo.principalNip
+            : prev.supervisorNip,
       }));
     }
   }, [headerInfo]);
@@ -206,10 +203,7 @@ export default function AbsensiClient({
       weekRange.endDateStr,
     ],
     queryFn: () =>
-      getWeeklyAttendanceReport(
-        weekRange.startDateStr,
-        weekRange.endDateStr,
-      ),
+      getWeeklyAttendanceReport(weekRange.startDateStr, weekRange.endDateStr),
     enabled: exportPeriod === 'mingguan',
   });
 
@@ -293,7 +287,12 @@ export default function AbsensiClient({
               );
             }
             const label = `${format(weekRange.mondayDate, 'dd MMM', { locale: id })} - ${format(weekRange.saturdayDate, 'dd MMM yyyy', { locale: id })}`;
-            await exportWeeklyAttendanceToExcel(data, label, docHeader, signatureData);
+            await exportWeeklyAttendanceToExcel(
+              data,
+              label,
+              docHeader,
+              signatureData,
+            );
           })(),
           {
             loading: 'Menyusun rekap Excel mingguan...',
@@ -410,20 +409,22 @@ export default function AbsensiClient({
       <div className='grid grid-cols-2 sm:flex items-center gap-1.5 sm:gap-2 p-1.5 bg-slate-200/80 border border-slate-300/80 rounded-2xl w-full sm:w-fit print:hidden'>
         <button
           onClick={() => setViewMode('input')}
-          className={`flex items-center justify-center text-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer w-full sm:w-auto ${viewMode === 'input'
-            ? 'bg-white text-emerald-700 shadow-xs'
-            : 'text-slate-600 hover:text-slate-900'
-            }`}
+          className={`flex items-center justify-center text-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer w-full sm:w-auto ${
+            viewMode === 'input'
+              ? 'bg-white text-emerald-700 shadow-xs'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
         >
           <UserCheck className='h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0' />
           <span className='truncate'>Data Absensi & Rekap</span>
         </button>
         <button
           onClick={() => setViewMode('preview')}
-          className={`flex items-center justify-center text-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer w-full sm:w-auto ${viewMode === 'preview'
-            ? 'bg-white text-emerald-700 shadow-xs'
-            : 'text-slate-600 hover:text-slate-900'
-            }`}
+          className={`flex items-center justify-center text-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer w-full sm:w-auto ${
+            viewMode === 'preview'
+              ? 'bg-white text-emerald-700 shadow-xs'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
         >
           <FileText className='h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0' />
           <span className='truncate'>Pratinjau Cetak (A4 PDF)</span>
@@ -826,10 +827,11 @@ export default function AbsensiClient({
                       <button
                         key={period}
                         onClick={() => setExportPeriod(period)}
-                        className={`px-2 sm:px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-all cursor-pointer text-center justify-center flex items-center ${isActive
-                          ? 'bg-emerald-600 text-white shadow-xs'
-                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-                          }`}
+                        className={`px-2 sm:px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-all cursor-pointer text-center justify-center flex items-center ${
+                          isActive
+                            ? 'bg-emerald-600 text-white shadow-xs'
+                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+                        }`}
                       >
                         {period}
                       </button>

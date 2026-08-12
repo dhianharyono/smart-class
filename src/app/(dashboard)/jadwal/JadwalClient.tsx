@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import {
-  Calendar,
   Sparkles,
   Printer,
   Plus,
@@ -10,12 +9,7 @@ import {
   Trash2,
   Clock,
   Coffee,
-  CheckSquare,
-  LayoutGrid,
   Info,
-  BookOpen,
-  CheckCircle2,
-  AlertCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -55,13 +49,62 @@ export default function JadwalClient() {
 
   // Timetable Rows State
   const [scheduleRows, setScheduleRows] = useState<ScheduleRow[]>([
-    { jamKe: 1, startTime: '07:15', endTime: '07:55', isBreak: false, breakLabel: 'Jam Istirahat', schedule: {} },
-    { jamKe: 2, startTime: '07:55', endTime: '08:35', isBreak: false, breakLabel: 'Jam Istirahat', schedule: {} },
-    { jamKe: 3, startTime: '08:35', endTime: '09:15', isBreak: false, breakLabel: 'Jam Istirahat', schedule: {} },
-    { jamKe: 4, startTime: '09:15', endTime: '09:55', isBreak: false, breakLabel: 'Jam Istirahat', schedule: {} },
-    { jamKe: 5, startTime: '10:15', endTime: '10:55', isBreak: false, breakLabel: 'Jam Istirahat', schedule: {} },
-    { jamKe: 6, startTime: '10:55', endTime: '11:35', isBreak: false, breakLabel: 'Jam Istirahat', schedule: {} },
-    { jamKe: 7, startTime: '11:35', endTime: '12:15', isBreak: false, breakLabel: 'Jam Istirahat', schedule: {} },
+    {
+      jamKe: 1,
+      startTime: '07:15',
+      endTime: '07:55',
+      isBreak: false,
+      breakLabel: 'Jam Istirahat',
+      schedule: {},
+    },
+    {
+      jamKe: 2,
+      startTime: '07:55',
+      endTime: '08:35',
+      isBreak: false,
+      breakLabel: 'Jam Istirahat',
+      schedule: {},
+    },
+    {
+      jamKe: 3,
+      startTime: '08:35',
+      endTime: '09:15',
+      isBreak: false,
+      breakLabel: 'Jam Istirahat',
+      schedule: {},
+    },
+    {
+      jamKe: 4,
+      startTime: '09:15',
+      endTime: '09:55',
+      isBreak: false,
+      breakLabel: 'Jam Istirahat',
+      schedule: {},
+    },
+    {
+      jamKe: 5,
+      startTime: '10:15',
+      endTime: '10:55',
+      isBreak: false,
+      breakLabel: 'Jam Istirahat',
+      schedule: {},
+    },
+    {
+      jamKe: 6,
+      startTime: '10:55',
+      endTime: '11:35',
+      isBreak: false,
+      breakLabel: 'Jam Istirahat',
+      schedule: {},
+    },
+    {
+      jamKe: 7,
+      startTime: '11:35',
+      endTime: '12:15',
+      isBreak: false,
+      breakLabel: 'Jam Istirahat',
+      schedule: {},
+    },
   ]);
 
   // Piket State
@@ -178,7 +221,9 @@ export default function JadwalClient() {
   // Generate AI Schedule Plotting
   const handleGenerateAI = () => {
     if (baselineSubjects.length === 0) {
-      toast.error('Tambahkan minimal 1 alokasi baseline mata pelajaran terlebih dahulu.');
+      toast.error(
+        'Tambahkan minimal 1 alokasi baseline mata pelajaran terlebih dahulu.',
+      );
       return;
     }
 
@@ -207,7 +252,9 @@ export default function JadwalClient() {
       }),
     );
 
-    toast.success('Jadwal pelajaran berhasil di-generate secara otomatis oleh AI!');
+    toast.success(
+      'Jadwal pelajaran berhasil di-generate secara otomatis oleh AI!',
+    );
   };
 
   // Print function
@@ -236,11 +283,11 @@ export default function JadwalClient() {
       <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between print:hidden'>
         <div>
           <h2 className='text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 flex items-center gap-3'>
-
             <span>Jadwal & Alokasi Pelajaran</span>
           </h2>
           <p className='text-slate-600 text-xs sm:text-sm mt-1'>
-            Kelola target alokasi jam mengajar mingguan dan plotting jadwal pelajaran kelas secara efektif.
+            Kelola target alokasi jam mengajar mingguan dan plotting jadwal
+            pelajaran kelas secara efektif.
           </p>
         </div>
 
@@ -338,12 +385,15 @@ export default function JadwalClient() {
                         className='p-3 rounded-xl border border-slate-100 bg-slate-50/80 flex items-center justify-between gap-3 text-xs'
                       >
                         <div className='flex-1 min-w-0'>
-                          <p className='font-bold text-slate-900 truncate'>{sub.name}</p>
+                          <p className='font-bold text-slate-900 truncate'>
+                            {sub.name}
+                          </p>
                           <div className='flex items-center gap-2 mt-1'>
                             <div className='flex-1 bg-slate-200 rounded-full h-1.5 overflow-hidden'>
                               <div
-                                className={`h-full rounded-full transition-all ${isComplete ? 'bg-emerald-500' : 'bg-amber-500'
-                                  }`}
+                                className={`h-full rounded-full transition-all ${
+                                  isComplete ? 'bg-emerald-500' : 'bg-amber-500'
+                                }`}
                                 style={{
                                   width: `${Math.min(100, (assigned / sub.targetHours) * 100)}%`,
                                 }}
@@ -382,7 +432,8 @@ export default function JadwalClient() {
                 <span>PENGATURAN JAM ISTIRAHAT</span>
               </span>
               <span className='text-[11px] text-slate-500 font-medium'>
-                Klik chip nomor jam untuk mengaktifkan / membatalkan jam istirahat
+                Klik chip nomor jam untuk mengaktifkan / membatalkan jam
+                istirahat
               </span>
             </div>
             <div className='flex flex-wrap items-center gap-2 pt-1'>
@@ -397,7 +448,9 @@ export default function JadwalClient() {
                       : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-emerald-400 hover:bg-emerald-50/50'
                   }`}
                 >
-                  <Coffee className={`h-3.5 w-3.5 ${row.isBreak ? 'text-white' : 'text-slate-400'}`} />
+                  <Coffee
+                    className={`h-3.5 w-3.5 ${row.isBreak ? 'text-white' : 'text-slate-400'}`}
+                  />
                   <span>Jam {row.jamKe}</span>
                   {row.isBreak && (
                     <span className='text-[9px] bg-white/20 text-white px-1.5 py-0.2 rounded font-extrabold uppercase ml-0.5'>
@@ -415,10 +468,17 @@ export default function JadwalClient() {
               <table className='w-full text-xs text-left border-collapse'>
                 <thead>
                   <tr className='bg-slate-50 border-b border-slate-200 text-slate-700 font-bold text-center'>
-                    <th className='p-3 border-r border-slate-200 w-16 uppercase'>JAM</th>
-                    <th className='p-3 border-r border-slate-200 w-36 uppercase'>WAKTU</th>
+                    <th className='p-3 border-r border-slate-200 w-16 uppercase'>
+                      JAM
+                    </th>
+                    <th className='p-3 border-r border-slate-200 w-36 uppercase'>
+                      WAKTU
+                    </th>
                     {DAYS.map((day) => (
-                      <th key={day} className='p-3 border-r border-slate-200 min-w-[120px] uppercase'>
+                      <th
+                        key={day}
+                        className='p-3 border-r border-slate-200 min-w-[120px] uppercase'
+                      >
                         {day}
                       </th>
                     ))}
@@ -446,7 +506,11 @@ export default function JadwalClient() {
                             onChange={(e) => {
                               const val = e.target.value;
                               setScheduleRows((prev) =>
-                                prev.map((r) => (r.jamKe === row.jamKe ? { ...r, startTime: val } : r)),
+                                prev.map((r) =>
+                                  r.jamKe === row.jamKe
+                                    ? { ...r, startTime: val }
+                                    : r,
+                                ),
                               );
                             }}
                             className='w-12 text-center bg-slate-50 border border-slate-200 rounded-md py-0.5 px-1 focus:border-emerald-500'
@@ -458,7 +522,11 @@ export default function JadwalClient() {
                             onChange={(e) => {
                               const val = e.target.value;
                               setScheduleRows((prev) =>
-                                prev.map((r) => (r.jamKe === row.jamKe ? { ...r, endTime: val } : r)),
+                                prev.map((r) =>
+                                  r.jamKe === row.jamKe
+                                    ? { ...r, endTime: val }
+                                    : r,
+                                ),
                               );
                             }}
                             className='w-12 text-center bg-slate-50 border border-slate-200 rounded-md py-0.5 px-1 focus:border-emerald-500'
@@ -468,7 +536,10 @@ export default function JadwalClient() {
 
                       {/* ISTIRAHAT ROW FULL SPAN OR REGULAR DAY CELLS */}
                       {row.isBreak ? (
-                        <td colSpan={DAYS.length} className='p-3 text-center bg-amber-100/70 text-amber-900 font-bold tracking-widest text-xs uppercase'>
+                        <td
+                          colSpan={DAYS.length}
+                          className='p-3 text-center bg-amber-100/70 text-amber-900 font-bold tracking-widest text-xs uppercase'
+                        >
                           <div className='flex items-center justify-center gap-2'>
                             <Coffee className='h-4 w-4 text-amber-700' />
                             <span>ISTIRAHAT / SHOLAT / KANTIN</span>
@@ -476,10 +547,15 @@ export default function JadwalClient() {
                         </td>
                       ) : (
                         DAYS.map((day) => (
-                          <td key={day} className='p-2 border-r border-slate-200 text-center'>
+                          <td
+                            key={day}
+                            className='p-2 border-r border-slate-200 text-center'
+                          >
                             <select
                               value={row.schedule[day] || ''}
-                              onChange={(e) => handleCellChange(row.jamKe, day, e.target.value)}
+                              onChange={(e) =>
+                                handleCellChange(row.jamKe, day, e.target.value)
+                              }
                               className='w-full bg-slate-50 border border-slate-200 text-slate-900 text-xs rounded-xl p-2 font-medium focus:border-emerald-500 cursor-pointer print:border-none print:bg-transparent print:text-center'
                             >
                               <option value=''>-- Kosong --</option>
@@ -488,10 +564,18 @@ export default function JadwalClient() {
                                   {sub.name}
                                 </option>
                               ))}
-                              <option value='Upacara Bendera'>Upacara Bendera</option>
-                              <option value='Senam & Olahraga'>Senam & Olahraga</option>
-                              <option value='Pramuka / Ekstra'>Pramuka / Ekstra</option>
-                              <option value='Tadarus & Literasi'>Tadarus & Literasi</option>
+                              <option value='Upacara Bendera'>
+                                Upacara Bendera
+                              </option>
+                              <option value='Senam & Olahraga'>
+                                Senam & Olahraga
+                              </option>
+                              <option value='Pramuka / Ekstra'>
+                                Pramuka / Ekstra
+                              </option>
+                              <option value='Tadarus & Literasi'>
+                                Tadarus & Literasi
+                              </option>
                             </select>
                           </td>
                         ))
@@ -505,7 +589,8 @@ export default function JadwalClient() {
             {/* Table Footer Controls */}
             <div className='p-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs print:hidden'>
               <div className='font-bold text-slate-700 uppercase tracking-wider'>
-                JUMLAH BARIS JAM PELAJARAN: <span className='text-emerald-700'>{scheduleRows.length}</span>
+                JUMLAH BARIS JAM PELAJARAN:{' '}
+                <span className='text-emerald-700'>{scheduleRows.length}</span>
               </div>
 
               <div className='flex items-center gap-2'>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { BookOpen, Loader2 } from 'lucide-react';
 
 interface LoadingScreenProps {
@@ -78,9 +78,7 @@ export default function LoadingScreen({
 
         {/* Spinner & Message */}
         <div className='flex flex-col items-center space-y-3 pt-4'>
-          <Loader2
-            className='h-6 w-6 animate-spin text-emerald-600'
-          />
+          <Loader2 className='h-6 w-6 animate-spin text-emerald-600' />
           <p className='text-slate-700 text-sm font-medium animate-pulse'>
             {displayMessage}
           </p>

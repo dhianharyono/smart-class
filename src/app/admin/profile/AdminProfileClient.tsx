@@ -6,7 +6,6 @@ import { getAdminProfile, updateAdminProfile } from '@/actions/adminActions';
 import { changePassword } from '@/actions/profileActions';
 import { toast } from 'sonner';
 import {
-  ShieldCheck,
   User,
   Mail,
   AtSign,
@@ -18,18 +17,27 @@ import {
   Loader2,
   Save,
   KeyRound,
-  Calendar,
   AlertCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 
 export default function AdminProfileClient() {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<'info' | 'security'>('info');
 
   // Fetch admin profile
-  const { data: adminProfile, isLoading, error } = useQuery({
+  const {
+    data: adminProfile,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['adminProfile'],
     queryFn: getAdminProfile,
   });
@@ -103,8 +111,12 @@ export default function AdminProfileClient() {
   const isPasswordValid = hasMinLength && hasLetter && hasNumber;
 
   const isConfirmNotEmpty = passwordForm.confirmPassword.length > 0;
-  const isPasswordMatching = isConfirmNotEmpty && passwordForm.newPassword === passwordForm.confirmPassword;
-  const isPasswordMismatch = isConfirmNotEmpty && passwordForm.newPassword !== passwordForm.confirmPassword;
+  const isPasswordMatching =
+    isConfirmNotEmpty &&
+    passwordForm.newPassword === passwordForm.confirmPassword;
+  const isPasswordMismatch =
+    isConfirmNotEmpty &&
+    passwordForm.newPassword !== passwordForm.confirmPassword;
 
   // Submit Profile Changes
   const handleProfileSubmit = (e: React.FormEvent) => {
@@ -115,19 +127,27 @@ export default function AdminProfileClient() {
       return;
     }
 
-    if (!profileForm.username.trim() || profileForm.username.trim().length < 3) {
+    if (
+      !profileForm.username.trim() ||
+      profileForm.username.trim().length < 3
+    ) {
       toast.error('Username minimal 3 karakter.');
       return;
     }
 
     const USERNAME_REGEX = /^[a-zA-Z0-9_]{3,20}$/;
     if (!USERNAME_REGEX.test(profileForm.username.trim().toLowerCase())) {
-      toast.error('Username hanya boleh berisi huruf, angka, dan garis bawah (_).');
+      toast.error(
+        'Username hanya boleh berisi huruf, angka, dan garis bawah (_).',
+      );
       return;
     }
 
     const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!profileForm.email.trim() || !EMAIL_REGEX.test(profileForm.email.trim().toLowerCase())) {
+    if (
+      !profileForm.email.trim() ||
+      !EMAIL_REGEX.test(profileForm.email.trim().toLowerCase())
+    ) {
       toast.error('Format email tidak valid.');
       return;
     }
@@ -145,7 +165,9 @@ export default function AdminProfileClient() {
     }
 
     if (!isPasswordValid) {
-      toast.error('Password baru minimal 6 karakter dan mengandung huruf & angka.');
+      toast.error(
+        'Password baru minimal 6 karakter dan mengandung huruf & angka.',
+      );
       return;
     }
 
@@ -164,7 +186,9 @@ export default function AdminProfileClient() {
     return (
       <div className='min-h-[400px] flex flex-col items-center justify-center gap-3 text-slate-500'>
         <Loader2 className='h-8 w-8 animate-spin text-emerald-600' />
-        <p className='text-xs font-semibold'>Memuat data profil administrator...</p>
+        <p className='text-xs font-semibold'>
+          Memuat data profil administrator...
+        </p>
       </div>
     );
   }
@@ -175,7 +199,8 @@ export default function AdminProfileClient() {
         <AlertCircle className='h-10 w-10 text-rose-500' />
         <h3 className='font-extrabold text-base'>Gagal Memuat Profil</h3>
         <p className='text-xs text-rose-700 font-medium'>
-          {(error as any)?.message || 'Data pengguna admin tidak dapat ditemukan.'}
+          {(error as any)?.message ||
+            'Data pengguna admin tidak dapat ditemukan.'}
         </p>
       </div>
     );
@@ -183,10 +208,10 @@ export default function AdminProfileClient() {
 
   const registeredDateStr = adminProfile.createdAt
     ? new Date(adminProfile.createdAt).toLocaleDateString('id-ID', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    })
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      })
     : '-';
 
   return (
@@ -197,7 +222,8 @@ export default function AdminProfileClient() {
           Profil & Pengaturan Administrator
         </h1>
         <p className='text-xs sm:text-sm text-slate-500 font-medium'>
-          Kelola data akun administrator dan amankan kredensial sistem secara berkala.
+          Kelola data akun administrator dan amankan kredensial sistem secara
+          berkala.
         </p>
       </div>
 
@@ -206,10 +232,11 @@ export default function AdminProfileClient() {
         <Button
           onClick={() => setActiveTab('info')}
           variant='ghost'
-          className={`rounded-xl text-xs font-semibold h-11 px-4 sm:px-5 gap-2 transition-all cursor-pointer w-full sm:w-auto justify-center ${activeTab === 'info'
+          className={`rounded-xl text-xs font-semibold h-11 px-4 sm:px-5 gap-2 transition-all cursor-pointer w-full sm:w-auto justify-center ${
+            activeTab === 'info'
               ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-xs font-bold'
               : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-            }`}
+          }`}
         >
           <User className='h-4 w-4 shrink-0' />
           <span>Informasi Admin</span>
@@ -218,10 +245,11 @@ export default function AdminProfileClient() {
         <Button
           onClick={() => setActiveTab('security')}
           variant='ghost'
-          className={`rounded-xl text-xs font-semibold h-11 px-4 sm:px-5 gap-2 transition-all cursor-pointer w-full sm:w-auto justify-center ${activeTab === 'security'
+          className={`rounded-xl text-xs font-semibold h-11 px-4 sm:px-5 gap-2 transition-all cursor-pointer w-full sm:w-auto justify-center ${
+            activeTab === 'security'
               ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-xs font-bold'
               : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-            }`}
+          }`}
         >
           <KeyRound className='h-4 w-4 shrink-0' />
           <span>Ubah Password</span>
@@ -237,16 +265,23 @@ export default function AdminProfileClient() {
                 <User className='h-5 w-5' />
               </div>
               <div>
-                <CardTitle className='text-base sm:text-lg font-bold text-slate-900'>Informasi Admin</CardTitle>
+                <CardTitle className='text-base sm:text-lg font-bold text-slate-900'>
+                  Informasi Admin
+                </CardTitle>
                 <CardDescription className='text-xs text-slate-500 mt-0.5'>
-                  Perbarui nama lengkap, username, dan alamat email akun administrator
+                  Perbarui nama lengkap, username, dan alamat email akun
+                  administrator
                 </CardDescription>
               </div>
             </div>
           </CardHeader>
 
           <CardContent className='p-6 sm:p-8 space-y-5'>
-            <form id='admin-profile-form' onSubmit={handleProfileSubmit} className='space-y-5'>
+            <form
+              id='admin-profile-form'
+              onSubmit={handleProfileSubmit}
+              className='space-y-5'
+            >
               {/* Nama Lengkap */}
               <div className='space-y-1.5'>
                 <label className='text-xs font-bold uppercase tracking-wider text-slate-700 block'>
@@ -261,7 +296,9 @@ export default function AdminProfileClient() {
                     required
                     placeholder='Contoh: Admin Smart Class, M.Kom'
                     value={profileForm.name}
-                    onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
+                    onChange={(e) =>
+                      setProfileForm({ ...profileForm, name: e.target.value })
+                    }
                     disabled={updateProfileMutation.isPending}
                     className='w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:outline-none rounded-xl text-sm font-medium transition-all shadow-xs disabled:opacity-50'
                   />
@@ -285,7 +322,9 @@ export default function AdminProfileClient() {
                     onChange={(e) =>
                       setProfileForm({
                         ...profileForm,
-                        username: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''),
+                        username: e.target.value
+                          .toLowerCase()
+                          .replace(/[^a-z0-9_]/g, ''),
                       })
                     }
                     disabled={updateProfileMutation.isPending}
@@ -293,7 +332,8 @@ export default function AdminProfileClient() {
                   />
                 </div>
                 <p className='text-[11px] text-slate-400 font-medium'>
-                  Huruf kecil, angka, dan garis bawah (_). Minimal 3-20 karakter.
+                  Huruf kecil, angka, dan garis bawah (_). Minimal 3-20
+                  karakter.
                 </p>
               </div>
 
@@ -311,7 +351,9 @@ export default function AdminProfileClient() {
                     required
                     placeholder='admin@smartclass.sch.id'
                     value={profileForm.email}
-                    onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
+                    onChange={(e) =>
+                      setProfileForm({ ...profileForm, email: e.target.value })
+                    }
                     disabled={updateProfileMutation.isPending}
                     className='w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:outline-none rounded-xl text-sm font-medium transition-all shadow-xs disabled:opacity-50'
                   />
@@ -352,7 +394,9 @@ export default function AdminProfileClient() {
                 <KeyRound className='h-5 w-5' />
               </div>
               <div>
-                <CardTitle className='text-base sm:text-lg font-bold text-slate-900'>Ubah Password</CardTitle>
+                <CardTitle className='text-base sm:text-lg font-bold text-slate-900'>
+                  Ubah Password
+                </CardTitle>
                 <CardDescription className='text-xs text-slate-500 mt-0.5'>
                   Perbarui kata sandi akun administrator Anda secara aman
                 </CardDescription>
@@ -361,7 +405,11 @@ export default function AdminProfileClient() {
           </CardHeader>
 
           <CardContent className='p-6 sm:p-8 space-y-5'>
-            <form id='admin-password-form' onSubmit={handlePasswordSubmit} className='space-y-5'>
+            <form
+              id='admin-password-form'
+              onSubmit={handlePasswordSubmit}
+              className='space-y-5'
+            >
               {/* Password Saat Ini */}
               <div className='space-y-1.5'>
                 <label className='text-xs font-bold uppercase tracking-wider text-slate-700 block'>
@@ -376,7 +424,12 @@ export default function AdminProfileClient() {
                     required
                     placeholder='Masukkan password saat ini'
                     value={passwordForm.currentPassword}
-                    onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                    onChange={(e) =>
+                      setPasswordForm({
+                        ...passwordForm,
+                        currentPassword: e.target.value,
+                      })
+                    }
                     disabled={changePasswordMutation.isPending}
                     className='w-full pl-10 pr-10 py-2.5 bg-slate-50/50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:outline-none rounded-xl text-sm font-medium transition-all shadow-xs disabled:opacity-50'
                   />
@@ -385,7 +438,11 @@ export default function AdminProfileClient() {
                     onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                     className='absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600'
                   >
-                    {showCurrentPassword ? <EyeOff className='h-4 w-4' /> : <Eye className='h-4 w-4' />}
+                    {showCurrentPassword ? (
+                      <EyeOff className='h-4 w-4' />
+                    ) : (
+                      <Eye className='h-4 w-4' />
+                    )}
                   </button>
                 </div>
               </div>
@@ -404,7 +461,12 @@ export default function AdminProfileClient() {
                     required
                     placeholder='Buat password baru (min. 6 karakter)'
                     value={passwordForm.newPassword}
-                    onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                    onChange={(e) =>
+                      setPasswordForm({
+                        ...passwordForm,
+                        newPassword: e.target.value,
+                      })
+                    }
                     disabled={changePasswordMutation.isPending}
                     className='w-full pl-10 pr-10 py-2.5 bg-slate-50/50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:outline-none rounded-xl text-sm font-medium transition-all shadow-xs disabled:opacity-50'
                   />
@@ -413,7 +475,11 @@ export default function AdminProfileClient() {
                     onClick={() => setShowNewPassword(!showNewPassword)}
                     className='absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600'
                   >
-                    {showNewPassword ? <EyeOff className='h-4 w-4' /> : <Eye className='h-4 w-4' />}
+                    {showNewPassword ? (
+                      <EyeOff className='h-4 w-4' />
+                    ) : (
+                      <Eye className='h-4 w-4' />
+                    )}
                   </button>
                 </div>
 
@@ -426,7 +492,13 @@ export default function AdminProfileClient() {
                       ) : (
                         <X className='h-3.5 w-3.5 text-slate-300 shrink-0' />
                       )}
-                      <span className={hasMinLength ? 'text-emerald-700 font-medium' : 'text-slate-400'}>
+                      <span
+                        className={
+                          hasMinLength
+                            ? 'text-emerald-700 font-medium'
+                            : 'text-slate-400'
+                        }
+                      >
                         Min. 6 huruf
                       </span>
                     </div>
@@ -436,7 +508,13 @@ export default function AdminProfileClient() {
                       ) : (
                         <X className='h-3.5 w-3.5 text-slate-300 shrink-0' />
                       )}
-                      <span className={hasLetter ? 'text-emerald-700 font-medium' : 'text-slate-400'}>
+                      <span
+                        className={
+                          hasLetter
+                            ? 'text-emerald-700 font-medium'
+                            : 'text-slate-400'
+                        }
+                      >
                         Huruf
                       </span>
                     </div>
@@ -446,7 +524,13 @@ export default function AdminProfileClient() {
                       ) : (
                         <X className='h-3.5 w-3.5 text-slate-300 shrink-0' />
                       )}
-                      <span className={hasNumber ? 'text-emerald-700 font-medium' : 'text-slate-400'}>
+                      <span
+                        className={
+                          hasNumber
+                            ? 'text-emerald-700 font-medium'
+                            : 'text-slate-400'
+                        }
+                      >
                         Angka
                       </span>
                     </div>
@@ -457,7 +541,8 @@ export default function AdminProfileClient() {
               {/* Konfirmasi Password Baru */}
               <div className='space-y-1.5'>
                 <label className='text-xs font-bold uppercase tracking-wider text-slate-700 block'>
-                  KONFIRMASI PASSWORD BARU <span className='text-rose-500'>*</span>
+                  KONFIRMASI PASSWORD BARU{' '}
+                  <span className='text-rose-500'>*</span>
                 </label>
                 <div className='relative'>
                   <div className='absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400'>
@@ -468,21 +553,31 @@ export default function AdminProfileClient() {
                     required
                     placeholder='Ulangi password baru Anda'
                     value={passwordForm.confirmPassword}
-                    onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                    onChange={(e) =>
+                      setPasswordForm({
+                        ...passwordForm,
+                        confirmPassword: e.target.value,
+                      })
+                    }
                     disabled={changePasswordMutation.isPending}
-                    className={`w-full pl-10 pr-10 py-2.5 bg-slate-50/50 border ${isPasswordMismatch
+                    className={`w-full pl-10 pr-10 py-2.5 bg-slate-50/50 border ${
+                      isPasswordMismatch
                         ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
                         : isPasswordMatching
                           ? 'border-emerald-400 focus:border-emerald-500 focus:ring-emerald-500/20 bg-emerald-50/20'
                           : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
-                      } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all shadow-xs disabled:opacity-50`}
+                    } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all shadow-xs disabled:opacity-50`}
                   />
                   <button
                     type='button'
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className='absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600'
                   >
-                    {showConfirmPassword ? <EyeOff className='h-4 w-4' /> : <Eye className='h-4 w-4' />}
+                    {showConfirmPassword ? (
+                      <EyeOff className='h-4 w-4' />
+                    ) : (
+                      <Eye className='h-4 w-4' />
+                    )}
                   </button>
                 </div>
 

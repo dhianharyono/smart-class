@@ -2,7 +2,7 @@
 
 import React, { useState, useSyncExternalStore } from 'react';
 
-const emptySubscribe = () => () => { };
+const emptySubscribe = () => () => {};
 const getSnapshot = () => true;
 const getServerSnapshot = () => false;
 
@@ -16,7 +16,6 @@ import {
   AlertTriangle,
   TrendingUp,
   AlertCircle,
-  BarChart3,
   BookMarked,
   Home,
   CalendarCheck2,
@@ -129,10 +128,20 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
     }).format(num);
   };
 
-  const enabled = stats.enabledMenus || ['/', '/siswa', '/absensi', '/nilai', '/tabungan', '/jadwal', '/piket', '/jurnal'];
+  const enabled = stats.enabledMenus || [
+    '/',
+    '/siswa',
+    '/absensi',
+    '/nilai',
+    '/tabungan',
+    '/jadwal',
+    '/piket',
+    '/jurnal',
+  ];
 
   const isSiswaEnabled = enabled.includes('/siswa');
-  const isAbsensiEnabled = enabled.includes('/siswa') || enabled.includes('/absensi');
+  const isAbsensiEnabled =
+    enabled.includes('/siswa') || enabled.includes('/absensi');
   const isTabunganEnabled = enabled.includes('/tabungan');
   const isNilaiEnabled = enabled.includes('/nilai');
   const isJurnalEnabled = enabled.includes('/jurnal');
@@ -162,8 +171,7 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
       value: formatIDR(stats.totalSavingsBalance),
       description: 'Total dana terkumpul',
       icon: Wallet,
-      color:
-        'from-amber-50 to-orange-50/30 text-amber-700 border-amber-200/70',
+      color: 'from-amber-50 to-orange-50/30 text-amber-700 border-amber-200/70',
       visible: isTabunganEnabled,
     },
     {
@@ -179,7 +187,8 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
       value: `${stats.totalJournalEntries || 0} Sesi`,
       description: 'Agenda mengajar tercatat',
       icon: BookMarked,
-      color: 'from-purple-50 to-indigo-50/30 text-purple-700 border-purple-200/70',
+      color:
+        'from-purple-50 to-indigo-50/30 text-purple-700 border-purple-200/70',
       visible: isJurnalEnabled,
     },
   ].filter((c) => c.visible);
@@ -202,7 +211,8 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
             Dashboard Utama
           </h2>
           <p className='text-slate-600 text-sm mt-1'>
-            Ringkasan performa akademik, jadwal mengajar, presensi, dan tabungan kelas Anda.
+            Ringkasan performa akademik, jadwal mengajar, presensi, dan tabungan
+            kelas Anda.
           </p>
         </div>
         <Link href='/'>
@@ -217,25 +227,32 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
       </div>
 
       {/* Empty State – when no modules are active */}
-      {statCards.length === 0 && !isTabunganEnabled && !isAbsensiEnabled && !isJurnalEnabled && !isNilaiEnabled && (
-        <div className='flex flex-col items-center justify-center py-20 text-center gap-5 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50'>
-          <div className='flex h-20 w-20 items-center justify-center rounded-2xl bg-white border border-slate-200 shadow-xs text-slate-300'>
-            <LayoutGrid className='h-10 w-10' />
+      {statCards.length === 0 &&
+        !isTabunganEnabled &&
+        !isAbsensiEnabled &&
+        !isJurnalEnabled &&
+        !isNilaiEnabled && (
+          <div className='flex flex-col items-center justify-center py-20 text-center gap-5 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50'>
+            <div className='flex h-20 w-20 items-center justify-center rounded-2xl bg-white border border-slate-200 shadow-xs text-slate-300'>
+              <LayoutGrid className='h-10 w-10' />
+            </div>
+            <div className='space-y-1.5 max-w-sm'>
+              <h3 className='text-base font-extrabold text-slate-800'>
+                Belum Ada Modul Aktif
+              </h3>
+              <p className='text-sm text-slate-500 leading-relaxed'>
+                Anda belum mengaktifkan modul apapun pada dashboard. Aktifkan
+                modul yang ingin ditampilkan melalui halaman pengaturan.
+              </p>
+            </div>
+            <Link href='/settings'>
+              <Button className='bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold gap-2 shadow-xs'>
+                <Sparkles className='h-4 w-4' />
+                Kelola Menu Modul
+              </Button>
+            </Link>
           </div>
-          <div className='space-y-1.5 max-w-sm'>
-            <h3 className='text-base font-extrabold text-slate-800'>Belum Ada Modul Aktif</h3>
-            <p className='text-sm text-slate-500 leading-relaxed'>
-              Anda belum mengaktifkan modul apapun pada dashboard. Aktifkan modul yang ingin ditampilkan melalui halaman pengaturan.
-            </p>
-          </div>
-          <Link href='/settings'>
-            <Button className='bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold gap-2 shadow-xs'>
-              <Sparkles className='h-4 w-4' />
-              Kelola Menu Modul
-            </Button>
-          </Link>
-        </div>
-      )}
+        )}
 
       {/* Grid Stats */}
       {statCards.length > 0 && (
@@ -259,7 +276,9 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
                   <div className='text-2xl sm:text-3xl font-black tracking-tight text-slate-900 mb-1 leading-none'>
                     {card.value}
                   </div>
-                  <p className='text-[11px] text-slate-500 font-medium truncate'>{card.description}</p>
+                  <p className='text-[11px] text-slate-500 font-medium truncate'>
+                    {card.description}
+                  </p>
                 </div>
               </div>
             );
@@ -272,7 +291,9 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
         <div className='grid gap-6 md:grid-cols-3 items-stretch'>
           {/* Rekap Jurnal Mengajar Wali Kelas */}
           {isJurnalEnabled && (
-            <Card className={`bg-white border-slate-200/80 rounded-2xl shadow-xs overflow-hidden flex flex-col justify-between ${isAbsensiEnabled ? 'md:col-span-2' : 'md:col-span-3'}`}>
+            <Card
+              className={`bg-white border-slate-200/80 rounded-2xl shadow-xs overflow-hidden flex flex-col justify-between ${isAbsensiEnabled ? 'md:col-span-2' : 'md:col-span-3'}`}
+            >
               <CardHeader className='flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 sm:p-5 border-b border-slate-100'>
                 <div className='flex items-center gap-3'>
                   <div>
@@ -280,7 +301,8 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
                       Rekap Jurnal Mengajar Wali Kelas
                     </CardTitle>
                     <CardDescription className='text-xs text-slate-500 mt-0.5'>
-                      Daftar riwayat agenda harian mengajar dan absensi siswa terbaru
+                      Daftar riwayat agenda harian mengajar dan absensi siswa
+                      terbaru
                     </CardDescription>
                   </div>
                 </div>
@@ -294,35 +316,54 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
                         <thead className='bg-slate-50 border-b border-slate-200/80 text-slate-500 font-bold uppercase text-[10px] tracking-wider'>
                           <tr>
                             <th className='py-3 px-4'>Pertemuan & Tanggal</th>
-                            <th className='py-3 px-4'>Mata Pelajaran & Materi</th>
-                            <th className='py-3 px-4 text-center'>Absensi (S / I / A)</th>
+                            <th className='py-3 px-4'>
+                              Mata Pelajaran & Materi
+                            </th>
+                            <th className='py-3 px-4 text-center'>
+                              Absensi (S / I / A)
+                            </th>
                             <th className='py-3 px-4'>Kegiatan & Catatan</th>
                           </tr>
                         </thead>
                         <tbody className='divide-y divide-slate-100 bg-white font-medium'>
                           {stats.recentJournals.map((j: any) => (
-                            <tr key={j.id} className='hover:bg-slate-50/80 transition-colors'>
+                            <tr
+                              key={j.id}
+                              className='hover:bg-slate-50/80 transition-colors'
+                            >
                               <td className='py-3.5 px-4 whitespace-nowrap'>
                                 <div className='flex items-center gap-2'>
                                   <span className='px-2 py-0.5 rounded-md bg-purple-100 text-purple-800 text-[10px] font-extrabold shrink-0'>
                                     Sesi {j.meetingNo}
                                   </span>
-                                  <span className='text-slate-900 font-bold'>{j.date}</span>
+                                  <span className='text-slate-900 font-bold'>
+                                    {j.date}
+                                  </span>
                                 </div>
                               </td>
                               <td className='py-3.5 px-4'>
                                 <div>
-                                  <p className='font-bold text-slate-900'>{j.subject}</p>
-                                  <p className='text-slate-500 text-[11px] truncate max-w-xs mt-0.5'>{j.material}</p>
+                                  <p className='font-bold text-slate-900'>
+                                    {j.subject}
+                                  </p>
+                                  <p className='text-slate-500 text-[11px] truncate max-w-xs mt-0.5'>
+                                    {j.material}
+                                  </p>
                                 </div>
                               </td>
                               <td className='py-3.5 px-4 text-center whitespace-nowrap'>
                                 <div className='inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200 text-[11px] font-bold'>
-                                  <span className='text-amber-600'>S: {j.absentS}</span>
+                                  <span className='text-amber-600'>
+                                    S: {j.absentS}
+                                  </span>
                                   <span className='text-slate-300'>•</span>
-                                  <span className='text-blue-600'>I: {j.absentI}</span>
+                                  <span className='text-blue-600'>
+                                    I: {j.absentI}
+                                  </span>
                                   <span className='text-slate-300'>•</span>
-                                  <span className='text-rose-600'>A: {j.absentA}</span>
+                                  <span className='text-rose-600'>
+                                    A: {j.absentA}
+                                  </span>
                                 </div>
                               </td>
                               <td className='py-3.5 px-4'>
@@ -341,12 +382,18 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
                     <div className='p-2.5 rounded-xl bg-white border border-slate-200 text-slate-400 shadow-2xs'>
                       <BookMarked className='h-6 w-6' />
                     </div>
-                    <p className='text-xs font-bold text-slate-700 mt-1'>Belum Ada Catatan Jurnal Mengajar</p>
+                    <p className='text-xs font-bold text-slate-700 mt-1'>
+                      Belum Ada Catatan Jurnal Mengajar
+                    </p>
                     <p className='text-[11px] text-slate-400 max-w-xs leading-relaxed'>
-                      Catatan jurnal kegiatan mengajar harian wali kelas akan tersusun rapi di tabel rekap ini.
+                      Catatan jurnal kegiatan mengajar harian wali kelas akan
+                      tersusun rapi di tabel rekap ini.
                     </p>
                     <Link href='/jurnal' className='mt-2'>
-                      <Button size='sm' className='bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-xs px-4 h-9 cursor-pointer shadow-xs'>
+                      <Button
+                        size='sm'
+                        className='bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-xs px-4 h-9 cursor-pointer shadow-xs'
+                      >
                         Buat Jurnal Baru
                       </Button>
                     </Link>
@@ -358,7 +405,9 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
 
           {/* Attendance Pie Chart */}
           {isAbsensiEnabled && (
-            <Card className={`bg-white border-slate-200/80 rounded-2xl shadow-xs flex flex-col justify-between ${isJurnalEnabled ? 'md:col-span-1' : 'md:col-span-3'}`}>
+            <Card
+              className={`bg-white border-slate-200/80 rounded-2xl shadow-xs flex flex-col justify-between ${isJurnalEnabled ? 'md:col-span-1' : 'md:col-span-3'}`}
+            >
               <CardHeader className='pb-2'>
                 <div className='flex items-center justify-between'>
                   <div>
@@ -422,25 +471,33 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
                     <p className='text-xs font-black text-emerald-700 leading-tight'>
                       {stats.attendanceBreakdown.Hadir}
                     </p>
-                    <p className='text-[10px] text-slate-500 font-medium mt-0.5'>Hadir</p>
+                    <p className='text-[10px] text-slate-500 font-medium mt-0.5'>
+                      Hadir
+                    </p>
                   </div>
                   <div className='bg-blue-50/70 border border-blue-100/80 rounded-xl p-1.5'>
                     <p className='text-xs font-black text-blue-700 leading-tight'>
                       {stats.attendanceBreakdown.Sakit}
                     </p>
-                    <p className='text-[10px] text-slate-500 font-medium mt-0.5'>Sakit</p>
+                    <p className='text-[10px] text-slate-500 font-medium mt-0.5'>
+                      Sakit
+                    </p>
                   </div>
                   <div className='bg-amber-50/70 border border-amber-100/80 rounded-xl p-1.5'>
                     <p className='text-xs font-black text-amber-700 leading-tight'>
                       {stats.attendanceBreakdown.Izin}
                     </p>
-                    <p className='text-[10px] text-slate-500 font-medium mt-0.5'>Izin</p>
+                    <p className='text-[10px] text-slate-500 font-medium mt-0.5'>
+                      Izin
+                    </p>
                   </div>
                   <div className='bg-rose-50/70 border border-rose-100/80 rounded-xl p-1.5'>
                     <p className='text-xs font-black text-rose-700 leading-tight'>
                       {stats.attendanceBreakdown.Alfa}
                     </p>
-                    <p className='text-[10px] text-slate-500 font-medium mt-0.5'>Alfa</p>
+                    <p className='text-[10px] text-slate-500 font-medium mt-0.5'>
+                      Alfa
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -474,9 +531,23 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
                     margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
                   >
                     <defs>
-                      <linearGradient id='colorSaldo' x1='0' y1='0' x2='0' y2='1'>
-                        <stop offset='5%' stopColor='#10b981' stopOpacity={0.25} />
-                        <stop offset='95%' stopColor='#10b981' stopOpacity={0} />
+                      <linearGradient
+                        id='colorSaldo'
+                        x1='0'
+                        y1='0'
+                        x2='0'
+                        y2='1'
+                      >
+                        <stop
+                          offset='5%'
+                          stopColor='#10b981'
+                          stopOpacity={0.25}
+                        />
+                        <stop
+                          offset='95%'
+                          stopColor='#10b981'
+                          stopOpacity={0}
+                        />
                       </linearGradient>
                     </defs>
                     <XAxis
@@ -523,9 +594,12 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
                 <div className='p-2.5 rounded-xl bg-white border border-slate-200 shadow-2xs text-slate-400'>
                   <Wallet className='h-6 w-6' />
                 </div>
-                <p className='text-xs font-bold text-slate-700 mt-1'>Belum Ada Transaksi Tabungan</p>
+                <p className='text-xs font-bold text-slate-700 mt-1'>
+                  Belum Ada Transaksi Tabungan
+                </p>
                 <p className='text-[11px] text-slate-400 max-w-xs leading-relaxed'>
-                  Riwayat setoran & penarikan kas siswa akan otomatis ditampilkan pada grafik ini.
+                  Riwayat setoran & penarikan kas siswa akan otomatis
+                  ditampilkan pada grafik ini.
                 </p>
               </div>
             )}
@@ -534,49 +608,96 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
       )}
 
       {/* Monthly Journal Meetings & Absence Analytics Chart */}
-      {isJurnalEnabled && stats.journalMonthlyStats && stats.journalMonthlyStats.length > 0 && (
-        <Card className='bg-white border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-xs'>
-          <CardHeader className='pb-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-0 sm:p-6 sm:pb-2'>
-            <div className='min-w-0 flex-1'>
-              <CardTitle className='text-sm sm:text-md font-bold text-slate-900 flex items-center gap-2'>
-                <span>Statistik Pertemuan & Ketidakhadiran Siswa Per Bulan</span>
-              </CardTitle>
-              <CardDescription className='text-xs text-slate-500 mt-1'>
-                Grafik intensitas agenda harian mengajar wali kelas dan rekapitulasi absensi per bulan
-              </CardDescription>
-            </div>
-            <div className='text-left sm:text-right text-xs bg-emerald-50/80 sm:bg-transparent p-2.5 sm:p-0 rounded-xl border border-emerald-100 sm:border-none shrink-0'>
-              <span className='text-slate-500 inline sm:block font-medium mr-1 sm:mr-0'>Total Agenda Jurnal:</span>
-              <span className='text-emerald-700 font-extrabold text-xs sm:text-sm'>
-                {stats.totalJournalEntries || 0} Pertemuan
-              </span>
-            </div>
-          </CardHeader>
-          <CardContent className='h-72 sm:h-80 pt-4 p-0 sm:p-6 sm:pt-4'>
-            <ResponsiveContainer width='100%' height='100%'>
-              <BarChart data={stats.journalMonthlyStats} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                <CartesianGrid strokeDasharray='3 3' stroke='#f1f5f9' vertical={false} />
-                <XAxis dataKey='month' stroke='#64748b' fontSize={10} tickLine={false} axisLine={false} />
-                <YAxis stroke='#64748b' fontSize={10} tickLine={false} axisLine={false} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#ffffff',
-                    borderColor: '#e2e8f0',
-                    borderRadius: '12px',
-                    fontSize: '12px',
-                    boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
-                  }}
-                />
-                <Legend wrapperStyle={{ fontSize: '10px', paddingTop: '8px' }} />
-                <Bar dataKey='Pertemuan' fill='#10b981' radius={[4, 4, 0, 0]} name='Sesi Pertemuan' />
-                <Bar dataKey='Sakit' fill='#f59e0b' radius={[4, 4, 0, 0]} name='Sakit (S)' />
-                <Bar dataKey='Izin' fill='#3b82f6' radius={[4, 4, 0, 0]} name='Izin (I)' />
-                <Bar dataKey='Alpha' fill='#f43f5e' radius={[4, 4, 0, 0]} name='Alpha (A)' />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      )}
+      {isJurnalEnabled &&
+        stats.journalMonthlyStats &&
+        stats.journalMonthlyStats.length > 0 && (
+          <Card className='bg-white border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-xs'>
+            <CardHeader className='pb-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-0 sm:p-6 sm:pb-2'>
+              <div className='min-w-0 flex-1'>
+                <CardTitle className='text-sm sm:text-md font-bold text-slate-900 flex items-center gap-2'>
+                  <span>
+                    Statistik Pertemuan & Ketidakhadiran Siswa Per Bulan
+                  </span>
+                </CardTitle>
+                <CardDescription className='text-xs text-slate-500 mt-1'>
+                  Grafik intensitas agenda harian mengajar wali kelas dan
+                  rekapitulasi absensi per bulan
+                </CardDescription>
+              </div>
+              <div className='text-left sm:text-right text-xs bg-emerald-50/80 sm:bg-transparent p-2.5 sm:p-0 rounded-xl border border-emerald-100 sm:border-none shrink-0'>
+                <span className='text-slate-500 inline sm:block font-medium mr-1 sm:mr-0'>
+                  Total Agenda Jurnal:
+                </span>
+                <span className='text-emerald-700 font-extrabold text-xs sm:text-sm'>
+                  {stats.totalJournalEntries || 0} Pertemuan
+                </span>
+              </div>
+            </CardHeader>
+            <CardContent className='h-72 sm:h-80 pt-4 p-0 sm:p-6 sm:pt-4'>
+              <ResponsiveContainer width='100%' height='100%'>
+                <BarChart
+                  data={stats.journalMonthlyStats}
+                  margin={{ top: 10, right: 10, left: -25, bottom: 0 }}
+                >
+                  <CartesianGrid
+                    strokeDasharray='3 3'
+                    stroke='#f1f5f9'
+                    vertical={false}
+                  />
+                  <XAxis
+                    dataKey='month'
+                    stroke='#64748b'
+                    fontSize={10}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    stroke='#64748b'
+                    fontSize={10}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#ffffff',
+                      borderColor: '#e2e8f0',
+                      borderRadius: '12px',
+                      fontSize: '12px',
+                      boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
+                    }}
+                  />
+                  <Legend
+                    wrapperStyle={{ fontSize: '10px', paddingTop: '8px' }}
+                  />
+                  <Bar
+                    dataKey='Pertemuan'
+                    fill='#10b981'
+                    radius={[4, 4, 0, 0]}
+                    name='Sesi Pertemuan'
+                  />
+                  <Bar
+                    dataKey='Sakit'
+                    fill='#f59e0b'
+                    radius={[4, 4, 0, 0]}
+                    name='Sakit (S)'
+                  />
+                  <Bar
+                    dataKey='Izin'
+                    fill='#3b82f6'
+                    radius={[4, 4, 0, 0]}
+                    name='Izin (I)'
+                  />
+                  <Bar
+                    dataKey='Alpha'
+                    fill='#f43f5e'
+                    radius={[4, 4, 0, 0]}
+                    name='Alpha (A)'
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        )}
 
       {/* Notifications Alert Center */}
       {isNilaiEnabled && (
@@ -592,7 +713,8 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
                     Notifikasi Evaluasi Akademik (Di Bawah KKM &lt; {kkm})
                   </CardTitle>
                   <CardDescription className='text-xs text-slate-500 mt-0.5'>
-                    Daftar siswa dengan pencapaian nilai akademis di bawah standar KKM.
+                    Daftar siswa dengan pencapaian nilai akademis di bawah
+                    standar KKM.
                   </CardDescription>
                 </div>
               </CardHeader>
@@ -634,7 +756,8 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
                     Seluruh Siswa Lulus KKM (Standar ≥ {kkm})
                   </h3>
                   <p className='text-xs text-slate-500 mt-0.5'>
-                    Tidak ada siswa dengan nilai di bawah standar saat ini. Seluruh pencapaian akademis dalam kondisi baik.
+                    Tidak ada siswa dengan nilai di bawah standar saat ini.
+                    Seluruh pencapaian akademis dalam kondisi baik.
                   </p>
                 </div>
               </div>

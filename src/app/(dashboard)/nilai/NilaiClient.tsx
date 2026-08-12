@@ -7,13 +7,10 @@ import {
   Loader2,
   Check,
   Plus,
-  BookOpen,
   GraduationCap,
   Settings,
   Printer,
   FileText,
-  Sparkles,
-  ChevronLeft,
   Settings2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -141,7 +138,8 @@ export default function NilaiClient({
   // Sync headerInfo to docHeader & signatureData
   useEffect(() => {
     if (headerInfo) {
-      const activeNip = (headerInfo.nip && headerInfo.nip.trim() !== '') ? headerInfo.nip : '-';
+      const activeNip =
+        headerInfo.nip && headerInfo.nip.trim() !== '' ? headerInfo.nip : '-';
       setDocHeader((prev) => ({
         ...prev,
         schoolName: headerInfo.schoolName || prev.schoolName,
@@ -154,7 +152,10 @@ export default function NilaiClient({
         teacherName: headerInfo.teacherName || prev.teacherName,
         teacherNip: activeNip,
         supervisorName: headerInfo.principalName || prev.supervisorName,
-        supervisorNip: (headerInfo.principalNip && headerInfo.principalNip.trim() !== '') ? headerInfo.principalNip : prev.supervisorNip,
+        supervisorNip:
+          headerInfo.principalNip && headerInfo.principalNip.trim() !== ''
+            ? headerInfo.principalNip
+            : prev.supervisorNip,
       }));
     }
   }, [headerInfo]);
@@ -348,9 +349,9 @@ export default function NilaiClient({
   const allSubjAverageScore =
     allSubjScoresOnly.length > 0
       ? (
-        allSubjScoresOnly.reduce((a: number, b: number) => a + b, 0) /
-        allSubjScoresOnly.length
-      ).toFixed(1)
+          allSubjScoresOnly.reduce((a: number, b: number) => a + b, 0) /
+          allSubjScoresOnly.length
+        ).toFixed(1)
       : '-';
   const allSubjPassedCount = allSubjRecapRows.filter(
     (g: any) => g.overallAverage !== '' && Number(g.overallAverage) >= kkm,
@@ -368,9 +369,9 @@ export default function NilaiClient({
   const recapAverageScore =
     recapScoresOnly.length > 0
       ? (
-        recapScoresOnly.reduce((a: number, b: number) => a + b, 0) /
-        recapScoresOnly.length
-      ).toFixed(1)
+          recapScoresOnly.reduce((a: number, b: number) => a + b, 0) /
+          recapScoresOnly.length
+        ).toFixed(1)
       : '-';
   const recapPassedCount = (recapGrades || []).filter(
     (g: any) => g.finalScore !== '' && Number(g.finalScore) >= kkm,
@@ -386,9 +387,9 @@ export default function NilaiClient({
   const singleAverageScore =
     singleScoresOnly.length > 0
       ? (
-        singleScoresOnly.reduce((a: number, b: number) => a + b, 0) /
-        singleScoresOnly.length
-      ).toFixed(1)
+          singleScoresOnly.reduce((a: number, b: number) => a + b, 0) /
+          singleScoresOnly.length
+        ).toFixed(1)
       : '-';
 
   return (
@@ -495,20 +496,22 @@ export default function NilaiClient({
       <div className='grid grid-cols-2 sm:flex items-center gap-1.5 sm:gap-2 p-1.5 bg-slate-200/80 border border-slate-300/80 rounded-2xl w-full sm:w-fit print:hidden'>
         <button
           onClick={() => setActiveViewTab('data')}
-          className={`flex items-center justify-center text-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer w-full sm:w-auto ${activeViewTab === 'data'
-            ? 'bg-white text-emerald-700 shadow-xs'
-            : 'text-slate-600 hover:text-slate-900'
-            }`}
+          className={`flex items-center justify-center text-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer w-full sm:w-auto ${
+            activeViewTab === 'data'
+              ? 'bg-white text-emerald-700 shadow-xs'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
         >
           <GraduationCap className='h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0' />
           <span className='truncate'>Data Nilai Akademik</span>
         </button>
         <button
           onClick={() => setActiveViewTab('preview')}
-          className={`flex items-center justify-center text-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer w-full sm:w-auto ${activeViewTab === 'preview'
-            ? 'bg-white text-emerald-700 shadow-xs'
-            : 'text-slate-600 hover:text-slate-900'
-            }`}
+          className={`flex items-center justify-center text-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer w-full sm:w-auto ${
+            activeViewTab === 'preview'
+              ? 'bg-white text-emerald-700 shadow-xs'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
         >
           <FileText className='h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0' />
           <span className='truncate'>Pratinjau Cetak (A4 PDF)</span>
@@ -680,10 +683,11 @@ export default function NilaiClient({
                               onChange={(e) =>
                                 handleScoreChange(row.studentId, e.target.value)
                               }
-                              className={`text-center font-bold rounded-xl focus:ring-1 focus:ring-emerald-500 h-9 pr-2 ${row.score !== '' && row.score < kkm
-                                ? 'border-rose-300 text-rose-700 bg-rose-50 focus:border-rose-500'
-                                : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-emerald-500'
-                                }`}
+                              className={`text-center font-bold rounded-xl focus:ring-1 focus:ring-emerald-500 h-9 pr-2 ${
+                                row.score !== '' && row.score < kkm
+                                  ? 'border-rose-300 text-rose-700 bg-rose-50 focus:border-rose-500'
+                                  : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-emerald-500'
+                              }`}
                             />
                             {row.score !== '' && row.score < kkm && (
                               <span className='absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] font-extrabold text-rose-600 uppercase tracking-wider'>
@@ -928,7 +932,10 @@ export default function NilaiClient({
 
               <Select
                 value={reportViewMode}
-                onValueChange={(val) => val && setReportViewMode(val as 'all_subjects' | 'recap' | 'single')}
+                onValueChange={(val) =>
+                  val &&
+                  setReportViewMode(val as 'all_subjects' | 'recap' | 'single')
+                }
               >
                 <SelectTrigger className='bg-slate-50 border-slate-200 text-slate-900 rounded-xl h-10 w-full sm:w-52 text-xs font-bold shadow-xs cursor-pointer'>
                   <SelectValue>
@@ -940,9 +947,24 @@ export default function NilaiClient({
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent className='bg-white border-slate-200 text-slate-900 rounded-xl shadow-xl'>
-                  <SelectItem value='all_subjects' className='text-xs font-semibold cursor-pointer'>Semua Mapel (Leger)</SelectItem>
-                  <SelectItem value='recap' className='text-xs font-semibold cursor-pointer'>Per Mapel (Lengkap)</SelectItem>
-                  <SelectItem value='single' className='text-xs font-semibold cursor-pointer'>Per Kategori</SelectItem>
+                  <SelectItem
+                    value='all_subjects'
+                    className='text-xs font-semibold cursor-pointer'
+                  >
+                    Semua Mapel (Leger)
+                  </SelectItem>
+                  <SelectItem
+                    value='recap'
+                    className='text-xs font-semibold cursor-pointer'
+                  >
+                    Per Mapel (Lengkap)
+                  </SelectItem>
+                  <SelectItem
+                    value='single'
+                    className='text-xs font-semibold cursor-pointer'
+                  >
+                    Per Kategori
+                  </SelectItem>
                 </SelectContent>
               </Select>
 
@@ -1158,8 +1180,8 @@ export default function NilaiClient({
                       : reportViewMode === 'recap'
                         ? recapPassedCount
                         : localGrades.filter(
-                          (g) => g.score !== '' && Number(g.score) >= kkm,
-                        ).length}{' '}
+                            (g) => g.score !== '' && Number(g.score) >= kkm,
+                          ).length}{' '}
                     Siswa
                   </p>
                 </div>
@@ -1173,8 +1195,8 @@ export default function NilaiClient({
                       : reportViewMode === 'recap'
                         ? recapRemedialCount
                         : localGrades.filter(
-                          (g) => g.score !== '' && Number(g.score) < kkm,
-                        ).length}{' '}
+                            (g) => g.score !== '' && Number(g.score) < kkm,
+                          ).length}{' '}
                     Siswa
                   </p>
                 </div>
@@ -1254,10 +1276,11 @@ export default function NilaiClient({
                                 return (
                                   <td
                                     key={subj}
-                                    className={`border border-slate-300 px-2 py-2 text-center font-semibold ${isLow
-                                      ? 'text-rose-600 print:text-black font-bold'
-                                      : ''
-                                      }`}
+                                    className={`border border-slate-300 px-2 py-2 text-center font-semibold ${
+                                      isLow
+                                        ? 'text-rose-600 print:text-black font-bold'
+                                        : ''
+                                    }`}
                                   >
                                     {sc !== '' && sc !== undefined ? sc : '-'}
                                   </td>

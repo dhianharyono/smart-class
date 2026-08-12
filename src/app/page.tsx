@@ -6,37 +6,26 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   BookOpen,
-  Users,
   CalendarCheck2,
   GraduationCap,
   Wallet,
   BookMarked,
-  CheckCircle2,
   ArrowUp,
   ChevronDown,
   Menu,
   X,
   Zap,
   Smartphone,
-  Tablet,
-  Monitor,
-  Settings,
   Check,
   LayoutDashboard,
   LogOut,
   Loader2,
   Calendar,
-  CheckSquare,
   Printer,
   FileSpreadsheet,
-  FileText,
-  ShieldCheck,
   Sparkles,
   Download,
-  Award,
   School,
-  MailCheck,
-  Layers,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getCurrentUserSession, logoutTeacher } from '@/actions/authActions';
@@ -705,10 +694,11 @@ export default function LandingPage() {
                   key={tab.id}
                   whileTap={{ scale: 0.96 }}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`w-full sm:w-auto flex items-center justify-center gap-2 px-3 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer border ${isActive
+                  className={`w-full sm:w-auto flex items-center justify-center gap-2 px-3 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer border ${
+                    isActive
                       ? 'bg-emerald-600 text-white border-emerald-500 shadow-xs'
                       : 'bg-white text-slate-600 hover:bg-slate-100 border-slate-200'
-                    }`}
+                  }`}
                 >
                   <Icon className='h-4 w-4 shrink-0' />
                   <span className='truncate'>{tab.label}</span>
@@ -1311,8 +1301,9 @@ export default function LandingPage() {
                 >
                   <span>{item.q}</span>
                   <ChevronDown
-                    className={`h-5 w-5 text-slate-400 transition-transform duration-300 flex-shrink-0 ${openFaq === idx ? 'rotate-180 text-emerald-600' : ''
-                      }`}
+                    className={`h-5 w-5 text-slate-400 transition-transform duration-300 flex-shrink-0 ${
+                      openFaq === idx ? 'rotate-180 text-emerald-600' : ''
+                    }`}
                   />
                 </button>
                 <AnimatePresence>

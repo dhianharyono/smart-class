@@ -13,80 +13,24 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import {
   User,
   ShieldCheck,
-  Sliders,
   Building,
   GraduationCap,
   Mail,
   Lock,
   Loader2,
-  Check,
   Save,
   KeyRound,
   FileCheck2,
-  Users,
-  CalendarCheck2,
-  Wallet,
-  BookMarked,
-  LayoutDashboard,
-  Calendar,
-  School,
-  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   Card,
-  CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
 } from '@/components/ui/card';
-
-const ALL_MENUS = [
-  {
-    href: '/kelas',
-    label: 'Daftar Kelas',
-    desc: 'Kelola daftar kelas yang diampu (multi-kelas)',
-    icon: School,
-  },
-  {
-    href: '/siswa',
-    label: 'Data Siswa',
-    desc: 'Manajemen profil, data diri, dan direktori siswa',
-    icon: Users,
-  },
-  {
-    href: '/absensi',
-    label: 'Absensi Kelas',
-    desc: 'Pencatatan rekap kehadiran dan statistik kelas',
-    icon: CalendarCheck2,
-  },
-  {
-    href: '/nilai',
-    label: 'Nilai Akademik',
-    desc: 'Penginputan nilai mata pelajaran & standar KKM',
-    icon: GraduationCap,
-  },
-  {
-    href: '/tabungan',
-    label: 'Tabungan Siswa',
-    desc: 'Pencatatan setoran & penarikan kas tabungan',
-    icon: Wallet,
-  },
-  {
-    href: '/jadwal',
-    label: 'Jadwal & Alokasi',
-    desc: 'Plotting jadwal pelajaran mingguan kelas & piket',
-    icon: Calendar,
-  },
-  {
-    href: '/jurnal',
-    label: 'Jurnal Wali Kelas',
-    desc: 'Agenda harian mengajar guru & KBM',
-    icon: BookMarked,
-  },
-];
 
 export default function ProfileClient() {
   const queryClient = useQueryClient();
@@ -635,7 +579,6 @@ export default function ProfileClient() {
           </form>
         </Card>
       )}
-
     </div>
   );
 }

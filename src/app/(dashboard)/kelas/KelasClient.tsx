@@ -19,9 +19,6 @@ import {
   Loader2,
   Sparkles,
   Layers,
-  ArrowRight,
-  ShieldCheck,
-  Building,
   Check,
   Pencil,
 } from 'lucide-react';
@@ -30,7 +27,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   Card,
-  CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
@@ -80,7 +76,8 @@ export default function KelasClient() {
     return ['5A'];
   }, [profile]);
 
-  const activeClass = profile?.activeClass || profile?.className || classesList[0] || '5A';
+  const activeClass =
+    profile?.activeClass || profile?.className || classesList[0] || '5A';
 
   // Handler: Tambah Kelas Baru
   const handleAddClass = async (e: React.FormEvent) => {
@@ -158,7 +155,7 @@ export default function KelasClient() {
 
     if (
       classesList.some(
-        (c) => c !== oldName && c.toLowerCase() === newName.toLowerCase()
+        (c) => c !== oldName && c.toLowerCase() === newName.toLowerCase(),
       )
     ) {
       toast.error(`Kelas "${newName}" sudah ada dalam daftar kelas Anda.`);
@@ -219,7 +216,8 @@ export default function KelasClient() {
             <span>Daftar Kelas</span>
           </h2>
           <p className='text-slate-600 text-xs sm:text-sm mt-1'>
-            Kelola seluruh kelas yang Anda ampu di sekolah, ubah nama kelas, dan beralih antar kelas dengan 1-klik.
+            Kelola seluruh kelas yang Anda ampu di sekolah, ubah nama kelas, dan
+            beralih antar kelas dengan 1-klik.
           </p>
         </div>
       </div>
@@ -231,9 +229,12 @@ export default function KelasClient() {
             <Layers className='h-6 w-6' />
           </div>
           <div className='min-w-0'>
-            <p className='text-xs font-bold text-slate-500 uppercase tracking-wider'>Total Kelas Diampu</p>
+            <p className='text-xs font-bold text-slate-500 uppercase tracking-wider'>
+              Total Kelas Diampu
+            </p>
             <p className='text-xl sm:text-2xl font-extrabold text-slate-900 mt-0.5 justify-self-center'>
-              {isLoading ? '...' : classesList.length} <span className='text-xs font-medium text-slate-400'>Kelas</span>
+              {isLoading ? '...' : classesList.length}{' '}
+              <span className='text-xs font-medium text-slate-400'>Kelas</span>
             </p>
           </div>
         </Card>
@@ -243,7 +244,9 @@ export default function KelasClient() {
             <CheckCircle2 className='h-6 w-6' />
           </div>
           <div className='min-w-0'>
-            <p className='text-xs font-bold text-slate-500 uppercase tracking-wider justify-self-center'>Kelas Aktif</p>
+            <p className='text-xs font-bold text-slate-500 uppercase tracking-wider justify-self-center'>
+              Kelas Aktif
+            </p>
             <p className='text-xl sm:text-2xl font-extrabold text-slate-900 mt-0.5 truncate'>
               {isLoading ? '...' : `Kelas ${activeClass}`}
             </p>
@@ -255,9 +258,13 @@ export default function KelasClient() {
             <Sparkles className='h-6 w-6' />
           </div>
           <div className='min-w-0'>
-            <p className='text-xs font-bold text-slate-500 uppercase tracking-wider'>Mode Pembelajaran</p>
+            <p className='text-xs font-bold text-slate-500 uppercase tracking-wider'>
+              Mode Pembelajaran
+            </p>
             <p className='text-sm sm:text-base font-extrabold text-slate-800 mt-0.5 truncate'>
-              {classesList.length > 1 ? 'Multi-Kelas (Paralel)' : 'Tunggal (Wali Kelas)'}
+              {classesList.length > 1
+                ? 'Multi-Kelas (Paralel)'
+                : 'Tunggal (Wali Kelas)'}
             </p>
           </div>
         </Card>
@@ -276,7 +283,8 @@ export default function KelasClient() {
                     Daftar Kelas Tersedia
                   </CardTitle>
                   <CardDescription className='text-xs text-slate-500 mt-1'>
-                    Pilih kelas untuk mengaktifkan konteks data atau edit nama kelas Anda.
+                    Pilih kelas untuk mengaktifkan konteks data atau edit nama
+                    kelas Anda.
                   </CardDescription>
                 </div>
               </CardHeader>
@@ -293,18 +301,20 @@ export default function KelasClient() {
                     return (
                       <div
                         key={cls}
-                        className={`relative flex flex-col justify-between p-5 rounded-2xl border transition-all duration-200 h-full ${isActive
-                          ? 'bg-gradient-to-br from-emerald-50/80 to-teal-50/50 border-emerald-300 shadow-xs ring-2 ring-emerald-500/20'
-                          : 'bg-white border-slate-200 hover:border-slate-300 hover:shadow-xs'
-                          }`}
+                        className={`relative flex flex-col justify-between p-5 rounded-2xl border transition-all duration-200 h-full ${
+                          isActive
+                            ? 'bg-gradient-to-br from-emerald-50/80 to-teal-50/50 border-emerald-300 shadow-xs ring-2 ring-emerald-500/20'
+                            : 'bg-white border-slate-200 hover:border-slate-300 hover:shadow-xs'
+                        }`}
                       >
                         <div className='flex items-start justify-between gap-3 mb-4'>
                           <div className='flex items-center gap-3'>
                             <div
-                              className={`p-3 rounded-xl ${isActive
-                                ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
-                                : 'bg-slate-100 text-slate-600'
-                                }`}
+                              className={`p-3 rounded-xl ${
+                                isActive
+                                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
+                                  : 'bg-slate-100 text-slate-600'
+                              }`}
                             >
                               <School className='h-6 w-6' />
                             </div>
@@ -313,7 +323,9 @@ export default function KelasClient() {
                                 Kelas {cls}
                               </h3>
                               <p className='text-xs text-slate-500 mt-0.5'>
-                                {isActive ? 'Sedang Digunakan' : 'Siap Diaktifkan'}
+                                {isActive
+                                  ? 'Sedang Digunakan'
+                                  : 'Siap Diaktifkan'}
                               </p>
                             </div>
                           </div>
@@ -453,7 +465,8 @@ export default function KelasClient() {
               Edit Nama Kelas {editModal.oldName}
             </DialogTitle>
             <DialogDescription className='text-xs text-slate-500'>
-              Ubah nama kelas ini (misal: 11A menjadi XI IPA 1). Data seluruh siswa di kelas ini akan diperbarui secara otomatis.
+              Ubah nama kelas ini (misal: 11A menjadi XI IPA 1). Data seluruh
+              siswa di kelas ini akan diperbarui secara otomatis.
             </DialogDescription>
           </DialogHeader>
 

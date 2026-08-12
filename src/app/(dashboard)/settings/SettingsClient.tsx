@@ -6,8 +6,6 @@ import { getProfile, updateMenuPreferences } from '@/actions/profileActions';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import {
-  Settings,
-  Sliders,
   Users,
   CalendarCheck2,
   GraduationCap,
@@ -16,14 +14,9 @@ import {
   Check,
   Save,
   Loader2,
-  User,
-  ShieldCheck,
-  Sparkles,
   LayoutDashboard,
   RotateCcw,
   CheckCircle2,
-  ArrowRight,
-  Monitor,
   Calendar,
   School,
 } from 'lucide-react';
@@ -35,7 +28,6 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card';
-import Link from 'next/link';
 
 const CONFIGURABLE_MENUS = [
   {

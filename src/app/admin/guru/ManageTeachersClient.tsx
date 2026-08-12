@@ -11,7 +11,6 @@ import {
   Search,
   Edit2,
   Trash2,
-  GraduationCap,
   School,
   X,
   AlertTriangle,
@@ -23,13 +22,7 @@ import {
   EyeOff,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface Teacher {
   _id: string;
@@ -86,8 +79,15 @@ export default function ManageTeachersClient({
   // Search & School Filter
   const filteredTeachers = teachers.filter((t) => {
     const query = searchQuery.toLowerCase();
-    const teacherClasses = Array.isArray(t.classes) && t.classes.length > 0 ? t.classes : (t.className ? [t.className] : []);
-    const matchesClass = teacherClasses.some((c) => c.toLowerCase().includes(query));
+    const teacherClasses =
+      Array.isArray(t.classes) && t.classes.length > 0
+        ? t.classes
+        : t.className
+          ? [t.className]
+          : [];
+    const matchesClass = teacherClasses.some((c) =>
+      c.toLowerCase().includes(query),
+    );
     const matchesSearch =
       t.name.toLowerCase().includes(query) ||
       t.email.toLowerCase().includes(query) ||
@@ -105,7 +105,11 @@ export default function ManageTeachersClient({
     setEditName(teacher.name);
     setEditEmail(teacher.email);
     setEditSchool(teacher.schoolName || '');
-    setEditClass(teacher.classes && teacher.classes.length > 0 ? teacher.classes.join(', ') : (teacher.className || ''));
+    setEditClass(
+      teacher.classes && teacher.classes.length > 0
+        ? teacher.classes.join(', ')
+        : teacher.className || '',
+    );
     setEditRole(teacher.role || 'Wali Kelas');
     setIsEditOpen(true);
   };
@@ -179,20 +183,32 @@ export default function ManageTeachersClient({
       if (res.success) {
         toast.success('Data guru berhasil diubah.');
         const parsedEditClasses = editClass
-          ? Array.from(new Set(editClass.split(/[,/]/).map((s) => s.trim()).filter(Boolean)))
+          ? Array.from(
+              new Set(
+                editClass
+                  .split(/[,/]/)
+                  .map((s) => s.trim())
+                  .filter(Boolean),
+              ),
+            )
           : [];
         setTeachers((prev) =>
           prev.map((t) =>
             t._id === selectedTeacher._id
               ? {
-                ...t,
-                name: editName,
-                email: editEmail,
-                schoolName: editSchool,
-                className: parsedEditClasses[0] || editClass,
-                classes: parsedEditClasses.length > 0 ? parsedEditClasses : (editClass ? [editClass] : []),
-                role: editRole,
-              }
+                  ...t,
+                  name: editName,
+                  email: editEmail,
+                  schoolName: editSchool,
+                  className: parsedEditClasses[0] || editClass,
+                  classes:
+                    parsedEditClasses.length > 0
+                      ? parsedEditClasses
+                      : editClass
+                        ? [editClass]
+                        : [],
+                  role: editRole,
+                }
               : t,
           ),
         );
@@ -328,10 +344,11 @@ export default function ManageTeachersClient({
                               {teacher.email}
                             </span>
                             <span
-                              className={`px-2 py-0.5 border text-[9px] font-bold rounded-md uppercase tracking-wider ${teacher.role === 'Kepala Sekolah'
-                                ? 'bg-violet-50 text-violet-700 border-violet-200'
-                                : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                }`}
+                              className={`px-2 py-0.5 border text-[9px] font-bold rounded-md uppercase tracking-wider ${
+                                teacher.role === 'Kepala Sekolah'
+                                  ? 'bg-violet-50 text-violet-700 border-violet-200'
+                                  : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                              }`}
                             >
                               {teacher.role || 'Wali Kelas'}
                             </span>
@@ -348,7 +365,10 @@ export default function ManageTeachersClient({
                         <div className='flex flex-wrap gap-1 items-center'>
                           {teacher.classes && teacher.classes.length > 0 ? (
                             teacher.classes.map((cls, idx) => (
-                              <span key={idx} className='bg-emerald-50 border border-emerald-200/90 text-emerald-800 px-2 py-0.5 rounded text-[11px] font-mono font-bold'>
+                              <span
+                                key={idx}
+                                className='bg-emerald-50 border border-emerald-200/90 text-emerald-800 px-2 py-0.5 rounded text-[11px] font-mono font-bold'
+                              >
                                 Kelas {cls}
                               </span>
                             ))
@@ -402,7 +422,9 @@ export default function ManageTeachersClient({
           ) : (
             <div className='flex flex-col items-center justify-center py-16 text-slate-400 text-xs gap-1 px-6'>
               <AlertCircle className='h-8 w-8 text-slate-300' />
-              <span className='font-bold text-slate-700'>Tidak ada wali kelas ditemukan.</span>
+              <span className='font-bold text-slate-700'>
+                Tidak ada wali kelas ditemukan.
+              </span>
             </div>
           )}
         </CardContent>
@@ -502,7 +524,9 @@ export default function ManageTeachersClient({
                 <div className='space-y-1'>
                   <div>
                     <label className='block text-xs font-semibold text-slate-700 mb-1'>
-                      Nama Kelas <span className='text-slate-400'>(misal: 5A, 5B)</span> <span className='text-rose-500'>*</span>
+                      Nama Kelas{' '}
+                      <span className='text-slate-400'>(misal: 5A, 5B)</span>{' '}
+                      <span className='text-rose-500'>*</span>
                     </label>
                     <input
                       type='text'
@@ -561,13 +585,18 @@ export default function ManageTeachersClient({
               <div className='p-2 rounded-xl bg-rose-50 border border-rose-200'>
                 <AlertTriangle className='h-5 w-5' />
               </div>
-              <h3 className='text-lg font-bold text-slate-900'>Hapus Akun Guru?</h3>
+              <h3 className='text-lg font-bold text-slate-900'>
+                Hapus Akun Guru?
+              </h3>
             </div>
 
             <div className='space-y-3 mb-6'>
               <p className='text-sm text-slate-700'>
                 Apakah Anda yakin ingin menghapus akun guru{' '}
-                <strong className='text-slate-900'>{selectedTeacher.name}</strong>?
+                <strong className='text-slate-900'>
+                  {selectedTeacher.name}
+                </strong>
+                ?
               </p>
               <div className='p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 space-y-1'>
                 <p className='font-bold text-rose-800'>
@@ -752,7 +781,11 @@ export default function ManageTeachersClient({
                   </div>
                   <div className='space-y-1'>
                     <label className='block text-xs font-semibold text-slate-700 mb-1'>
-                      Nama Kelas <span className='text-slate-400 font-normal'>(misal: 5A, 5B)</span> <span className='text-rose-500'>*</span>
+                      Nama Kelas{' '}
+                      <span className='text-slate-400 font-normal'>
+                        (misal: 5A, 5B)
+                      </span>{' '}
+                      <span className='text-rose-500'>*</span>
                     </label>
                     <input
                       type='text'
