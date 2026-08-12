@@ -121,9 +121,6 @@ export default function TambahSiswaClient({ defaultClassName = '' }: TambahSiswa
             <span className='text-emerald-700 font-bold'>Biodata Baru</span>
           </div>
           <h2 className='text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 flex items-center gap-3'>
-            <div className='p-2 bg-emerald-100 text-emerald-700 rounded-xl'>
-              <UserPlus className='h-6 w-6' />
-            </div>
             <span>Formulir Input Biodata Siswa</span>
           </h2>
           <p className='text-slate-600 text-xs sm:text-sm mt-1'>

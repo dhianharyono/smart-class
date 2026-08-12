@@ -539,7 +539,6 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
           <CardHeader className='pb-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-0 sm:p-6 sm:pb-2'>
             <div className='min-w-0 flex-1'>
               <CardTitle className='text-sm sm:text-md font-bold text-slate-900 flex items-center gap-2'>
-                <BarChart3 className='h-5 w-5 text-emerald-600 shrink-0' />
                 <span>Statistik Pertemuan & Ketidakhadiran Siswa Per Bulan</span>
               </CardTitle>
               <CardDescription className='text-xs text-slate-500 mt-1'>

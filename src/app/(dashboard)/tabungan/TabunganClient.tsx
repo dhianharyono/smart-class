@@ -189,11 +189,11 @@ export default function TabunganClient() {
           </p>
         </div>
 
-        <div className='flex flex-wrap items-center gap-2 sm:gap-3'>
+        <div className='grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto'>
           <Button
             onClick={handleExcelExport}
             variant='outline'
-            className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs sm:text-sm font-semibold rounded-xl h-10 px-3.5 sm:px-4 gap-2 shadow-xs'
+            className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs sm:text-sm font-semibold rounded-xl h-10 px-3.5 sm:px-4 gap-2 shadow-xs w-full sm:w-auto justify-center'
           >
             <Download className='h-4 w-4' />
             Ekspor Excel
@@ -206,7 +206,7 @@ export default function TabunganClient() {
                 toast.error('Tambahkan data siswa terlebih dahulu!');
               }
             }}
-            className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold rounded-xl h-10 px-3.5 sm:px-4 gap-2 shadow-xs'
+            className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold rounded-xl h-10 px-3.5 sm:px-4 gap-2 shadow-xs w-full sm:w-auto justify-center'
           >
             <Plus className='h-4 w-4' />
             Transaksi Baru

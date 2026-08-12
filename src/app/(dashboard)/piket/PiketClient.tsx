@@ -49,18 +49,18 @@ export default function PiketClient() {
           </p>
         </div>
 
-        <div className='flex flex-wrap items-center gap-2.5'>
+        <div className='grid grid-cols-1 sm:flex sm:flex-wrap items-center gap-2.5 w-full sm:w-auto'>
           <Button
             onClick={handlePrint}
             variant='outline'
-            className='border-slate-900 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl h-10 px-4 gap-2 shadow-xs cursor-pointer'
+            className='border-slate-900 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl h-10 px-4 gap-2 shadow-xs cursor-pointer w-full sm:w-auto justify-center'
           >
             <Printer className='h-4 w-4' />
             <span>Cetak Jadwal Piket Dinding</span>
           </Button>
           <Button
             onClick={handleSave}
-            className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl h-10 px-5 gap-2 shadow-xs cursor-pointer'
+            className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl h-10 px-5 gap-2 shadow-xs cursor-pointer w-full sm:w-auto justify-center'
           >
             <Save className='h-4 w-4' />
             <span>Simpan Jadwal Piket</span>

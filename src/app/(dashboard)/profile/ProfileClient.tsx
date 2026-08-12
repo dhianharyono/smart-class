@@ -331,7 +331,7 @@ export default function ProfileClient() {
       </div>
 
       {/* Tabs Switcher */}
-      <div className='grid grid-cols-1 sm:flex sm:items-center sm:gap-2 border-b border-slate-200 pb-3 gap-2'>
+      <div className='grid grid-cols-2 sm:flex sm:items-center sm:gap-2 border-b border-slate-200 pb-3 gap-2'>
         <Button
           onClick={() => setActiveTab('profile')}
           variant='ghost'

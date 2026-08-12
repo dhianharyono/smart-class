@@ -407,26 +407,26 @@ export default function AbsensiClient({
       )}
 
       {/* View Mode Navigation Tabs (Matching Jurnal Client UI) */}
-      <div className='flex items-center gap-2 p-1.5 bg-slate-200/80 border border-slate-300/80 rounded-2xl w-fit print:hidden'>
+      <div className='grid grid-cols-2 sm:flex items-center gap-1.5 sm:gap-2 p-1.5 bg-slate-200/80 border border-slate-300/80 rounded-2xl w-full sm:w-fit print:hidden'>
         <button
           onClick={() => setViewMode('input')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${viewMode === 'input'
+          className={`flex items-center justify-center text-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer w-full sm:w-auto ${viewMode === 'input'
             ? 'bg-white text-emerald-700 shadow-xs'
             : 'text-slate-600 hover:text-slate-900'
             }`}
         >
-          <UserCheck className='h-4 w-4' />
-          <span>Data Absensi & Rekap</span>
+          <UserCheck className='h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0' />
+          <span className='truncate'>Data Absensi & Rekap</span>
         </button>
         <button
           onClick={() => setViewMode('preview')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${viewMode === 'preview'
+          className={`flex items-center justify-center text-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer w-full sm:w-auto ${viewMode === 'preview'
             ? 'bg-white text-emerald-700 shadow-xs'
             : 'text-slate-600 hover:text-slate-900'
             }`}
         >
-          <FileText className='h-4 w-4' />
-          <span>Pratinjau Cetak (A4 PDF)</span>
+          <FileText className='h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0' />
+          <span className='truncate'>Pratinjau Cetak (A4 PDF)</span>
         </button>
       </div>
 

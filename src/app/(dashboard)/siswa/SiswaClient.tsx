@@ -197,17 +197,17 @@ export default function SiswaClient({ initialStudents }: SiswaClientProps) {
           </p>
         </div>
 
-        <div className='flex flex-wrap items-center gap-2.5'>
+        <div className='grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2.5 w-full sm:w-auto'>
           <Button
             onClick={handleExcelExport}
             variant='outline'
-            className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl h-10 px-3.5 gap-2 shadow-xs'
+            className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl h-10 px-3.5 gap-2 shadow-xs w-full sm:w-auto justify-center'
           >
             <Download className='h-4 w-4 text-amber-600' />
             <span>Ekspor Excel</span>
           </Button>
-          <Link href='/siswa/tambah'>
-            <Button className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl h-10 px-4 gap-2 shadow-xs cursor-pointer'>
+          <Link href='/siswa/tambah' className='w-full sm:w-auto'>
+            <Button className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl h-10 px-4 gap-2 shadow-xs cursor-pointer w-full justify-center'>
               <UserPlus className='h-4 w-4' />
               <span>Input Biodata Lengkap</span>
             </Button>

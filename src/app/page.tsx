@@ -386,7 +386,7 @@ export default function LandingPage() {
             className='inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-extrabold mb-4 shadow-2xs'
           >
             <span className='flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse' />
-            <span>FITUR BARU: Dukungan Multi-Kelas & Active Switcher</span>
+            <span>UPDATE: Dukungan Multi-Kelas & Active Switcher</span>
           </motion.div>
 
           {/* Main Title H1 */}
@@ -410,8 +410,7 @@ export default function LandingPage() {
             className='mt-5 sm:mt-6 text-base sm:text-lg md:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed font-normal px-2'
           >
             Satu sistem terpadu untuk pencatatan presensi siswa, penilaian KKM,
-            agenda jurnal KBM harian, dan laporan kelas
-            otomatis.
+            agenda jurnal KBM harian, dan laporan kelas otomatis.
           </motion.p>
 
           {/* CTA Buttons */}
@@ -582,7 +581,8 @@ export default function LandingPage() {
                       <span>Pratinjau Cetak & Ekspor Laporan</span>
                     </div>
                     <div className='text-[11px] text-slate-600 font-medium'>
-                      Dinamis dan siap cetak lengkap dengan TTD Wali Kelas, Kepala Sekolah & NIP/NUPTK.
+                      Dinamis dan siap cetak lengkap dengan TTD Wali Kelas,
+                      Kepala Sekolah & NIP/NUPTK.
                     </div>
                   </div>
                 </div>
@@ -688,7 +688,7 @@ export default function LandingPage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className='flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-8 sm:mb-10 max-w-full px-1'
+            className='grid grid-cols-2 sm:flex sm:flex-wrap justify-center gap-2 sm:gap-3 mb-8 sm:mb-10 w-full max-w-full px-1'
           >
             {[
               { id: 'absensi', label: 'Absensi Kelas', icon: CalendarCheck2 },
@@ -705,13 +705,14 @@ export default function LandingPage() {
                   key={tab.id}
                   whileTap={{ scale: 0.96 }}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer border ${isActive
-                    ? 'bg-emerald-600 text-white border-emerald-500 shadow-xs'
-                    : 'bg-white text-slate-600 hover:bg-slate-100 border-slate-200'
-                    }`}
+                  className={`w-full sm:w-auto flex items-center justify-center gap-2 px-3 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer border ${
+                    isActive
+                      ? 'bg-emerald-600 text-white border-emerald-500 shadow-xs'
+                      : 'bg-white text-slate-600 hover:bg-slate-100 border-slate-200'
+                  }`}
                 >
-                  <Icon className='h-4 w-4' />
-                  <span>{tab.label}</span>
+                  <Icon className='h-4 w-4 shrink-0' />
+                  <span className='truncate'>{tab.label}</span>
                 </motion.button>
               );
             })}
@@ -740,7 +741,8 @@ export default function LandingPage() {
                     <p className='text-slate-600 text-sm leading-relaxed font-medium'>
                       Input kehadiran siswa harian (Hadir, Sakit, Izin, Alpa)
                       secara praktis. Sistem akan mengalkulasi persentase
-                      kehadiran bulanan dan mendukung Pratinjau Cetak / Ekspor PDF & Excel.
+                      kehadiran bulanan dan mendukung Pratinjau Cetak / Ekspor
+                      PDF & Excel.
                     </p>
                     <ul className='space-y-3 text-sm text-slate-700 font-medium'>
                       <li className='flex items-center gap-3'>
@@ -816,7 +818,8 @@ export default function LandingPage() {
                     <p className='text-slate-600 text-sm leading-relaxed font-medium'>
                       Input nilai per mata pelajaran, set nilai KKM standar, dan
                       biarkan Smart Class mengalkulasi rata-rata serta
-                      menyediakan lembar pratinjau cetak laporan nilai lengkap TTD.
+                      menyediakan lembar pratinjau cetak laporan nilai lengkap
+                      TTD.
                     </p>
                     <ul className='space-y-3 text-sm text-slate-700 font-medium'>
                       <li className='flex items-center gap-3'>
@@ -831,7 +834,9 @@ export default function LandingPage() {
                       </li>
                       <li className='flex items-center gap-3'>
                         <Check className='h-4 w-4 text-teal-600' />
-                        <span>Pratinjau Cetak & Export Laporan Nilai Ke Excel/PDF</span>
+                        <span>
+                          Pratinjau Cetak & Export Laporan Nilai Ke Excel/PDF
+                        </span>
                       </li>
                     </ul>
                   </div>
@@ -1077,7 +1082,10 @@ export default function LandingPage() {
                       Ampu Lebih dari 1 Kelas dalam 1 Akun Terpadu
                     </h3>
                     <p className='text-slate-600 text-sm leading-relaxed font-medium'>
-                      Wali kelas / Guru kini dapat mengampu dan mengelola multiple kelas (seperti Kelas 5A, 5B, 6A) tanpa perlu membuat akun terpisah. Berpindah kelas aktif dalam 1-klik dengan isolasi data mandiri.
+                      Wali kelas / Guru kini dapat mengampu dan mengelola
+                      multiple kelas (seperti Kelas 5A, 5B, 6A) tanpa perlu
+                      membuat akun terpisah. Berpindah kelas aktif dalam 1-klik
+                      dengan isolasi data mandiri.
                     </p>
                     <ul className='space-y-3 text-sm text-slate-700 font-medium'>
                       <li className='flex items-center gap-3'>
@@ -1089,13 +1097,15 @@ export default function LandingPage() {
                       <li className='flex items-center gap-3'>
                         <Check className='h-4 w-4 text-emerald-600' />
                         <span>
-                          Isolasi data mandiri per-kelas (Siswa, Presensi, Nilai, Tabungan & Jurnal)
+                          Isolasi data mandiri per-kelas (Siswa, Presensi,
+                          Nilai, Tabungan & Jurnal)
                         </span>
                       </li>
                       <li className='flex items-center gap-3'>
                         <Check className='h-4 w-4 text-emerald-600' />
                         <span>
-                          Input tag multi-kelas cepat saat onboarding awal & halaman profil
+                          Input tag multi-kelas cepat saat onboarding awal &
+                          halaman profil
                         </span>
                       </li>
                     </ul>
@@ -1117,14 +1127,18 @@ export default function LandingPage() {
                           <School className='h-4 w-4 text-white' />
                           <span>Kelas 11A</span>
                         </div>
-                        <span className='text-[10px] bg-white/20 px-2 py-0.5 rounded font-extrabold'>✓ KELAS AKTIF</span>
+                        <span className='text-[10px] bg-white/20 px-2 py-0.5 rounded font-extrabold'>
+                          ✓ KELAS AKTIF
+                        </span>
                       </div>
                       <div className='flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200 text-slate-700 font-bold shadow-xs hover:bg-slate-100'>
                         <div className='flex items-center gap-2'>
                           <School className='h-4 w-4 text-slate-500' />
                           <span>Kelas 12B</span>
                         </div>
-                        <span className='text-[10px] text-slate-400 font-bold'>Beralih ›</span>
+                        <span className='text-[10px] text-slate-400 font-bold'>
+                          Beralih ›
+                        </span>
                       </div>
                       <div className='p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-semibold text-center'>
                         + Tambah Kelas Pengampuan Baru
@@ -1144,10 +1158,14 @@ export default function LandingPage() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className='mt-6 p-4 rounded-2xl bg-white border border-slate-200/80 text-xs sm:text-sm text-slate-600 font-medium flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left shadow-2xs'
           >
-            <div className='flex items-center gap-2.5'>
-              <Sparkles className='h-4 w-4 text-emerald-600 shrink-0' />
+            <div className='flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-2 sm:gap-2.5'>
+              <Sparkles className='h-4 w-4 text-emerald-600 shrink-0 mt-0.5' />
               <span>
-                <strong className='text-slate-900 font-bold'>Modul Lengkap Lainnya:</strong> Manajemen Piket Kebersihan, Database Profil Siswa, Pratinjau Cetak Rekapitulasi Sah, serta Ekspor PDF & Excel.
+                <strong className='text-slate-900 font-bold'>
+                  Modul Lengkap Lainnya:
+                </strong>{' '}
+                Manajemen Piket Kebersihan, Database Profil Siswa, Pratinjau
+                Cetak Rekapitulasi Sah, serta Ekspor PDF & Excel.
               </span>
             </div>
             <div className='flex items-center gap-1.5 shrink-0 font-extrabold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200'>
@@ -1294,8 +1312,9 @@ export default function LandingPage() {
                 >
                   <span>{item.q}</span>
                   <ChevronDown
-                    className={`h-5 w-5 text-slate-400 transition-transform duration-300 flex-shrink-0 ${openFaq === idx ? 'rotate-180 text-emerald-600' : ''
-                      }`}
+                    className={`h-5 w-5 text-slate-400 transition-transform duration-300 flex-shrink-0 ${
+                      openFaq === idx ? 'rotate-180 text-emerald-600' : ''
+                    }`}
                   />
                 </button>
                 <AnimatePresence>
