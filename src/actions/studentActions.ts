@@ -10,8 +10,8 @@ import { verifySession } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { isRedirectError } from '@/lib/utils';
-
 import Teacher from '@/models/Teacher';
+import { studentSchema, updateStudentSchema, objectIdSchema } from '@/lib/validations';
 
 // Helper to authenticate teacher and return teacherId
 async function requireAuth() {
@@ -26,7 +26,6 @@ async function requireAuth() {
   }
   return session.userId;
 }
-
 
 export async function getStudents() {
   try {
@@ -54,6 +53,11 @@ export async function getStudents() {
 
 export async function getStudentById(id: string) {
   try {
+    const idValidation = objectIdSchema.safeParse(id);
+    if (!idValidation.success) {
+      throw new Error('ID siswa tidak valid.');
+    }
+
     await dbConnect();
     const teacherId = await requireAuth();
     const student = await Student.findOne({ _id: id, teacherId }).lean();
@@ -70,16 +74,18 @@ export async function getStudentById(id: string) {
   }
 }
 
-export async function createStudent(data: Partial<IStudent>) {
+export async function createStudent(rawData: Partial<IStudent>) {
   try {
+    const parseResult = studentSchema.safeParse(rawData);
+    if (!parseResult.success) {
+      throw new Error(parseResult.error.issues[0]?.message || 'Data siswa tidak valid.');
+    }
+    const data = parseResult.data;
+
     await dbConnect();
     const teacherId = await requireAuth();
     const teacher = await Teacher.findById(teacherId).lean();
     const activeClass = teacher?.activeClass || teacher?.className || data.className || '';
-
-    if (!data.nis || !data.name || !data.gender) {
-      throw new Error('Nama, NIS, dan Jenis Kelamin wajib diisi.');
-    }
 
     // Check for NIS duplicate for this teacher in this class
     const existing = await Student.findOne({ teacherId, nis: data.nis, className: activeClass });
@@ -106,8 +112,19 @@ export async function createStudent(data: Partial<IStudent>) {
   }
 }
 
-export async function updateStudent(id: string, data: Partial<IStudent>) {
+export async function updateStudent(id: string, rawData: Partial<IStudent>) {
   try {
+    const idValidation = objectIdSchema.safeParse(id);
+    if (!idValidation.success) {
+      throw new Error('ID siswa tidak valid.');
+    }
+
+    const parseResult = updateStudentSchema.safeParse(rawData);
+    if (!parseResult.success) {
+      throw new Error(parseResult.error.issues[0]?.message || 'Data pembaharuan tidak valid.');
+    }
+    const data = parseResult.data;
+
     await dbConnect();
     const teacherId = await requireAuth();
 
@@ -142,6 +159,11 @@ export async function updateStudent(id: string, data: Partial<IStudent>) {
 
 export async function deleteStudent(id: string) {
   try {
+    const idValidation = objectIdSchema.safeParse(id);
+    if (!idValidation.success) {
+      throw new Error('ID siswa tidak valid.');
+    }
+
     await dbConnect();
     const teacherId = await requireAuth();
 

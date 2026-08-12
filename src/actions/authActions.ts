@@ -9,18 +9,28 @@ import { signSession, verifySession } from '@/lib/auth';
 import { cookies } from 'next/headers';
 import { checkRateLimit } from '@/lib/rateLimit';
 import { verifyRecaptchaToken, isRecaptchaConfigured } from '@/lib/recaptcha';
-
 import { sendVerificationEmail } from '@/lib/email';
 import { ensureSchoolExists } from '@/actions/adminActions';
+import {
+  loginSchema,
+  registerSchema,
+  verifyOTPSchema,
+  resendOTPSchema,
+} from '@/lib/validations';
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-export async function loginTeacher(data: {
+export async function loginTeacher(rawData: {
   email: string;
   password: string;
   recaptchaToken?: string;
 }) {
   try {
+    // 0. Validate input using Zod Schema (prevents NoSQL injection / malformed payload)
+    const parseResult = loginSchema.safeParse(rawData);
+    if (!parseResult.success) {
+      throw new Error(parseResult.error.issues[0]?.message || 'Input tidak valid.');
+    }
+    const data = parseResult.data;
+
     // 1. Rate Limiting Check (Max 5 attempts per minute)
     const rateLimit = await checkRateLimit('login', 5, 60 * 1000);
     if (!rateLimit.allowed) {
@@ -30,8 +40,6 @@ export async function loginTeacher(data: {
     }
 
     // 2. Strict Google reCAPTCHA Check for Login
-    // If token is provided, ALWAYS verify it.
-    // If token is omitted, enforce reCAPTCHA if failed attempt count >= 2 (matching client CAPTCHA_THRESHOLD)
     const recaptchaRequired = rateLimit.attemptCount >= 2;
     if (data.recaptchaToken || recaptchaRequired) {
       const recaptchaRes = await verifyRecaptchaToken(data.recaptchaToken);
@@ -42,11 +50,6 @@ export async function loginTeacher(data: {
 
     await dbConnect();
     const { email: loginInput, password } = data;
-
-    if (!loginInput || !password) {
-      throw new Error('Username/email dan password wajib diisi.');
-    }
-
     const normalizedInput = loginInput.toLowerCase().trim();
 
     // Query teacher by either email OR username
@@ -104,7 +107,7 @@ export async function loginTeacher(data: {
   }
 }
 
-export async function registerTeacher(data: {
+export async function registerTeacher(rawData: {
   name: string;
   username: string;
   email: string;
@@ -114,6 +117,13 @@ export async function registerTeacher(data: {
   recaptchaToken?: string;
 }) {
   try {
+    // 0. Validate input using Zod Schema
+    const parseResult = registerSchema.safeParse(rawData);
+    if (!parseResult.success) {
+      throw new Error(parseResult.error.issues[0]?.message || 'Data pendaftaran tidak valid.');
+    }
+    const data = parseResult.data;
+
     // 1. Rate Limiting Check (Max 5 attempts per minute)
     const rateLimit = await checkRateLimit('register', 5, 60 * 1000);
     if (!rateLimit.allowed) {
@@ -130,37 +140,8 @@ export async function registerTeacher(data: {
 
     await dbConnect();
     const { name, username, email, password, schoolName, className } = data;
-
-    if (!name || !username || !email || !password) {
-      throw new Error('Nama, username, email, dan password wajib diisi.');
-    }
-
     const normalizedUsername = username.toLowerCase().trim();
-    const USERNAME_REGEX = /^[a-zA-Z0-9_]{3,20}$/;
-    if (!USERNAME_REGEX.test(normalizedUsername)) {
-      throw new Error(
-        'Username hanya boleh berisi huruf, angka, dan garis bawah (_) minimal 3-20 karakter.',
-      );
-    }
-
     const normalizedEmail = email.toLowerCase().trim();
-    if (!EMAIL_REGEX.test(normalizedEmail)) {
-      throw new Error(
-        'Format email tidak valid. Silakan gunakan alamat email yang aktif (misal: nama@gmail.com).',
-      );
-    }
-
-    if (password.length < 6) {
-      throw new Error('Password minimal harus 6 karakter.');
-    }
-
-    if (!/[a-zA-Z]/.test(password)) {
-      throw new Error('Password harus mengandung setidaknya 1 huruf.');
-    }
-
-    if (!/\d/.test(password)) {
-      throw new Error('Password harus mengandung setidaknya 1 angka.');
-    }
 
     // Check if username is already taken by another teacher
     const usernameExists = await Teacher.findOne({
@@ -238,9 +219,15 @@ export async function registerTeacher(data: {
   }
 }
 
-export async function verifyEmailOTP(data: { email: string; otp: string }) {
+export async function verifyEmailOTP(rawData: { email: string; otp: string }) {
   try {
-    const normalizedInput = data.email ? data.email.toLowerCase().trim() : '';
+    // 0. Validate input using Zod Schema
+    const parseResult = verifyOTPSchema.safeParse(rawData);
+    if (!parseResult.success) {
+      throw new Error(parseResult.error.issues[0]?.message || 'Format OTP tidak valid.');
+    }
+    const data = parseResult.data;
+    const normalizedInput = data.email.toLowerCase().trim();
 
     // 1. IP-based Rate Limiting (Max 5 attempts / min)
     const ipRateLimit = await checkRateLimit('verify_otp_ip', 5, 60 * 1000);
@@ -338,9 +325,15 @@ export async function verifyEmailOTP(data: { email: string; otp: string }) {
   }
 }
 
-export async function resendVerificationOTP(data: { email: string }) {
+export async function resendVerificationOTP(rawData: { email: string }) {
   try {
-    const normalizedInput = data.email ? data.email.toLowerCase().trim() : '';
+    // 0. Validate input using Zod Schema
+    const parseResult = resendOTPSchema.safeParse(rawData);
+    if (!parseResult.success) {
+      throw new Error(parseResult.error.issues[0]?.message || 'Email tidak valid.');
+    }
+    const data = parseResult.data;
+    const normalizedInput = data.email.toLowerCase().trim();
 
     // 1. IP-based Rate Limiting for resend (Max 3 attempts per minute)
     const ipRateLimit = await checkRateLimit('resend_otp_ip', 3, 60 * 1000);
