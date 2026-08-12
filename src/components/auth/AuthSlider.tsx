@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Script from 'next/script';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -61,7 +62,7 @@ export default function AuthSlider({
     }
     return 0;
   });
-  const CAPTCHA_THRESHOLD = 2;
+  const CAPTCHA_THRESHOLD = 1;
   const isSignInCaptchaRequired = failedAttempts >= CAPTCHA_THRESHOLD;
 
   // Sign Up States
@@ -111,6 +112,8 @@ export default function AuthSlider({
   // Toggle Mode & sync URL without hard page reload
   const toggleMode = (newMode: 'signin' | 'signup') => {
     setMode(newMode);
+    setRecaptchaToken('');
+    setResetCaptcha((prev) => prev + 1);
     if (typeof window !== 'undefined') {
       window.history.replaceState(
         null,
@@ -164,7 +167,7 @@ export default function AuthSlider({
         setLoading(false);
       } else {
         toast.error(res.error || 'Username/email atau password salah.');
-        const nextAttempts = failedAttempts + 1;
+        const nextAttempts = Math.max(failedAttempts + 1, 1);
         setFailedAttempts(nextAttempts);
         sessionStorage.setItem(
           'login_failed_attempts',
@@ -174,9 +177,9 @@ export default function AuthSlider({
         setRecaptchaToken('');
         setLoading(false);
       }
-    } catch (err) {
-      toast.error('Terjadi kesalahan. Silakan coba lagi.');
-      const nextAttempts = failedAttempts + 1;
+    } catch (err: any) {
+      toast.error(err?.message || 'Terjadi kesalahan. Silakan coba lagi.');
+      const nextAttempts = Math.max(failedAttempts + 1, 1);
       setFailedAttempts(nextAttempts);
       sessionStorage.setItem('login_failed_attempts', nextAttempts.toString());
       setResetCaptcha((prev) => prev + 1);
@@ -344,6 +347,12 @@ export default function AuthSlider({
 
   return (
     <div className='min-h-screen w-full bg-slate-100 flex flex-col items-center justify-center relative overflow-hidden font-sans p-3 sm:p-6 lg:p-8'>
+      {!!process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && (
+        <Script
+          src='https://www.google.com/recaptcha/api.js?onload=onReCaptchaLoadCallback&render=explicit'
+          strategy='afterInteractive'
+        />
+      )}
       {/* Background ambient glow matching site theme */}
       <div className='fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-[140px] pointer-events-none' />
 

@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   LogOut,
   User,
+  MessageSquareText,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ConfirmDialog from '@/components/ConfirmDialog';
@@ -39,6 +40,7 @@ const adminMenuGroups: SidebarGroup[] = [
     items: [
       { name: 'Kelola Sekolah', href: '/admin/sekolah', icon: School },
       { name: 'Kelola Wali Kelas', href: '/admin/guru', icon: Users },
+      { name: 'Kelola Kritik & Saran', href: '/admin/feedback', icon: MessageSquareText },
     ],
   },
   {

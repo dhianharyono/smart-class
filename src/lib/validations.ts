@@ -76,3 +76,30 @@ export const updateProfileSchema = z.object({
   principalNip: z.string().trim().optional(),
   kkm: z.number().min(0).max(100).optional(),
 });
+
+/**
+ * Feedback / Kritik & Saran Schemas
+ */
+export const feedbackSchema = z.object({
+  category: z.enum(['Kritik', 'Saran', 'Laporan Bug', 'Pertanyaan', 'Lainnya'], {
+    message: 'Kategori masukan tidak valid',
+  }),
+  subject: z
+    .string()
+    .trim()
+    .min(3, 'Judul minimal 3 karakter.')
+    .max(150, 'Judul maksimal 150 karakter.'),
+  content: z
+    .string()
+    .trim()
+    .min(10, 'Isi masukan minimal 10 karakter.')
+    .max(2000, 'Isi masukan terlalu panjang (maksimal 2000 karakter).'),
+  rating: z.number().min(1).max(5).optional(),
+});
+
+export const respondFeedbackSchema = z.object({
+  feedbackId: objectIdSchema,
+  status: z.enum(['Pending', 'Diproses', 'Selesai']),
+  adminResponse: z.string().trim().max(2000, 'Tanggapan terlalu panjang (maksimal 2000 karakter).').optional(),
+});
+

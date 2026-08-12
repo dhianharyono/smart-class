@@ -398,8 +398,9 @@ export default function LandingPage() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className='mt-5 sm:mt-6 text-base sm:text-lg md:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed font-normal px-2'
           >
-            Satu sistem terpadu untuk pencatatan presensi siswa, penilaian KKM,
-            agenda jurnal KBM harian, dan laporan kelas otomatis.
+            Satu sistem terpadu untuk pencatatan presensi siswa, penilaian
+            akademik, jurnal KBM, jadwal pelajaran, dan laporan cetak siap
+            pakai.
           </motion.p>
 
           {/* CTA Buttons */}
@@ -611,13 +612,13 @@ export default function LandingPage() {
                 {
                   num: 'PDF & Excel',
                   title: 'Ekspor Laporan 1-Klik',
-                  desc: 'Lengkap TTD Wali Kelas & Kepala Sekolah',
+                  desc: 'Kemudahan ekspor laporan siap cetak',
                   color: 'text-indigo-600',
                 },
                 {
                   num: 'Safe & Secure',
                   title: 'Perlindungan Data',
-                  desc: 'Privasi data siswa tersimpan aman',
+                  desc: 'Data tersimpan aman di server & cloud storage',
                   color: 'text-emerald-600',
                 },
               ].map((stat, idx) => (
@@ -663,7 +664,7 @@ export default function LandingPage() {
               Modul Utama Wali Kelas
             </h2>
             <p className='text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight'>
-              Kebutuhan Kelas Dalam Satu Genggaman
+              Simulasi Antarmuka & Fitur
             </p>
             <p className='text-base text-slate-600 font-medium'>
               Pilih modul di bawah ini untuk melihat simulasi antarmuka dan
@@ -683,9 +684,9 @@ export default function LandingPage() {
               { id: 'absensi', label: 'Absensi Kelas', icon: CalendarCheck2 },
               { id: 'nilai', label: 'Nilai Akademik', icon: GraduationCap },
               { id: 'jurnal', label: 'Jurnal KBM', icon: BookMarked },
-              { id: 'tabungan', label: 'Tabungan Siswa', icon: Wallet },
-              { id: 'jadwal', label: 'Jadwal & Alokasi', icon: Calendar },
               { id: 'multikelas', label: 'Multi-Kelas Guru', icon: School },
+              { id: 'jadwal', label: 'Jadwal & Alokasi', icon: Calendar },
+              { id: 'tabungan', label: 'Tabungan Siswa', icon: Wallet },
             ].map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -1180,7 +1181,7 @@ export default function LandingPage() {
                 Mengapa Memilih Smart Class
               </h2>
               <p className='text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight'>
-                Smart Class Memudahkan Tugas Wali Kelas
+                Memudahkan Tugas Guru & Wali Kelas
               </p>
             </motion.div>
 
@@ -1189,7 +1190,7 @@ export default function LandingPage() {
                 {
                   icon: Printer,
                   title: 'Cetak Laporan & Ekspor',
-                  desc: 'Pratinjau cetak rekap absensi & nilai akademik siap cetak lengkap TTD Wali Kelas, Kepala Sekolah & NIP/NUPTK. Dukung ekspor Excel & PDF.',
+                  desc: 'Cetak rekapitulasi presensi, nilai, maupun jurnal harian dengan format siap pakai. Ekspor data ke PDF & Excel untuk mendukung akreditasi sekolah.',
                   color: 'bg-emerald-100 text-emerald-700',
                   hoverBorder: 'hover:border-emerald-500/50',
                 },
@@ -1220,17 +1221,17 @@ export default function LandingPage() {
                       y: -8,
                       transition: { duration: 0.25, ease: 'easeOut' },
                     }}
-                    className={`p-8 rounded-3xl bg-slate-50 border border-slate-200 ${card.hoverBorder} transition-colors space-y-4 group h-full shadow-xs`}
+                    className={`p-8 rounded-3xl bg-slate-50 border border-slate-200 ${card.hoverBorder} transition-colors space-y-4 group h-full shadow-xs place-items-center`}
                   >
                     <div
                       className={`flex h-12 w-12 items-center justify-center rounded-2xl ${card.color} group-hover:scale-110 transition-transform`}
                     >
                       <Icon className='h-6 w-6' />
                     </div>
-                    <h3 className='text-xl font-extrabold text-slate-900'>
+                    <h3 className='text-xl font-extrabold text-slate-900 mb-2'>
                       {card.title}
                     </h3>
-                    <p className='text-sm text-slate-600 leading-relaxed font-medium'>
+                    <p className='text-sm text-slate-600 leading-relaxed font-medium text-center'>
                       {card.desc}
                     </p>
                   </motion.div>
@@ -1264,7 +1265,7 @@ export default function LandingPage() {
             {[
               {
                 q: 'Bagaimana cara mendaftar dan mulai menggunakan aplikasi?',
-                a: 'Cukup klik tombol "Daftar Sekarang", isi nama lengkap, email, nama sekolah, dan kata sandi. Akun Anda akan langsung aktif dan siap digunakan.',
+                a: 'Cukup klik tombol "Daftar Sekarang", isi nama lengkap & gelar, username, email, dan kata sandi. Akun Anda akan langsung aktif dan siap digunakan.',
               },
               {
                 q: 'Apakah Smart Class bisa diakses langsung melalui Smartphone/HP?',
@@ -1272,7 +1273,7 @@ export default function LandingPage() {
               },
               {
                 q: 'Bagaimana keamanan akun dan data sekolah di Smart Class?',
-                a: 'Smart Class dilindungi oleh teknologi keamanan tingkat tinggi, termasuk integrasi Google reCAPTCHA v3 dan sistem Rate Limiting untuk mencegah akses unauthorized/bot, serta enkripsi data terproteksi.',
+                a: 'Smart Class dilindungi oleh teknologi keamanan tingkat tinggi, termasuk enkripsi data, proteksi kata sandi, dan backup rutin. Data sekolah Anda aman dan hanya dapat diakses oleh akun yang terdaftar.',
               },
               {
                 q: 'Apakah saya bisa menyesuaikan modul apa saja yang tampil di sidebar?',

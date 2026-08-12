@@ -31,6 +31,7 @@ import {
   AlertCircle,
   Plus,
   Loader2,
+  MessageSquareText,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -100,9 +101,10 @@ const sidebarMenuGroups: SidebarGroup[] = [
     ],
   },
   {
-    category: 'PENGATURAN',
+    category: 'PENGATURAN & MASUKAN',
     items: [
-      { name: 'Profil & Identitas Sekolah', href: '/profile', icon: User },
+      { name: 'Profil & Sekolah', href: '/profile', icon: User },
+      { name: 'Kritik & Saran', href: '/feedback', icon: MessageSquareText },
       { name: 'Pengaturan', href: '/settings', icon: Settings },
     ],
   },
@@ -149,6 +151,11 @@ const CONFIGURABLE_MENUS = [
     label: 'Jurnal Wali Kelas',
     desc: 'Agenda harian mengajar guru & KBM',
   },
+  {
+    href: '/feedback',
+    label: 'Kritik & Saran',
+    desc: 'Kirim masukan, kritik, saran, atau laporan ke administrator',
+  },
 ];
 
 interface DashboardLayoutClientProps {
@@ -184,18 +191,19 @@ export default function DashboardLayoutClient({
       teacher.enabledMenus && teacher.enabledMenus.length > 0
         ? teacher.enabledMenus
         : [
-            '/dashboard',
-            '/kelas',
-            '/siswa',
-            '/absensi',
-            '/nilai',
-            '/tabungan',
-            '/jadwal',
-            '/piket',
-            '/jurnal',
-            '/profile',
-            '/settings',
-          ];
+          '/dashboard',
+          '/kelas',
+          '/siswa',
+          '/absensi',
+          '/nilai',
+          '/tabungan',
+          '/jadwal',
+          '/piket',
+          '/jurnal',
+          '/feedback',
+          '/profile',
+          '/settings',
+        ];
     return base.includes('/kelas') ? base : [...base, '/kelas'];
   });
 
@@ -648,6 +656,7 @@ export default function DashboardLayoutClient({
                 }
                 if (
                   item.href === '/dashboard' ||
+                  item.href === '/feedback' ||
                   item.href === '/' ||
                   (item.href && enabledMenus.includes(item.href))
                 ) {
@@ -683,19 +692,17 @@ export default function DashboardLayoutClient({
                                 [item.name]: !isOpen,
                               }))
                             }
-                            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer ${
-                              isChildActive
+                            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer ${isChildActive
                                 ? 'bg-emerald-50/70 text-emerald-900 border border-emerald-200/80 font-bold'
                                 : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 border border-transparent'
-                            }`}
+                              }`}
                           >
                             <div className='flex items-center gap-3'>
                               <Icon
-                                className={`h-4.5 w-4.5 transition-transform duration-200 ${
-                                  isChildActive
+                                className={`h-4.5 w-4.5 transition-transform duration-200 ${isChildActive
                                     ? 'text-emerald-600'
                                     : 'text-slate-400'
-                                }`}
+                                  }`}
                               />
                               <span>{item.name}</span>
                             </div>
@@ -716,18 +723,16 @@ export default function DashboardLayoutClient({
                                     key={child.href}
                                     href={child.href}
                                     onClick={() => setMobileOpen(false)}
-                                    className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all duration-200 ${
-                                      isSubActive
+                                    className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all duration-200 ${isSubActive
                                         ? 'bg-emerald-600 text-white font-bold shadow-xs'
                                         : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium'
-                                    }`}
+                                      }`}
                                   >
                                     <SubIcon
-                                      className={`h-4 w-4 ${
-                                        isSubActive
+                                      className={`h-4 w-4 ${isSubActive
                                           ? 'text-white'
                                           : 'text-slate-400'
-                                      }`}
+                                        }`}
                                     />
                                     <span>{child.name}</span>
                                   </Link>
@@ -746,18 +751,16 @@ export default function DashboardLayoutClient({
                         key={item.href}
                         href={item.href!}
                         onClick={() => setMobileOpen(false)}
-                        className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group ${
-                          isActive
+                        className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group ${isActive
                             ? 'bg-emerald-50/90 text-emerald-800 border border-emerald-200/80 shadow-xs font-bold'
                             : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 border border-transparent'
-                        }`}
+                          }`}
                       >
                         <Icon
-                          className={`h-4.5 w-4.5 transition-transform duration-200 group-hover:scale-110 ${
-                            isActive
+                          className={`h-4.5 w-4.5 transition-transform duration-200 group-hover:scale-110 ${isActive
                               ? 'text-emerald-600'
                               : 'text-slate-400 group-hover:text-slate-600'
-                          }`}
+                            }`}
                         />
                         <span>{item.name}</span>
                         {isActive && (
@@ -815,9 +818,8 @@ export default function DashboardLayoutClient({
         type='button'
         onClick={() => setIsClassDropdownOpen(!isClassDropdownOpen)}
         disabled={isSwitchingClass}
-        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100/90 border border-emerald-200/90 text-emerald-900 text-xs font-bold transition-all cursor-pointer shadow-2xs ${
-          isSwitchingClass ? 'opacity-50' : ''
-        }`}
+        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100/90 border border-emerald-200/90 text-emerald-900 text-xs font-bold transition-all cursor-pointer shadow-2xs ${isSwitchingClass ? 'opacity-50' : ''
+          }`}
       >
         <School className='h-4 w-4 text-emerald-600 shrink-0' />
         <span className='truncate max-w-[120px] sm:max-w-none'>
@@ -848,11 +850,10 @@ export default function DashboardLayoutClient({
                 return (
                   <div
                     key={cls}
-                    className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
-                      isActive
+                    className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${isActive
                         ? 'bg-emerald-600 text-white shadow-2xs'
                         : 'text-slate-700 hover:bg-slate-100'
-                    }`}
+                      }`}
                   >
                     <button
                       type='button'
@@ -1096,18 +1097,16 @@ export default function DashboardLayoutClient({
               <button
                 type='button'
                 onClick={() => setOnboardingStep(1)}
-                className={`w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-xl border text-[11px] sm:text-xs font-bold transition-all cursor-pointer min-w-0 ${
-                  onboardingStep === 1
+                className={`w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-xl border text-[11px] sm:text-xs font-bold transition-all cursor-pointer min-w-0 ${onboardingStep === 1
                     ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
                     : 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
-                }`}
+                  }`}
               >
                 <span
-                  className={`h-5 w-5 rounded-lg flex items-center justify-center font-black text-[11px] shrink-0 ${
-                    onboardingStep === 1
+                  className={`h-5 w-5 rounded-lg flex items-center justify-center font-black text-[11px] shrink-0 ${onboardingStep === 1
                       ? 'bg-white/25 text-white'
                       : 'bg-emerald-600 text-white'
-                  }`}
+                    }`}
                 >
                   1
                 </span>
@@ -1119,18 +1118,16 @@ export default function DashboardLayoutClient({
               <button
                 type='button'
                 onClick={() => handleNextStep()}
-                className={`w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-xl border text-[11px] sm:text-xs font-bold transition-all cursor-pointer min-w-0 ${
-                  onboardingStep === 2
+                className={`w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-xl border text-[11px] sm:text-xs font-bold transition-all cursor-pointer min-w-0 ${onboardingStep === 2
                     ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
                     : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100 hover:text-slate-600'
-                }`}
+                  }`}
               >
                 <span
-                  className={`h-5 w-5 rounded-lg flex items-center justify-center font-black text-[11px] shrink-0 ${
-                    onboardingStep === 2
+                  className={`h-5 w-5 rounded-lg flex items-center justify-center font-black text-[11px] shrink-0 ${onboardingStep === 2
                       ? 'bg-white/25 text-white'
                       : 'bg-slate-200 text-slate-500'
-                  }`}
+                    }`}
                 >
                   2
                 </span>
@@ -1163,11 +1160,10 @@ export default function DashboardLayoutClient({
                       if (onboardingErrors.name)
                         setOnboardingErrors((prev) => ({ ...prev, name: '' }));
                     }}
-                    className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${
-                      onboardingErrors.name
+                    className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${onboardingErrors.name
                         ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
                         : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
-                    } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
+                      } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
                   />
                 </div>
                 {onboardingErrors.name && (
@@ -1197,11 +1193,10 @@ export default function DashboardLayoutClient({
                       if (onboardingErrors.nip)
                         setOnboardingErrors((prev) => ({ ...prev, nip: '' }));
                     }}
-                    className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${
-                      onboardingErrors.nip
+                    className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${onboardingErrors.nip
                         ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
                         : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
-                    } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
+                      } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
                   />
                 </div>
                 {onboardingErrors.nip && (
@@ -1233,11 +1228,10 @@ export default function DashboardLayoutClient({
                           }));
                       }}
                       disabled={loadingSchools}
-                      className={`w-full pl-10 pr-8 py-2.5 bg-slate-50/50 border ${
-                        onboardingErrors.school
+                      className={`w-full pl-10 pr-8 py-2.5 bg-slate-50/50 border ${onboardingErrors.school
                           ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
                           : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
-                      } text-slate-900 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium appearance-none cursor-pointer transition-all`}
+                        } text-slate-900 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium appearance-none cursor-pointer transition-all`}
                     >
                       {loadingSchools ? (
                         <option value=''>Memuat...</option>
@@ -1291,11 +1285,10 @@ export default function DashboardLayoutClient({
                             handleAddOnboardingClassTag();
                           }
                         }}
-                        className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${
-                          onboardingErrors.className
+                        className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${onboardingErrors.className
                             ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
                             : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
-                        } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
+                          } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
                       />
                     </div>
                     <Button
@@ -1361,11 +1354,10 @@ export default function DashboardLayoutClient({
                           school: '',
                         }));
                     }}
-                    className={`w-full px-4 py-2.5 bg-slate-50/50 border ${
-                      onboardingErrors.school
+                    className={`w-full px-4 py-2.5 bg-slate-50/50 border ${onboardingErrors.school
                         ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
                         : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
-                    } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
+                      } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
                   />
                   {onboardingErrors.school && (
                     <p className='text-[11px] text-rose-500 font-medium flex items-center gap-1 mt-1'>
@@ -1399,11 +1391,10 @@ export default function DashboardLayoutClient({
                             principalName: '',
                           }));
                       }}
-                      className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${
-                        onboardingErrors.principalName
+                      className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${onboardingErrors.principalName
                           ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
                           : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
-                      } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
+                        } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
                     />
                   </div>
                   {onboardingErrors.principalName && (
@@ -1435,11 +1426,10 @@ export default function DashboardLayoutClient({
                             principalNip: '',
                           }));
                       }}
-                      className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${
-                        onboardingErrors.principalNip
+                      className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${onboardingErrors.principalNip
                           ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
                           : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
-                      } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
+                        } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
                     />
                   </div>
                   {onboardingErrors.principalNip && (
@@ -1480,18 +1470,16 @@ export default function DashboardLayoutClient({
                           ]);
                         }
                       }}
-                      className={`flex items-start gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer select-none ${
-                        isChecked
+                      className={`flex items-start gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer select-none ${isChecked
                           ? 'bg-emerald-50/80 border-emerald-300 text-emerald-950 shadow-2xs'
                           : 'bg-slate-50/60 border-slate-200 text-slate-600 hover:border-slate-300'
-                      }`}
+                        }`}
                     >
                       <div
-                        className={`mt-0.5 h-5 w-5 rounded-lg border flex items-center justify-center shrink-0 transition-colors ${
-                          isChecked
+                        className={`mt-0.5 h-5 w-5 rounded-lg border flex items-center justify-center shrink-0 transition-colors ${isChecked
                             ? 'bg-emerald-600 border-emerald-600 text-white shadow-2xs'
                             : 'border-slate-300 bg-white'
-                        }`}
+                          }`}
                       >
                         {isChecked && (
                           <Check className='h-3.5 w-3.5 stroke-[3]' />
