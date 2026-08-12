@@ -186,7 +186,7 @@ export async function registerTeacher(data: {
       }
     }
 
-    // Cryptographically secure 6-digit OTP code for email verification
+    // Cryptographically secure 6-digit OTP code using Node.js CSPRNG (crypto.randomInt)
     const otpCode = crypto.randomInt(100000, 1000000).toString();
 
     const newTeacher = new Teacher({
@@ -238,16 +238,27 @@ export async function registerTeacher(data: {
 
 export async function verifyEmailOTP(data: { email: string; otp: string }) {
   try {
-    // Rate limit OTP verification attempts to prevent brute-force attacks (Max 5 attempts / min)
-    const rateLimit = await checkRateLimit('verify_otp', 5, 60 * 1000);
-    if (!rateLimit.allowed) {
+    const normalizedInput = data.email ? data.email.toLowerCase().trim() : '';
+
+    // 1. IP-based Rate Limiting (Max 5 attempts / min)
+    const ipRateLimit = await checkRateLimit('verify_otp_ip', 5, 60 * 1000);
+    if (!ipRateLimit.allowed) {
       throw new Error(
-        `Terlalu banyak percobaan verifikasi OTP. Silakan coba lagi dalam ${rateLimit.retryAfterSeconds} detik.`,
+        `Terlalu banyak percobaan verifikasi OTP. Silakan coba lagi dalam ${ipRateLimit.retryAfterSeconds} detik.`,
       );
     }
 
+    // 2. Email-based Rate Limiting (Max 5 attempts / min per email account)
+    if (normalizedInput) {
+      const emailRateLimit = await checkRateLimit(`verify_otp_email:${normalizedInput}`, 5, 60 * 1000);
+      if (!emailRateLimit.allowed) {
+        throw new Error(
+          `Terlalu banyak percobaan verifikasi OTP untuk akun ini. Silakan coba lagi dalam ${emailRateLimit.retryAfterSeconds} detik.`,
+        );
+      }
+    }
+
     await dbConnect();
-    const normalizedInput = data.email.toLowerCase().trim();
     const teacher = await Teacher.findOne({
       $or: [{ email: normalizedInput }, { username: normalizedInput }],
     });
@@ -262,7 +273,16 @@ export async function verifyEmailOTP(data: { email: string; otp: string }) {
       const dbOtp = String(teacher.emailVerificationToken || '').trim();
       const userOtp = String(data.otp || '').trim();
 
-      if (!dbOtp || dbOtp !== userOtp) {
+      if (!dbOtp || !userOtp || dbOtp.length !== userOtp.length) {
+        throw new Error(
+          'Kode OTP verifikasi tidak cocok. Periksa kembali email Anda.',
+        );
+      }
+
+      // Timing-safe comparison to prevent timing side-channel attacks on OTP check
+      const dbOtpBuf = Buffer.from(dbOtp);
+      const userOtpBuf = Buffer.from(userOtp);
+      if (!crypto.timingSafeEqual(dbOtpBuf, userOtpBuf)) {
         throw new Error(
           'Kode OTP verifikasi tidak cocok. Periksa kembali email Anda.',
         );
@@ -317,16 +337,27 @@ export async function verifyEmailOTP(data: { email: string; otp: string }) {
 
 export async function resendVerificationOTP(data: { email: string }) {
   try {
-    // Rate limit resend OTP requests (Max 3 attempts per minute)
-    const rateLimit = await checkRateLimit('resend_otp', 3, 60 * 1000);
-    if (!rateLimit.allowed) {
+    const normalizedInput = data.email ? data.email.toLowerCase().trim() : '';
+
+    // 1. IP-based Rate Limiting for resend (Max 3 attempts per minute)
+    const ipRateLimit = await checkRateLimit('resend_otp_ip', 3, 60 * 1000);
+    if (!ipRateLimit.allowed) {
       throw new Error(
-        `Terlalu banyak permintaan kode OTP. Silakan coba lagi dalam ${rateLimit.retryAfterSeconds} detik.`,
+        `Terlalu banyak permintaan kode OTP. Silakan coba lagi dalam ${ipRateLimit.retryAfterSeconds} detik.`,
       );
     }
 
+    // 2. Email-based Rate Limiting for resend (Max 3 attempts per minute per email)
+    if (normalizedInput) {
+      const emailRateLimit = await checkRateLimit(`resend_otp_email:${normalizedInput}`, 3, 60 * 1000);
+      if (!emailRateLimit.allowed) {
+        throw new Error(
+          `Terlalu banyak permintaan kode OTP untuk email ini. Silakan coba lagi dalam ${emailRateLimit.retryAfterSeconds} detik.`,
+        );
+      }
+    }
+
     await dbConnect();
-    const normalizedInput = data.email.toLowerCase().trim();
     const teacher = await Teacher.findOne({
       $or: [{ email: normalizedInput }, { username: normalizedInput }],
     });
@@ -339,7 +370,7 @@ export async function resendVerificationOTP(data: { email: string }) {
       throw new Error('Email Anda sudah terverifikasi.');
     }
 
-    // Cryptographically secure 6-digit OTP code
+    // Cryptographically secure 6-digit OTP code using CSPRNG (crypto.randomInt)
     const otpCode = crypto.randomInt(100000, 1000000).toString();
     teacher.emailVerificationToken = otpCode;
     teacher.emailVerificationExpires = new Date(Date.now() + 15 * 60 * 1000);
