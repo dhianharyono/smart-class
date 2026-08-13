@@ -56,41 +56,74 @@ export async function getAdminStats() {
     await dbConnect();
     await requireAdminAuth();
 
-    // Dapatkan semua email admin agar tidak terhitung sebagai guru/wali kelas
+    // 1. Dapatkan semua email admin agar tidak terhitung sebagai guru/wali kelas
     const adminUsers = await AdminUser.find({}).lean();
-    const adminEmails = adminUsers.map((a) => a.username);
+    const adminEmails = adminUsers.map((a) => (a.username || '').toLowerCase().trim());
+    const adminEmailSet = new Set(adminEmails);
 
-    // Dapatkan semua ID guru yang sah di database untuk auto-cleanup data yatim/orphan
-    const validTeachers = await Teacher.find({}).select('_id').lean();
-    const validTeacherIds = validTeachers.map((t) => t._id.toString());
+    // 2. Dapatkan guru reguler (non-admin)
+    const allTeachers = await Teacher.find({}).sort({ name: 1 }).lean();
+    const teachers = allTeachers.filter(
+      (t) => !adminEmailSet.has((t.email || '').toLowerCase().trim())
+    );
 
-    // Auto-cleanup data yatim yang tersisa dari guru yang sudah dihapus sebelumnya
-    await Journal.deleteMany({ teacherId: { $nin: validTeacherIds } });
-    await JournalHeader.deleteMany({ teacherId: { $nin: validTeacherIds } });
-    await Student.deleteMany({ teacherId: { $nin: validTeacherIds } });
-    await Attendance.deleteMany({ teacherId: { $nin: validTeacherIds } });
-    await Grade.deleteMany({ teacherId: { $nin: validTeacherIds } });
-    await Saving.deleteMany({ teacherId: { $nin: validTeacherIds } });
+    const validTeacherIdStrs = teachers.map((t) => t._id.toString());
+    const teacherMap = new Map(teachers.map((t) => [t._id.toString(), t]));
 
-    // 1. Hitung total data dasar (kecuali admin)
-    const teacherCount = await Teacher.countDocuments({ email: { $nin: adminEmails } });
+    // 3. Hitung total data dasar
+    const teacherCount = teachers.length;
     const schoolCount = await School.countDocuments();
-    const studentCount = await Student.countDocuments();
-    const totalJournalCount = await Journal.countDocuments();
-    const totalGradeCount = await Grade.countDocuments();
 
-    // 2. Hitung total saldo tabungan di seluruh sistem
-    const savings = await Saving.find({}).lean();
+    // 4. Fetch data agregat secara paralel untuk seluruh guru
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+
+    const [
+      allStudents,
+      allJournals,
+      allAttendances,
+      allGrades,
+      allSavings,
+      recentJournalDocs,
+      activeTeachers,
+    ] = await Promise.all([
+      Student.find({ teacherId: { $in: validTeacherIdStrs } }, { _id: 1, teacherId: 1, className: 1 }).lean(),
+      Journal.find({ teacherId: { $in: validTeacherIdStrs } }, { _id: 1, teacherId: 1, className: 1, createdAt: 1, subject: 1, material: 1, date: 1 }).lean(),
+      Attendance.find({ teacherId: { $in: validTeacherIdStrs } }, { _id: 1, teacherId: 1, studentId: 1, status: 1, createdAt: 1 }).lean(),
+      Grade.find({ teacherId: { $in: validTeacherIdStrs } }, { _id: 1, teacherId: 1, studentId: 1, createdAt: 1 }).lean(),
+      Saving.find({ teacherId: { $in: validTeacherIdStrs } }, { _id: 1, teacherId: 1, studentId: 1, type: 1, amount: 1, createdAt: 1 }).lean(),
+      Journal.find({ teacherId: { $in: validTeacherIdStrs } })
+        .sort({ createdAt: -1 })
+        .limit(6)
+        .lean(),
+      Teacher.find({
+        _id: { $in: validTeacherIdStrs },
+        lastActiveAt: { $gte: fiveMinutesAgo },
+      }).sort({ name: 1 }).lean(),
+    ]);
+
+    const studentCount = allStudents.length;
+    const totalJournalCount = allJournals.length;
+    const totalGradeCount = allGrades.length;
+
+    // Hitung total saldo tabungan di seluruh sistem
     let totalSavingsBalance = 0;
-    savings.forEach((tx) => {
+    allSavings.forEach((tx) => {
       totalSavingsBalance += tx.type === 'Kredit' ? tx.amount : -tx.amount;
     });
 
-    // 3. Rekapituasi Presensi Sistem (Hadir, Sakit, Izin, Alfa)
-    const totalHadir = await Attendance.countDocuments({ status: 'Hadir' });
-    const totalSakit = await Attendance.countDocuments({ status: 'Sakit' });
-    const totalIzin = await Attendance.countDocuments({ status: 'Izin' });
-    const totalAlfa = await Attendance.countDocuments({ status: 'Alfa' });
+    // Presensi Sistem
+    let totalHadir = 0;
+    let totalSakit = 0;
+    let totalIzin = 0;
+    let totalAlfa = 0;
+
+    allAttendances.forEach((att) => {
+      if (att.status === 'Hadir') totalHadir++;
+      else if (att.status === 'Sakit') totalSakit++;
+      else if (att.status === 'Izin') totalIzin++;
+      else if (att.status === 'Alfa') totalAlfa++;
+    });
+
     const totalAttendanceRecords = totalHadir + totalSakit + totalIzin + totalAlfa;
     const attendanceBreakdown = {
       hadir: totalHadir,
@@ -104,200 +137,205 @@ export async function getAdminStats() {
       alfaPct: totalAttendanceRecords > 0 ? Math.round((totalAlfa / totalAttendanceRecords) * 100) : 0,
     };
 
-    // 4. Activity Stream: Entri Jurnal Pembelajaran KBM Terkini (Hanya dari guru aktif)
-    const recentJournalDocs = await Journal.find({ teacherId: { $in: validTeacherIds } })
-      .sort({ createdAt: -1 })
-      .limit(6)
-      .lean();
+    // Entri Jurnal Pembelajaran KBM Terkini
+    const recentJournals = recentJournalDocs.flatMap((j) => {
+      const t = teacherMap.get(j.teacherId);
+      if (!t) return [];
+      return [{
+        id: j._id.toString(),
+        teacherName: t.name || 'Wali Kelas',
+        schoolName: t.schoolName || '-',
+        className: j.className || t.className || '-',
+        subject: j.subject || 'Umum',
+        material: j.material || '-',
+        date: j.date ? new Date(j.date).toISOString() : new Date(j.createdAt).toISOString(),
+      }];
+    });
 
-    const teacherIds = Array.from(new Set(recentJournalDocs.map((j) => j.teacherId)));
-    const journalTeachers = await Teacher.find({ _id: { $in: teacherIds } }).lean();
-    const teacherMap = new Map(journalTeachers.map((t) => [t._id.toString(), t]));
+    // Pengelompokan Data Per Guru (In-Memory Indexing)
+    const teacherStudentsMap = new Map<string, typeof allStudents>();
+    allStudents.forEach((s) => {
+      const tId = s.teacherId;
+      const list = teacherStudentsMap.get(tId) || [];
+      list.push(s);
+      teacherStudentsMap.set(tId, list);
+    });
 
-    const recentJournals = recentJournalDocs
-      .flatMap((j) => {
-        const t = teacherMap.get(j.teacherId);
-        if (!t) return [];
-        return [{
-          id: j._id.toString(),
-          teacherName: t.name || 'Wali Kelas',
-          schoolName: t.schoolName || '-',
-          className: j.className || t.className || '-',
-          subject: j.subject || 'Umum',
-          material: j.material || '-',
-          date: j.date ? new Date(j.date).toISOString() : new Date(j.createdAt).toISOString(),
-        }];
+    const teacherJournalsMap = new Map<string, typeof allJournals>();
+    allJournals.forEach((j) => {
+      const tId = j.teacherId;
+      const list = teacherJournalsMap.get(tId) || [];
+      list.push(j);
+      teacherJournalsMap.set(tId, list);
+    });
+
+    const teacherAttendancesMap = new Map<string, typeof allAttendances>();
+    allAttendances.forEach((a) => {
+      const tId = a.teacherId;
+      const list = teacherAttendancesMap.get(tId) || [];
+      list.push(a);
+      teacherAttendancesMap.set(tId, list);
+    });
+
+    const teacherGradesMap = new Map<string, typeof allGrades>();
+    allGrades.forEach((g) => {
+      const tId = g.teacherId;
+      const list = teacherGradesMap.get(tId) || [];
+      list.push(g);
+      teacherGradesMap.set(tId, list);
+    });
+
+    const teacherSavingsMap = new Map<string, typeof allSavings>();
+    allSavings.forEach((s) => {
+      const tId = s.teacherId;
+      const list = teacherSavingsMap.get(tId) || [];
+      list.push(s);
+      teacherSavingsMap.set(tId, list);
+    });
+
+    // Olah statistik per guru
+    const teacherStats = teachers.map((t) => {
+      const teacherIdStr = t._id.toString();
+
+      const teacherClasses = Array.isArray(t.classes) && t.classes.length > 0
+        ? Array.from(new Set(t.classes.filter(Boolean)))
+        : (t.className ? [t.className] : []);
+
+      const tStudents = teacherStudentsMap.get(teacherIdStr) || [];
+      const studentClassMap = new Map<string, string>();
+      const studentCountByClass = new Map<string, number>();
+
+      tStudents.forEach((s) => {
+        const sId = s._id.toString();
+        const cls = s.className || '-';
+        studentClassMap.set(sId, cls);
+        studentCountByClass.set(cls, (studentCountByClass.get(cls) || 0) + 1);
       });
 
-    // 5. Ambil data statistik per guru (kecuali admin)
-    const teachers = await Teacher.find({ email: { $nin: adminEmails } }).sort({ name: 1 }).lean();
-    const teacherStats = await Promise.all(
-      teachers.map(async (t) => {
-        const teacherIdStr = t._id.toString();
+      const tJournals = teacherJournalsMap.get(teacherIdStr) || [];
+      const journalCountByClass = new Map<string, number>();
+      tJournals.forEach((j) => {
+        const cls = j.className || (teacherClasses[0] || '-');
+        journalCountByClass.set(cls, (journalCountByClass.get(cls) || 0) + 1);
+      });
 
-        const teacherClasses = Array.isArray(t.classes) && t.classes.length > 0
-          ? Array.from(new Set(t.classes.filter(Boolean)))
-          : (t.className ? [t.className] : []);
+      const allClasses = Array.from(
+        new Set([
+          ...teacherClasses,
+          ...Array.from(studentCountByClass.keys()),
+          ...Array.from(journalCountByClass.keys()),
+        ])
+      );
 
-        // 1. Fetch Students per teacher
-        const teacherStudents = await Student.find({ teacherId: teacherIdStr }, { _id: 1, className: 1 }).lean();
-        const studentClassMap = new Map<string, string>();
-        const studentCountByClass = new Map<string, number>();
+      const classStudentCounts = allClasses.map((cls) => ({
+        className: cls,
+        count: studentCountByClass.get(cls) || 0,
+      }));
 
-        teacherStudents.forEach((s) => {
-          const sId = s._id.toString();
-          const cls = s.className || '-';
-          studentClassMap.set(sId, cls);
-          studentCountByClass.set(cls, (studentCountByClass.get(cls) || 0) + 1);
-        });
+      const tAttendances = teacherAttendancesMap.get(teacherIdStr) || [];
+      const classAttMap = new Map<string, { total: number; hadir: number }>();
+      let hadirAttendance = 0;
 
-        // 2. Fetch Journals per teacher
-        const journals = await Journal.find({ teacherId: teacherIdStr }, { className: 1 }).lean();
-        const journalCountByClass = new Map<string, number>();
-        journals.forEach((j) => {
-          const cls = j.className || (teacherClasses[0] || '-');
-          journalCountByClass.set(cls, (journalCountByClass.get(cls) || 0) + 1);
-        });
+      tAttendances.forEach((att) => {
+        if (att.status === 'Hadir') hadirAttendance++;
+        const sId = att.studentId?.toString();
+        const clsName = (sId ? studentClassMap.get(sId) : null) || teacherClasses[0] || '-';
+        const curr = classAttMap.get(clsName) || { total: 0, hadir: 0 };
+        curr.total += 1;
+        if (att.status === 'Hadir') curr.hadir += 1;
+        classAttMap.set(clsName, curr);
+      });
 
-        const allClasses = Array.from(
-          new Set([
-            ...teacherClasses,
-            ...Array.from(studentCountByClass.keys()),
-            ...Array.from(journalCountByClass.keys()),
-          ])
-        );
+      const totalAttendance = tAttendances.length;
+      const attendanceRate = totalAttendance > 0 ? Math.round((hadirAttendance / totalAttendance) * 100) : 0;
 
-        const classStudentCounts = allClasses.map((cls) => ({
-          className: cls,
-          count: studentCountByClass.get(cls) || 0,
-        }));
-        const classStudentCount = teacherStudents.length;
-
-        // 3. Fetch Attendance per teacher
-        const attendances = await Attendance.find({ teacherId: teacherIdStr }, { studentId: 1, status: 1 }).lean();
-        const classAttMap = new Map<string, { total: number; hadir: number }>();
-        let hadirAttendance = 0;
-
-        attendances.forEach((att) => {
-          if (att.status === 'Hadir') hadirAttendance++;
-          const sId = att.studentId?.toString();
-          const clsName = (sId ? studentClassMap.get(sId) : null) || teacherClasses[0] || '-';
-          const curr = classAttMap.get(clsName) || { total: 0, hadir: 0 };
-          curr.total += 1;
-          if (att.status === 'Hadir') curr.hadir += 1;
-          classAttMap.set(clsName, curr);
-        });
-
-        const totalAttendance = attendances.length;
-        const attendanceRate = totalAttendance > 0 ? Math.round((hadirAttendance / totalAttendance) * 100) : 0;
-
-        const classAttendanceRates = allClasses.map((cls) => {
-          const data = classAttMap.get(cls);
-          return {
-            className: cls,
-            rate: data && data.total > 0 ? Math.round((data.hadir / data.total) * 100) : null,
-            total: data?.total || 0,
-          };
-        });
-
-        // 4. Class Journal Counts
-        const classJournalCounts = allClasses.map((cls) => ({
-          className: cls,
-          count: journalCountByClass.get(cls) || 0,
-        }));
-        const journalCount = journals.length;
-
-        // 5. Fetch Grades per teacher
-        const grades = await Grade.find({ teacherId: teacherIdStr }, { studentId: 1 }).lean();
-        const gradeCountByClass = new Map<string, number>();
-        grades.forEach((g) => {
-          const sId = g.studentId?.toString();
-          const cls = (sId ? studentClassMap.get(sId) : null) || teacherClasses[0] || '-';
-          gradeCountByClass.set(cls, (gradeCountByClass.get(cls) || 0) + 1);
-        });
-
-        const classGradeCounts = allClasses.map((cls) => ({
-          className: cls,
-          count: gradeCountByClass.get(cls) || 0,
-        }));
-        const gradeCount = grades.length;
-
-        // 6. Fetch Savings per teacher
-        const teacherSavings = await Saving.find({ teacherId: teacherIdStr }, { studentId: 1, type: 1, amount: 1 }).lean();
-        const savingsByClass = new Map<string, number>();
-        let classSavingsBalance = 0;
-
-        teacherSavings.forEach((tx) => {
-          const amt = tx.type === 'Kredit' ? tx.amount : -tx.amount;
-          classSavingsBalance += amt;
-          const sId = tx.studentId?.toString();
-          const cls = (sId ? studentClassMap.get(sId) : null) || teacherClasses[0] || '-';
-          savingsByClass.set(cls, (savingsByClass.get(cls) || 0) + amt);
-        });
-
-        const classSavings = allClasses.map((cls) => ({
-          className: cls,
-          amount: savingsByClass.get(cls) || 0,
-        }));
-
+      const classAttendanceRates = allClasses.map((cls) => {
+        const data = classAttMap.get(cls);
         return {
-          id: teacherIdStr,
-          name: t.name,
-          email: t.email,
-          schoolName: t.schoolName || '-',
-          className: t.className || (teacherClasses[0] || '-'),
-          classes: teacherClasses,
-          classStudentCounts,
-          classAttendanceRates,
-          classJournalCounts,
-          classGradeCounts,
-          classSavings,
-          studentCount: classStudentCount,
-          totalSavings: classSavingsBalance,
-          journalCount,
-          gradeCount,
-          attendanceRate,
-          totalAttendance,
-          createdAt: t.createdAt.toISOString(),
+          className: cls,
+          rate: data && data.total > 0 ? Math.round((data.hadir / data.total) * 100) : null,
+          total: data?.total || 0,
         };
-      })
-    );
+      });
 
-    // Hitung rata-rata tingkat kehadiran seluruh kelas di mana ada data absensi
-    const teachersWithAttendance = teacherStats.filter(t => t.totalAttendance > 0);
+      const classJournalCounts = allClasses.map((cls) => ({
+        className: cls,
+        count: journalCountByClass.get(cls) || 0,
+      }));
+      const journalCount = tJournals.length;
+
+      const tGrades = teacherGradesMap.get(teacherIdStr) || [];
+      const gradeCountByClass = new Map<string, number>();
+      tGrades.forEach((g) => {
+        const sId = g.studentId?.toString();
+        const cls = (sId ? studentClassMap.get(sId) : null) || teacherClasses[0] || '-';
+        gradeCountByClass.set(cls, (gradeCountByClass.get(cls) || 0) + 1);
+      });
+
+      const classGradeCounts = allClasses.map((cls) => ({
+        className: cls,
+        count: gradeCountByClass.get(cls) || 0,
+      }));
+      const gradeCount = tGrades.length;
+
+      const tSavings = teacherSavingsMap.get(teacherIdStr) || [];
+      const savingsByClass = new Map<string, number>();
+      let classSavingsBalance = 0;
+
+      tSavings.forEach((tx) => {
+        const amt = tx.type === 'Kredit' ? tx.amount : -tx.amount;
+        classSavingsBalance += amt;
+        const sId = tx.studentId?.toString();
+        const cls = (sId ? studentClassMap.get(sId) : null) || teacherClasses[0] || '-';
+        savingsByClass.set(cls, (savingsByClass.get(cls) || 0) + amt);
+      });
+
+      const classSavings = allClasses.map((cls) => ({
+        className: cls,
+        amount: savingsByClass.get(cls) || 0,
+      }));
+
+      return {
+        id: teacherIdStr,
+        name: t.name,
+        email: t.email,
+        schoolName: t.schoolName || '-',
+        className: t.className || (teacherClasses[0] || '-'),
+        classes: teacherClasses,
+        classStudentCounts,
+        classAttendanceRates,
+        classJournalCounts,
+        classGradeCounts,
+        classSavings,
+        studentCount: tStudents.length,
+        totalSavings: classSavingsBalance,
+        journalCount,
+        gradeCount,
+        attendanceRate,
+        totalAttendance,
+        createdAt: t.createdAt ? new Date(t.createdAt).toISOString() : new Date().toISOString(),
+      };
+    });
+
+    // Hitung rata-rata tingkat kehadiran seluruh kelas
+    const teachersWithAttendance = teacherStats.filter((t) => t.totalAttendance > 0);
     const overallAttendanceRate = teachersWithAttendance.length > 0
       ? Math.round(teachersWithAttendance.reduce((acc, curr) => acc + curr.attendanceRate, 0) / teachersWithAttendance.length)
       : 0;
 
-    // 6. Dapatkan pengguna online (aktif dalam 5 menit terakhir, khusus Wali Kelas / Guru non-admin)
-    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-    const activeTeachers = await Teacher.find({
-      email: { $nin: adminEmails },
-      lastActiveAt: { $gte: fiveMinutesAgo }
-    }).sort({ name: 1 }).lean();
-
+    // Pengguna online
     const onlineUsers = activeTeachers.map((u) => {
       return {
         id: u._id.toString(),
         name: u.name,
         email: u.email,
         role: (u as any).role || 'Wali Kelas',
-        lastActiveAt: u.lastActiveAt ? u.lastActiveAt.toISOString() : new Date().toISOString()
+        lastActiveAt: u.lastActiveAt ? new Date(u.lastActiveAt).toISOString() : new Date().toISOString(),
       };
     });
 
-    // 7. Hitung Tren Aktivitas Wali Kelas (7 hari terakhir)
-    const activityTrend: {
-      date: string;
-      day: string;
-      fullLabel: string;
-      jurnal: number;
-      presensi: number;
-      nilai: number;
-      tabungan: number;
-      total: number;
-    }[] = [];
-
+    // Tren Aktivitas Wali Kelas (7 hari terakhir) - Fast In-Memory Bucketing
+    const activityTrend = [];
     const now = new Date();
     const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
 
@@ -305,28 +343,32 @@ export async function getAdminStats() {
       const d = new Date(now);
       d.setDate(now.getDate() - i);
 
-      const startOfDay = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
-      const endOfDay = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
+      const startOfDay = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0).getTime();
+      const endOfDay = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999).getTime();
 
-      const journalCount = await Journal.countDocuments({
-        teacherId: { $in: validTeacherIds },
-        createdAt: { $gte: startOfDay, $lte: endOfDay },
-      });
+      let jCount = 0;
+      for (const j of allJournals) {
+        const t = new Date((j as any).createdAt || (j as any).date).getTime();
+        if (t >= startOfDay && t <= endOfDay) jCount++;
+      }
 
-      const attendanceCount = await Attendance.countDocuments({
-        teacherId: { $in: validTeacherIds },
-        createdAt: { $gte: startOfDay, $lte: endOfDay },
-      });
+      let aCount = 0;
+      for (const a of allAttendances) {
+        const t = new Date((a as any).createdAt).getTime();
+        if (t >= startOfDay && t <= endOfDay) aCount++;
+      }
 
-      const gradeCount = await Grade.countDocuments({
-        teacherId: { $in: validTeacherIds },
-        createdAt: { $gte: startOfDay, $lte: endOfDay },
-      });
+      let gCount = 0;
+      for (const g of allGrades) {
+        const t = new Date((g as any).createdAt).getTime();
+        if (t >= startOfDay && t <= endOfDay) gCount++;
+      }
 
-      const savingCount = await Saving.countDocuments({
-        teacherId: { $in: validTeacherIds },
-        createdAt: { $gte: startOfDay, $lte: endOfDay },
-      });
+      let sCount = 0;
+      for (const s of allSavings) {
+        const t = new Date((s as any).createdAt).getTime();
+        if (t >= startOfDay && t <= endOfDay) sCount++;
+      }
 
       const dayLabel = dayNames[d.getDay()];
       const dateStr = `${d.getDate()}/${d.getMonth() + 1}`;
@@ -335,11 +377,11 @@ export async function getAdminStats() {
         date: dateStr,
         day: dayLabel,
         fullLabel: `${dayLabel}, ${dateStr}`,
-        jurnal: journalCount,
-        presensi: attendanceCount,
-        nilai: gradeCount,
-        tabungan: savingCount,
-        total: journalCount + attendanceCount + gradeCount + savingCount,
+        jurnal: jCount,
+        presensi: aCount,
+        nilai: gCount,
+        tabungan: sCount,
+        total: jCount + aCount + gCount + sCount,
       });
     }
 
@@ -532,57 +574,79 @@ export async function getSchools() {
   try {
     await dbConnect();
 
-    // Dapatkan semua email admin agar tidak terikut saat auto-sync sekolah
     const adminUsers = await AdminUser.find({}).lean();
     const adminEmails = adminUsers.map((a) => (a.username || '').toLowerCase().trim());
+    const adminEmailSet = new Set(adminEmails);
 
-    // Auto-sync: Sinkronisasi nama sekolah unik dari dokumen Teacher non-admin yang belum ada di koleksi School
-    const teacherSchoolNames: (string | null | undefined)[] = await Teacher.distinct('schoolName', {
-      email: { $nin: adminEmails },
-      schoolName: { $exists: true, $ne: '' },
-    });
-    for (const rawName of teacherSchoolNames) {
-      if (rawName && typeof rawName === 'string' && rawName.trim().length >= 2) {
-        const trimmed = rawName.trim();
-        const safePattern = escapeRegExp(trimmed);
-        const exists = await School.findOne({
-          name: { $regex: new RegExp(`^${safePattern}$`, 'i') },
-        });
-        if (!exists) {
-          try {
-            await School.create({ name: trimmed });
-            console.log(`[SYNC] Auto-created missing school from teacher record: "${trimmed}"`);
-          } catch (err) {
-            // Abaikan jika ada duplikasi concurrent
-          }
-        }
+    const [schools, teachers] = await Promise.all([
+      School.find({}).sort({ name: 1 }).lean(),
+      Teacher.find({}, { _id: 1, email: 1, schoolName: 1 }).lean(),
+    ]);
+
+    const validTeachers = teachers.filter(
+      (t) => !adminEmailSet.has((t.email || '').toLowerCase().trim())
+    );
+    const validTeacherIds = validTeachers.map((t) => t._id.toString());
+
+    // Sync missing school names from teacher records if any
+    const existingSchoolNamesLower = new Set(schools.map((s) => (s.name || '').toLowerCase().trim()));
+    const teacherSchoolNames = Array.from(
+      new Set(validTeachers.map((t) => t.schoolName).filter(Boolean))
+    ) as string[];
+
+    const missingSchools = teacherSchoolNames.filter(
+      (name) => name.trim().length >= 2 && !existingSchoolNamesLower.has(name.trim().toLowerCase())
+    );
+
+    if (missingSchools.length > 0) {
+      for (const missingName of missingSchools) {
+        try {
+          await School.create({ name: missingName.trim() });
+          console.log(`[SYNC] Auto-created missing school: "${missingName}"`);
+        } catch (err) {}
       }
+      const updatedSchools = await School.find({}).sort({ name: 1 }).lean();
+      schools.length = 0;
+      schools.push(...updatedSchools);
     }
 
-    const schools = await School.find({}).sort({ name: 1 }).lean();
+    const students = await Student.find({ teacherId: { $in: validTeacherIds } }, { teacherId: 1 }).lean();
 
-    const schoolsWithCount = await Promise.all(
-      schools.map(async (school) => {
-        const teacherCount = await Teacher.countDocuments({ 
-          schoolName: school.name,
-          email: { $nin: adminEmails }
-        });
+    const teacherCountBySchool = new Map<string, number>();
+    const teacherIdsBySchool = new Map<string, string[]>();
 
-        // Hitung jumlah siswa di sekolah ini
-        const schoolTeachers = await Teacher.find({ 
-          schoolName: school.name,
-          email: { $nin: adminEmails }
-        }).select('_id').lean();
-        const teacherIds = schoolTeachers.map((t) => t._id.toString());
-        const studentCount = await Student.countDocuments({ teacherId: { $in: teacherIds } });
+    validTeachers.forEach((t) => {
+      if (t.schoolName) {
+        const sName = t.schoolName.trim();
+        teacherCountBySchool.set(sName, (teacherCountBySchool.get(sName) || 0) + 1);
+        const ids = teacherIdsBySchool.get(sName) || [];
+        ids.push(t._id.toString());
+        teacherIdsBySchool.set(sName, ids);
+      }
+    });
 
-        return {
-          ...school,
-          teacherCount,
-          studentCount,
-        };
-      })
-    );
+    const studentCountByTeacher = new Map<string, number>();
+    students.forEach((s) => {
+      if (s.teacherId) {
+        const tId = s.teacherId.toString();
+        studentCountByTeacher.set(tId, (studentCountByTeacher.get(tId) || 0) + 1);
+      }
+    });
+
+    const schoolsWithCount = schools.map((school) => {
+      const sName = (school.name || '').trim();
+      const teacherCount = teacherCountBySchool.get(sName) || 0;
+      const tIds = teacherIdsBySchool.get(sName) || [];
+      const studentCount = tIds.reduce((sum, tId) => sum + (studentCountByTeacher.get(tId) || 0), 0);
+
+      return {
+        ...school,
+        _id: school._id.toString(),
+        createdAt: school.createdAt ? new Date(school.createdAt).toISOString() : new Date().toISOString(),
+        teacherCount,
+        studentCount,
+      };
+    });
 
     return JSON.parse(JSON.stringify(schoolsWithCount));
   } catch (error: any) {
