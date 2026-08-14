@@ -608,8 +608,8 @@ export default function AbsensiClient({
       {viewMode === 'preview' && (
         <div className='space-y-6'>
           {/* Live Preview Control Bar */}
-          <div className='bg-white border border-slate-200/80 p-4 rounded-2xl flex flex-col lg:flex-row lg:items-center justify-between gap-4 shadow-xs print:hidden'>
-            <div className='flex items-center gap-3'>
+          <div className='bg-white border border-slate-200/80 p-4 rounded-2xl flex flex-col 2xl:flex-row 2xl:items-center justify-between gap-4 shadow-xs print:hidden'>
+            <div className='flex items-center gap-3 shrink-0'>
               <div className='p-2.5 bg-emerald-50 text-emerald-600 rounded-xl border border-emerald-100 shrink-0'>
                 <FileText className='h-5 w-5' />
               </div>
@@ -618,7 +618,7 @@ export default function AbsensiClient({
                   <h3 className='text-sm sm:text-base font-extrabold text-slate-900'>
                     Live Preview Cetak Laporan Absensi Siswa
                   </h3>
-                  <span className='text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider'>
+                  <span className='text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shrink-0'>
                     FORMAT A4 PDF
                   </span>
                 </div>
@@ -629,258 +629,275 @@ export default function AbsensiClient({
               </div>
             </div>
 
-            {/* Rentang Laporan Pills + Dynamic Selectors + Actions */}
-            <div className='grid grid-cols-1 sm:flex sm:flex-wrap items-center gap-2.5 w-full lg:w-auto'>
-              {/* Header Info Dialog Modal Trigger Button */}
-              <Dialog open={headerModalOpen} onOpenChange={setHeaderModalOpen}>
-                <DialogTrigger
-                  render={
-                    <Button
-                      variant='outline'
-                      className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl h-10 px-3.5 gap-2 shadow-xs cursor-pointer w-full sm:w-auto justify-center'
-                    />
-                  }
-                >
-                  <Settings2 className='h-4 w-4 text-emerald-600' />
-                  <span>Pengaturan Header</span>
-                </DialogTrigger>
-                <DialogContent className='bg-white border border-slate-200 text-slate-900 rounded-2xl max-w-md p-5 sm:p-6 shadow-2xl'>
-                  <DialogHeader className='pb-3 border-b border-slate-200'>
-                    <DialogTitle className='text-lg font-bold text-slate-900 flex items-center gap-2'>
-                      <Settings2 className='h-5 w-5 text-emerald-600' />
-                      Pengaturan Header & Tanda Tangan
-                    </DialogTitle>
-                    <DialogDescription className='text-xs text-slate-500'>
-                      Edit metadata identitas sekolah, guru, dan pengesahan
-                      cetak laporan secara dinamis.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className='space-y-3.5 py-3 text-xs'>
-                    <div className='space-y-1'>
-                      <Label className='text-slate-700 font-semibold'>
-                        Nama Sekolah / Instansi
-                      </Label>
-                      <Input
-                        value={docHeader.schoolName}
-                        onChange={(e) =>
-                          setDocHeader({
-                            ...docHeader,
-                            schoolName: e.target.value,
-                          })
-                        }
-                        className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
+            {/* Rentang Laporan Pills + Dynamic Selectors + Actions Container */}
+            <div className='flex flex-wrap items-center justify-between 2xl:justify-end gap-2.5 w-full 2xl:w-auto border-t border-slate-100 2xl:border-t-0 pt-3.5 2xl:pt-0'>
+              {/* Filter Group: Modal Trigger, Pills & Date Selector */}
+              <div className='flex flex-wrap items-center gap-2 w-full sm:w-auto'>
+                {/* Header Info Dialog Modal Trigger Button */}
+                <Dialog open={headerModalOpen} onOpenChange={setHeaderModalOpen}>
+                  <DialogTrigger
+                    render={
+                      <Button
+                        variant='outline'
+                        className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl h-10 px-3.5 gap-2 shadow-xs cursor-pointer w-full sm:w-auto justify-center'
                       />
-                    </div>
-                    <div className='grid grid-cols-2 gap-3'>
-                      <div className='space-y-1'>
-                        <Label className='text-slate-700 font-semibold'>
-                          Nama Guru Kelas
-                        </Label>
-                        <Input
-                          value={docHeader.teacherName}
-                          onChange={(e) => {
-                            setDocHeader({
-                              ...docHeader,
-                              teacherName: e.target.value,
-                            });
-                            setSignatureData((prev) => ({
-                              ...prev,
-                              teacherName: e.target.value,
-                            }));
-                          }}
-                          className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
-                        />
-                      </div>
-                      <div className='space-y-1'>
-                        <Label className='text-slate-700 font-semibold'>
-                          NIP/NUPTK Guru
-                        </Label>
-                        <Input
-                          value={docHeader.nip}
-                          onChange={(e) => {
-                            setDocHeader({ ...docHeader, nip: e.target.value });
-                            setSignatureData((prev) => ({
-                              ...prev,
-                              teacherNip: e.target.value,
-                            }));
-                          }}
-                          className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
-                        />
-                      </div>
-                    </div>
-                    <div className='grid grid-cols-2 gap-3'>
-                      <div className='space-y-1'>
-                        <Label className='text-slate-700 font-semibold'>
-                          Kelas
-                        </Label>
-                        <Input
-                          value={docHeader.className}
-                          onChange={(e) =>
-                            setDocHeader({
-                              ...docHeader,
-                              className: e.target.value,
-                            })
-                          }
-                          className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
-                        />
-                      </div>
-                      <div className='space-y-1'>
-                        <Label className='text-slate-700 font-semibold'>
-                          Jabatan Pengesah (Kiri)
-                        </Label>
-                        <Input
-                          value={signatureData.supervisorTitle}
-                          onChange={(e) =>
-                            setSignatureData({
-                              ...signatureData,
-                              supervisorTitle: e.target.value,
-                            })
-                          }
-                          className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
-                        />
-                      </div>
-                    </div>
-                    <div className='grid grid-cols-2 gap-3'>
-                      <div className='space-y-1'>
-                        <Label className='text-slate-700 font-semibold'>
-                          Nama Kepala Sekolah
-                        </Label>
-                        <Input
-                          placeholder='Drs. H. Ahmad Dahlan, M.Pd.'
-                          value={signatureData.supervisorName}
-                          onChange={(e) =>
-                            setSignatureData({
-                              ...signatureData,
-                              supervisorName: e.target.value,
-                            })
-                          }
-                          className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
-                        />
-                      </div>
-                      <div className='space-y-1'>
-                        <Label className='text-slate-700 font-semibold'>
-                          NIP Kepala Sekolah
-                        </Label>
-                        <Input
-                          placeholder='19750812 200003 1 002'
-                          value={signatureData.supervisorNip}
-                          onChange={(e) =>
-                            setSignatureData({
-                              ...signatureData,
-                              supervisorNip: e.target.value,
-                            })
-                          }
-                          className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
-                        />
-                      </div>
-                    </div>
-                    <div className='grid grid-cols-2 gap-3'>
-                      <div className='space-y-1'>
-                        <Label className='text-slate-700 font-semibold'>
-                          Kota Cetak
-                        </Label>
-                        <Input
-                          value={signatureData.place}
-                          onChange={(e) =>
-                            setSignatureData({
-                              ...signatureData,
-                              place: e.target.value,
-                            })
-                          }
-                          className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
-                        />
-                      </div>
-                      <div className='space-y-1'>
-                        <Label className='text-slate-700 font-semibold'>
-                          Tanggal Cetak
-                        </Label>
-                        <Input
-                          value={signatureData.date}
-                          onChange={(e) =>
-                            setSignatureData({
-                              ...signatureData,
-                              date: e.target.value,
-                            })
-                          }
-                          className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button
-                      onClick={() => setHeaderModalOpen(false)}
-                      className='bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl w-full'
-                    >
-                      Selesai Edit
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-
-              {/* Rentang Laporan Pills */}
-              <div className='grid grid-cols-3 sm:flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/80 w-full sm:w-auto'>
-                {(['mingguan', 'bulanan', 'tahunan'] as ExportPeriod[]).map(
-                  (period) => {
-                    const isActive = exportPeriod === period;
-                    return (
-                      <button
-                        key={period}
-                        onClick={() => setExportPeriod(period)}
-                        className={`px-2 sm:px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-all cursor-pointer text-center justify-center flex items-center ${
-                          isActive
-                            ? 'bg-emerald-600 text-white shadow-xs'
-                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-                        }`}
-                      >
-                        {period}
-                      </button>
-                    );
-                  },
-                )}
-              </div>
-
-              {/* Dynamic Period Selectors */}
-              {exportPeriod === 'mingguan' && (
-                <Popover>
-                  <PopoverTrigger className='justify-start text-left font-medium border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-900 rounded-xl h-10 gap-2 flex items-center px-3 cursor-pointer text-xs'>
-                    <CalendarIcon className='h-3.5 w-3.5 text-emerald-600' />
-                    <span>
-                      {format(weekRange.mondayDate, 'dd MMM', { locale: id })} -{' '}
-                      {format(weekRange.saturdayDate, 'dd MMM yyyy', {
-                        locale: id,
-                      })}
-                    </span>
-                  </PopoverTrigger>
-                  <PopoverContent className='w-auto p-0 bg-white border-slate-200 rounded-xl shadow-xl'>
-                    <Calendar
-                      mode='single'
-                      selected={selectedDate}
-                      onSelect={(date) => date && setSelectedDate(date)}
-                      className='bg-white text-slate-900 rounded-xl'
-                    />
-                  </PopoverContent>
-                </Popover>
-              )}
-
-              {exportPeriod === 'bulanan' && (
-                <div className='flex items-center gap-1.5'>
-                  <select
-                    value={selectedMonth}
-                    onChange={(e) => setSelectedMonth(Number(e.target.value))}
-                    className='bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 cursor-pointer'
+                    }
                   >
-                    {MONTH_NAMES.map((m, idx) => (
-                      <option key={m} value={idx + 1}>
-                        {m}
-                      </option>
-                    ))}
-                  </select>
+                    <Settings2 className='h-4 w-4 text-emerald-600' />
+                    <span>Pengaturan Header</span>
+                  </DialogTrigger>
+                  <DialogContent className='bg-white border border-slate-200 text-slate-900 rounded-2xl max-w-md p-5 sm:p-6 shadow-2xl'>
+                    <DialogHeader className='pb-3 border-b border-slate-200'>
+                      <DialogTitle className='text-lg font-bold text-slate-900 flex items-center gap-2'>
+                        <Settings2 className='h-5 w-5 text-emerald-600' />
+                        Pengaturan Header & Tanda Tangan
+                      </DialogTitle>
+                      <DialogDescription className='text-xs text-slate-500'>
+                        Edit metadata identitas sekolah, guru, dan pengesahan
+                        cetak laporan secara dinamis.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className='space-y-3.5 py-3 text-xs'>
+                      <div className='space-y-1'>
+                        <Label className='text-slate-700 font-semibold'>
+                          Nama Sekolah / Instansi
+                        </Label>
+                        <Input
+                          value={docHeader.schoolName}
+                          onChange={(e) =>
+                            setDocHeader({
+                              ...docHeader,
+                              schoolName: e.target.value,
+                            })
+                          }
+                          className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
+                        />
+                      </div>
+                      <div className='grid grid-cols-2 gap-3'>
+                        <div className='space-y-1'>
+                          <Label className='text-slate-700 font-semibold'>
+                            Nama Guru Kelas
+                          </Label>
+                          <Input
+                            value={docHeader.teacherName}
+                            onChange={(e) => {
+                              setDocHeader({
+                                ...docHeader,
+                                teacherName: e.target.value,
+                              });
+                              setSignatureData((prev) => ({
+                                ...prev,
+                                teacherName: e.target.value,
+                              }));
+                            }}
+                            className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
+                          />
+                        </div>
+                        <div className='space-y-1'>
+                          <Label className='text-slate-700 font-semibold'>
+                            NIP/NUPTK Guru
+                          </Label>
+                          <Input
+                            value={docHeader.nip}
+                            onChange={(e) => {
+                              setDocHeader({ ...docHeader, nip: e.target.value });
+                              setSignatureData((prev) => ({
+                                ...prev,
+                                teacherNip: e.target.value,
+                              }));
+                            }}
+                            className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
+                          />
+                        </div>
+                      </div>
+                      <div className='grid grid-cols-2 gap-3'>
+                        <div className='space-y-1'>
+                          <Label className='text-slate-700 font-semibold'>
+                            Kelas
+                          </Label>
+                          <Input
+                            value={docHeader.className}
+                            onChange={(e) =>
+                              setDocHeader({
+                                ...docHeader,
+                                className: e.target.value,
+                              })
+                            }
+                            className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
+                          />
+                        </div>
+                        <div className='space-y-1'>
+                          <Label className='text-slate-700 font-semibold'>
+                            Jabatan Pengesah (Kiri)
+                          </Label>
+                          <Input
+                            value={signatureData.supervisorTitle}
+                            onChange={(e) =>
+                              setSignatureData({
+                                ...signatureData,
+                                supervisorTitle: e.target.value,
+                              })
+                            }
+                            className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
+                          />
+                        </div>
+                      </div>
+                      <div className='grid grid-cols-2 gap-3'>
+                        <div className='space-y-1'>
+                          <Label className='text-slate-700 font-semibold'>
+                            Nama Kepala Sekolah
+                          </Label>
+                          <Input
+                            placeholder='Drs. H. Ahmad Dahlan, M.Pd.'
+                            value={signatureData.supervisorName}
+                            onChange={(e) =>
+                              setSignatureData({
+                                ...signatureData,
+                                supervisorName: e.target.value,
+                              })
+                            }
+                            className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
+                          />
+                        </div>
+                        <div className='space-y-1'>
+                          <Label className='text-slate-700 font-semibold'>
+                            NIP Kepala Sekolah
+                          </Label>
+                          <Input
+                            placeholder='19750812 200003 1 002'
+                            value={signatureData.supervisorNip}
+                            onChange={(e) =>
+                              setSignatureData({
+                                ...signatureData,
+                                supervisorNip: e.target.value,
+                              })
+                            }
+                            className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
+                          />
+                        </div>
+                      </div>
+                      <div className='grid grid-cols-2 gap-3'>
+                        <div className='space-y-1'>
+                          <Label className='text-slate-700 font-semibold'>
+                            Kota Cetak
+                          </Label>
+                          <Input
+                            value={signatureData.place}
+                            onChange={(e) =>
+                              setSignatureData({
+                                ...signatureData,
+                                place: e.target.value,
+                              })
+                            }
+                            className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
+                          />
+                        </div>
+                        <div className='space-y-1'>
+                          <Label className='text-slate-700 font-semibold'>
+                            Tanggal Cetak
+                          </Label>
+                          <Input
+                            value={signatureData.date}
+                            onChange={(e) =>
+                              setSignatureData({
+                                ...signatureData,
+                                date: e.target.value,
+                              })
+                            }
+                            className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button
+                        onClick={() => setHeaderModalOpen(false)}
+                        className='bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl w-full'
+                      >
+                        Selesai Edit
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
 
+                {/* Rentang Laporan Pills */}
+                <div className='grid grid-cols-3 sm:flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/80 w-full sm:w-auto'>
+                  {(['mingguan', 'bulanan', 'tahunan'] as ExportPeriod[]).map(
+                    (period) => {
+                      const isActive = exportPeriod === period;
+                      return (
+                        <button
+                          key={period}
+                          onClick={() => setExportPeriod(period)}
+                          className={`px-2 sm:px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-all cursor-pointer text-center justify-center flex items-center ${
+                            isActive
+                              ? 'bg-emerald-600 text-white shadow-xs'
+                              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+                          }`}
+                        >
+                          {period}
+                        </button>
+                      );
+                    },
+                  )}
+                </div>
+
+                {/* Dynamic Period Selectors */}
+                {exportPeriod === 'mingguan' && (
+                  <Popover>
+                    <PopoverTrigger className='justify-start text-left font-medium border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-900 rounded-xl h-10 gap-2 flex items-center px-3 cursor-pointer text-xs'>
+                      <CalendarIcon className='h-3.5 w-3.5 text-emerald-600' />
+                      <span>
+                        {format(weekRange.mondayDate, 'dd MMM', { locale: id })} -{' '}
+                        {format(weekRange.saturdayDate, 'dd MMM yyyy', {
+                          locale: id,
+                        })}
+                      </span>
+                    </PopoverTrigger>
+                    <PopoverContent className='w-auto p-0 bg-white border-slate-200 rounded-xl shadow-xl'>
+                      <Calendar
+                        mode='single'
+                        selected={selectedDate}
+                        onSelect={(date) => date && setSelectedDate(date)}
+                        className='bg-white text-slate-900 rounded-xl'
+                      />
+                    </PopoverContent>
+                  </Popover>
+                )}
+
+                {exportPeriod === 'bulanan' && (
+                  <div className='flex items-center gap-1.5'>
+                    <select
+                      value={selectedMonth}
+                      onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                      className='bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 cursor-pointer'
+                    >
+                      {MONTH_NAMES.map((m, idx) => (
+                        <option key={m} value={idx + 1}>
+                          {m}
+                        </option>
+                      ))}
+                    </select>
+
+                    <select
+                      value={selectedYear}
+                      onChange={(e) => setSelectedYear(Number(e.target.value))}
+                      className='bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 cursor-pointer'
+                    >
+                      {YEARS.map((y) => (
+                        <option key={y} value={y}>
+                          {y}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {exportPeriod === 'tahunan' && (
                   <select
                     value={selectedYear}
                     onChange={(e) => setSelectedYear(Number(e.target.value))}
-                    className='bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 cursor-pointer'
+                    className='bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 cursor-pointer'
                   >
                     {YEARS.map((y) => (
                       <option key={y} value={y}>
@@ -888,40 +905,27 @@ export default function AbsensiClient({
                       </option>
                     ))}
                   </select>
-                </div>
-              )}
+                )}
+              </div>
 
-              {exportPeriod === 'tahunan' && (
-                <select
-                  value={selectedYear}
-                  onChange={(e) => setSelectedYear(Number(e.target.value))}
-                  className='bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 cursor-pointer'
-                >
-                  {YEARS.map((y) => (
-                    <option key={y} value={y}>
-                      {y}
-                    </option>
-                  ))}
-                </select>
-              )}
-
-              <div className='grid grid-cols-2 gap-2 w-full sm:w-auto'>
+              {/* Action Group: Excel & PDF Buttons */}
+              <div className='flex items-center gap-2 w-full sm:w-auto shrink-0'>
                 <Button
                   onClick={handleExportExcel}
                   variant='outline'
-                  className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-semibold rounded-xl h-10 px-3.5 gap-2 shadow-xs cursor-pointer w-full sm:w-auto justify-center'
+                  className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl h-10 px-3.5 gap-2 shadow-xs cursor-pointer flex-1 sm:flex-initial justify-center'
                 >
                   <Download className='h-4 w-4 text-emerald-600' />
-                  Ekspor Excel
+                  <span>Ekspor Excel</span>
                 </Button>
 
                 <Button
                   onClick={handlePrint}
                   variant='outline'
-                  className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl h-10 px-3.5 gap-2 shadow-xs cursor-pointer w-full sm:w-auto justify-center'
+                  className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl h-10 px-3.5 gap-2 shadow-xs cursor-pointer flex-1 sm:flex-initial justify-center'
                 >
                   <Printer className='h-4 w-4 text-blue-600' />
-                  Cetak PDF
+                  <span>Cetak PDF</span>
                 </Button>
               </div>
             </div>

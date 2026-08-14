@@ -720,8 +720,8 @@ export default function NilaiClient({
       {activeViewTab === 'preview' && (
         <div className='space-y-6'>
           {/* Live Preview Control Bar */}
-          <div className='bg-white border border-slate-200/80 p-4 rounded-2xl flex flex-col lg:flex-row lg:items-center justify-between gap-4 shadow-xs print:hidden'>
-            <div className='flex items-center gap-3'>
+          <div className='bg-white border border-slate-200/80 p-4 rounded-2xl flex flex-col 2xl:flex-row 2xl:items-center justify-between gap-4 shadow-xs print:hidden'>
+            <div className='flex items-center gap-3 shrink-0'>
               <div className='p-2.5 bg-emerald-50 text-emerald-600 rounded-xl border border-emerald-100 shrink-0'>
                 <FileText className='h-5 w-5' />
               </div>
@@ -730,7 +730,7 @@ export default function NilaiClient({
                   <h3 className='text-sm sm:text-base font-extrabold text-slate-900'>
                     Live Preview Cetak Nilai Akademik
                   </h3>
-                  <span className='text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider'>
+                  <span className='text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shrink-0'>
                     FORMAT A4 PDF
                   </span>
                 </div>
@@ -741,288 +741,292 @@ export default function NilaiClient({
               </div>
             </div>
 
-            {/* Mode & Subject Selectors + Actions */}
-            <div className='grid grid-cols-1 sm:flex sm:flex-wrap items-center gap-2.5 w-full lg:w-auto'>
-              {/* Header Info Dialog Modal Trigger Button */}
-              <Dialog open={headerModalOpen} onOpenChange={setHeaderModalOpen}>
-                <DialogTrigger
-                  render={
-                    <Button
-                      variant='outline'
-                      className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl h-10 px-3.5 gap-2 shadow-xs cursor-pointer w-full sm:w-auto justify-center'
-                    />
-                  }
-                >
-                  <Settings2 className='h-4 w-4 text-emerald-600' />
-                  <span>Pengaturan Header</span>
-                </DialogTrigger>
-                <DialogContent className='bg-white border border-slate-200 text-slate-900 rounded-2xl max-w-md p-5 sm:p-6 shadow-2xl'>
-                  <DialogHeader className='pb-3 border-b border-slate-200'>
-                    <DialogTitle className='text-lg font-bold text-slate-900 flex items-center gap-2'>
-                      <Settings2 className='h-5 w-5 text-emerald-600' />
-                      Pengaturan Header & Tanda Tangan
-                    </DialogTitle>
-                    <DialogDescription className='text-xs text-slate-500'>
-                      Edit metadata identitas sekolah, guru, dan pengesahan
-                      cetak laporan secara dinamis.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className='space-y-3.5 py-3 text-xs'>
-                    <div className='space-y-1'>
-                      <Label className='text-slate-700 font-semibold'>
-                        Nama Sekolah / Instansi
-                      </Label>
-                      <Input
-                        value={docHeader.schoolName}
-                        onChange={(e) =>
-                          setDocHeader({
-                            ...docHeader,
-                            schoolName: e.target.value,
-                          })
-                        }
-                        className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
+            {/* Mode & Subject Selectors + Actions Container */}
+            <div className='flex flex-wrap items-center justify-between 2xl:justify-end gap-2.5 w-full 2xl:w-auto border-t border-slate-100 2xl:border-t-0 pt-3.5 2xl:pt-0'>
+              {/* Filter Group: Modal Trigger & Selectors */}
+              <div className='flex flex-wrap items-center gap-2 w-full sm:w-auto'>
+                {/* Header Info Dialog Modal Trigger Button */}
+                <Dialog open={headerModalOpen} onOpenChange={setHeaderModalOpen}>
+                  <DialogTrigger
+                    render={
+                      <Button
+                        variant='outline'
+                        className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl h-10 px-3.5 gap-2 shadow-xs cursor-pointer w-full sm:w-auto justify-center'
                       />
-                    </div>
-                    <div className='grid grid-cols-2 gap-3'>
+                    }
+                  >
+                    <Settings2 className='h-4 w-4 text-emerald-600' />
+                    <span>Pengaturan Header</span>
+                  </DialogTrigger>
+                  <DialogContent className='bg-white border border-slate-200 text-slate-900 rounded-2xl max-w-md p-5 sm:p-6 shadow-2xl'>
+                    <DialogHeader className='pb-3 border-b border-slate-200'>
+                      <DialogTitle className='text-lg font-bold text-slate-900 flex items-center gap-2'>
+                        <Settings2 className='h-5 w-5 text-emerald-600' />
+                        Pengaturan Header & Tanda Tangan
+                      </DialogTitle>
+                      <DialogDescription className='text-xs text-slate-500'>
+                        Edit metadata identitas sekolah, guru, dan pengesahan
+                        cetak laporan secara dinamis.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className='space-y-3.5 py-3 text-xs'>
                       <div className='space-y-1'>
                         <Label className='text-slate-700 font-semibold'>
-                          Nama Guru / Wali Kelas
+                          Nama Sekolah / Instansi
                         </Label>
                         <Input
-                          value={docHeader.teacherName}
-                          onChange={(e) => {
-                            setDocHeader({
-                              ...docHeader,
-                              teacherName: e.target.value,
-                            });
-                            setSignatureData((prev) => ({
-                              ...prev,
-                              teacherName: e.target.value,
-                            }));
-                          }}
-                          className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
-                        />
-                      </div>
-                      <div className='space-y-1'>
-                        <Label className='text-slate-700 font-semibold'>
-                          NIP/NUPTK Guru
-                        </Label>
-                        <Input
-                          value={docHeader.nip}
-                          onChange={(e) => {
-                            setDocHeader({ ...docHeader, nip: e.target.value });
-                            setSignatureData((prev) => ({
-                              ...prev,
-                              teacherNip: e.target.value,
-                            }));
-                          }}
-                          className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
-                        />
-                      </div>
-                    </div>
-                    <div className='grid grid-cols-2 gap-3'>
-                      <div className='space-y-1'>
-                        <Label className='text-slate-700 font-semibold'>
-                          Kelas
-                        </Label>
-                        <Input
-                          value={docHeader.className}
+                          value={docHeader.schoolName}
                           onChange={(e) =>
                             setDocHeader({
                               ...docHeader,
-                              className: e.target.value,
+                              schoolName: e.target.value,
                             })
                           }
                           className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
                         />
                       </div>
-                      <div className='space-y-1'>
-                        <Label className='text-slate-700 font-semibold'>
-                          Jabatan Pengesah (Kiri)
-                        </Label>
-                        <Input
-                          value={signatureData.supervisorTitle}
-                          onChange={(e) =>
-                            setSignatureData({
-                              ...signatureData,
-                              supervisorTitle: e.target.value,
-                            })
-                          }
-                          className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
-                        />
+                      <div className='grid grid-cols-2 gap-3'>
+                        <div className='space-y-1'>
+                          <Label className='text-slate-700 font-semibold'>
+                            Nama Guru / Wali Kelas
+                          </Label>
+                          <Input
+                            value={docHeader.teacherName}
+                            onChange={(e) => {
+                              setDocHeader({
+                                ...docHeader,
+                                teacherName: e.target.value,
+                              });
+                              setSignatureData((prev) => ({
+                                ...prev,
+                                teacherName: e.target.value,
+                              }));
+                            }}
+                            className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
+                          />
+                        </div>
+                        <div className='space-y-1'>
+                          <Label className='text-slate-700 font-semibold'>
+                            NIP/NUPTK Guru
+                          </Label>
+                          <Input
+                            value={docHeader.nip}
+                            onChange={(e) => {
+                              setDocHeader({ ...docHeader, nip: e.target.value });
+                              setSignatureData((prev) => ({
+                                ...prev,
+                                teacherNip: e.target.value,
+                              }));
+                            }}
+                            className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
+                          />
+                        </div>
+                      </div>
+                      <div className='grid grid-cols-2 gap-3'>
+                        <div className='space-y-1'>
+                          <Label className='text-slate-700 font-semibold'>
+                            Kelas
+                          </Label>
+                          <Input
+                            value={docHeader.className}
+                            onChange={(e) =>
+                              setDocHeader({
+                                ...docHeader,
+                                className: e.target.value,
+                              })
+                            }
+                            className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
+                          />
+                        </div>
+                        <div className='space-y-1'>
+                          <Label className='text-slate-700 font-semibold'>
+                            Jabatan Pengesah (Kiri)
+                          </Label>
+                          <Input
+                            value={signatureData.supervisorTitle}
+                            onChange={(e) =>
+                              setSignatureData({
+                                ...signatureData,
+                                supervisorTitle: e.target.value,
+                              })
+                            }
+                            className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
+                          />
+                        </div>
+                      </div>
+                      <div className='grid grid-cols-2 gap-3'>
+                        <div className='space-y-1'>
+                          <Label className='text-slate-700 font-semibold'>
+                            Nama Kepala Sekolah
+                          </Label>
+                          <Input
+                            placeholder='Drs. H. Ahmad Dahlan, M.Pd.'
+                            value={signatureData.supervisorName}
+                            onChange={(e) =>
+                              setSignatureData({
+                                ...signatureData,
+                                supervisorName: e.target.value,
+                              })
+                            }
+                            className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
+                          />
+                        </div>
+                        <div className='space-y-1'>
+                          <Label className='text-slate-700 font-semibold'>
+                            NIP Kepala Sekolah
+                          </Label>
+                          <Input
+                            placeholder='19750812 200003 1 002'
+                            value={signatureData.supervisorNip}
+                            onChange={(e) =>
+                              setSignatureData({
+                                ...signatureData,
+                                supervisorNip: e.target.value,
+                              })
+                            }
+                            className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
+                          />
+                        </div>
+                      </div>
+                      <div className='grid grid-cols-2 gap-3'>
+                        <div className='space-y-1'>
+                          <Label className='text-slate-700 font-semibold'>
+                            Kota Cetak
+                          </Label>
+                          <Input
+                            value={signatureData.place}
+                            onChange={(e) =>
+                              setSignatureData({
+                                ...signatureData,
+                                place: e.target.value,
+                              })
+                            }
+                            className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
+                          />
+                        </div>
+                        <div className='space-y-1'>
+                          <Label className='text-slate-700 font-semibold'>
+                            Tanggal Cetak
+                          </Label>
+                          <Input
+                            value={signatureData.date}
+                            onChange={(e) =>
+                              setSignatureData({
+                                ...signatureData,
+                                date: e.target.value,
+                              })
+                            }
+                            className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
+                          />
+                        </div>
                       </div>
                     </div>
-                    <div className='grid grid-cols-2 gap-3'>
-                      <div className='space-y-1'>
-                        <Label className='text-slate-700 font-semibold'>
-                          Nama Kepala Sekolah
-                        </Label>
-                        <Input
-                          placeholder='Drs. H. Ahmad Dahlan, M.Pd.'
-                          value={signatureData.supervisorName}
-                          onChange={(e) =>
-                            setSignatureData({
-                              ...signatureData,
-                              supervisorName: e.target.value,
-                            })
-                          }
-                          className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
-                        />
-                      </div>
-                      <div className='space-y-1'>
-                        <Label className='text-slate-700 font-semibold'>
-                          NIP Kepala Sekolah
-                        </Label>
-                        <Input
-                          placeholder='19750812 200003 1 002'
-                          value={signatureData.supervisorNip}
-                          onChange={(e) =>
-                            setSignatureData({
-                              ...signatureData,
-                              supervisorNip: e.target.value,
-                            })
-                          }
-                          className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
-                        />
-                      </div>
-                    </div>
-                    <div className='grid grid-cols-2 gap-3'>
-                      <div className='space-y-1'>
-                        <Label className='text-slate-700 font-semibold'>
-                          Kota Cetak
-                        </Label>
-                        <Input
-                          value={signatureData.place}
-                          onChange={(e) =>
-                            setSignatureData({
-                              ...signatureData,
-                              place: e.target.value,
-                            })
-                          }
-                          className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
-                        />
-                      </div>
-                      <div className='space-y-1'>
-                        <Label className='text-slate-700 font-semibold'>
-                          Tanggal Cetak
-                        </Label>
-                        <Input
-                          value={signatureData.date}
-                          onChange={(e) =>
-                            setSignatureData({
-                              ...signatureData,
-                              date: e.target.value,
-                            })
-                          }
-                          className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button
-                      onClick={() => setHeaderModalOpen(false)}
-                      className='bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl w-full'
-                    >
-                      Selesai Edit
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+                    <DialogFooter>
+                      <Button
+                        onClick={() => setHeaderModalOpen(false)}
+                        className='bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl w-full'
+                      >
+                        Selesai Edit
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
 
-              <Select
-                value={reportViewMode}
-                onValueChange={(val) =>
-                  val &&
-                  setReportViewMode(val as 'all_subjects' | 'recap' | 'single')
-                }
-              >
-                <SelectTrigger className='bg-slate-50 border-slate-200 text-slate-900 rounded-xl h-10 w-full sm:w-52 text-xs font-bold shadow-xs cursor-pointer'>
-                  <SelectValue>
-                    {reportViewMode === 'all_subjects'
-                      ? 'Semua Mapel (Leger)'
-                      : reportViewMode === 'recap'
-                        ? 'Per Mapel (Lengkap)'
-                        : 'Per Kategori'}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent className='bg-white border-slate-200 text-slate-900 rounded-xl shadow-xl'>
-                  <SelectItem
-                    value='all_subjects'
-                    className='text-xs font-semibold cursor-pointer'
-                  >
-                    Semua Mapel (Leger)
-                  </SelectItem>
-                  <SelectItem
-                    value='recap'
-                    className='text-xs font-semibold cursor-pointer'
-                  >
-                    Per Mapel (Lengkap)
-                  </SelectItem>
-                  <SelectItem
-                    value='single'
-                    className='text-xs font-semibold cursor-pointer'
-                  >
-                    Per Kategori
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-
-              {/* Subject Selector (Visible in recap & single modes) */}
-              {(reportViewMode === 'recap' || reportViewMode === 'single') && (
                 <Select
-                  value={selectedSubject}
-                  onValueChange={(val) => val && setSelectedSubject(val)}
-                >
-                  <SelectTrigger className='bg-slate-50 border-slate-200 text-slate-900 rounded-xl h-10 w-44 text-xs font-semibold'>
-                    <SelectValue placeholder='Pilih Mapel' />
-                  </SelectTrigger>
-                  <SelectContent className='bg-white border-slate-200 text-slate-900 rounded-xl'>
-                    {subjects.map((subj) => (
-                      <SelectItem key={subj} value={subj}>
-                        {subj}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-
-              {/* Category Selector (Only in single mode) */}
-              {reportViewMode === 'single' && (
-                <Select
-                  value={selectedCategory}
+                  value={reportViewMode}
                   onValueChange={(val) =>
-                    val && setSelectedCategory(val as any)
+                    val &&
+                    setReportViewMode(val as 'all_subjects' | 'recap' | 'single')
                   }
                 >
-                  <SelectTrigger className='bg-slate-50 border-slate-200 text-slate-900 rounded-xl h-10 w-32 text-xs font-semibold'>
-                    <SelectValue placeholder='Kategori' />
+                  <SelectTrigger className='bg-slate-50 border-slate-200 text-slate-900 rounded-xl h-10 w-full sm:w-52 text-xs font-bold shadow-xs cursor-pointer'>
+                    <SelectValue>
+                      {reportViewMode === 'all_subjects'
+                        ? 'Semua Mapel (Leger)'
+                        : reportViewMode === 'recap'
+                          ? 'Per Mapel (Lengkap)'
+                          : 'Per Kategori'}
+                    </SelectValue>
                   </SelectTrigger>
-                  <SelectContent className='bg-white border-slate-200 text-slate-900 rounded-xl'>
-                    <SelectItem value='Tugas'>Tugas</SelectItem>
-                    <SelectItem value='UH'>UH</SelectItem>
-                    <SelectItem value='UTS'>UTS</SelectItem>
-                    <SelectItem value='UAS'>UAS</SelectItem>
+                  <SelectContent className='bg-white border-slate-200 text-slate-900 rounded-xl shadow-xl'>
+                    <SelectItem
+                      value='all_subjects'
+                      className='text-xs font-semibold cursor-pointer'
+                    >
+                      Semua Mapel (Leger)
+                    </SelectItem>
+                    <SelectItem
+                      value='recap'
+                      className='text-xs font-semibold cursor-pointer'
+                    >
+                      Per Mapel (Lengkap)
+                    </SelectItem>
+                    <SelectItem
+                      value='single'
+                      className='text-xs font-semibold cursor-pointer'
+                    >
+                      Per Kategori
+                    </SelectItem>
                   </SelectContent>
                 </Select>
-              )}
 
-              <div className='grid grid-cols-2 gap-2 w-full sm:w-auto'>
+                {/* Subject Selector (Visible in recap & single modes) */}
+                {(reportViewMode === 'recap' || reportViewMode === 'single') && (
+                  <Select
+                    value={selectedSubject}
+                    onValueChange={(val) => val && setSelectedSubject(val)}
+                  >
+                    <SelectTrigger className='bg-slate-50 border-slate-200 text-slate-900 rounded-xl h-10 w-44 text-xs font-semibold'>
+                      <SelectValue placeholder='Pilih Mapel' />
+                    </SelectTrigger>
+                    <SelectContent className='bg-white border-slate-200 text-slate-900 rounded-xl'>
+                      {subjects.map((subj) => (
+                        <SelectItem key={subj} value={subj}>
+                          {subj}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+
+                {/* Category Selector (Only in single mode) */}
+                {reportViewMode === 'single' && (
+                  <Select
+                    value={selectedCategory}
+                    onValueChange={(val) =>
+                      val && setSelectedCategory(val as any)
+                    }
+                  >
+                    <SelectTrigger className='bg-slate-50 border-slate-200 text-slate-900 rounded-xl h-10 w-32 text-xs font-semibold'>
+                      <SelectValue placeholder='Kategori' />
+                    </SelectTrigger>
+                    <SelectContent className='bg-white border-slate-200 text-slate-900 rounded-xl'>
+                      <SelectItem value='Tugas'>Tugas</SelectItem>
+                      <SelectItem value='UH'>UH</SelectItem>
+                      <SelectItem value='UTS'>UTS</SelectItem>
+                      <SelectItem value='UAS'>UAS</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
+
+              {/* Action Group: Excel & PDF Buttons */}
+              <div className='flex items-center gap-2 w-full sm:w-auto shrink-0'>
                 <Button
                   onClick={handleExcelExport}
                   variant='outline'
-                  className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl h-10 px-3.5 gap-2 shadow-xs cursor-pointer w-full sm:w-auto justify-center'
+                  className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl h-10 px-3.5 gap-2 shadow-xs cursor-pointer flex-1 sm:flex-initial justify-center'
                 >
                   <Download className='h-4 w-4 text-emerald-600' />
-                  Ekspor Excel
+                  <span>Ekspor Excel</span>
                 </Button>
                 <Button
                   onClick={handlePrint}
                   variant='outline'
-                  className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl h-10 px-3.5 gap-2 shadow-xs cursor-pointer w-full sm:w-auto justify-center'
+                  className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl h-10 px-3.5 gap-2 shadow-xs cursor-pointer flex-1 sm:flex-initial justify-center'
                 >
                   <Printer className='h-4 w-4 text-blue-600' />
-                  Cetak PDF
+                  <span>Cetak PDF</span>
                 </Button>
               </div>
             </div>
