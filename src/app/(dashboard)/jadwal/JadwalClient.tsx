@@ -13,7 +13,16 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { toast } from 'sonner';
 
 interface BaselineSubject {
@@ -44,6 +53,7 @@ export default function JadwalClient() {
     { id: '6', name: 'Pendidikan Agama', targetHours: 3 },
   ]);
 
+  const [isAddBaselineOpen, setIsAddBaselineOpen] = useState(false);
   const [newSubjectName, setNewSubjectName] = useState('');
   const [newSubjectHours, setNewSubjectHours] = useState<number>(1);
 
@@ -107,19 +117,6 @@ export default function JadwalClient() {
     },
   ]);
 
-  // Piket State
-  const [piketData, setPiketData] = useState<Record<string, string>>({
-    Senin: 'Ahmad, Budi, Citra, Dewi',
-    Selasa: 'Eko, Fani, Gita, Hendra',
-    Rabu: 'Indah, Joko, Kartika, Lani',
-    Kamis: 'Maman, Nita, Oki, Putri',
-    Jumat: 'Rian, Siska, Tono, Utama',
-    Sabtu: 'Vina, Wahyu, Yuni, Zainal',
-  });
-
-  // Hover state for Jam Ke Break button
-  const [hoveredJamKe, setHoveredJamKe] = useState<number | null>(null);
-
   // Add Baseline Subject
   const handleAddBaseline = (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,6 +132,7 @@ export default function JadwalClient() {
     setBaselineSubjects((prev) => [...prev, newSubject]);
     setNewSubjectName('');
     setNewSubjectHours(1);
+    setIsAddBaselineOpen(false);
     toast.success(`Mata pelajaran '${newSubject.name}' berhasil ditambahkan!`);
   };
 
@@ -299,6 +297,7 @@ export default function JadwalClient() {
             <Sparkles className='h-4 w-4' />
             <span>Generate Jadwal AI</span>
           </Button>
+
           <Button
             onClick={handlePrint}
             variant='outline'
@@ -310,96 +309,133 @@ export default function JadwalClient() {
         </div>
       </div>
 
-      {/* MAIN CONTENT AREA */}
-      <div className='grid grid-cols-1 lg:grid-cols-12 gap-6'>
-        {/* LEFT COLUMN: BASELINE & TRACKER */}
-        <div className='lg:col-span-4 space-y-6 print:hidden'>
-          {/* TAMBAH ALOKASI BASELINE CARD */}
-          <Card className='bg-white border-slate-200/80 rounded-2xl shadow-xs overflow-hidden'>
-            <CardContent className='p-5 space-y-4'>
-              <div className='flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-700 border-b border-slate-100 pb-3'>
-                <Plus className='h-4 w-4 text-emerald-600' />
-                <span>TAMBAH ALOKASI BASELINE</span>
+      {/* MODAL DIALOG: TAMBAH ALOKASI BASELINE */}
+      <Dialog open={isAddBaselineOpen} onOpenChange={setIsAddBaselineOpen}>
+        <DialogContent className='bg-white border border-slate-200 text-slate-900 rounded-2xl max-w-md p-5 sm:p-6 shadow-2xl'>
+          <form onSubmit={handleAddBaseline}>
+            <DialogHeader className='pb-3 border-b border-slate-200'>
+              <DialogTitle className='text-lg font-extrabold text-slate-900 flex items-center gap-2'>
+                <Plus className='h-5 w-5 text-emerald-600' />
+                Tambah Alokasi Baseline
+              </DialogTitle>
+              <DialogDescription className='text-xs text-slate-500'>
+                Buat alokasi waktu mata pelajaran baru beserta target jam mingguan.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className='space-y-4 py-4 text-xs'>
+              <div className='space-y-1.5'>
+                <Label className='text-slate-700 font-bold uppercase tracking-wider text-[11px]'>
+                  Nama Mata Pelajaran
+                </Label>
+                <Input
+                  placeholder='Contoh: Matematika, IPA, Seni...'
+                  value={newSubjectName}
+                  onChange={(e) => setNewSubjectName(e.target.value)}
+                  className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-10 text-xs'
+                  required
+                />
               </div>
 
-              <form onSubmit={handleAddBaseline} className='space-y-3.5'>
-                <div className='space-y-1.5'>
-                  <label className='text-[11px] font-bold text-slate-600 uppercase tracking-wider block'>
-                    NAMA MATA PELAJARAN
-                  </label>
-                  <Input
-                    placeholder='Contoh: Matematika, IPA, Seni...'
-                    value={newSubjectName}
-                    onChange={(e) => setNewSubjectName(e.target.value)}
-                    className='bg-slate-50 border-slate-200 text-slate-900 text-xs rounded-xl h-10 placeholder:text-slate-400'
-                  />
-                </div>
+              <div className='space-y-1.5'>
+                <Label className='text-slate-700 font-bold uppercase tracking-wider text-[11px]'>
+                  Alokasi Mingguan (Jam/Sesi)
+                </Label>
+                <Input
+                  type='number'
+                  min={1}
+                  max={20}
+                  value={newSubjectHours}
+                  onChange={(e) => setNewSubjectHours(Number(e.target.value))}
+                  className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-10 text-xs'
+                  required
+                />
+              </div>
+            </div>
 
-                <div className='space-y-1.5'>
-                  <label className='text-[11px] font-bold text-slate-600 uppercase tracking-wider block'>
-                    ALOKASI MINGGUAN (JAM/SESI)
-                  </label>
-                  <Input
-                    type='number'
-                    min={1}
-                    max={20}
-                    value={newSubjectHours}
-                    onChange={(e) => setNewSubjectHours(Number(e.target.value))}
-                    className='bg-slate-50 border-slate-200 text-slate-900 text-xs rounded-xl h-10'
-                  />
-                </div>
+            <DialogFooter className='pt-2 flex justify-end gap-2'>
+              <Button
+                type='button'
+                variant='outline'
+                onClick={() => setIsAddBaselineOpen(false)}
+                className='border-slate-200 text-slate-700 rounded-xl h-10 text-xs font-semibold cursor-pointer'
+              >
+                Batal
+              </Button>
+              <Button
+                type='submit'
+                className='bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl h-10 text-xs px-5 shadow-xs cursor-pointer'
+              >
+                Simpan Alokasi
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
-                <Button
-                  type='submit'
-                  className='w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl h-10 cursor-pointer shadow-xs'
-                >
-                  Simpan Alokasi
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-
+      {/* MAIN CONTENT AREA */}
+      <div className='grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch'>
+        {/* LEFT COLUMN: BASELINE TRACKER */}
+        <div className='lg:col-span-4 flex flex-col print:hidden'>
           {/* TRACKER ALOKASI KELAS CARD */}
-          <Card className='bg-white border-slate-200/80 rounded-2xl shadow-xs overflow-hidden'>
-            <CardContent className='p-5 space-y-4'>
-              <div className='flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-700 border-b border-slate-100 pb-3'>
-                <Clock className='h-4 w-4 text-emerald-600' />
-                <span>TRACKER ALOKASI KELAS</span>
+          <Card className='bg-white border-slate-200/80 rounded-2xl shadow-xs overflow-hidden h-full flex flex-col'>
+            <CardContent className='p-5 space-y-4 flex-1 flex flex-col'>
+              <div className='flex items-center justify-between border-b border-slate-100 pb-3 shrink-0'>
+                <div className='flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-700'>
+                  <Clock className='h-4 w-4 text-emerald-600' />
+                  <span>TRACKER ALOKASI KELAS</span>
+                </div>
+                <Button
+                  onClick={() => setIsAddBaselineOpen(true)}
+                  variant='ghost'
+                  size='sm'
+                  className='h-7 px-2.5 text-xs font-bold text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 rounded-xl gap-1 cursor-pointer'
+                >
+                  <Plus className='h-3.5 w-3.5' />
+                  <span>Tambah Pelajaran</span>
+                </Button>
               </div>
 
               {baselineSubjects.length === 0 ? (
-                <div className='py-10 text-center text-slate-400 space-y-2'>
+                <div className='flex-1 flex flex-col items-center justify-center py-10 text-center text-slate-400 space-y-3'>
                   <Info className='h-8 w-8 mx-auto text-slate-300' />
                   <p className='text-xs font-medium text-slate-500'>
                     Belum ada alokasi waktu mata pelajaran.
                   </p>
+                  <Button
+                    onClick={() => setIsAddBaselineOpen(true)}
+                    className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl h-9 px-4 gap-1.5 shadow-xs cursor-pointer'
+                  >
+                    <Plus className='h-3.5 w-3.5' />
+                    <span>Tambah Alokasi Pertama</span>
+                  </Button>
                 </div>
               ) : (
-                <div className='space-y-3 max-h-[350px] overflow-y-auto pr-1'>
+                <div className='space-y-3 flex-1 overflow-y-auto pr-1 max-h-[560px] lg:max-h-[620px]'>
                   {baselineSubjects.map((sub) => {
                     const assigned = getAssignedHours(sub.name);
                     const isComplete = assigned >= sub.targetHours;
                     return (
                       <div
                         key={sub.id}
-                        className='p-3 rounded-xl border border-slate-100 bg-slate-50/80 flex items-center justify-between gap-3 text-xs'
+                        className='p-3.5 rounded-2xl border border-slate-100 bg-slate-50/80 flex items-center justify-between gap-3 text-xs shadow-2xs hover:border-slate-200 transition-all'
                       >
                         <div className='flex-1 min-w-0'>
-                          <p className='font-bold text-slate-900 truncate'>
+                          <p className='font-extrabold text-slate-900 truncate'>
                             {sub.name}
                           </p>
-                          <div className='flex items-center gap-2 mt-1'>
-                            <div className='flex-1 bg-slate-200 rounded-full h-1.5 overflow-hidden'>
+                          <div className='flex items-center gap-2 mt-1.5'>
+                            <div className='flex-1 bg-slate-200 rounded-full h-2 overflow-hidden'>
                               <div
-                                className={`h-full rounded-full transition-all ${
-                                  isComplete ? 'bg-emerald-500' : 'bg-amber-500'
+                                className={`h-full rounded-full transition-all duration-300 ${
+                                  isComplete ? 'bg-emerald-600' : 'bg-amber-500'
                                 }`}
                                 style={{
                                   width: `${Math.min(100, (assigned / sub.targetHours) * 100)}%`,
                                 }}
                               />
                             </div>
-                            <span className='text-[10px] font-bold text-slate-600 shrink-0'>
+                            <span className='text-[11px] font-bold text-slate-600 shrink-0'>
                               {assigned} / {sub.targetHours} jam
                             </span>
                           </div>
@@ -409,9 +445,10 @@ export default function JadwalClient() {
                           onClick={() => handleRemoveBaseline(sub.id)}
                           variant='ghost'
                           size='icon'
-                          className='h-7 w-7 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg shrink-0'
+                          className='h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl shrink-0 cursor-pointer'
+                          title='Hapus alokasi mata pelajaran'
                         >
-                          <Trash2 className='h-3.5 w-3.5' />
+                          <Trash2 className='h-4 w-4' />
                         </Button>
                       </div>
                     );
@@ -423,7 +460,7 @@ export default function JadwalClient() {
         </div>
 
         {/* RIGHT COLUMN: MAIN INTERACTIVE SCHEDULE TABLE */}
-        <div className='lg:col-span-8 space-y-4'>
+        <div className='lg:col-span-8 space-y-4 flex flex-col'>
           {/* Quick Break Chips Control Bar Above Table */}
           <div className='bg-white border border-slate-200/80 rounded-2xl p-4 space-y-2.5 shadow-xs print:hidden'>
             <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 border-b border-slate-100 pb-2.5'>
@@ -442,11 +479,10 @@ export default function JadwalClient() {
                   key={row.jamKe}
                   type='button'
                   onClick={() => handleToggleBreak(row.jamKe)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs flex items-center gap-1.5 border ${
-                    row.isBreak
-                      ? 'bg-amber-500 border-amber-600 text-white shadow-amber-500/20'
-                      : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-emerald-400 hover:bg-emerald-50/50'
-                  }`}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs flex items-center gap-1.5 border ${row.isBreak
+                    ? 'bg-amber-500 border-amber-600 text-white shadow-amber-500/20'
+                    : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-emerald-400 hover:bg-emerald-50/50'
+                    }`}
                 >
                   <Coffee
                     className={`h-3.5 w-3.5 ${row.isBreak ? 'text-white' : 'text-slate-400'}`}
@@ -488,9 +524,8 @@ export default function JadwalClient() {
                   {scheduleRows.map((row) => (
                     <tr
                       key={row.jamKe}
-                      className={`border-b border-slate-200 transition-colors ${
-                        row.isBreak ? 'bg-amber-50/60' : 'hover:bg-slate-50/60'
-                      }`}
+                      className={`border-b border-slate-200 transition-colors ${row.isBreak ? 'bg-amber-50/60' : 'hover:bg-slate-50/60'
+                        }`}
                     >
                       {/* JAM KE COLUMN */}
                       <td className='p-3 border-r border-slate-200 text-center font-bold text-slate-800'>

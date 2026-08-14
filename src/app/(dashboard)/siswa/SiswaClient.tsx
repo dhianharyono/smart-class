@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useState, useTransition } from 'react';
+import React, { useState, useTransition, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import GuidedSpotlight from '@/components/GuidedSpotlight';
 import {
   Search,
   Pencil,
@@ -16,6 +18,8 @@ import {
   User,
   GraduationCap,
   HeartHandshake,
+  Sparkles,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -91,6 +95,21 @@ export default function SiswaClient({ initialStudents }: SiswaClientProps) {
   });
 
   const [isPending, startTransition] = useTransition();
+
+  // Guided Onboarding Spotlight State
+  const inputSiswaBtnRef = useRef<HTMLButtonElement | null>(null);
+  const [mounted, setMounted] = useState(false);
+  const [showGuidedTooltip, setShowGuidedTooltip] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('guided') === '1' || params.get('guided') === 'input_siswa') {
+        setShowGuidedTooltip(true);
+      }
+    }
+  }, []);
 
   // Keep local state in sync when initial data refreshes
   React.useEffect(() => {
@@ -172,6 +191,16 @@ export default function SiswaClient({ initialStudents }: SiswaClientProps) {
 
   return (
     <div className='space-y-6 animate-fade-in'>
+      {/* GUIDED ONBOARDING SPOTLIGHT OVERLAY */}
+      {showGuidedTooltip && (
+        <GuidedSpotlight
+          targetRef={inputSiswaBtnRef}
+          stepTitle='Langkah 1: Tambah Biodata Siswa'
+          stepDescription='Klik tombol hijau "Input Biodata Lengkap" ini untuk mendaftarkan data siswa kelas Anda!'
+          onClose={() => setShowGuidedTooltip(false)}
+        />
+      )}
+
       {/* Header Bar */}
       <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between print:hidden'>
         <div>
@@ -193,8 +222,12 @@ export default function SiswaClient({ initialStudents }: SiswaClientProps) {
             <Download className='h-4 w-4 text-amber-600' />
             <span>Ekspor Excel</span>
           </Button>
+
           <Link href='/siswa/tambah' className='w-full sm:w-auto'>
-            <Button className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl h-10 px-4 gap-2 shadow-xs cursor-pointer w-full justify-center'>
+            <Button
+              ref={inputSiswaBtnRef}
+              className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl h-10 px-4 gap-2 shadow-xs cursor-pointer w-full justify-center'
+            >
               <UserPlus className='h-4 w-4' />
               <span>Input Biodata Lengkap</span>
             </Button>
@@ -359,15 +392,25 @@ export default function SiswaClient({ initialStudents }: SiswaClientProps) {
                     colSpan={7}
                     className='text-center py-12 sm:py-16 px-4 text-slate-400'
                   >
-                    <div className='max-w-md mx-auto flex flex-col items-center justify-center'>
-                      <Users className='h-10 w-10 sm:h-12 sm:w-12 text-slate-300 mx-auto mb-2 shrink-0' />
-                      <p className='text-sm sm:text-base font-extrabold text-slate-800 tracking-tight'>
-                        Belum ada data siswa.
-                      </p>
-                      <p className='text-xs sm:text-sm text-slate-500 mt-1 font-medium leading-relaxed'>
-                        Klik tombol "Input Biodata Lengkap" untuk menambah
-                        registrasi siswa baru.
-                      </p>
+                    <div className='max-w-md mx-auto flex flex-col items-center justify-center space-y-3'>
+                      <div className='h-14 w-14 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center shrink-0 shadow-xs'>
+                        <Users className='h-7 w-7' />
+                      </div>
+                      <div>
+                        <p className='text-base font-extrabold text-slate-900 tracking-tight'>
+                          Belum ada data siswa.
+                        </p>
+                        <p className='text-xs text-slate-500 mt-1 font-medium leading-relaxed'>
+                          Klik tombol "Input Biodata Lengkap" untuk menambah
+                          registrasi siswa baru.
+                        </p>
+                      </div>
+                      <Link href='/siswa/tambah'>
+                        <Button className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl h-10 px-5 gap-2 shadow-xs cursor-pointer mt-1'>
+                          <UserPlus className='h-4 w-4' />
+                          <span>Input Biodata Lengkap</span>
+                        </Button>
+                      </Link>
                     </div>
                   </TableCell>
                 </TableRow>

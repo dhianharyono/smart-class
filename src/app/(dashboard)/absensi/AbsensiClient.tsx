@@ -1,6 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useTransition } from 'react';
+import React, { useState, useEffect, useTransition, useRef } from 'react';
+import Link from 'next/link';
+import GuidedSpotlight from '@/components/GuidedSpotlight';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
@@ -13,6 +15,9 @@ import {
   Printer,
   FileText,
   Settings2,
+  Plus,
+  Sparkles,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -367,12 +372,54 @@ export default function AbsensiClient({
     { hadir: 0, sakit: 0, izin: 0, alfa: 0 },
   );
 
+  // Guided Onboarding Spotlight State
+  const absensiBtnRef = useRef<HTMLButtonElement | null>(null);
+  const printTabRef = useRef<HTMLButtonElement | null>(null);
+  const [mounted, setMounted] = useState(false);
+  const [showGuidedTooltip, setShowGuidedTooltip] = useState(false);
+  const [guidedStep, setGuidedStep] = useState<'absensi' | 'cetak'>('absensi');
+
+  useEffect(() => {
+    setMounted(true);
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const guidedParam = params.get('guided');
+      if (guidedParam === 'cetak') {
+        setGuidedStep('cetak');
+        setShowGuidedTooltip(true);
+      } else if (guidedParam === '1' || guidedParam === 'absensi') {
+        setGuidedStep('absensi');
+        setShowGuidedTooltip(true);
+      }
+    }
+  }, []);
+
   const formattedSelectedDate = format(selectedDate, 'EEEE, dd MMMM yyyy', {
     locale: id,
   });
 
   return (
     <div className='space-y-6 animate-fade-in'>
+      {/* GUIDED ONBOARDING SPOTLIGHT OVERLAY */}
+      {showGuidedTooltip && (
+        <GuidedSpotlight
+          targetRef={guidedStep === 'cetak' ? printTabRef : absensiBtnRef}
+          stepTitle={
+            guidedStep === 'cetak'
+              ? 'Langkah 4: Pratinjau Cetak A4 PDF'
+              : 'Langkah 2: Presensi Harian Siswa'
+          }
+          stepDescription={
+            guidedStep === 'cetak'
+              ? 'Klik tab "Pratinjau Cetak (A4 PDF)" ini untuk melihat rekapitulasi presensi harian & bulanan yang siap dicetak ke PDF!'
+              : localRecords.length === 0
+              ? 'Klik tombol "Input Data Siswa Sekarang" di atas untuk mendaftarkan siswa terlebih dahulu!'
+              : 'Pilih tanggal presensi lalu beri tanda status (Hadir/Sakit/Izin/Alfa) untuk siswa Anda.'
+          }
+          onClose={() => setShowGuidedTooltip(false)}
+        />
+      )}
+
       {/* Top Bar Header */}
       {!hideHeader && (
         <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between print:hidden'>
@@ -386,20 +433,33 @@ export default function AbsensiClient({
             </p>
           </div>
 
-          <div className='flex flex-wrap items-center gap-2 sm:gap-3'>
-            {viewMode === 'input' && (
-              <Button
-                onClick={handleSave}
-                disabled={isPending || isDailyLoading}
-                className='bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl h-10 px-6 gap-2 shadow-xs cursor-pointer'
-              >
-                {isPending ? (
-                  <Loader2 className='h-4 w-4 animate-spin' />
-                ) : (
-                  <Check className='h-4 w-4' />
-                )}
-                Simpan Presensi
-              </Button>
+          <div className='relative flex flex-wrap items-center gap-2 sm:gap-3'>
+            {localRecords.length === 0 && !isDailyLoading ? (
+              <Link href='/siswa'>
+                <Button
+                  ref={absensiBtnRef}
+                  className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl h-10 px-4 gap-2 shadow-xs cursor-pointer justify-center'
+                >
+                  <Plus className='h-4 w-4' />
+                  <span>Input Data Siswa Sekarang</span>
+                </Button>
+              </Link>
+            ) : (
+              viewMode === 'input' && (
+                <Button
+                  ref={absensiBtnRef}
+                  onClick={handleSave}
+                  disabled={isPending || isDailyLoading}
+                  className='bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl h-10 px-6 gap-2 shadow-xs cursor-pointer'
+                >
+                  {isPending ? (
+                    <Loader2 className='h-4 w-4 animate-spin' />
+                  ) : (
+                    <Check className='h-4 w-4' />
+                  )}
+                  Simpan Presensi
+                </Button>
+              )
             )}
           </div>
         </div>
@@ -419,6 +479,7 @@ export default function AbsensiClient({
           <span className='truncate'>Data Absensi & Rekap</span>
         </button>
         <button
+          ref={printTabRef}
           onClick={() => setViewMode('preview')}
           className={`flex items-center justify-center text-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer w-full sm:w-auto ${
             viewMode === 'preview'
@@ -590,14 +651,24 @@ export default function AbsensiClient({
                 </TableBody>
               </Table>
             ) : (
-              <div className='flex flex-col items-center justify-center py-12 sm:py-20 px-4 text-center text-slate-500 max-w-md mx-auto'>
-                <UserCheck className='h-10 w-10 text-slate-300 mb-2 shrink-0' />
-                <p className='text-sm sm:text-base font-extrabold text-slate-800 tracking-tight'>
-                  Tidak ada siswa terdaftar di kelas.
-                </p>
-                <p className='text-xs sm:text-sm text-slate-500 mt-1 font-medium leading-relaxed'>
-                  Silakan tambahkan siswa terlebih dahulu di halaman Data Siswa.
-                </p>
+              <div className='flex flex-col items-center justify-center py-12 sm:py-16 px-4 text-center text-slate-500 max-w-md mx-auto space-y-3'>
+                <div className='h-14 w-14 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center shrink-0 shadow-xs'>
+                  <UserCheck className='h-7 w-7' />
+                </div>
+                <div>
+                  <p className='text-base font-extrabold text-slate-900 tracking-tight'>
+                    Belum Ada Siswa Terdaftar
+                  </p>
+                  <p className='text-xs text-slate-500 mt-1 font-medium leading-relaxed'>
+                    Silakan tambahkan data siswa terlebih dahulu agar Anda dapat langsung mencatat presensi harian.
+                  </p>
+                </div>
+                <Link href='/siswa'>
+                  <Button className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl h-10 px-5 gap-2 shadow-xs cursor-pointer mt-1'>
+                    <Plus className='h-4 w-4' />
+                    <span>Input Data Siswa Sekarang</span>
+                  </Button>
+                </Link>
               </div>
             )}
           </CardContent>

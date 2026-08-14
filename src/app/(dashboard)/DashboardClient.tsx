@@ -22,8 +22,10 @@ import {
   CheckCircle2,
   Sparkles,
   LayoutGrid,
+  Plus,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import OnboardingWidget from '@/components/OnboardingWidget';
 import {
   Card,
   CardContent,
@@ -51,6 +53,7 @@ interface DashboardClientProps {
   stats: {
     studentCount: number;
     monthlyAttendanceRate: number;
+    totalAttendanceLogs?: number;
     totalSavingsBalance: number;
     lowGradeCount: number;
     lowGradeNotifications: Array<{
@@ -226,6 +229,9 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
         </Link>
       </div>
 
+      {/* Interactive Onboarding Guide for New Users */}
+      <OnboardingWidget stats={stats} />
+
       {/* Empty State – when no modules are active */}
       {statCards.length === 0 &&
         !isTabunganEnabled &&
@@ -392,7 +398,7 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
                     <Link href='/jurnal' className='mt-2'>
                       <Button
                         size='sm'
-                        className='bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-xs px-4 h-9 cursor-pointer shadow-xs'
+                        className='bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs px-4 h-9 cursor-pointer shadow-xs'
                       >
                         Buat Jurnal Baru
                       </Button>
@@ -424,82 +430,116 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
                 </div>
               </CardHeader>
               <CardContent className='pt-0 flex flex-col justify-between flex-1 gap-4'>
-                <div className='h-44 sm:h-48 relative flex items-center justify-center my-auto'>
-                  <ResponsiveContainer width='100%' height='100%'>
-                    <PieChart margin={{ top: 0, bottom: 0, left: 0, right: 0 }}>
-                      <Pie
-                        data={stats.attendanceChartData}
-                        cx='50%'
-                        cy='50%'
-                        innerRadius={52}
-                        outerRadius={70}
-                        paddingAngle={3}
-                        dataKey='value'
-                      >
-                        {stats.attendanceChartData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: '#ffffff',
-                          borderColor: '#e2e8f0',
-                          borderRadius: '12px',
-                          boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
-                        }}
-                        formatter={(value: any, name: any) => [
-                          `${value} Log Kehadiran`,
-                          name,
-                        ]}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                  {/* Central text displaying Rate */}
-                  <div className='absolute inset-0 flex flex-col items-center justify-center pointer-events-none'>
-                    <span className='text-2xl font-black text-slate-900 leading-none'>
-                      {stats.monthlyAttendanceRate}%
-                    </span>
-                    <span className='text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-1'>
-                      Hadir
-                    </span>
-                  </div>
-                </div>
+                {stats.attendanceBreakdown.Hadir +
+                  stats.attendanceBreakdown.Sakit +
+                  stats.attendanceBreakdown.Izin +
+                  stats.attendanceBreakdown.Alfa >
+                0 ? (
+                  <>
+                    <div className='h-44 sm:h-48 relative flex items-center justify-center my-auto'>
+                      <ResponsiveContainer width='100%' height='100%'>
+                        <PieChart
+                          margin={{ top: 0, bottom: 0, left: 0, right: 0 }}
+                        >
+                          <Pie
+                            data={stats.attendanceChartData}
+                            cx='50%'
+                            cy='50%'
+                            innerRadius={52}
+                            outerRadius={70}
+                            paddingAngle={3}
+                            dataKey='value'
+                          >
+                            {stats.attendanceChartData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: '#ffffff',
+                              borderColor: '#e2e8f0',
+                              borderRadius: '12px',
+                              boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
+                            }}
+                            formatter={(value: any, name: any) => [
+                              `${value} Log Kehadiran`,
+                              name,
+                            ]}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                      {/* Central text displaying Rate */}
+                      <div className='absolute inset-0 flex flex-col items-center justify-center pointer-events-none'>
+                        <span className='text-2xl font-black text-slate-900 leading-none'>
+                          {stats.monthlyAttendanceRate}%
+                        </span>
+                        <span className='text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-1'>
+                          Hadir
+                        </span>
+                      </div>
+                    </div>
 
-                {/* Attendance Breakdown Pills */}
-                <div className='grid grid-cols-4 gap-1.5 border-t border-slate-100 pt-3 text-center'>
-                  <div className='bg-emerald-50/70 border border-emerald-100/80 rounded-xl p-1.5'>
-                    <p className='text-xs font-black text-emerald-700 leading-tight'>
-                      {stats.attendanceBreakdown.Hadir}
-                    </p>
-                    <p className='text-[10px] text-slate-500 font-medium mt-0.5'>
-                      Hadir
-                    </p>
+                    {/* Attendance Breakdown Pills */}
+                    <div className='grid grid-cols-4 gap-1.5 border-t border-slate-100 pt-3 text-center'>
+                      <div className='bg-emerald-50/70 border border-emerald-100/80 rounded-xl p-1.5'>
+                        <p className='text-xs font-black text-emerald-700 leading-tight'>
+                          {stats.attendanceBreakdown.Hadir}
+                        </p>
+                        <p className='text-[10px] text-slate-500 font-medium mt-0.5'>
+                          Hadir
+                        </p>
+                      </div>
+                      <div className='bg-blue-50/70 border border-blue-100/80 rounded-xl p-1.5'>
+                        <p className='text-xs font-black text-blue-700 leading-tight'>
+                          {stats.attendanceBreakdown.Sakit}
+                        </p>
+                        <p className='text-[10px] text-slate-500 font-medium mt-0.5'>
+                          Sakit
+                        </p>
+                      </div>
+                      <div className='bg-amber-50/70 border border-amber-100/80 rounded-xl p-1.5'>
+                        <p className='text-xs font-black text-amber-700 leading-tight'>
+                          {stats.attendanceBreakdown.Izin}
+                        </p>
+                        <p className='text-[10px] text-slate-500 font-medium mt-0.5'>
+                          Izin
+                        </p>
+                      </div>
+                      <div className='bg-rose-50/70 border border-rose-100/80 rounded-xl p-1.5'>
+                        <p className='text-xs font-black text-rose-700 leading-tight'>
+                          {stats.attendanceBreakdown.Alfa}
+                        </p>
+                        <p className='text-[10px] text-slate-500 font-medium mt-0.5'>
+                          Alfa
+                        </p>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className='flex flex-col items-center justify-center py-7 text-center gap-2.5 rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 my-auto px-4'>
+                    <div className='p-3 rounded-2xl bg-blue-50 border border-blue-100 text-blue-500 shadow-xs'>
+                      <CalendarCheck2 className='h-6 w-6' />
+                    </div>
+                    <div>
+                      <p className='text-xs font-bold text-slate-800'>
+                        Belum Ada Data Presensi Bulan Ini
+                      </p>
+                      <p className='text-[11px] text-slate-500 mt-1 max-w-xs leading-relaxed font-medium'>
+                        Mulai catat presensi harian siswa untuk melihat
+                        statistik & distribusi kehadiran.
+                      </p>
+                    </div>
+                    <Link href='/absensi?guided=1'>
+                      <Button
+                        size='sm'
+                        className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl h-8.5 px-3.5 gap-1.5 shadow-xs cursor-pointer mt-1'
+                      >
+                        <Plus className='h-3.5 w-3.5' />
+                        Input Presensi Sekarang
+                      </Button>
+                    </Link>
                   </div>
-                  <div className='bg-blue-50/70 border border-blue-100/80 rounded-xl p-1.5'>
-                    <p className='text-xs font-black text-blue-700 leading-tight'>
-                      {stats.attendanceBreakdown.Sakit}
-                    </p>
-                    <p className='text-[10px] text-slate-500 font-medium mt-0.5'>
-                      Sakit
-                    </p>
-                  </div>
-                  <div className='bg-amber-50/70 border border-amber-100/80 rounded-xl p-1.5'>
-                    <p className='text-xs font-black text-amber-700 leading-tight'>
-                      {stats.attendanceBreakdown.Izin}
-                    </p>
-                    <p className='text-[10px] text-slate-500 font-medium mt-0.5'>
-                      Izin
-                    </p>
-                  </div>
-                  <div className='bg-rose-50/70 border border-rose-100/80 rounded-xl p-1.5'>
-                    <p className='text-xs font-black text-rose-700 leading-tight'>
-                      {stats.attendanceBreakdown.Alfa}
-                    </p>
-                    <p className='text-[10px] text-slate-500 font-medium mt-0.5'>
-                      Alfa
-                    </p>
-                  </div>
-                </div>
+                )}
               </CardContent>
             </Card>
           )}
@@ -590,17 +630,28 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
                 </ResponsiveContainer>
               </div>
             ) : (
-              <div className='flex flex-col items-center justify-center py-8 text-center gap-2 rounded-xl border border-dashed border-slate-200 bg-slate-50/50 my-2'>
-                <div className='p-2.5 rounded-xl bg-white border border-slate-200 shadow-2xs text-slate-400'>
+              <div className='flex flex-col items-center justify-center py-8 text-center gap-2.5 rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 my-2 px-4'>
+                <div className='p-3 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-600 shadow-xs'>
                   <Wallet className='h-6 w-6' />
                 </div>
-                <p className='text-xs font-bold text-slate-700 mt-1'>
-                  Belum Ada Transaksi Tabungan
-                </p>
-                <p className='text-[11px] text-slate-400 max-w-xs leading-relaxed'>
-                  Riwayat setoran & penarikan kas siswa akan otomatis
-                  ditampilkan pada grafik ini.
-                </p>
+                <div>
+                  <p className='text-xs font-bold text-slate-800'>
+                    Belum Ada Transaksi Tabungan
+                  </p>
+                  <p className='text-[11px] text-slate-500 mt-1 max-w-xs leading-relaxed font-medium'>
+                    Riwayat setoran & penarikan kas siswa akan otomatis
+                    ditampilkan pada grafik ini.
+                  </p>
+                </div>
+                <Link href='/tabungan'>
+                  <Button
+                    size='sm'
+                    className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl h-8.5 px-4 gap-1.5 shadow-xs cursor-pointer mt-1'
+                  >
+                    <Plus className='h-3.5 w-3.5' />
+                    Input Transaksi Tabungan
+                  </Button>
+                </Link>
               </div>
             )}
           </CardContent>

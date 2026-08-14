@@ -678,7 +678,10 @@ export default function DashboardLayoutClient({
                   {visibleItemsInGroup.map((item) => {
                     if (item.children && item.children.length > 0) {
                       const isChildActive = item.children.some(
-                        (child) => pathname === child.href,
+                        (child) =>
+                          pathname === child.href ||
+                          (child.href !== '/' &&
+                            pathname.startsWith(child.href + '/')),
                       );
                       const isOpen = openMenus[item.name] ?? isChildActive;
                       const Icon = item.icon;
@@ -716,7 +719,10 @@ export default function DashboardLayoutClient({
                           {isOpen && (
                             <div className='pl-3.5 space-y-1 border-l-2 border-slate-200/80 ml-5 my-1'>
                               {item.children.map((child) => {
-                                const isSubActive = pathname === child.href;
+                                const isSubActive =
+                                  pathname === child.href ||
+                                  (child.href !== '/' &&
+                                    pathname.startsWith(child.href + '/'));
                                 const SubIcon = child.icon;
                                 return (
                                   <Link
@@ -744,7 +750,11 @@ export default function DashboardLayoutClient({
                       );
                     }
 
-                    const isActive = pathname === item.href;
+                    const isActive =
+                      pathname === item.href ||
+                      (item.href !== '/' &&
+                        item.href !== '/dashboard' &&
+                        pathname.startsWith(item.href + '/'));
                     const Icon = item.icon;
                     return (
                       <Link
@@ -957,7 +967,7 @@ export default function DashboardLayoutClient({
         )}
 
         {/* Workspace content */}
-        <main className='flex-1 p-4 md:p-8 max-w-7xl w-full mx-auto animate-fade-in min-w-0 max-w-full overflow-hidden'>
+        <main className='flex-1 p-4 md:p-8 max-w-7xl w-full mx-auto animate-fade-in min-w-0 max-w-full overflow-x-clip'>
           {children}
         </main>
       </div>

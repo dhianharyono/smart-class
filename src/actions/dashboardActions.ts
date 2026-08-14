@@ -84,7 +84,7 @@ export async function getDashboardStats() {
     const monthlyAttendanceRate =
       totalLogs > 0
         ? Math.round((attendanceBreakdown.Hadir / totalLogs) * 100)
-        : 100; // default to 100% if no logs
+        : 0;
 
     // 3. Savings total balance
     let totalSavingsBalance = 0;
@@ -193,6 +193,7 @@ export async function getDashboardStats() {
     return JSON.parse(JSON.stringify({
       studentCount,
       monthlyAttendanceRate,
+      totalAttendanceLogs: totalLogs,
       totalSavingsBalance,
       lowGradeCount: lowGradeNotifications.length,
       lowGradeNotifications: lowGradeNotifications.slice(0, 5), // top 5 most urgent alerts

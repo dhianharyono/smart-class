@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useTransition } from 'react';
+import Link from 'next/link';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Download,
@@ -313,14 +314,24 @@ export default function TabunganClient() {
               </TableBody>
             </Table>
           ) : (
-            <div className='flex flex-col items-center justify-center py-12 sm:py-20 px-4 text-center text-slate-500 max-w-md mx-auto'>
-              <Wallet className='h-10 w-10 text-slate-300 mb-2 shrink-0' />
-              <p className='text-sm sm:text-base font-extrabold text-slate-800 tracking-tight'>
-                Tidak ada siswa terdaftar di kelas.
-              </p>
-              <p className='text-xs sm:text-sm text-slate-500 mt-1 font-medium leading-relaxed'>
-                Silakan tambahkan siswa terlebih dahulu di halaman Data Siswa.
-              </p>
+            <div className='flex flex-col items-center justify-center py-12 sm:py-16 px-4 text-center text-slate-500 max-w-md mx-auto space-y-3'>
+              <div className='h-14 w-14 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center shrink-0 shadow-xs'>
+                <Wallet className='h-7 w-7' />
+              </div>
+              <div>
+                <p className='text-base font-extrabold text-slate-900 tracking-tight'>
+                  Tidak ada siswa terdaftar di kelas.
+                </p>
+                <p className='text-xs text-slate-500 mt-1 font-medium leading-relaxed'>
+                  Silakan tambahkan siswa terlebih dahulu di halaman Data Siswa.
+                </p>
+              </div>
+              <Link href='/siswa'>
+                <Button className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl h-10 px-5 gap-2 shadow-xs cursor-pointer mt-1'>
+                  <Plus className='h-4 w-4' />
+                  <span>Input Data Siswa Sekarang</span>
+                </Button>
+              </Link>
             </div>
           )}
         </CardContent>

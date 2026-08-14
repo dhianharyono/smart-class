@@ -367,17 +367,6 @@ export default function LandingPage() {
       <main className='relative z-10'>
         {/* ==================== HERO SECTION ==================== */}
         <section className='relative pt-12 sm:pt-20 lg:pt-24 pb-16 sm:pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center flex flex-col items-center justify-center'>
-          {/* Feature Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className='inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-extrabold mb-4 shadow-2xs'
-          >
-            <span className='flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse' />
-            <span>UPDATE: Dukungan Multi-Kelas & Active Switcher</span>
-          </motion.div>
-
           {/* Main Title H1 */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}

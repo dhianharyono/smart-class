@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import GuidedSpotlight from '@/components/GuidedSpotlight';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   getJournals,
@@ -27,6 +28,8 @@ import {
   FileText,
   Activity,
   CheckCircle2,
+  Sparkles,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -180,6 +183,21 @@ export default function JurnalClient() {
       }));
     }
   }, [headerData]);
+
+  // Guided Onboarding Spotlight State
+  const jurnalBtnRef = useRef<HTMLButtonElement | null>(null);
+  const [mounted, setMounted] = useState(false);
+  const [showGuidedTooltip, setShowGuidedTooltip] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('guided') === '1' || params.get('guided') === 'jurnal') {
+        setShowGuidedTooltip(true);
+      }
+    }
+  }, []);
 
   // Load student attendance for target date
   const loadStudentAttendance = async (dateStr: string) => {
@@ -449,6 +467,16 @@ export default function JurnalClient() {
 
   return (
     <div className='space-y-6 animate-fade-in'>
+      {/* GUIDED ONBOARDING SPOTLIGHT OVERLAY */}
+      {showGuidedTooltip && (
+        <GuidedSpotlight
+          targetRef={jurnalBtnRef}
+          stepTitle='Langkah 3: Tulis Jurnal Mengajar'
+          stepDescription='Klik tombol hijau "Tambah Jurnal" ini untuk mengisi resume materi KBM hari ini!'
+          onClose={() => setShowGuidedTooltip(false)}
+        />
+      )}
+
       {/* Header Bar - Always Visible */}
       <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between print:hidden'>
         <div>
@@ -461,8 +489,9 @@ export default function JurnalClient() {
           </p>
         </div>
 
-        <div className='flex flex-wrap items-center gap-2.5'>
+        <div className='relative flex flex-wrap items-center gap-2.5'>
           <Button
+            ref={jurnalBtnRef}
             onClick={handleOpenCreateModal}
             className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl h-10 px-4 gap-2 shadow-xs cursor-pointer'
           >
