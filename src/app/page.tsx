@@ -1372,24 +1372,26 @@ export default function LandingPage() {
       </main>
 
       {/* ==================== FOOTER ==================== */}
-      <footer className='border-t border-slate-200 bg-white py-8 sm:py-12 relative z-10'>
+      <footer className='border-t border-slate-200 bg-white py-8 sm:py-10 relative z-10'>
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6 text-sm text-slate-600 text-center md:text-left'>
-          <div className='flex flex-col sm:flex-row items-center gap-2 sm:gap-3'>
-            <div className='flex items-center gap-2.5'>
-              <div className='flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-xs shrink-0'>
-                <BookOpen className='h-4 w-4' />
-              </div>
+          {/* Left: Brand Logo & Copyright */}
+          <div className='flex items-center gap-3'>
+            <div className='flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-xs shrink-0'>
+              <BookOpen className='h-4 w-4' />
+            </div>
+            <div className='flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2'>
               <span className='font-extrabold text-slate-900 tracking-tight text-base whitespace-nowrap'>
                 Smart Class
               </span>
+              <span className='hidden sm:inline text-slate-300'>•</span>
+              <span className='text-xs text-slate-500 font-medium whitespace-nowrap'>
+                © 2026. All rights reserved.
+              </span>
             </div>
-            <span className='hidden sm:inline text-slate-300'>•</span>
-            <span className='text-xs text-slate-500 font-medium whitespace-nowrap'>
-              © 2026 Smart Class. All rights reserved.
-            </span>
           </div>
 
-          <div className='flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs text-slate-600 font-semibold'>
+          {/* Center: Navigation Menu Links */}
+          <div className='flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs text-slate-600 font-semibold md:mx-auto'>
             <a
               href='#fitur'
               onClick={(e) => scrollToSection(e, 'fitur')}
@@ -1424,6 +1426,19 @@ export default function LandingPage() {
             >
               {currentUser ? 'Dashboard' : 'Masuk'}
             </Link>
+          </div>
+
+          {/* Right: Credit Link */}
+          <div className='text-xs text-slate-500 font-medium whitespace-nowrap'>
+            Developed by{' '}
+            <a
+              href='https://cetha-tech.vercel.app/'
+              target='_blank'
+              rel='noopener noreferrer'
+              className='font-bold text-emerald-600 hover:text-emerald-700 underline decoration-emerald-300 underline-offset-2 transition-colors'
+            >
+              Cetha Technologies
+            </a>
           </div>
         </div>
       </footer>
