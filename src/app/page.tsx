@@ -79,6 +79,7 @@ export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     if (
@@ -88,6 +89,7 @@ export default function LandingPage() {
       window.history.scrollRestoration = 'manual';
     }
     const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
       if (window.scrollY > 300) {
         setShowScrollTop(true);
       } else {
@@ -113,7 +115,14 @@ export default function LandingPage() {
     e.preventDefault();
     const el = document.getElementById(id);
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
+      const headerOffset = 95;
+      const elementPosition = el.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.scrollY - headerOffset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth',
+      });
     }
   };
 
@@ -125,257 +134,269 @@ export default function LandingPage() {
       <div className='fixed bottom-10 -left-48 w-[500px] h-[500px] bg-emerald-600/10 rounded-full blur-[160px] pointer-events-none z-0' />
 
       {/* ==================== HEADER / NAVBAR ==================== */}
-      <header className='sticky top-0 z-50 backdrop-blur-xl bg-white/95 border-b border-slate-200/80 transition-all shadow-xs'>
-        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 sm:py-4 flex items-center justify-between min-h-[72px] sm:min-h-[80px]'>
-          {/* Brand Logo */}
-          <Link
-            href='/'
-            className='flex items-center gap-3 group cursor-pointer shrink-0'
+      <header className='fixed inset-x-0 top-0 z-50 transition-all duration-500 py-3 sm:py-4'>
+        <div className='max-w-7xl mx-auto px-4 sm:px-6'>
+          <nav
+            className={`flex items-center justify-between rounded-full px-4 py-2.5 sm:px-5 border transition-all duration-700 ease-in-out ${
+              isScrolled
+                ? 'bg-white/80 backdrop-blur-md border-slate-200/80 shadow-xs'
+                : 'bg-white/70 backdrop-blur-md border-transparent shadow-none'
+            }`}
           >
-            <div className='flex h-9 w-9 lg:h-11 lg:w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-md group-hover:scale-105 transition-transform duration-300'>
-              <BookOpen className='h-4 w-4 lg:h-6 lg:w-6' />
-            </div>
-            <div>
-              <div className='flex items-center gap-2'>
-                <span className='text-sm lg:text-xl font-extrabold tracking-tight text-slate-900 leading-none'>
-                  Smart Class
+            {/* Brand Logo */}
+            <Link
+              href='/'
+              onClick={(e) => {
+                e.preventDefault();
+                scrollToTop();
+                setMobileMenuOpen(false);
+              }}
+              className='flex items-center gap-2.5 group cursor-pointer shrink-0'
+            >
+              <span className='relative inline-flex h-9 w-9 items-center justify-center shrink-0'>
+                <span className='absolute inset-0 animate-pulse rounded-lg bg-emerald-500/20' />
+                <span className='relative w-9 h-9 bg-emerald-600 rounded-lg flex items-center justify-center text-white font-bold text-lg shadow-xs group-hover:scale-105 transition-transform'>
+                  <BookOpen className='h-4 w-4' />
                 </span>
-              </div>
-              <p className='text-xs lg:text-[11px] text-slate-500 font-bold mt-0.5'>
-                Dashboard Wali Kelas
-              </p>
-            </div>
-          </Link>
+              </span>
+              <span className='font-bold text-sm sm:text-base tracking-tight text-slate-900 group-hover:text-emerald-600 transition-colors'>
+                Smart Class
+              </span>
+            </Link>
 
-          {/* Quick Anchor Links (Desktop) */}
-          <nav className='hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600'>
-            <a
-              href='#fitur'
-              onClick={(e) => scrollToSection(e, 'fitur')}
-              className='hover:text-emerald-600 transition-colors'
-            >
-              Fitur Unggulan
-            </a>
-            <a
-              href='#modul'
-              onClick={(e) => scrollToSection(e, 'modul')}
-              className='hover:text-emerald-600 transition-colors'
-            >
-              Modul KBM
-            </a>
-            <a
-              href='#manfaat'
-              onClick={(e) => scrollToSection(e, 'manfaat')}
-              className='hover:text-emerald-600 transition-colors'
-            >
-              Mengapa Kami
-            </a>
-            <a
-              href='#faq'
-              onClick={(e) => scrollToSection(e, 'faq')}
-              className='hover:text-emerald-600 transition-colors'
-            >
-              FAQ
-            </a>
-          </nav>
-
-          {/* Action CTAs (Desktop) */}
-          <div className='hidden md:flex items-center gap-3'>
-            {currentUser ? (
-              <div className='flex items-center gap-2.5'>
-                <Link
-                  href={dashboardHref}
-                  onClick={() => setNavigatingButton('header')}
-                >
-                  <Button
-                    disabled={navigatingButton !== null}
-                    className='bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-5 py-2.5 rounded-xl shadow-xs transition-all duration-300 flex items-center gap-2 cursor-pointer'
-                  >
-                    {navigatingButton === 'header' ? (
-                      <>
-                        <Loader2 className='h-4 w-4 animate-spin' />
-                        <span>Membuka...</span>
-                      </>
-                    ) : (
-                      <>
-                        <LayoutDashboard className='h-4 w-4' />
-                        <span>Dashboard</span>
-                      </>
-                    )}
-                  </Button>
-                </Link>
-                <Button
-                  variant='outline'
-                  onClick={() => setShowLogoutConfirm(true)}
-                  className='border-slate-200 bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-600 hover:border-rose-200 rounded-xl text-sm font-semibold px-4 py-2.5 flex items-center gap-2 cursor-pointer transition-all shadow-xs'
-                >
-                  <LogOut className='h-4 w-4' />
-                  <span>Keluar</span>
-                </Button>
-              </div>
-            ) : (
-              <>
-                <Link href='/sign-in'>
-                  <Button
-                    variant='ghost'
-                    className='text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-xl text-sm font-semibold px-4 cursor-pointer'
-                  >
-                    Masuk
-                  </Button>
-                </Link>
-                <Link href='/sign-up'>
-                  <Button className='bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-5 py-2.5 rounded-xl shadow-xs transition-all duration-300 flex items-center gap-2 cursor-pointer'>
-                    <span>Daftar Sekarang</span>
-                  </Button>
-                </Link>
-              </>
-            )}
-          </div>
-
-          {/* Hamburger Menu Button (Mobile) */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label='Toggle Mobile Menu'
-            className='md:hidden p-2.5 rounded-xl text-slate-700 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer'
-          >
-            {mobileMenuOpen ? (
-              <X className='h-6 w-6 text-emerald-600' />
-            ) : (
-              <Menu className='h-6 w-6' />
-            )}
-          </button>
-        </div>
-
-        {/* Mobile Dropdown Drawer */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: 'easeInOut' }}
-              className='md:hidden bg-white/95 border-b border-slate-200 backdrop-blur-2xl px-4 pt-3 pb-6 space-y-2 overflow-hidden shadow-md'
-            >
+            {/* Quick Anchor Links (Desktop) */}
+            <div className='hidden items-center gap-5 lg:gap-7 md:flex'>
               <a
                 href='#fitur'
-                onClick={(e) => {
-                  scrollToSection(e, 'fitur');
-                  setMobileMenuOpen(false);
-                }}
-                className='block px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-100 hover:text-emerald-700 transition-colors'
+                onClick={(e) => scrollToSection(e, 'fitur')}
+                className='text-xs lg:text-sm font-medium transition-colors text-slate-600 hover:text-emerald-600'
               >
                 Fitur Unggulan
               </a>
               <a
                 href='#modul'
-                onClick={(e) => {
-                  scrollToSection(e, 'modul');
-                  setMobileMenuOpen(false);
-                }}
-                className='block px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-100 hover:text-emerald-700 transition-colors'
+                onClick={(e) => scrollToSection(e, 'modul')}
+                className='text-xs lg:text-sm font-medium transition-colors text-slate-600 hover:text-emerald-600'
               >
                 Modul KBM
               </a>
               <a
                 href='#manfaat'
-                onClick={(e) => {
-                  scrollToSection(e, 'manfaat');
-                  setMobileMenuOpen(false);
-                }}
-                className='block px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-100 hover:text-emerald-700 transition-colors'
+                onClick={(e) => scrollToSection(e, 'manfaat')}
+                className='text-xs lg:text-sm font-medium transition-colors text-slate-600 hover:text-emerald-600'
               >
                 Mengapa Kami
               </a>
               <a
                 href='#faq'
-                onClick={(e) => {
-                  scrollToSection(e, 'faq');
-                  setMobileMenuOpen(false);
-                }}
-                className='block px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-100 hover:text-emerald-700 transition-colors'
+                onClick={(e) => scrollToSection(e, 'faq')}
+                className='text-xs lg:text-sm font-medium transition-colors text-slate-600 hover:text-emerald-600'
               >
                 FAQ
               </a>
-              <div className='pt-3 border-t border-slate-200 flex flex-col gap-2.5'>
-                {currentUser ? (
-                  <>
-                    <Link
-                      href={dashboardHref}
-                      onClick={() => {
-                        setNavigatingButton('mobile');
-                        setMobileMenuOpen(false);
-                      }}
-                    >
-                      <Button
-                        disabled={navigatingButton !== null}
-                        className='w-full justify-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl py-3 flex items-center gap-2 cursor-pointer shadow-xs'
-                      >
-                        {navigatingButton === 'mobile' ? (
-                          <>
-                            <Loader2 className='h-4 w-4 animate-spin' />
-                            <span>Membuka...</span>
-                          </>
-                        ) : (
-                          <>
-                            <LayoutDashboard className='h-4 w-4' />
-                            <span>Dashboard</span>
-                          </>
-                        )}
-                      </Button>
-                    </Link>
+            </div>
+
+            {/* Action CTAs (Desktop) & Mobile Toggle */}
+            <div className='flex items-center gap-2 sm:gap-3'>
+              {currentUser ? (
+                <div className='hidden md:flex items-center gap-2'>
+                  <Link
+                    href={dashboardHref}
+                    onClick={() => setNavigatingButton('header')}
+                  >
                     <Button
-                      variant='outline'
-                      onClick={() => {
-                        setMobileMenuOpen(false);
-                        setShowLogoutConfirm(true);
-                      }}
-                      className='w-full justify-center border-slate-200 bg-white text-slate-700 hover:text-rose-600 hover:bg-rose-50 rounded-xl font-semibold py-3 flex items-center gap-2 cursor-pointer shadow-xs'
+                      disabled={navigatingButton !== null}
+                      className='rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs lg:text-sm px-4 sm:px-5 py-2 sm:py-2.5 shadow-xs transition-all hover:shadow-md active:scale-95 inline-flex items-center gap-1.5 cursor-pointer h-auto'
                     >
-                      <LogOut className='h-4 w-4' />
-                      <span>Keluar</span>
+                      {navigatingButton === 'header' ? (
+                        <>
+                          <Loader2 className='h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin' />
+                          <span>Membuka...</span>
+                        </>
+                      ) : (
+                        <>
+                          <LayoutDashboard className='h-3.5 w-3.5 sm:h-4 sm:w-4' />
+                          <span>Dashboard</span>
+                        </>
+                      )}
                     </Button>
-                  </>
+                  </Link>
+                  <Button
+                    variant='outline'
+                    onClick={() => setShowLogoutConfirm(true)}
+                    className='rounded-full border border-slate-200/80 bg-white/80 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 text-slate-700 px-3 sm:px-4 py-2 sm:py-2.5 text-xs lg:text-sm font-medium shadow-xs transition-all inline-flex items-center gap-1.5 cursor-pointer h-auto'
+                  >
+                    <LogOut className='h-3.5 w-3.5 sm:h-4 sm:w-4' />
+                    <span>Keluar</span>
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <Link
+                    href='/sign-in'
+                    className='hidden md:inline-flex text-xs lg:text-sm font-medium text-slate-600 hover:text-emerald-600 transition-colors px-3 py-2'
+                  >
+                    Masuk
+                  </Link>
+                  <Link href='/sign-up'>
+                    <Button className='hidden md:inline-flex rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs lg:text-sm px-5 py-2.5 shadow-xs transition-all hover:shadow-md active:scale-95 cursor-pointer h-auto'>
+                      Daftar Sekarang
+                    </Button>
+                  </Link>
+                </>
+              )}
+
+              {/* Circular Hamburger Menu Button (Mobile) */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label='Toggle Menu'
+                aria-expanded={mobileMenuOpen}
+                className='inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-100/80 ring-1 ring-slate-200/80 md:hidden text-slate-700 hover:bg-slate-200/80 transition-all cursor-pointer'
+              >
+                {mobileMenuOpen ? (
+                  <X className='h-4 w-4 stroke-slate-700' />
                 ) : (
-                  <>
-                    <Link
-                      href='/sign-in'
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <Button
-                        variant='ghost'
-                        className='w-full justify-center text-slate-700 hover:bg-slate-100 rounded-xl font-semibold cursor-pointer'
-                      >
-                        Masuk Aplikasi
-                      </Button>
-                    </Link>
-                    <Link
-                      href='/sign-up'
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <Button className='w-full justify-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl cursor-pointer shadow-xs'>
-                        Daftar Sekarang
-                      </Button>
-                    </Link>
-                  </>
+                  <Menu className='h-4 w-4 stroke-slate-700' />
                 )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              </button>
+            </div>
+          </nav>
+
+          {/* Floating Mobile Card Drawer */}
+          <AnimatePresence>
+            {mobileMenuOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -10, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.98 }}
+                transition={{ duration: 0.25, ease: 'easeOut' }}
+                className='md:hidden mt-2.5 rounded-3xl bg-white border border-slate-200/80 p-5 shadow-2xl space-y-1'
+              >
+                <a
+                  href='#fitur'
+                  onClick={(e) => {
+                    scrollToSection(e, 'fitur');
+                    setMobileMenuOpen(false);
+                  }}
+                  className='block px-4 py-3 rounded-2xl text-sm font-semibold text-slate-800 hover:bg-emerald-50 hover:text-emerald-700 transition-colors'
+                >
+                  Fitur Unggulan
+                </a>
+                <a
+                  href='#modul'
+                  onClick={(e) => {
+                    scrollToSection(e, 'modul');
+                    setMobileMenuOpen(false);
+                  }}
+                  className='block px-4 py-3 rounded-2xl text-sm font-semibold text-slate-800 hover:bg-emerald-50 hover:text-emerald-700 transition-colors'
+                >
+                  Modul KBM
+                </a>
+                <a
+                  href='#manfaat'
+                  onClick={(e) => {
+                    scrollToSection(e, 'manfaat');
+                    setMobileMenuOpen(false);
+                  }}
+                  className='block px-4 py-3 rounded-2xl text-sm font-semibold text-slate-800 hover:bg-emerald-50 hover:text-emerald-700 transition-colors'
+                >
+                  Mengapa Kami
+                </a>
+                <a
+                  href='#faq'
+                  onClick={(e) => {
+                    scrollToSection(e, 'faq');
+                    setMobileMenuOpen(false);
+                  }}
+                  className='block px-4 py-3 rounded-2xl text-sm font-semibold text-slate-800 hover:bg-emerald-50 hover:text-emerald-700 transition-colors'
+                >
+                  FAQ
+                </a>
+
+                <div className='pt-3 mt-2 border-t border-slate-100 flex flex-col gap-2'>
+                  {currentUser ? (
+                    <>
+                      <Link
+                        href={dashboardHref}
+                        onClick={() => {
+                          setNavigatingButton('mobile');
+                          setMobileMenuOpen(false);
+                        }}
+                        className='w-full'
+                      >
+                        <Button
+                          disabled={navigatingButton !== null}
+                          className='w-full rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 sm:py-3 text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer h-auto'
+                        >
+                          {navigatingButton === 'mobile' ? (
+                            <>
+                              <Loader2 className='h-4 w-4 animate-spin' />
+                              <span>Membuka...</span>
+                            </>
+                          ) : (
+                            <>
+                              <LayoutDashboard className='h-4 w-4' />
+                              <span>Dashboard</span>
+                            </>
+                          )}
+                        </Button>
+                      </Link>
+                      <Button
+                        variant='outline'
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setShowLogoutConfirm(true);
+                        }}
+                        className='w-full rounded-full border border-slate-200 bg-white text-slate-700 hover:text-rose-600 hover:bg-rose-50 font-semibold py-2.5 sm:py-3 text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer h-auto'
+                      >
+                        <LogOut className='h-4 w-4' />
+                        <span>Keluar</span>
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Link
+                        href='/sign-in'
+                        onClick={() => setMobileMenuOpen(false)}
+                        className='w-full'
+                      >
+                        <Button
+                          variant='outline'
+                          className='w-full rounded-full border border-slate-200 bg-slate-50/80 hover:bg-slate-100 text-slate-700 font-semibold py-2.5 sm:py-3 text-xs sm:text-sm cursor-pointer shadow-xs transition-all h-auto'
+                        >
+                          Masuk Aplikasi
+                        </Button>
+                      </Link>
+                      <Link
+                        href='/sign-up'
+                        onClick={() => setMobileMenuOpen(false)}
+                        className='w-full'
+                      >
+                        <Button className='w-full rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 sm:py-3 text-xs sm:text-sm cursor-pointer shadow-xs transition-all h-auto'>
+                          Daftar Sekarang
+                        </Button>
+                      </Link>
+                    </>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </header>
 
       <main className='relative z-10'>
-        {/* ==================== HERO SECTION ==================== */}
-        <section className='relative pt-12 sm:pt-20 lg:pt-24 pb-16 sm:pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center flex flex-col items-center justify-center'>
+        {/* ==================== HERO SECTION (100VH FULL SCREEN) ==================== */}
+        <section className='relative min-h-screen min-h-[100dvh] pt-20 sm:pt-24 pb-8 sm:pb-12 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto text-center flex flex-col items-center justify-center'>
           {/* Main Title H1 */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className='text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 max-w-4xl mx-auto leading-tight sm:leading-[1.12]'
+            className='text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 max-w-4xl mx-auto leading-[1.12] sm:leading-[1.1]'
           >
             Smart Class
-            <span className='block mt-1 sm:mt-2 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 bg-clip-text text-transparent'>
+            <span className='block mt-2 sm:mt-2.5 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 bg-clip-text text-transparent'>
               Dashboard Wali Kelas
             </span>
           </motion.h1>
@@ -385,7 +406,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className='mt-5 sm:mt-6 text-base sm:text-lg md:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed font-normal px-2'
+            className='mt-5 sm:mt-6 text-base sm:text-lg md:text-xl text-slate-600 max-w-2xl sm:max-w-3xl mx-auto leading-relaxed font-normal px-2'
           >
             Satu sistem terpadu untuk pencatatan presensi siswa, penilaian
             akademik, jurnal KBM, jadwal pelajaran, dan laporan cetak siap
@@ -397,7 +418,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className='mt-8 sm:mt-10 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3.5 sm:gap-4 w-full sm:w-auto max-w-xs sm:max-w-none mx-auto'
+            className='mt-8 sm:mt-9 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3.5 sm:gap-4 w-full sm:w-auto max-w-xs sm:max-w-none mx-auto'
           >
             {currentUser ? (
               <>
@@ -412,7 +433,7 @@ export default function LandingPage() {
                   >
                     <Button
                       disabled={navigatingButton !== null}
-                      className='w-full sm:w-auto h-12 sm:h-14 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm sm:text-base px-7 sm:px-9 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2.5 cursor-pointer'
+                      className='w-full sm:w-auto h-11 sm:h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm sm:text-base px-7 sm:px-8 rounded-full shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2.5 cursor-pointer'
                     >
                       {navigatingButton === 'hero' ? (
                         <>
@@ -435,7 +456,7 @@ export default function LandingPage() {
                 >
                   <Button
                     variant='outline'
-                    className='w-full sm:w-auto h-12 sm:h-14 border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold text-sm sm:text-base px-6 sm:px-8 rounded-2xl transition-all flex items-center justify-center cursor-pointer shadow-xs'
+                    className='w-full sm:w-auto h-11 sm:h-12 border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-sm sm:text-base px-7 sm:px-8 rounded-full transition-all flex items-center justify-center cursor-pointer shadow-xs'
                   >
                     <span>Lihat Modul KBM</span>
                   </Button>
@@ -448,140 +469,31 @@ export default function LandingPage() {
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
                   >
-                    <Button className='w-full sm:w-auto h-12 sm:h-14 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm sm:text-base px-7 sm:px-9 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2.5 cursor-pointer'>
+                    <Button className='w-full sm:w-auto h-11 sm:h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm sm:text-base px-7 sm:px-8 rounded-full shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2.5 cursor-pointer'>
                       <span>Daftar Sekarang</span>
                     </Button>
                   </motion.div>
                 </Link>
-                <Link href='#modul' className='w-full sm:w-auto'>
+                <a
+                  href='#modul'
+                  onClick={(e) => scrollToSection(e, 'modul')}
+                  className='w-full sm:w-auto'
+                >
                   <Button
                     variant='outline'
-                    className='w-full sm:w-auto h-12 sm:h-14 border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold text-sm sm:text-base px-6 sm:px-8 rounded-2xl transition-all flex items-center justify-center cursor-pointer shadow-xs'
+                    className='w-full sm:w-auto h-11 sm:h-12 border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-sm sm:text-base px-7 sm:px-8 rounded-full transition-all flex items-center justify-center cursor-pointer shadow-xs'
                   >
                     <span>Lihat Modul Wali Kelas</span>
                   </Button>
-                </Link>
+                </a>
               </>
             )}
           </motion.div>
-
-          {/* Hero Interactive Showcase Mockup Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 30, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.7, delay: 0.5, ease: 'easeOut' }}
-            className='mt-12 sm:mt-14 w-full max-w-4xl rounded-3xl bg-white border border-slate-200/90 shadow-lg p-4 sm:p-6 overflow-hidden text-left'
-          >
-            {/* Top Bar Fake App Shell */}
-            <div className='flex items-center justify-between border-b border-slate-200 pb-3 mb-4 flex-wrap gap-2'>
-              <div className='flex items-center gap-3 min-w-0'>
-                <div className='flex gap-1.5 shrink-0'>
-                  <div className='w-3 h-3 rounded-full bg-slate-300' />
-                  <div className='w-3 h-3 rounded-full bg-slate-300' />
-                  <div className='w-3 h-3 rounded-full bg-slate-300' />
-                </div>
-                <span className='text-xs font-bold text-slate-700 truncate'>
-                  Smart Class — Dashboard Wali Kelas
-                </span>
-              </div>
-              <div className='flex items-center gap-2 shrink-0'>
-                <div className='hidden sm:flex items-center gap-1.5 text-[11px] font-bold text-teal-700 bg-teal-50 px-3 py-1 rounded-full border border-teal-200'>
-                  <span className='w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse' />
-                  <span>Responsive</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Fake Dashboard Grid Preview */}
-            <div className='grid grid-cols-1 sm:grid-cols-3 gap-3.5'>
-              {/* Card 1: Presensi Live */}
-              <div className='p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5'>
-                <div className='flex items-center justify-between'>
-                  <span className='text-xs font-bold text-slate-800 flex items-center gap-1.5'>
-                    <CalendarCheck2 className='h-3.5 w-3.5 text-emerald-600' />
-                    Presensi Harian
-                  </span>
-                  <span className='text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full'>
-                    96.5% Hadir
-                  </span>
-                </div>
-                <div className='space-y-1 text-xs'>
-                  <div className='flex justify-between p-2 rounded-xl bg-white border border-slate-200/80 font-medium'>
-                    <span>Hadir: 28 Siswa</span>
-                    <span className='text-emerald-600 font-bold'>✓</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card 2: Tabungan Kelas */}
-              <div className='p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5'>
-                <div className='flex items-center justify-between'>
-                  <span className='text-xs font-bold text-slate-800 flex items-center gap-1.5'>
-                    <Wallet className='h-3.5 w-3.5 text-teal-600' />
-                    Kas Tabungan
-                  </span>
-                  <span className='text-[10px] bg-teal-100 text-teal-800 font-bold px-2 py-0.5 rounded-full'>
-                    Real-time
-                  </span>
-                </div>
-                <div className='p-2 rounded-xl bg-white border border-slate-200/80'>
-                  <div className='text-base font-extrabold text-teal-700 font-mono'>
-                    Rp 4.850.000
-                  </div>
-                </div>
-              </div>
-
-              {/* Card 3: Evaluasi Akademik */}
-              <div className='p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5'>
-                <div className='flex items-center justify-between'>
-                  <span className='text-xs font-bold text-slate-800 flex items-center gap-1.5'>
-                    <GraduationCap className='h-3.5 w-3.5 text-indigo-600' />
-                    Nilai Kelas
-                  </span>
-                  <span className='text-[10px] bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded-full'>
-                    KKM: 75
-                  </span>
-                </div>
-                <div className='p-2 rounded-xl bg-white border border-slate-200/80'>
-                  <div className='text-base font-extrabold text-indigo-700 font-mono'>
-                    85.4 / 100
-                  </div>
-                </div>
-              </div>
-
-              {/* Card 4: Feature Highlight Banner */}
-              <div className='sm:col-span-3 p-3.5 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border border-emerald-200/90 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs'>
-                <div className='flex items-center gap-3'>
-                  <div className='p-2 rounded-xl bg-emerald-600 text-white shadow-xs shrink-0'>
-                    <Printer className='h-4 w-4' />
-                  </div>
-                  <div>
-                    <div className='text-xs font-extrabold text-slate-900 flex items-center gap-1.5'>
-                      <span>Pratinjau Cetak & Ekspor Laporan</span>
-                    </div>
-                    <div className='text-[11px] text-slate-600 font-medium'>
-                      Dinamis dan siap cetak lengkap dengan TTD Wali Kelas,
-                      Kepala Sekolah & NIP/NUPTK.
-                    </div>
-                  </div>
-                </div>
-                <div className='flex items-center gap-2 text-[11px] font-extrabold self-end sm:self-center shrink-0'>
-                  <span className='px-2.5 py-1 rounded-lg bg-emerald-600 text-white flex items-center gap-1 shadow-xs'>
-                    <Download className='h-3 w-3' /> PDF Ready
-                  </span>
-                  <span className='px-2.5 py-1 rounded-lg bg-teal-700 text-white flex items-center gap-1 shadow-xs'>
-                    <FileSpreadsheet className='h-3 w-3' /> Excel Export
-                  </span>
-                </div>
-              </div>
-            </div>
-          </motion.div>
         </section>
 
-        {/* ==================== STATS / IMPACT SECTION ==================== */}
         <section
           id='fitur'
-          className='py-16 bg-white border-y border-slate-200/80 shadow-xs'
+          className='scroll-mt-28 py-16 bg-white border-y border-slate-200/80 shadow-xs'
         >
           <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
             <div className='grid grid-cols-2 lg:grid-cols-4 gap-8 text-center'>
@@ -596,13 +508,13 @@ export default function LandingPage() {
                   num: '7+ Modul',
                   title: 'Terintegrasi Sempurna',
                   desc: 'Jadwal, Piket, Absensi, Nilai, Tabungan, Jurnal & Cetak',
-                  color: 'text-teal-600',
+                  color: 'text-emerald-600',
                 },
                 {
                   num: 'PDF & Excel',
                   title: 'Ekspor Laporan 1-Klik',
                   desc: 'Kemudahan ekspor laporan siap cetak',
-                  color: 'text-indigo-600',
+                  color: 'text-emerald-600',
                 },
                 {
                   num: 'Safe & Secure',
@@ -640,7 +552,7 @@ export default function LandingPage() {
         {/* ==================== INTERACTIVE MODULE SHOWCASE ==================== */}
         <section
           id='modul'
-          className='py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto'
+          className='scroll-mt-28 py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto'
         >
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -1156,7 +1068,7 @@ export default function LandingPage() {
         {/* ==================== KEY BENEFITS SECTION ==================== */}
         <section
           id='manfaat'
-          className='py-24 bg-white border-y border-slate-200/80 relative shadow-xs'
+          className='scroll-mt-28 py-24 bg-white border-y border-slate-200/80 relative shadow-xs'
         >
           <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
             <motion.div
@@ -1233,7 +1145,7 @@ export default function LandingPage() {
         {/* ==================== FAQ SECTION ==================== */}
         <section
           id='faq'
-          className='py-24 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto'
+          className='scroll-mt-28 py-24 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto'
         >
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -1315,72 +1227,21 @@ export default function LandingPage() {
             ))}
           </div>
         </section>
-
-        {/* ==================== FINAL CTA BANNER ==================== */}
-        <section
-          id='cta'
-          className='py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto'
-        >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.97, y: 20 }}
-            whileInView={{ opacity: 1, scale: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, ease: 'easeOut' }}
-            className='relative rounded-3xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 border border-emerald-500/30 p-8 sm:p-14 text-center overflow-hidden shadow-xl text-white'
-          >
-            <div className='relative z-10 space-y-6 max-w-3xl mx-auto'>
-              <h2 className='text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight'>
-                Siap Tingkatkan Produktivitas ?
-              </h2>
-              <p className='text-base sm:text-lg text-emerald-50 font-medium'>
-                Bergabunglah dengan wali kelas modern lainnya dalam mengelola
-                administrasi kelas lebih cepat, akurat, dan paperless. Hanya
-                dengan beberapa klik, semua kebutuhan kelas ada di genggaman
-                Anda.
-              </p>
-              <div className='pt-4 flex flex-col sm:flex-row items-center justify-center gap-4'>
-                {currentUser ? (
-                  <Link href={dashboardHref} className='w-full sm:w-auto'>
-                    <motion.div
-                      whileHover={{ scale: 1.04 }}
-                      whileTap={{ scale: 0.96 }}
-                    >
-                      <Button className='w-full sm:w-auto bg-white text-emerald-800 hover:bg-emerald-50 font-bold text-base px-8 py-6 rounded-2xl shadow-md transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer'>
-                        <LayoutDashboard className='h-5 w-5' />
-                        <span>Dashboard</span>
-                      </Button>
-                    </motion.div>
-                  </Link>
-                ) : (
-                  <>
-                    <Link href='/sign-up' className='w-full sm:w-auto'>
-                      <motion.div
-                        whileHover={{ scale: 1.04 }}
-                        whileTap={{ scale: 0.96 }}
-                      >
-                        <Button className='w-full sm:w-auto bg-white text-emerald-800 hover:bg-emerald-50 font-bold text-base px-8 py-6 rounded-2xl shadow-md transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer'>
-                          <span>Daftar Sekarang</span>
-                        </Button>
-                      </motion.div>
-                    </Link>
-                  </>
-                )}
-              </div>
-            </div>
-          </motion.div>
-        </section>
       </main>
 
       {/* ==================== FOOTER ==================== */}
       <footer className='border-t border-slate-200 bg-white py-8 sm:py-10 relative z-10'>
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6 text-sm text-slate-600 text-center md:text-left'>
           {/* Left: Brand Logo & Copyright */}
-          <div className='flex items-center gap-3'>
-            <div className='flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-xs shrink-0'>
+          <div
+            onClick={scrollToTop}
+            className='flex items-center gap-3 cursor-pointer group'
+          >
+            <div className='flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-xs shrink-0 group-hover:scale-105 transition-transform'>
               <BookOpen className='h-4 w-4' />
             </div>
             <div className='flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2'>
-              <span className='font-extrabold text-slate-900 tracking-tight text-base whitespace-nowrap'>
+              <span className='font-extrabold text-slate-900 tracking-tight text-base whitespace-nowrap group-hover:text-emerald-600 transition-colors'>
                 Smart Class
               </span>
               <span className='hidden sm:inline text-slate-300'>•</span>

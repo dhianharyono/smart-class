@@ -183,3 +183,8 @@
   }
 }
 
+/* Hide Next.js devtools indicator badge ("N" icon) */
+nextjs-portal {
+  display: none !important;
+}
+

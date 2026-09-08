@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { addSchool, deleteSchool } from '@/actions/adminActions';
 import { toast } from 'sonner';
 import {
@@ -11,18 +12,13 @@ import {
   Building,
   Users,
   Search,
-  CheckCircle2,
   Sparkles,
   AlertCircle,
+  Calendar,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import ConfirmDialog from '@/components/ConfirmDialog';
 
 interface SchoolData {
@@ -44,6 +40,33 @@ export default function ManageSchoolsClient({
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (isCreateOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isCreateOpen]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isCreateOpen) {
+        setIsCreateOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isCreateOpen]);
 
   // Confirm delete modal state
   const [deleteConfirm, setDeleteConfirm] = useState<{
@@ -72,6 +95,7 @@ export default function ManageSchoolsClient({
           [...prev, res.school!].sort((a, b) => a.name.localeCompare(b.name)),
         );
         setNewSchoolName('');
+        setIsCreateOpen(false);
       } else {
         toast.error(res.error || 'Gagal menambahkan sekolah.');
       }
@@ -118,257 +142,273 @@ export default function ManageSchoolsClient({
     return s.name.toLowerCase().includes(query);
   });
 
-  // Calculate stats
-  const totalTeachers = schools.reduce(
-    (acc, curr) => acc + (curr.teacherCount || 0),
-    0,
-  );
-
   return (
-    <div className='space-y-8 animate-fade-in pb-12'>
-      {/* Header Banner */}
-      <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
+    <div className='space-y-6 animate-fade-in pb-12'>
+      {/* Header Bar */}
+      <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
         <div>
-          <h2 className='text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900'>
-            Kelola Daftar Sekolah
+          <h2 className='text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 flex items-center gap-3'>
+            <span>Kelola Daftar Sekolah</span>
           </h2>
           <p className='text-slate-600 text-xs sm:text-sm mt-1 max-w-2xl'>
             Tambahkan sekolah baru agar dapat dipilih saat registrasi wali
             kelas, atau kelola dan rapikan daftar sekolah terdaftar di database.
           </p>
         </div>
+        <Button
+          onClick={() => {
+            setNewSchoolName('');
+            setIsCreateOpen(true);
+          }}
+          className='bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow-xs hover:shadow-md transition-all flex items-center gap-2 cursor-pointer w-full sm:w-auto justify-center'
+        >
+          <Plus className='h-4 w-4' />
+          <span>Tambah Sekolah</span>
+        </Button>
       </div>
 
-      {/* 3 Summary KPI Cards */}
-      <div className='grid grid-cols-1 sm:grid-cols-3 gap-4'>
-        <div className='bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs flex items-center gap-4'>
-          <div className='h-12 w-12 rounded-2xl bg-emerald-50 border border-emerald-200/80 text-emerald-700 flex items-center justify-center shrink-0 shadow-xs'>
-            <School className='h-6 w-6' />
-          </div>
-          <div>
-            <p className='text-[10px] font-extrabold text-slate-500 uppercase tracking-wider'>
-              Total Sekolah
-            </p>
-            <p className='text-xl font-black text-slate-900'>
-              {schools.length} Sekolah
-            </p>
-            <span className='text-[10px] text-emerald-600 font-semibold block mt-0.5'>
-              Terdaftar di Sistem
-            </span>
-          </div>
+      {/* Filter & Search Bar */}
+      <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-xs'>
+        <div className='flex-1 relative'>
+          <Search className='absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400' />
+          <input
+            type='text'
+            placeholder='Cari nama sekolah...'
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className='w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:outline-none rounded-xl text-xs sm:text-sm font-medium transition-all'
+          />
         </div>
-
-        <div className='bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs flex items-center gap-4'>
-          <div className='h-12 w-12 rounded-2xl bg-teal-50 border border-teal-200/80 text-teal-700 flex items-center justify-center shrink-0 shadow-xs'>
-            <Users className='h-6 w-6' />
-          </div>
-          <div>
-            <p className='text-[10px] font-extrabold text-slate-500 uppercase tracking-wider'>
-              Total Guru Terkait
-            </p>
-            <p className='text-xl font-black text-slate-900'>
-              {totalTeachers} Wali Kelas
-            </p>
-            <span className='text-[10px] text-teal-600 font-semibold block mt-0.5'>
-              Aktif Terhubung
-            </span>
-          </div>
-        </div>
-
-        <div className='bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs flex items-center gap-4'>
-          <div className='h-12 w-12 rounded-2xl bg-blue-50 border border-blue-200/80 text-blue-700 flex items-center justify-center shrink-0 shadow-xs'>
-            <CheckCircle2 className='h-6 w-6' />
-          </div>
-          <div>
-            <p className='text-[10px] font-extrabold text-slate-500 uppercase tracking-wider'>
-              Status Fitur
-            </p>
-            <p className='text-xl font-black text-slate-900'>Siap Digunakan</p>
-            <span className='text-[10px] text-blue-600 font-semibold block mt-0.5'>
-              Form Registrasi Aktif
-            </span>
-          </div>
+        <div className='text-xs text-slate-500 font-medium shrink-0'>
+          Menampilkan {filteredSchools.length} dari {schools.length} Sekolah
         </div>
       </div>
 
-      {/* Main Grid: Form Tambah Sekolah & List Sekolah */}
-      <div className='grid gap-6 lg:grid-cols-3 items-start'>
-        {/* CARD 1: Tambah Sekolah Baru */}
-        <Card className='bg-white border border-slate-200/90 rounded-3xl shadow-sm lg:col-span-1'>
-          <CardHeader className='p-6 pb-4'>
-            <div className='flex items-center gap-3'>
-              <div className='h-10 w-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shadow-md shadow-emerald-500/20 shrink-0'>
-                <Plus className='h-5 w-5' />
-              </div>
-              <div>
-                <CardTitle className='text-base font-extrabold text-slate-900'>
-                  Tambah Sekolah Baru
-                </CardTitle>
-                <CardDescription className='text-xs text-slate-500 mt-0.5'>
-                  Daftarkan nama sekolah baru ke database
-                </CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className='px-6 pb-6 space-y-4'>
-            <form onSubmit={handleAddSubmit} className='space-y-4'>
-              <div className='space-y-1.5'>
-                <label
-                  htmlFor='schoolName'
-                  className='text-xs font-bold text-slate-700 tracking-wider uppercase block'
-                >
-                  NAMA SEKOLAH <span className='text-rose-500'>*</span>
-                </label>
-                <div className='relative'>
-                  <div className='absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400'>
-                    <Building className='h-4.5 w-4.5' />
-                  </div>
-                  <input
-                    id='schoolName'
-                    type='text'
-                    required
-                    placeholder='Contoh: SDN 02 Pagi'
-                    value={newSchoolName}
-                    onChange={(e) => setNewSchoolName(e.target.value)}
-                    disabled={loading}
-                    className='w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:outline-none rounded-xl text-sm font-medium transition-all shadow-xs disabled:opacity-50'
-                  />
-                </div>
-              </div>
-
-              <Button
-                type='submit'
-                disabled={loading}
-                className='w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold py-3 px-4 rounded-xl shadow-md shadow-emerald-600/20 transition-all text-xs uppercase tracking-wider cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2'
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className='h-4 w-4 animate-spin' />
-                    <span>MENAMBAHKAN...</span>
-                  </>
-                ) : (
-                  <>
-                    <Plus className='h-4 w-4' />
-                    <span>TAMBAH SEKOLAH</span>
-                  </>
-                )}
-              </Button>
-            </form>
-
-            <div className='p-3.5 bg-emerald-50/60 border border-emerald-200/80 rounded-2xl flex items-start gap-2.5 text-xs text-emerald-800'>
-              <Sparkles className='h-4 w-4 text-emerald-600 shrink-0 mt-0.5' />
-              <p className='leading-relaxed text-[11px] font-medium'>
-                <strong>Tips Admin:</strong> Sekolah yang berhasil ditambahkan
-                akan langsung muncul pada pilihan dropdown formulir pendaftaran
-                wali kelas.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* CARD 2: Daftar Sekolah Saat Ini */}
-        <Card className='bg-white border border-slate-200/90 rounded-3xl shadow-sm lg:col-span-2'>
-          <CardHeader className='p-6 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
-            <div className='flex items-center gap-3'>
-              <div className='h-10 w-10 rounded-xl bg-gradient-to-tr from-teal-600 to-emerald-500 text-white flex items-center justify-center shadow-md shadow-teal-500/20 shrink-0'>
-                <School className='h-5 w-5' />
-              </div>
-              <div>
-                <CardTitle className='text-base font-extrabold text-slate-900 flex items-center gap-2'>
-                  <span>Daftar Sekolah Saat Ini</span>
-                  <span className='bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full'>
-                    {schools.length} Sekolah
-                  </span>
-                </CardTitle>
-                <CardDescription className='text-xs text-slate-500 mt-0.5'>
-                  Daftar sekolah terdata. Sekolah yang masih aktif digunakan
-                  guru tidak dapat dihapus.
-                </CardDescription>
-              </div>
-            </div>
-
-            {/* Live Search Bar */}
-            <div className='relative w-full sm:w-64'>
-              <Search className='absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400' />
-              <input
-                type='text'
-                placeholder='Cari sekolah...'
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className='w-full pl-9 pr-3 py-2 text-xs bg-slate-50/60 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:bg-white transition-colors'
-              />
-            </div>
-          </CardHeader>
-
-          <CardContent className='px-6 pb-6'>
-            {filteredSchools.length > 0 ? (
-              <div className='space-y-2.5 max-h-[480px] overflow-y-auto pr-1'>
-                {filteredSchools.map((school) => {
-                  const hasTeachers = (school.teacherCount || 0) > 0;
-                  return (
-                    <div
-                      key={school._id}
-                      className='flex items-center justify-between p-3.5 bg-slate-50/70 border border-slate-200/90 rounded-2xl hover:bg-slate-100/80 hover:border-emerald-200 transition-all group'
-                    >
-                      <div className='flex items-center gap-3.5 min-w-0'>
-                        <div className='h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500/10 to-teal-500/20 border border-emerald-200/60 text-emerald-700 flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform'>
-                          <School className='h-5 w-5' />
-                        </div>
-                        <div className='flex flex-col min-w-0'>
-                          <span className='font-bold text-slate-900 group-hover:text-emerald-700 transition-colors text-sm truncate'>
-                            {school.name}
-                          </span>
-                          <div className='flex items-center gap-2 mt-0.5'>
-                            <span className='inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/70'>
-                              <Users className='h-3 w-3 text-emerald-600' />
-                              {school.teacherCount || 0} Guru Terdaftar
+      {/* Table Card */}
+      <Card className='bg-white border-slate-200/80 rounded-2xl shadow-xs'>
+        <CardContent className='p-0'>
+          {filteredSchools.length > 0 ? (
+            <div className='overflow-x-auto min-w-0 max-w-full'>
+              <table className='w-full min-w-[650px] text-left text-sm text-slate-700 border-collapse'>
+                <thead>
+                  <tr className='border-b border-slate-200 text-slate-700 text-xs font-bold uppercase tracking-wider bg-slate-50'>
+                    <th className='py-3.5 px-6'>Nama Sekolah</th>
+                    <th className='py-3.5 px-6'>Jumlah Guru Terkait</th>
+                    <th className='py-3.5 px-6'>Tanggal Terdaftar</th>
+                    <th className='py-3.5 px-6'>Status</th>
+                    <th className='py-3.5 px-6 text-center'>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className='divide-y divide-slate-100'>
+                  {filteredSchools.map((school) => {
+                    const hasTeachers = (school.teacherCount || 0) > 0;
+                    return (
+                      <tr
+                        key={school._id}
+                        className='hover:bg-slate-50/80 transition-colors group'
+                      >
+                        <td className='py-4 px-6'>
+                          <div className='flex items-center gap-3'>
+                            <div className='h-9 w-9 rounded-xl bg-emerald-50 border border-emerald-200/80 text-emerald-700 flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform'>
+                              <School className='h-4.5 w-4.5' />
+                            </div>
+                            <span className='font-bold text-slate-900 group-hover:text-emerald-700 transition-colors'>
+                              {school.name}
                             </span>
                           </div>
-                        </div>
-                      </div>
+                        </td>
+                        <td className='py-4 px-6'>
+                          <div className='flex items-center gap-2'>
+                            <Users className='h-4 w-4 text-slate-400' />
+                            <span className='font-semibold text-slate-800 text-xs'>
+                              {school.teacherCount || 0} Wali Kelas
+                            </span>
+                          </div>
+                        </td>
+                        <td className='py-4 px-6 text-slate-500 text-xs font-medium'>
+                          <div className='flex items-center gap-1.5'>
+                            <Calendar className='h-3.5 w-3.5' />
+                            <span>
+                              {school.createdAt
+                                ? new Date(school.createdAt).toLocaleDateString(
+                                    'id-ID',
+                                    {
+                                      day: 'numeric',
+                                      month: 'short',
+                                      year: 'numeric',
+                                    },
+                                  )
+                                : '-'}
+                            </span>
+                          </div>
+                        </td>
+                        <td className='py-4 px-6'>
+                          <span
+                            className={`px-2.5 py-1 border text-[10px] font-bold rounded-lg uppercase tracking-wider inline-flex items-center gap-1.5 ${
+                              hasTeachers
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                : 'bg-slate-50 text-slate-500 border-slate-200'
+                            }`}
+                          >
+                            <span
+                              className={`h-1.5 w-1.5 rounded-full ${
+                                hasTeachers ? 'bg-emerald-600' : 'bg-slate-400'
+                              }`}
+                            />
+                            {hasTeachers ? 'Aktif Digunakan' : 'Belum Ada Guru'}
+                          </span>
+                        </td>
+                        <td className='py-4 px-6 text-center'>
+                          <div className='flex justify-center items-center gap-2'>
+                            <Button
+                              variant='ghost'
+                              size='icon'
+                              disabled={deletingId !== null}
+                              onClick={() =>
+                                openDeleteConfirmModal(school._id, school.name)
+                              }
+                              title={
+                                hasTeachers
+                                  ? 'Sekolah dengan guru aktif tidak dapat dihapus'
+                                  : 'Hapus Sekolah'
+                              }
+                              className='h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 rounded-xl cursor-pointer transition-colors disabled:opacity-30 disabled:cursor-not-allowed'
+                            >
+                              {deletingId === school._id ? (
+                                <Loader2 className='h-3.5 w-3.5 animate-spin text-rose-600' />
+                              ) : (
+                                <Trash2 className='h-3.5 w-3.5' />
+                              )}
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className='flex flex-col items-center justify-center py-16 text-slate-400 text-xs gap-2 px-6'>
+              <AlertCircle className='h-8 w-8 text-slate-300' />
+              <span className='font-bold text-slate-700 text-sm'>
+                {searchQuery
+                  ? 'Tidak ada sekolah yang cocok dengan pencarian.'
+                  : 'Belum ada sekolah terdaftar.'}
+              </span>
+              <span className='text-center max-w-sm text-slate-500'>
+                {searchQuery
+                  ? 'Coba gunakan kata kunci pencarian nama sekolah lain.'
+                  : 'Klik tombol "Tambah Sekolah" di atas untuk mendaftarkan sekolah pertama.'}
+              </span>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-                      <Button
-                        variant='ghost'
-                        size='icon'
-                        disabled={deletingId !== null}
-                        onClick={() =>
-                          openDeleteConfirmModal(school._id, school.name)
-                        }
-                        title={
-                          hasTeachers
-                            ? 'Sekolah dengan guru aktif tidak bisa dihapus'
-                            : 'Hapus Sekolah'
-                        }
-                        className='h-9 w-9 text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 rounded-xl cursor-pointer shrink-0 transition-colors ml-2'
-                      >
-                        {deletingId === school._id ? (
-                          <Loader2 className='h-4 w-4 animate-spin text-rose-600' />
-                        ) : (
-                          <Trash2 className='h-4 w-4' />
-                        )}
-                      </Button>
+      {/* ================================================================= */}
+      {/* MODAL TAMBAH SEKOLAH BARU (Full Screen Backdrop Blur via Portal)   */}
+      {/* ================================================================= */}
+      {mounted &&
+        isCreateOpen &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div className='fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-6 overflow-y-auto bg-slate-900/50 backdrop-blur-md animate-in fade-in duration-200'>
+            <div
+              className='fixed inset-0'
+              onClick={() => setIsCreateOpen(false)}
+            />
+            <div className='relative w-full max-w-md bg-white rounded-3xl border border-slate-200 shadow-2xl overflow-hidden z-10 my-auto animate-in zoom-in-95 duration-200 text-slate-900'>
+              {/* Header */}
+              <div className='flex items-center justify-between px-6 py-5 border-b border-slate-100 bg-slate-50/50'>
+                <div className='flex items-center gap-3'>
+                  <div className='h-10 w-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shadow-md shadow-emerald-500/20'>
+                    <School className='h-5 w-5' />
+                  </div>
+                  <div>
+                    <h2 className='text-base sm:text-lg font-black text-slate-900 tracking-tight'>
+                      Tambah Sekolah Baru
+                    </h2>
+                    <p className='text-xs text-slate-500 font-medium'>
+                      Daftarkan nama sekolah baru ke database sistem
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type='button'
+                  onClick={() => setIsCreateOpen(false)}
+                  className='p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer'
+                >
+                  <X className='h-5 w-5' />
+                </button>
+              </div>
+
+              {/* Form */}
+              <form onSubmit={handleAddSubmit} className='p-6 space-y-4'>
+                <div className='space-y-1.5'>
+                  <label
+                    htmlFor='schoolName'
+                    className='text-xs font-bold text-slate-700 tracking-wider uppercase block'
+                  >
+                    NAMA SEKOLAH <span className='text-rose-500'>*</span>
+                  </label>
+                  <div className='relative'>
+                    <div className='absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400'>
+                      <Building className='h-4.5 w-4.5' />
                     </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className='flex flex-col items-center justify-center py-16 text-slate-400 text-xs gap-2 px-6 border border-dashed border-slate-200 rounded-2xl'>
-                <AlertCircle className='h-8 w-8 text-emerald-600/40' />
-                <span className='font-bold text-slate-700 text-sm'>
-                  {searchQuery
-                    ? 'Tidak ada sekolah yang cocok'
-                    : 'Belum ada sekolah terdaftar'}
-                </span>
-                <span className='text-center max-w-sm'>
-                  {searchQuery
-                    ? 'Coba gunakan kata kunci pencarian lain.'
-                    : 'Gunakan form di samping untuk menambahkan sekolah pertama ke sistem.'}
-                </span>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+                    <input
+                      id='schoolName'
+                      type='text'
+                      required
+                      placeholder='Contoh: SDN 02 Mentari Pagi'
+                      value={newSchoolName}
+                      onChange={(e) => setNewSchoolName(e.target.value)}
+                      disabled={loading}
+                      className='w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-sm font-medium transition-all disabled:opacity-50'
+                    />
+                  </div>
+                </div>
+
+                <div className='p-3.5 bg-emerald-50/70 border border-emerald-200/80 rounded-2xl flex items-start gap-2.5 text-xs text-emerald-800'>
+                  <Sparkles className='h-4 w-4 text-emerald-600 shrink-0 mt-0.5' />
+                  <p className='leading-relaxed text-[11px] font-medium'>
+                    <strong>Tips Admin:</strong> Sekolah yang berhasil didaftarkan
+                    akan langsung tersedia pada opsi formulir pendaftaran wali
+                    kelas baru.
+                  </p>
+                </div>
+
+                <div className='pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5'>
+                  <button
+                    type='button'
+                    onClick={() => setIsCreateOpen(false)}
+                    className='px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer'
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type='submit'
+                    disabled={loading || !newSchoolName.trim()}
+                    className='flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm shadow-emerald-600/20 transition-all cursor-pointer disabled:opacity-50'
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className='h-4 w-4 animate-spin' />
+                        <span>Menambahkan...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Plus className='h-4 w-4' />
+                        <span>Tambah Sekolah</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>,
+          document.body,
+        )}
 
       <ConfirmDialog
         open={deleteConfirm.open}

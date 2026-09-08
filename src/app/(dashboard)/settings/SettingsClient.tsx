@@ -19,6 +19,7 @@ import {
   CheckCircle2,
   Calendar,
   School,
+  MessageSquareText,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -85,6 +86,13 @@ const CONFIGURABLE_MENUS = [
     desc: 'Agenda harian mengajar guru & rekaman kegiatan KBM',
     icon: BookMarked,
     color: 'text-teal-400 bg-teal-500/10 border-teal-500/20',
+  },
+  {
+    href: '/feedback',
+    label: 'Kritik & Saran',
+    desc: 'Kirim masukan, kritik, saran, atau laporan ke administrator',
+    icon: MessageSquareText,
+    color: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
   },
 ];
 

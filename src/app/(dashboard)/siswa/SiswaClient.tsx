@@ -1,10 +1,9 @@
 'use client';
 
-import React, { useState, useTransition, useEffect, useRef } from 'react';
+import React, { useState, useTransition, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import GuidedSpotlight from '@/components/GuidedSpotlight';
 import {
   Search,
   Pencil,
@@ -96,20 +95,7 @@ export default function SiswaClient({ initialStudents }: SiswaClientProps) {
 
   const [isPending, startTransition] = useTransition();
 
-  // Guided Onboarding Spotlight State
-  const inputSiswaBtnRef = useRef<HTMLButtonElement | null>(null);
-  const [mounted, setMounted] = useState(false);
-  const [showGuidedTooltip, setShowGuidedTooltip] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('guided') === '1' || params.get('guided') === 'input_siswa') {
-        setShowGuidedTooltip(true);
-      }
-    }
-  }, []);
 
   // Keep local state in sync when initial data refreshes
   React.useEffect(() => {
@@ -191,15 +177,7 @@ export default function SiswaClient({ initialStudents }: SiswaClientProps) {
 
   return (
     <div className='space-y-6 animate-fade-in'>
-      {/* GUIDED ONBOARDING SPOTLIGHT OVERLAY */}
-      {showGuidedTooltip && (
-        <GuidedSpotlight
-          targetRef={inputSiswaBtnRef}
-          stepTitle='Langkah 1: Tambah Biodata Siswa'
-          stepDescription='Klik tombol hijau "Input Biodata Lengkap" ini untuk mendaftarkan data siswa kelas Anda!'
-          onClose={() => setShowGuidedTooltip(false)}
-        />
-      )}
+
 
       {/* Header Bar */}
       <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between print:hidden'>
@@ -225,7 +203,6 @@ export default function SiswaClient({ initialStudents }: SiswaClientProps) {
 
           <Link href='/siswa/tambah' className='w-full sm:w-auto'>
             <Button
-              ref={inputSiswaBtnRef}
               className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl h-10 px-4 gap-2 shadow-xs cursor-pointer w-full justify-center'
             >
               <UserPlus className='h-4 w-4' />

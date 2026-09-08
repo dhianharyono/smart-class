@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useTransition, useRef } from 'react';
+import React, { useState, useEffect, useTransition } from 'react';
 import Link from 'next/link';
-import GuidedSpotlight from '@/components/GuidedSpotlight';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
@@ -372,27 +371,7 @@ export default function AbsensiClient({
     { hadir: 0, sakit: 0, izin: 0, alfa: 0 },
   );
 
-  // Guided Onboarding Spotlight State
-  const absensiBtnRef = useRef<HTMLButtonElement | null>(null);
-  const printTabRef = useRef<HTMLButtonElement | null>(null);
-  const [mounted, setMounted] = useState(false);
-  const [showGuidedTooltip, setShowGuidedTooltip] = useState(false);
-  const [guidedStep, setGuidedStep] = useState<'absensi' | 'cetak'>('absensi');
 
-  useEffect(() => {
-    setMounted(true);
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const guidedParam = params.get('guided');
-      if (guidedParam === 'cetak') {
-        setGuidedStep('cetak');
-        setShowGuidedTooltip(true);
-      } else if (guidedParam === '1' || guidedParam === 'absensi') {
-        setGuidedStep('absensi');
-        setShowGuidedTooltip(true);
-      }
-    }
-  }, []);
 
   const formattedSelectedDate = format(selectedDate, 'EEEE, dd MMMM yyyy', {
     locale: id,
@@ -400,25 +379,7 @@ export default function AbsensiClient({
 
   return (
     <div className='space-y-6 animate-fade-in'>
-      {/* GUIDED ONBOARDING SPOTLIGHT OVERLAY */}
-      {showGuidedTooltip && (
-        <GuidedSpotlight
-          targetRef={guidedStep === 'cetak' ? printTabRef : absensiBtnRef}
-          stepTitle={
-            guidedStep === 'cetak'
-              ? 'Langkah 4: Pratinjau Cetak A4 PDF'
-              : 'Langkah 2: Presensi Harian Siswa'
-          }
-          stepDescription={
-            guidedStep === 'cetak'
-              ? 'Klik tab "Pratinjau Cetak (A4 PDF)" ini untuk melihat rekapitulasi presensi harian & bulanan yang siap dicetak ke PDF!'
-              : localRecords.length === 0
-              ? 'Klik tombol "Input Data Siswa Sekarang" di atas untuk mendaftarkan siswa terlebih dahulu!'
-              : 'Pilih tanggal presensi lalu beri tanda status (Hadir/Sakit/Izin/Alfa) untuk siswa Anda.'
-          }
-          onClose={() => setShowGuidedTooltip(false)}
-        />
-      )}
+
 
       {/* Top Bar Header */}
       {!hideHeader && (
@@ -437,7 +398,6 @@ export default function AbsensiClient({
             {localRecords.length === 0 && !isDailyLoading ? (
               <Link href='/siswa'>
                 <Button
-                  ref={absensiBtnRef}
                   className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl h-10 px-4 gap-2 shadow-xs cursor-pointer justify-center'
                 >
                   <Plus className='h-4 w-4' />
@@ -447,7 +407,6 @@ export default function AbsensiClient({
             ) : (
               viewMode === 'input' && (
                 <Button
-                  ref={absensiBtnRef}
                   onClick={handleSave}
                   disabled={isPending || isDailyLoading}
                   className='bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl h-10 px-6 gap-2 shadow-xs cursor-pointer'
@@ -479,7 +438,6 @@ export default function AbsensiClient({
           <span className='truncate'>Data Absensi & Rekap</span>
         </button>
         <button
-          ref={printTabRef}
           onClick={() => setViewMode('preview')}
           className={`flex items-center justify-center text-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer w-full sm:w-auto ${
             viewMode === 'preview'

@@ -38,7 +38,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <AdminLayoutClient 
       admin={{ 
         name: adminUser.name || 'Admin Smart Class', 
-        email: adminUser.email 
+        email: adminUser.email,
+        username: adminUser.username || '',
       }}
     >
       {children}

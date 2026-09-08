@@ -11,8 +11,6 @@ function useIsMounted() {
 }
 import {
   Users,
-  School,
-  GraduationCap,
   ArrowRight,
   BookOpen,
   CheckCircle2,
@@ -225,24 +223,6 @@ export default function AdminDashboardClient({
     }
   };
 
-  const statCards = [
-    {
-      title: 'Total Wali Kelas',
-      value: stats.teacherCount,
-      description: 'Guru aktif terdaftar',
-      icon: GraduationCap,
-      color: 'bg-white border-slate-200/80 text-emerald-700 shadow-xs',
-      iconColor: 'bg-emerald-50 border-emerald-200 text-emerald-700',
-    },
-    {
-      title: 'Sekolah Terdaftar',
-      value: stats.schoolCount,
-      description: 'Sekolah terdata',
-      icon: School,
-      color: 'bg-white border-slate-200/80 text-teal-700 shadow-xs',
-      iconColor: 'bg-teal-50 border-teal-200 text-teal-700',
-    },
-  ];
 
   // Filtered teachers list based on search term
   const filteredTeacherStats = stats.teacherStats.filter((teacher) => {
@@ -306,35 +286,6 @@ export default function AdminDashboardClient({
         </Link>
       </div>
 
-      {/* Grid Utama 4 Stat Cards */}
-      <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-2'>
-        {statCards.map((card, i) => {
-          const Icon = card.icon;
-          return (
-            <div
-              key={i}
-              className={`${card.color} rounded-2xl relative overflow-hidden p-4 sm:p-4.5 flex flex-col justify-between border border-slate-200/70 shadow-xs transition-all duration-200 hover:shadow-sm`}
-            >
-              <div className='flex items-center justify-between gap-2 mb-3'>
-                <span className='text-xs font-extrabold text-slate-500 uppercase tracking-wider truncate'>
-                  {card.title}
-                </span>
-                <div className={`p-2 rounded-xl border ${card.iconColor}`}>
-                  <Icon className='h-4 w-4' />
-                </div>
-              </div>
-              <div>
-                <div className='font-black tracking-tight text-slate-900 mb-1 leading-none text-2xl sm:text-3xl'>
-                  {card.value}
-                </div>
-                <p className='text-[11px] text-slate-500 font-medium truncate'>
-                  {card.description}
-                </p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
 
       {/* 2-Column Section for Statistik Sekolah & Pengguna Online */}
       <div className='grid gap-6 md:grid-cols-2'>

@@ -17,8 +17,6 @@ import {
   Trash2,
   CheckCircle2,
   Loader2,
-  Sparkles,
-  Layers,
   Check,
   Pencil,
 } from 'lucide-react';
@@ -222,53 +220,6 @@ export default function KelasClient() {
         </div>
       </div>
 
-      {/* Quick Summary Cards - Gambar 1: Rapikan Tampilan Dalam Card */}
-      <div className='grid grid-cols-1 sm:grid-cols-3 gap-4'>
-        <Card className='bg-white border-slate-200/80 rounded-2xl shadow-xs p-5 flex items-center gap-4'>
-          <div className='p-3 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 shrink-0'>
-            <Layers className='h-6 w-6' />
-          </div>
-          <div className='min-w-0'>
-            <p className='text-xs font-bold text-slate-500 uppercase tracking-wider'>
-              Total Kelas Diampu
-            </p>
-            <p className='text-xl sm:text-2xl font-extrabold text-slate-900 mt-0.5 justify-self-center'>
-              {isLoading ? '...' : classesList.length}{' '}
-              <span className='text-xs font-medium text-slate-400'>Kelas</span>
-            </p>
-          </div>
-        </Card>
-
-        <Card className='bg-white border-slate-200/80 rounded-2xl shadow-xs p-5 flex items-center gap-4'>
-          <div className='p-3 rounded-xl bg-teal-50 text-teal-600 border border-teal-100 shrink-0'>
-            <CheckCircle2 className='h-6 w-6' />
-          </div>
-          <div className='min-w-0'>
-            <p className='text-xs font-bold text-slate-500 uppercase tracking-wider justify-self-center'>
-              Kelas Aktif
-            </p>
-            <p className='text-xl sm:text-2xl font-extrabold text-slate-900 mt-0.5 truncate'>
-              {isLoading ? '...' : `Kelas ${activeClass}`}
-            </p>
-          </div>
-        </Card>
-
-        <Card className='bg-white border-slate-200/80 rounded-2xl shadow-xs p-5 flex items-center gap-4'>
-          <div className='p-3 rounded-xl bg-amber-50 text-amber-600 border border-amber-100 shrink-0'>
-            <Sparkles className='h-6 w-6' />
-          </div>
-          <div className='min-w-0'>
-            <p className='text-xs font-bold text-slate-500 uppercase tracking-wider'>
-              Mode Pembelajaran
-            </p>
-            <p className='text-sm sm:text-base font-extrabold text-slate-800 mt-0.5 truncate'>
-              {classesList.length > 1
-                ? 'Multi-Kelas (Paralel)'
-                : 'Tunggal (Wali Kelas)'}
-            </p>
-          </div>
-        </Card>
-      </div>
 
       {/* Main Layout Grid - Gambar 2: Sejajarkan Tinggi Card */}
       <div className='grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch'>

@@ -32,6 +32,9 @@ import {
   Plus,
   Loader2,
   MessageSquareText,
+  Lock,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -46,6 +49,7 @@ import ConfirmDialog from '@/components/ConfirmDialog';
 import {
   updateMenuPreferences,
   updateProfile,
+  changePassword,
   switchActiveClass,
   addClass,
   deleteClass,
@@ -101,11 +105,9 @@ const sidebarMenuGroups: SidebarGroup[] = [
     ],
   },
   {
-    category: 'PENGATURAN & MASUKAN',
+    category: 'PUSAT MASUKAN',
     items: [
-      { name: 'Profil & Sekolah', href: '/profile', icon: User },
       { name: 'Kritik & Saran', href: '/feedback', icon: MessageSquareText },
-      { name: 'Pengaturan', href: '/settings', icon: Settings },
     ],
   },
 ];
@@ -255,6 +257,54 @@ export default function DashboardLayoutClient({
   });
 
   const [isClassDropdownOpen, setIsClassDropdownOpen] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+
+  // States for Profile Modal
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [profileModalTab, setProfileModalTab] = useState<'profile' | 'security'>('profile');
+  const [profileModalForm, setProfileModalForm] = useState({
+    name: teacher.name || '',
+    email: teacher.email || '',
+    schoolName: teacher.schoolName || '',
+    nip: teacher.nip && teacher.nip !== '-' ? teacher.nip : '',
+    principalName: teacher.principalName || '',
+    principalNip: teacher.principalNip && teacher.principalNip !== '-' ? teacher.principalNip : '',
+  });
+  const [passwordModalForm, setPasswordModalForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [isSavingPassword, setIsSavingPassword] = useState(false);
+
+  // States for Settings Modal
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [settingsSelectedMenus, setSettingsSelectedMenus] = useState<string[]>(() => {
+    return teacher.enabledMenus && teacher.enabledMenus.length > 0
+      ? teacher.enabledMenus
+      : CONFIGURABLE_MENUS.map((m) => m.href);
+  });
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
+
+  // Sync states when teacher changes
+  React.useEffect(() => {
+    setProfileModalForm({
+      name: teacher.name || '',
+      email: teacher.email || '',
+      schoolName: teacher.schoolName || '',
+      nip: teacher.nip && teacher.nip !== '-' ? teacher.nip : '',
+      principalName: teacher.principalName || '',
+      principalNip: teacher.principalNip && teacher.principalNip !== '-' ? teacher.principalNip : '',
+    });
+    if (teacher.enabledMenus && teacher.enabledMenus.length > 0) {
+      setSettingsSelectedMenus(teacher.enabledMenus);
+    }
+  }, [teacher]);
+
   const [isSwitchingClass, setIsSwitchingClass] = useState(false);
   const [isAddClassModalOpen, setIsAddClassModalOpen] = useState(false);
   const [newClassNameInput, setNewClassNameInput] = useState('');
@@ -430,6 +480,118 @@ export default function DashboardLayoutClient({
     } catch (err: any) {
       toast.error(err.message || 'Gagal menghapus kelas.');
       setIsSwitchingClass(false);
+    }
+  };
+
+  // Profile Modal Submit Handler
+  const handleProfileModalSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!profileModalForm.name.trim() || profileModalForm.name.trim().length < 3) {
+      toast.error('Nama lengkap & gelar minimal 3 karakter.');
+      return;
+    }
+    setIsSavingProfile(true);
+    try {
+      const res = await updateProfile({
+        name: profileModalForm.name.trim(),
+        email: profileModalForm.email.trim(),
+        schoolName: profileModalForm.schoolName.trim(),
+        nip: profileModalForm.nip.trim() || '-',
+        principalName: profileModalForm.principalName.trim(),
+        principalNip: profileModalForm.principalNip.trim() || '-',
+      });
+      if (res.success) {
+        toast.success('Data profil & sekolah berhasil disimpan!');
+        setIsProfileModalOpen(false);
+        router.refresh();
+      } else {
+        toast.error((res as any).error || 'Gagal menyimpan profil.');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Terjadi kesalahan saat menyimpan profil.');
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
+
+  // Password Modal Submit Handler
+  const handlePasswordModalSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!passwordModalForm.currentPassword) {
+      toast.error('Password saat ini wajib diisi.');
+      return;
+    }
+    if (passwordModalForm.newPassword.length < 6) {
+      toast.error('Password baru minimal 6 karakter.');
+      return;
+    }
+    if (passwordModalForm.newPassword !== passwordModalForm.confirmPassword) {
+      toast.error('Konfirmasi password tidak cocok.');
+      return;
+    }
+    setIsSavingPassword(true);
+    try {
+      const res = await changePassword({
+        currentPassword: passwordModalForm.currentPassword,
+        newPassword: passwordModalForm.newPassword,
+      });
+      if (res.success) {
+        toast.success('Password akun berhasil diperbarui!');
+        setPasswordModalForm({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: '',
+        });
+        setIsProfileModalOpen(false);
+      } else {
+        toast.error((res as any).error || 'Gagal mengubah password.');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Gagal mengubah password.');
+    } finally {
+      setIsSavingPassword(false);
+    }
+  };
+
+  // Settings Modal Handlers
+  const handleToggleSettingsMenu = (href: string) => {
+    setSettingsSelectedMenus((prev) => {
+      const next = prev.includes(href)
+        ? prev.filter((h) => h !== href)
+        : [...prev, href];
+      return next;
+    });
+  };
+
+  const handleSelectAllSettingsMenus = () => {
+    const allHrefs = CONFIGURABLE_MENUS.map((m) => m.href);
+    const isAll = allHrefs.every((h) => settingsSelectedMenus.includes(h));
+    if (isAll) {
+      setSettingsSelectedMenus(['/kelas']);
+    } else {
+      setSettingsSelectedMenus(allHrefs);
+    }
+  };
+
+  const handleSettingsModalSubmit = async () => {
+    if (settingsSelectedMenus.length === 0) {
+      toast.error('Pilih setidaknya 1 menu untuk ditampilkan.');
+      return;
+    }
+    setIsSavingSettings(true);
+    try {
+      const res = await updateMenuPreferences(settingsSelectedMenus, true);
+      if (res.success) {
+        toast.success('Pengaturan menu sidebar berhasil disimpan!');
+        setIsSettingsModalOpen(false);
+        window.location.reload();
+      } else {
+        toast.error((res as any).error || 'Gagal menyimpan pengaturan menu.');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Gagal menyimpan preferensi menu.');
+    } finally {
+      setIsSavingSettings(false);
     }
   };
 
@@ -625,24 +787,36 @@ export default function DashboardLayoutClient({
   const initialName = teacher.name ? teacher.name.charAt(0).toUpperCase() : 'G';
 
   const sidebarContent = (
-    <div className='flex h-full flex-col justify-between p-4'>
-      <div className='overflow-y-auto pr-1'>
-        {/* Brand Header */}
-        <div className='flex items-center gap-3 px-2 py-4 mb-5 border-b border-slate-200/80'>
-          <div className='flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-md shadow-emerald-500/20'>
-            <BookOpen className='h-5 w-5' />
+    <div className='flex h-full flex-col'>
+      {/* Brand Header - Height 16 (64px) perfectly aligned with Desktop Top Header */}
+      <div className='flex h-16 shrink-0 items-center justify-between gap-3 px-5 border-b border-slate-200/80'>
+        <div className='flex items-center gap-3 min-w-0'>
+          <div className='flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-lg bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-xs shadow-emerald-500/20'>
+            <BookOpen className='h-4 w-4' />
           </div>
-          <div>
-            <h1 className='text-lg font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent'>
+          <div className='min-w-0'>
+            <h1 className='text-[15px] font-bold leading-none bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent truncate'>
               Smart Class
             </h1>
-            <p className='text-xs text-slate-500 font-medium'>
+            <p className='text-[11px] text-slate-500 font-medium mt-1 leading-none truncate'>
               Dashboard Wali Kelas
             </p>
           </div>
         </div>
 
-        {/* Grouped Navigation Items */}
+        {/* Mobile Drawer Close Button */}
+        <button
+          type='button'
+          onClick={() => setMobileOpen(false)}
+          className='md:hidden flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer shrink-0'
+          aria-label='Tutup Navigasi'
+        >
+          <X className='h-5 w-5' />
+        </button>
+      </div>
+
+      {/* Grouped Navigation Items */}
+      <div className='flex-1 overflow-y-auto px-3.5 py-4'>
         <nav className='space-y-5'>
           {sidebarMenuGroups.map((group) => {
             const visibleItemsInGroup = group.items
@@ -656,7 +830,6 @@ export default function DashboardLayoutClient({
                 }
                 if (
                   item.href === '/dashboard' ||
-                  item.href === '/feedback' ||
                   item.href === '/' ||
                   (item.href && enabledMenus.includes(item.href))
                 ) {
@@ -785,40 +958,6 @@ export default function DashboardLayoutClient({
           })}
         </nav>
       </div>
-
-      {/* Footer / User Profile section */}
-      <div className='border-t border-slate-200/80 pt-4 px-1'>
-        <div className='flex items-center justify-between p-2 rounded-2xl bg-slate-50 border border-slate-200/80 hover:bg-slate-100/60 transition-colors group'>
-          <Link
-            href='/profile'
-            onClick={() => setMobileOpen(false)}
-            className='flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer'
-          >
-            {/* Custom Avatar with Emerald gradient */}
-            <div className='h-9 w-9 shrink-0 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white font-bold text-sm shadow-xs border border-emerald-500/30 group-hover:scale-105 transition-transform'>
-              {initialName}
-            </div>
-            <div className='flex flex-col min-w-0 flex-1'>
-              <span className='text-xs font-bold text-slate-800 truncate group-hover:text-emerald-700 transition-colors'>
-                {teacher.name || 'Guru Smart Class'}
-              </span>
-              <span className='text-[10px] text-slate-500 truncate font-medium'>
-                {teacher.email || ''}
-              </span>
-            </div>
-          </Link>
-          <Button
-            variant='ghost'
-            size='icon'
-            onClick={() => setShowLogoutConfirm(true)}
-            title='Keluar Aplikasi'
-            className='h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-xl cursor-pointer shrink-0 transition-colors ml-1'
-          >
-            <LogOut className='h-4 w-4' />
-            <span className='sr-only'>Keluar Aplikasi</span>
-          </Button>
-        </div>
-      </div>
     </div>
   );
 
@@ -828,11 +967,12 @@ export default function DashboardLayoutClient({
         type='button'
         onClick={() => setIsClassDropdownOpen(!isClassDropdownOpen)}
         disabled={isSwitchingClass}
-        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100/90 border border-emerald-200/90 text-emerald-900 text-xs font-bold transition-all cursor-pointer shadow-2xs ${isSwitchingClass ? 'opacity-50' : ''
-          }`}
+        className={`inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100/90 border border-emerald-200/90 text-emerald-900 text-xs font-bold transition-all cursor-pointer shadow-2xs ${
+          isSwitchingClass ? 'opacity-50' : ''
+        }`}
       >
-        <School className='h-4 w-4 text-emerald-600 shrink-0' />
-        <span className='truncate max-w-[120px] sm:max-w-none'>
+        <School className='h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-600 shrink-0' />
+        <span className='truncate max-w-[80px] xs:max-w-[110px] sm:max-w-none'>
           {isMobile
             ? `Kelas ${currentActiveClass || '-'}`
             : `Kelas Aktif: ${currentActiveClass || '-'}`}
@@ -840,7 +980,7 @@ export default function DashboardLayoutClient({
         {isSwitchingClass ? (
           <Loader2 className='h-3.5 w-3.5 text-emerald-600 animate-spin shrink-0' />
         ) : (
-          <ChevronDown className='h-3.5 w-3.5 text-emerald-600 shrink-0' />
+          <ChevronDown className='h-3 w-3 sm:h-3.5 sm:w-3.5 text-emerald-600 shrink-0' />
         )}
       </button>
 
@@ -903,6 +1043,112 @@ export default function DashboardLayoutClient({
     </div>
   );
 
+  const renderProfileDropdown = (isMobile = false) => (
+    <div className='relative'>
+      <button
+        type='button'
+        onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+        className={`flex items-center ${
+          isMobile ? 'gap-1 p-0.5' : 'gap-2.5 p-1 sm:px-2.5 sm:py-1.5'
+        } rounded-full hover:bg-slate-100/80 text-left transition-all duration-200 cursor-pointer group`}
+      >
+        {/* Avatar */}
+        <div className='h-8 w-8 shrink-0 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white font-bold text-xs shadow-xs border border-emerald-500/30 group-hover:scale-105 transition-transform'>
+          {initialName}
+        </div>
+
+        {/* User Info (hidden on mobile, visible on desktop) */}
+        {!isMobile && (
+          <div className='hidden sm:flex flex-col min-w-0 max-w-[140px] lg:max-w-[180px] leading-tight'>
+            <span className='text-xs font-bold text-slate-900 truncate group-hover:text-emerald-700 transition-colors'>
+              {teacher.name || 'Guru Smart Class'}
+            </span>
+            <span className='text-[10px] text-slate-500 font-medium capitalize'>
+              Wali Kelas
+            </span>
+          </div>
+        )}
+
+        <ChevronDown
+          className={`${
+            isMobile ? 'h-3 w-3' : 'h-3.5 w-3.5'
+          } text-slate-400 group-hover:text-slate-600 transition-transform duration-200 shrink-0 mr-0.5 ${
+            isProfileDropdownOpen ? 'rotate-180 text-emerald-600' : ''
+          }`}
+        />
+      </button>
+
+      {/* Dropdown Menu */}
+      {isProfileDropdownOpen && (
+        <>
+          <div
+            className='fixed inset-0 z-40'
+            onClick={() => setIsProfileDropdownOpen(false)}
+          />
+          <div className='absolute right-0 mt-2 w-64 bg-white rounded-2xl border border-slate-200 shadow-xl z-50 p-2 animate-in fade-in-50 zoom-in-95 duration-150 divide-y divide-slate-100'>
+            {/* User Identity Info */}
+            <div className='p-2.5 pb-2'>
+              <div className='flex items-center gap-2.5'>
+                <div className='h-9 w-9 shrink-0 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white font-bold text-sm shadow-xs border border-emerald-500/30'>
+                  {initialName}
+                </div>
+                <div className='flex flex-col min-w-0 flex-1 leading-tight'>
+                  <span className='text-xs font-bold text-slate-900 truncate'>
+                    {teacher.name || 'Guru Smart Class'}
+                  </span>
+                  <span className='text-[10px] text-emerald-600 font-semibold capitalize'>
+                    Wali Kelas
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Links */}
+            <div className='py-1.5 space-y-0.5'>
+              <button
+                type='button'
+                onClick={() => {
+                  setIsProfileDropdownOpen(false);
+                  setIsProfileModalOpen(true);
+                }}
+                className='w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition-colors cursor-pointer text-left'
+              >
+                <User className='h-4 w-4 text-slate-400' />
+                <span>Profil & Sekolah</span>
+              </button>
+              <button
+                type='button'
+                onClick={() => {
+                  setIsProfileDropdownOpen(false);
+                  setIsSettingsModalOpen(true);
+                }}
+                className='w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition-colors cursor-pointer text-left'
+              >
+                <Settings className='h-4 w-4 text-slate-400' />
+                <span>Pengaturan Menu</span>
+              </button>
+            </div>
+
+            {/* Logout Action */}
+            <div className='pt-1.5'>
+              <button
+                type='button'
+                onClick={() => {
+                  setIsProfileDropdownOpen(false);
+                  setShowLogoutConfirm(true);
+                }}
+                className='w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 hover:text-rose-700 transition-colors cursor-pointer text-left'
+              >
+                <LogOut className='h-4 w-4 text-rose-500' />
+                <span>Keluar Aplikasi</span>
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+
   return (
     <div className='flex min-h-screen bg-slate-50 text-slate-900'>
       {/* Desktop Sidebar */}
@@ -917,37 +1163,32 @@ export default function DashboardLayoutClient({
           <div className='flex items-center gap-4'>
             {renderClassSwitcherPill(false)}
           </div>
-          <div className='flex items-center gap-3 text-xs text-slate-500 font-medium'>
+          <div className='flex items-center gap-3.5 text-xs text-slate-500 font-medium'>
             {teacher.schoolName && (
-              <span className='px-3 py-1 rounded-full bg-slate-100 border border-slate-200/80 text-slate-700 font-semibold'>
+              <span className='hidden lg:inline-block px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200/80 text-slate-700 font-semibold text-xs'>
                 {teacher.schoolName}
               </span>
             )}
+            {renderProfileDropdown(false)}
           </div>
         </header>
 
         {/* Mobile Top Header */}
-        <header className='flex h-16 items-center justify-between border-b border-slate-200/80 px-4 md:hidden bg-white/90 backdrop-blur-md sticky top-0 z-40 print:hidden'>
-          <div className='flex items-center gap-2'>
-            <BookOpen className='h-5 w-5 text-emerald-600 shrink-0' />
-            <span className='font-bold text-emerald-700 text-sm hidden xs:inline'>
-              Smart Class
-            </span>
-          </div>
-          <div className='flex items-center gap-2'>
+        <header className='flex h-16 items-center justify-between border-b border-slate-200/80 px-3 sm:px-4 md:hidden bg-white/95 backdrop-blur-md sticky top-0 z-40 print:hidden'>
+          {/* Left: Hamburger Button */}
+          <button
+            type='button'
+            onClick={toggleSidebar}
+            aria-label='Buka Menu Navigasi'
+            className='flex h-9 w-9 items-center justify-center rounded-xl text-slate-700 hover:text-slate-900 hover:bg-slate-100 active:bg-slate-200 transition-colors cursor-pointer shrink-0'
+          >
+            <Menu className='h-5 w-5' />
+          </button>
+
+          {/* Right: Class Switcher Pill + Profile Dropdown */}
+          <div className='flex items-center gap-1.5 sm:gap-2 shrink-0'>
             {renderClassSwitcherPill(true)}
-            <Button
-              variant='ghost'
-              size='icon'
-              onClick={toggleSidebar}
-              className='text-slate-600 hover:text-slate-900'
-            >
-              {mobileOpen ? (
-                <X className='h-6 w-6' />
-              ) : (
-                <Menu className='h-6 w-6' />
-              )}
-            </Button>
+            {renderProfileDropdown(true)}
           </div>
         </header>
 
@@ -1571,6 +1812,394 @@ export default function DashboardLayoutClient({
         isLoading={isSwitchingClass}
         onConfirm={handleConfirmDeleteClassHeader}
       />
+
+      {/* ================================================================= */}
+      {/* MODAL PROFIL & SEKOLAH (Full Screen Backdrop Blur)                */}
+      {/* ================================================================= */}
+      {isProfileModalOpen && (
+        <div className='fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-6 overflow-y-auto bg-slate-900/50 backdrop-blur-md animate-in fade-in duration-200'>
+          <div
+            className='fixed inset-0'
+            onClick={() => setIsProfileModalOpen(false)}
+          />
+          <div className='relative w-full max-w-2xl bg-white rounded-3xl border border-slate-200 shadow-2xl overflow-hidden z-10 my-auto animate-in zoom-in-95 duration-200'>
+            {/* Header */}
+            <div className='flex items-center justify-between px-6 py-5 border-b border-slate-100 bg-slate-50/50'>
+              <div className='flex items-center gap-3'>
+                <div className='h-10 w-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shadow-md shadow-emerald-500/20'>
+                  <User className='h-5 w-5' />
+                </div>
+                <div>
+                  <h2 className='text-base sm:text-lg font-black text-slate-900 tracking-tight'>
+                    Profil & Informasi Sekolah
+                  </h2>
+                  <p className='text-xs text-slate-500 font-medium'>
+                    Kelola informasi diri, NIP, serta data sekolah
+                  </p>
+                </div>
+              </div>
+              <button
+                type='button'
+                onClick={() => setIsProfileModalOpen(false)}
+                className='p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer'
+              >
+                <X className='h-5 w-5' />
+              </button>
+            </div>
+
+            {/* Tabs */}
+            <div className='flex border-b border-slate-200/80 px-6 pt-3 bg-white gap-2'>
+              <button
+                type='button'
+                onClick={() => setProfileModalTab('profile')}
+                className={`pb-3 px-3 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
+                  profileModalTab === 'profile'
+                    ? 'border-emerald-600 text-emerald-700'
+                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                <User className='h-4 w-4' />
+                <span>Informasi Diri & Sekolah</span>
+              </button>
+              <button
+                type='button'
+                onClick={() => setProfileModalTab('security')}
+                className={`pb-3 px-3 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
+                  profileModalTab === 'security'
+                    ? 'border-emerald-600 text-emerald-700'
+                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                <Lock className='h-4 w-4' />
+                <span>Keamanan (Ganti Password)</span>
+              </button>
+            </div>
+
+            {/* Tab 1: Profile Form */}
+            {profileModalTab === 'profile' && (
+              <form onSubmit={handleProfileModalSubmit} className='p-6 space-y-4 max-h-[calc(85vh-180px)] overflow-y-auto'>
+                <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+                  <div className='space-y-1.5'>
+                    <label className='text-xs font-bold text-slate-700 block'>
+                      Nama Lengkap & Gelar <span className='text-rose-500'>*</span>
+                    </label>
+                    <input
+                      type='text'
+                      required
+                      value={profileModalForm.name}
+                      onChange={(e) => setProfileModalForm({ ...profileModalForm, name: e.target.value })}
+                      placeholder='Contoh: Ahmad Dahlan, S.Pd.'
+                      className='w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-xs sm:text-sm font-medium transition-all'
+                    />
+                  </div>
+                  <div className='space-y-1.5'>
+                    <label className='text-xs font-bold text-slate-700 block'>
+                      Alamat Email
+                    </label>
+                    <input
+                      type='email'
+                      disabled
+                      value={profileModalForm.email}
+                      className='w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 text-slate-500 rounded-xl text-xs sm:text-sm font-medium cursor-not-allowed'
+                    />
+                  </div>
+                  <div className='space-y-1.5'>
+                    <label className='text-xs font-bold text-slate-700 block'>
+                      NIP / NUPTK Guru
+                    </label>
+                    <input
+                      type='text'
+                      value={profileModalForm.nip}
+                      onChange={(e) => setProfileModalForm({ ...profileModalForm, nip: e.target.value })}
+                      placeholder='Masukkan NIP / NUPTK'
+                      className='w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-xs sm:text-sm font-medium transition-all'
+                    />
+                  </div>
+                  <div className='space-y-1.5'>
+                    <label className='text-xs font-bold text-slate-700 block'>
+                      Nama Sekolah
+                    </label>
+                    <input
+                      type='text'
+                      value={profileModalForm.schoolName}
+                      onChange={(e) => setProfileModalForm({ ...profileModalForm, schoolName: e.target.value })}
+                      placeholder='Contoh: SDN 1 Mentari Pagi'
+                      className='w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-xs sm:text-sm font-medium transition-all'
+                    />
+                  </div>
+                  <div className='space-y-1.5'>
+                    <label className='text-xs font-bold text-slate-700 block'>
+                      Nama Kepala Sekolah
+                    </label>
+                    <input
+                      type='text'
+                      value={profileModalForm.principalName}
+                      onChange={(e) => setProfileModalForm({ ...profileModalForm, principalName: e.target.value })}
+                      placeholder='Contoh: Dr. H. Mulyadi, M.Pd.'
+                      className='w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-xs sm:text-sm font-medium transition-all'
+                    />
+                  </div>
+                  <div className='space-y-1.5'>
+                    <label className='text-xs font-bold text-slate-700 block'>
+                      NIP Kepala Sekolah
+                    </label>
+                    <input
+                      type='text'
+                      value={profileModalForm.principalNip}
+                      onChange={(e) => setProfileModalForm({ ...profileModalForm, principalNip: e.target.value })}
+                      placeholder='Masukkan NIP Kepala Sekolah'
+                      className='w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-xs sm:text-sm font-medium transition-all'
+                    />
+                  </div>
+                </div>
+
+                <div className='pt-3 flex items-center justify-end gap-2 border-t border-slate-100'>
+                  <Button
+                    type='button'
+                    variant='outline'
+                    onClick={() => setIsProfileModalOpen(false)}
+                    className='rounded-xl text-xs font-semibold'
+                  >
+                    Batal
+                  </Button>
+                  <Button
+                    type='submit'
+                    disabled={isSavingProfile}
+                    className='bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs px-5 shadow-sm shadow-emerald-600/20 cursor-pointer'
+                  >
+                    {isSavingProfile ? (
+                      <>
+                        <Loader2 className='h-4 w-4 animate-spin mr-1.5' />
+                        <span>Menyimpan...</span>
+                      </>
+                    ) : (
+                      <span>Simpan Perubahan</span>
+                    )}
+                  </Button>
+                </div>
+              </form>
+            )}
+
+            {/* Tab 2: Security Form */}
+            {profileModalTab === 'security' && (
+              <form onSubmit={handlePasswordModalSubmit} className='p-6 space-y-4 max-h-[calc(85vh-180px)] overflow-y-auto'>
+                <div className='space-y-1.5'>
+                  <label className='text-xs font-bold text-slate-700 block'>
+                    Password Saat Ini <span className='text-rose-500'>*</span>
+                  </label>
+                  <div className='relative'>
+                    <input
+                      type={showCurrentPassword ? 'text' : 'password'}
+                      required
+                      value={passwordModalForm.currentPassword}
+                      onChange={(e) => setPasswordModalForm({ ...passwordModalForm, currentPassword: e.target.value })}
+                      placeholder='Masukkan password saat ini'
+                      className='w-full px-3.5 py-2.5 pr-10 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-xs sm:text-sm font-medium transition-all'
+                    />
+                    <button
+                      type='button'
+                      onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                      className='absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer'
+                    >
+                      {showCurrentPassword ? <EyeOff className='h-4 w-4' /> : <Eye className='h-4 w-4' />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className='space-y-1.5'>
+                  <label className='text-xs font-bold text-slate-700 block'>
+                    Password Baru <span className='text-rose-500'>*</span>
+                  </label>
+                  <div className='relative'>
+                    <input
+                      type={showNewPassword ? 'text' : 'password'}
+                      required
+                      value={passwordModalForm.newPassword}
+                      onChange={(e) => setPasswordModalForm({ ...passwordModalForm, newPassword: e.target.value })}
+                      placeholder='Minimal 6 karakter'
+                      className='w-full px-3.5 py-2.5 pr-10 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-xs sm:text-sm font-medium transition-all'
+                    />
+                    <button
+                      type='button'
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      className='absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer'
+                    >
+                      {showNewPassword ? <EyeOff className='h-4 w-4' /> : <Eye className='h-4 w-4' />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className='space-y-1.5'>
+                  <label className='text-xs font-bold text-slate-700 block'>
+                    Konfirmasi Password Baru <span className='text-rose-500'>*</span>
+                  </label>
+                  <div className='relative'>
+                    <input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      required
+                      value={passwordModalForm.confirmPassword}
+                      onChange={(e) => setPasswordModalForm({ ...passwordModalForm, confirmPassword: e.target.value })}
+                      placeholder='Ulangi password baru'
+                      className='w-full px-3.5 py-2.5 pr-10 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-xs sm:text-sm font-medium transition-all'
+                    />
+                    <button
+                      type='button'
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className='absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer'
+                    >
+                      {showConfirmPassword ? <EyeOff className='h-4 w-4' /> : <Eye className='h-4 w-4' />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className='pt-3 flex items-center justify-end gap-2 border-t border-slate-100'>
+                  <Button
+                    type='button'
+                    variant='outline'
+                    onClick={() => setIsProfileModalOpen(false)}
+                    className='rounded-xl text-xs font-semibold'
+                  >
+                    Batal
+                  </Button>
+                  <Button
+                    type='submit'
+                    disabled={isSavingPassword}
+                    className='bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs px-5 shadow-sm shadow-emerald-600/20 cursor-pointer'
+                  >
+                    {isSavingPassword ? (
+                      <>
+                        <Loader2 className='h-4 w-4 animate-spin mr-1.5' />
+                        <span>Mengubah...</span>
+                      </>
+                    ) : (
+                      <span>Ubah Password</span>
+                    )}
+                  </Button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ================================================================= */}
+      {/* MODAL PENGATURAN MENU (Full Screen Backdrop Blur)                 */}
+      {/* ================================================================= */}
+      {isSettingsModalOpen && (
+        <div className='fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-6 overflow-y-auto bg-slate-900/50 backdrop-blur-md animate-in fade-in duration-200'>
+          <div
+            className='fixed inset-0'
+            onClick={() => setIsSettingsModalOpen(false)}
+          />
+          <div className='relative w-full max-w-2xl bg-white rounded-3xl border border-slate-200 shadow-2xl overflow-hidden z-10 my-auto animate-in zoom-in-95 duration-200'>
+            {/* Header */}
+            <div className='flex items-center justify-between px-6 py-5 border-b border-slate-100 bg-slate-50/50'>
+              <div className='flex items-center gap-3'>
+                <div className='h-10 w-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shadow-md shadow-emerald-500/20'>
+                  <Settings className='h-5 w-5' />
+                </div>
+                <div>
+                  <h2 className='text-base sm:text-lg font-black text-slate-900 tracking-tight'>
+                    Pengaturan Menu Sidebar
+                  </h2>
+                  <p className='text-xs text-slate-500 font-medium'>
+                    Pilih modul yang ingin diaktifkan atau disembunyikan pada navigasi sidebar
+                  </p>
+                </div>
+              </div>
+              <button
+                type='button'
+                onClick={() => setIsSettingsModalOpen(false)}
+                className='p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer'
+              >
+                <X className='h-5 w-5' />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className='p-6 space-y-4 max-h-[calc(85vh-180px)] overflow-y-auto'>
+              <div className='flex items-center justify-between pb-1'>
+                <span className='text-xs font-bold text-slate-500 uppercase tracking-wider'>
+                  DAFTAR MODUL KBM TERSEDIA
+                </span>
+                <button
+                  type='button'
+                  onClick={handleSelectAllSettingsMenus}
+                  className='text-xs font-bold text-emerald-600 hover:text-emerald-700 hover:underline cursor-pointer'
+                >
+                  {CONFIGURABLE_MENUS.map((m) => m.href).every((h) => settingsSelectedMenus.includes(h))
+                    ? 'Hapus Semua'
+                    : 'Pilih Semua'}
+                </button>
+              </div>
+
+              <div className='grid grid-cols-1 sm:grid-cols-2 gap-2.5'>
+                {CONFIGURABLE_MENUS.map((menu) => {
+                  const isSelected = settingsSelectedMenus.includes(menu.href);
+                  return (
+                    <div
+                      key={menu.href}
+                      onClick={() => handleToggleSettingsMenu(menu.href)}
+                      className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-start justify-between gap-3 ${
+                        isSelected
+                          ? 'bg-emerald-50/70 border-emerald-300/80 shadow-2xs'
+                          : 'bg-slate-50/60 border-slate-200/80 hover:bg-slate-100/60'
+                      }`}
+                    >
+                      <div className='flex items-start gap-2.5 min-w-0'>
+                        <div
+                          className={`h-7 w-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${
+                            isSelected
+                              ? 'bg-emerald-600 text-white shadow-2xs'
+                              : 'bg-slate-200 text-slate-500'
+                          }`}
+                        >
+                          <Check className={`h-4 w-4 transition-transform ${isSelected ? 'scale-100' : 'scale-0'}`} />
+                        </div>
+                        <div className='min-w-0 flex-1'>
+                          <div className='text-xs font-bold text-slate-900 truncate'>
+                            {menu.label}
+                          </div>
+                          <div className='text-[11px] text-slate-500 line-clamp-1'>
+                            {menu.desc}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className='p-6 pt-3 flex items-center justify-end gap-2 border-t border-slate-100 bg-slate-50/30'>
+              <Button
+                type='button'
+                variant='outline'
+                onClick={() => setIsSettingsModalOpen(false)}
+                className='rounded-xl text-xs font-semibold'
+              >
+                Batal
+              </Button>
+              <Button
+                type='button'
+                disabled={isSavingSettings}
+                onClick={handleSettingsModalSubmit}
+                className='bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs px-5 shadow-sm shadow-emerald-600/20 cursor-pointer'
+              >
+                {isSavingSettings ? (
+                  <>
+                    <Loader2 className='h-4 w-4 animate-spin mr-1.5' />
+                    <span>Menyimpan...</span>
+                  </>
+                ) : (
+                  <span>Simpan Pengaturan</span>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

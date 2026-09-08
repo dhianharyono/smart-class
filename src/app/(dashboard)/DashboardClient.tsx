@@ -25,7 +25,6 @@ import {
   Plus,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import OnboardingWidget from '@/components/OnboardingWidget';
 import {
   Card,
   CardContent,
@@ -229,8 +228,6 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
         </Link>
       </div>
 
-      {/* Interactive Onboarding Guide for New Users */}
-      <OnboardingWidget stats={stats} />
 
       {/* Empty State – when no modules are active */}
       {statCards.length === 0 &&
@@ -529,7 +526,7 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
                         statistik & distribusi kehadiran.
                       </p>
                     </div>
-                    <Link href='/absensi?guided=1'>
+                    <Link href='/absensi'>
                       <Button
                         size='sm'
                         className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl h-8.5 px-3.5 gap-1.5 shadow-xs cursor-pointer mt-1'
