@@ -197,17 +197,7 @@ export default function AdminDashboardClient({
     }).format(num);
   };
 
-  const formatCompactIDR = (amount: number) => {
-    if (Math.abs(amount) >= 1_000_000) {
-      const val = amount / 1_000_000;
-      return `Rp ${val % 1 === 0 ? val : val.toFixed(1)}jt`;
-    }
-    if (Math.abs(amount) >= 1_000) {
-      const val = amount / 1_000;
-      return `Rp ${val % 1 === 0 ? val : val.toFixed(0)}rb`;
-    }
-    return `Rp ${amount}`;
-  };
+
 
   const formatDate = (dateStr: string) => {
     try {
@@ -240,17 +230,7 @@ export default function AdminDashboardClient({
     );
   });
 
-  const breakdown = stats.attendanceBreakdown || {
-    hadir: 0,
-    sakit: 0,
-    izin: 0,
-    alfa: 0,
-    total: 0,
-    hadirPct: 0,
-    sakitPct: 0,
-    izinPct: 0,
-    alfaPct: 0,
-  };
+
 
   // Activity trend metrics
   const trendData = stats.activityTrend || [];

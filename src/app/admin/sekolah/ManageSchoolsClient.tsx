@@ -99,8 +99,8 @@ export default function ManageSchoolsClient({
       } else {
         toast.error(res.error || 'Gagal menambahkan sekolah.');
       }
-    } catch (err: any) {
-      toast.error(err.message || 'Terjadi kesalahan.');
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Terjadi kesalahan.');
     } finally {
       setLoading(false);
     }
@@ -128,8 +128,8 @@ export default function ManageSchoolsClient({
       } else {
         toast.error(res.error || 'Gagal menghapus sekolah.');
       }
-    } catch (err: any) {
-      toast.error(err.message || 'Terjadi kesalahan.');
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Terjadi kesalahan.');
     } finally {
       setDeletingId(null);
     }

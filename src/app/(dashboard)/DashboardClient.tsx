@@ -147,8 +147,6 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
   const isTabunganEnabled = enabled.includes('/tabungan');
   const isNilaiEnabled = enabled.includes('/nilai');
   const isJurnalEnabled = enabled.includes('/jurnal');
-  const isJadwalEnabled = enabled.includes('/jadwal');
-  const isPiketEnabled = enabled.includes('/piket');
 
   const statCards = [
     {

@@ -22,9 +22,7 @@ import {
   Loader2,
   Calendar,
   Printer,
-  FileSpreadsheet,
   Sparkles,
-  Download,
   School,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';

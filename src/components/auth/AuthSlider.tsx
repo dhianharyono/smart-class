@@ -266,7 +266,7 @@ export default function AuthSlider({
         setRecaptchaToken('');
         setLoading(false);
       }
-    } catch (err) {
+    } catch {
       toast.error('Terjadi kesalahan. Silakan coba lagi.');
       setResetCaptcha((prev) => prev + 1);
       setRecaptchaToken('');

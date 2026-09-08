@@ -16,7 +16,6 @@ import {
   User,
   MessageSquareText,
   ChevronDown,
-  Sparkles,
   Lock,
   Eye,
   EyeOff,
@@ -25,7 +24,6 @@ import {
 } from 'lucide-react';
 import { updateAdminProfile } from '@/actions/adminActions';
 import { changePassword } from '@/actions/profileActions';
-import { Button } from '@/components/ui/button';
 import ConfirmDialog from '@/components/ConfirmDialog';
 
 interface SidebarItem {

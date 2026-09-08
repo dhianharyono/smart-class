@@ -15,8 +15,6 @@ import {
   FileText,
   Settings2,
   Plus,
-  Sparkles,
-  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -371,11 +369,6 @@ export default function AbsensiClient({
     { hadir: 0, sakit: 0, izin: 0, alfa: 0 },
   );
 
-
-
-  const formattedSelectedDate = format(selectedDate, 'EEEE, dd MMMM yyyy', {
-    locale: id,
-  });
 
   return (
     <div className='space-y-6 animate-fade-in'>
