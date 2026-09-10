@@ -27,7 +27,12 @@ import {
   FileText,
   Activity,
   CheckCircle2,
+  Upload,
+  RotateCcw,
+  ImageIcon,
+  School,
 } from 'lucide-react';
+import { getProfile } from '@/actions/profileActions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -92,7 +97,31 @@ export default function JurnalClient() {
     'SEMESTER I (GANJIL) TAHUN PELAJARAN 2026/2027',
   );
 
-  // Signature Block State for A4 Print Preview
+  // Preset Kop Resmi Khusus SLB Purnama Asih
+  const SLB_PURNAMA_ASIH_KOP = {
+    logoUrl: '/logo-resmi-slb.png',
+    schoolName: 'SEKOLAH LUAR BIASA PURNAMA ASIH',
+    subHeader1: 'SATUAN PENDIDIKAN TKLB, SDLB, SMPLB, SMALB',
+    subHeader2: 'Izin Kanwil Depdikbud Jawa Barat No. 293/I.02.3/T./17-4-1985',
+    subHeader3: 'Registrasi Nomor : 421.9/1761-Disdik Tanggal 01 Mei 2007',
+    addressLine:
+      'Jl. Villa Duta No. 2 Desa Ciwaruga Kec. Parongpong Telp. (022) 2014794',
+    cityRegency: 'KABUPATEN BANDUNG BARAT',
+  };
+
+  // Dynamic Document Header State (Kop Surat Resmi Dinas / Lembaga - Default Generik)
+  const [docHeader, setDocHeader] = useState({
+    useOfficialKop: false,
+    logoUrl: '/icon.svg',
+    schoolName: '',
+    subHeader1: '',
+    subHeader2: '',
+    subHeader3: '',
+    addressLine: '',
+    cityRegency: '',
+  });
+
+  // Dynamic Interactive Signature Block State (Matching refined Absensi format)
   const [signatureData, setSignatureData] = useState({
     place: 'Bandung',
     date: new Date().toLocaleDateString('id-ID', {
@@ -100,10 +129,69 @@ export default function JurnalClient() {
       month: 'long',
       year: 'numeric',
     }),
-    supervisorTitle: 'Mengetahui, Kepala Sekolah',
+    supervisorTitle: 'Kepala Sekolah',
     supervisorName: '',
     supervisorNip: '-',
+    teacherTitle: 'Guru Kelas / Wali Kelas',
+    teacherName: '',
+    teacherNip: '-',
   });
+
+  const updateDocHeader = (
+    updater:
+      | Partial<typeof docHeader>
+      | ((prev: typeof docHeader) => typeof docHeader),
+  ) => {
+    setDocHeader((prev) => {
+      const next =
+        typeof updater === 'function' ? updater(prev) : { ...prev, ...updater };
+      try {
+        localStorage.setItem('smart_class_kop_settings', JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
+  };
+
+  const updateSignatureData = (
+    updater:
+      | Partial<typeof signatureData>
+      | ((prev: typeof signatureData) => typeof signatureData),
+  ) => {
+    setSignatureData((prev) => {
+      const next =
+        typeof updater === 'function' ? updater(prev) : { ...prev, ...updater };
+      try {
+        localStorage.setItem('smart_class_sig_settings', JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
+  };
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Ukuran logo maksimal 2MB');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        updateDocHeader({ logoUrl: reader.result });
+        toast.success('Logo sekolah berhasil diperbarui!');
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleResetLogo = () => {
+    const isSlb =
+      profile?.schoolName?.toLowerCase().includes('purnama asih') ||
+      docHeader.schoolName?.toLowerCase().includes('purnama asih');
+    const defaultLogo = isSlb ? '/logo-resmi-slb.png' : '/icon.svg';
+    updateDocHeader({ logoUrl: defaultLogo });
+    toast.success('Logo dikembalikan ke logo default.');
+  };
 
   // Dialog States
   const [journalModalOpen, setJournalModalOpen] = useState(false);
@@ -130,15 +218,20 @@ export default function JurnalClient() {
   // Header State
   const [headerForm, setHeaderForm] = useState({
     schoolName: '',
-    subject: '',
+    subject: 'Mata Pelajaran',
     classNameSemester: '',
-    academicYear: '',
-    curriculum: '2013',
+    academicYear: '2026/2027',
+    curriculum: 'Kurikulum Merdeka',
     teacherName: '',
     nip: '-',
   });
 
   // Queries
+  const { data: profile } = useQuery({
+    queryKey: ['profile'],
+    queryFn: () => getProfile(),
+  });
+
   const { data: journals, isLoading: isJournalsLoading } = useQuery<
     JournalEntry[]
   >({
@@ -151,37 +244,88 @@ export default function JurnalClient() {
     queryFn: () => getJournalHeader(),
   });
 
-  // Keep headerForm synced with fetched header
+  // Load saved kop settings & signature from localStorage on client mount
   React.useEffect(() => {
-    if (headerData) {
-      const activeNip =
-        headerData.nip && headerData.nip.trim() !== '' ? headerData.nip : '-';
-      setHeaderForm({
-        schoolName: headerData.schoolName || '',
-        subject: headerData.subject || '',
-        classNameSemester: headerData.classNameSemester || '',
-        academicYear: headerData.academicYear || '',
-        curriculum: headerData.curriculum || '2013',
-        teacherName: headerData.teacherName || '',
-        nip: activeNip,
-      });
-      if (headerData.academicYear) {
-        setDocHeaderSubtitle(
-          `SEMESTER I (GANJIL) TAHUN PELAJARAN ${headerData.academicYear}`,
-        );
+    try {
+      const savedKop = localStorage.getItem('smart_class_kop_settings');
+      if (savedKop) {
+        const parsedKop = JSON.parse(savedKop);
+        setDocHeader((prev) => ({ ...prev, ...parsedKop }));
       }
-      setSignatureData((prev) => ({
+      const savedSig = localStorage.getItem('smart_class_sig_settings');
+      if (savedSig) {
+        const parsedSig = JSON.parse(savedSig);
+        if (
+          parsedSig.supervisorTitle === 'Mengetahui, Kepala Sekolah' ||
+          parsedSig.supervisorTitle === 'Mengetahui,'
+        ) {
+          parsedSig.supervisorTitle = 'Kepala Sekolah';
+        }
+        setSignatureData((prev) => ({ ...prev, ...parsedSig }));
+      }
+    } catch (e) {}
+  }, []);
+
+  // Keep headerForm synced with fetched header & profile
+  React.useEffect(() => {
+    const activeClass = profile?.activeClass || profile?.className || '';
+    const school = profile?.schoolName || headerData?.schoolName || '';
+    const teacherName = profile?.name || headerData?.teacherName || '';
+    const teacherNip =
+      profile?.nip && profile.nip !== '-'
+        ? profile.nip
+        : headerData?.nip && headerData.nip !== '-'
+          ? headerData.nip
+          : '-';
+    const principalName =
+      profile?.principalName || headerData?.principalName || '';
+    const principalNip =
+      profile?.principalNip && profile.principalNip !== '-'
+        ? profile.principalNip
+        : headerData?.principalNip && headerData.principalNip !== '-'
+          ? headerData.principalNip
+          : '-';
+
+    setHeaderForm((prev) => ({
+      schoolName: school || prev.schoolName,
+      subject: headerData?.subject || prev.subject || 'Mata Pelajaran',
+      classNameSemester:
+        headerData?.classNameSemester &&
+        !headerData.classNameSemester.includes('XTKJ')
+          ? headerData.classNameSemester
+          : activeClass
+            ? `Kelas ${activeClass} / Ganjil`
+            : prev.classNameSemester,
+      academicYear:
+        headerData?.academicYear || prev.academicYear || '2026/2027',
+      curriculum:
+        headerData?.curriculum || prev.curriculum || 'Kurikulum Merdeka',
+      teacherName: teacherName || prev.teacherName,
+      nip: teacherNip || prev.nip,
+    }));
+
+    if (headerData?.academicYear) {
+      setDocHeaderSubtitle(
+        `SEMESTER I (GANJIL) TAHUN PELAJARAN ${headerData.academicYear}`,
+      );
+    }
+
+    if (school && !docHeader.schoolName) {
+      setDocHeader((prev) => ({
         ...prev,
-        supervisorName: headerData.principalName || prev.supervisorName,
-        supervisorNip:
-          headerData.principalNip && headerData.principalNip.trim() !== ''
-            ? headerData.principalNip
-            : prev.supervisorNip,
+        schoolName: prev.schoolName || school,
       }));
     }
-  }, [headerData]);
 
-
+    setSignatureData((prev) => ({
+      ...prev,
+      supervisorName: prev.supervisorName || principalName,
+      supervisorNip:
+        prev.supervisorNip !== '-' ? prev.supervisorNip : principalNip,
+      teacherName: prev.teacherName || teacherName,
+      teacherNip: prev.teacherNip !== '-' ? prev.teacherNip : teacherNip,
+    }));
+  }, [headerData, profile]);
 
   // Load student attendance for target date
   const loadStudentAttendance = async (dateStr: string) => {
@@ -451,8 +595,6 @@ export default function JurnalClient() {
 
   return (
     <div className='space-y-6 animate-fade-in'>
-
-
       {/* Header Bar - Always Visible */}
       <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between print:hidden'>
         <div>
@@ -531,10 +673,10 @@ export default function JurnalClient() {
               <Button
                 onClick={() => setHeaderModalOpen(true)}
                 variant='outline'
-                className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl h-10 px-3.5 gap-2 shadow-xs'
+                className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl h-10 px-3.5 gap-2 shadow-xs cursor-pointer'
               >
                 <Settings2 className='h-4 w-4 text-emerald-600' />
-                Edit Header
+                Edit Kop & TTD
               </Button>
               <Button
                 onClick={() => window.print()}
@@ -550,21 +692,160 @@ export default function JurnalClient() {
           {/* Centered A4 Document Canvas Container */}
           <div className='bg-slate-200/70 p-4 sm:p-10 rounded-2xl border border-slate-300/80 overflow-x-auto min-h-[900px] flex justify-center shadow-inner print:p-0 print:bg-white print:border-none'>
             <div className='w-full max-w-[850px] bg-white text-slate-900 shadow-2xl rounded-sm border border-slate-300 p-8 sm:p-14 print:p-0 print:shadow-none print:border-none print:w-full print:max-w-none print:text-black font-sans leading-relaxed'>
-              {/* Document Header Title (Interactive Inputs) */}
-              <div className='text-center mb-8 border-b-2 border-slate-900 pb-4 print:border-black space-y-1'>
-                <Input
-                  value={docHeaderTitle}
-                  onChange={(e) => setDocHeaderTitle(e.target.value)}
-                  className='text-center font-black uppercase tracking-wider text-base sm:text-2xl text-slate-900 print:text-black border-b border-transparent hover:border-slate-300 focus:border-emerald-600 rounded-none h-auto py-1 outline-none transition-all print:border-none print:p-0 bg-transparent w-full font-sans'
-                  placeholder='AGENDA JURNAL HARIAN KBM'
-                />
-                <Input
-                  value={docHeaderSubtitle}
-                  onChange={(e) => setDocHeaderSubtitle(e.target.value)}
-                  className='text-center font-bold uppercase text-xs sm:text-sm text-slate-800 print:text-black border-b border-transparent hover:border-slate-300 focus:border-emerald-600 rounded-none h-auto py-1 outline-none transition-all print:border-none print:p-0 bg-transparent w-full mt-1 font-sans'
-                  placeholder='SEMESTER I (GANJIL) TAHUN PELAJARAN 2026/2027'
-                />
-              </div>
+              {/* Document KOP / Interactive Header Title */}
+              {docHeader.useOfficialKop ? (
+                <div className='mb-6'>
+                  <div className='flex items-center justify-between gap-3 sm:gap-4'>
+                    {/* Left: School Emblem / Circular Logo */}
+                    <div className='w-28 sm:w-32 shrink-0 flex flex-col items-center justify-center relative group'>
+                      <img
+                        src={docHeader.logoUrl || '/icon.svg'}
+                        alt='Logo Sekolah'
+                        className='w-28 h-28 sm:w-[124px] sm:h-[124px] object-contain transition-transform group-hover:scale-105'
+                      />
+                      {/* Floating edit button on hover (hidden in print) */}
+                      <label
+                        htmlFor='quick-logo-upload-jurnal'
+                        className='absolute inset-0 bg-black/40 text-white text-[10px] font-bold rounded-full opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center cursor-pointer transition-opacity print:hidden'
+                        title='Klik untuk ganti logo'
+                      >
+                        <Upload className='h-4 w-4 mb-0.5' />
+                        <span>Ganti</span>
+                      </label>
+                      <input
+                        id='quick-logo-upload-jurnal'
+                        type='file'
+                        accept='image/*'
+                        onChange={handleLogoUpload}
+                        className='hidden'
+                      />
+                    </div>
+
+                    {/* Center: Official Letterhead Text Block (Times New Roman / Serif style) */}
+                    <div className='flex-1 text-center font-serif text-slate-900 print:text-black space-y-[2px] px-1'>
+                      {/* Baris 1: Nama Sekolah / Yayasan */}
+                      {Boolean(docHeader.schoolName && docHeader.schoolName.trim()) && (
+                        <input
+                          value={docHeader.schoolName}
+                          onChange={(e) =>
+                            updateDocHeader({ schoolName: e.target.value })
+                          }
+                          className='w-full bg-transparent border-0 border-b border-transparent hover:border-slate-300 focus:border-emerald-600 focus:bg-emerald-50/20 p-0 text-center outline-none transition-all print:border-none print:p-0 font-serif font-bold uppercase text-base sm:text-xl md:text-[22px] text-slate-900 print:text-black leading-tight tracking-normal'
+                          placeholder='NAMA YAYASAN / DINAS PENDIDIKAN'
+                        />
+                      )}
+                      {/* Baris 2: Satuan Pendidikan */}
+                      {Boolean(docHeader.subHeader1 && docHeader.subHeader1.trim()) && (
+                        <input
+                          value={docHeader.subHeader1}
+                          onChange={(e) =>
+                            updateDocHeader({ subHeader1: e.target.value })
+                          }
+                          className='w-full bg-transparent border-0 border-b border-transparent hover:border-slate-300 focus:border-emerald-600 focus:bg-emerald-50/20 p-0 text-center outline-none transition-all print:border-none print:p-0 font-serif font-normal uppercase text-xs sm:text-sm md:text-[14.5px] text-slate-900 print:text-black leading-tight tracking-normal'
+                          placeholder='SATUAN PENDIDIKAN / NAMA SEKOLAH'
+                        />
+                      )}
+                      {/* Baris 3: Izin Kanwil */}
+                      {Boolean(docHeader.subHeader2 && docHeader.subHeader2.trim()) && (
+                        <input
+                          value={docHeader.subHeader2}
+                          onChange={(e) =>
+                            updateDocHeader({ subHeader2: e.target.value })
+                          }
+                          className='w-full bg-transparent border-0 border-b border-transparent hover:border-slate-300 focus:border-emerald-600 focus:bg-emerald-50/20 p-0 text-center outline-none transition-all print:border-none print:p-0 font-serif font-normal text-[11px] sm:text-xs md:text-[13px] text-slate-800 print:text-black leading-tight'
+                          placeholder='Izin Operasional / NPSN'
+                        />
+                      )}
+                      {/* Baris 4: Nomor Registrasi */}
+                      {Boolean(docHeader.subHeader3 && docHeader.subHeader3.trim()) && (
+                        <input
+                          value={docHeader.subHeader3}
+                          onChange={(e) =>
+                            updateDocHeader({ subHeader3: e.target.value })
+                          }
+                          className='w-full bg-transparent border-0 border-b border-transparent hover:border-slate-300 focus:border-emerald-600 focus:bg-emerald-50/20 p-0 text-center outline-none transition-all print:border-none print:p-0 font-serif font-normal text-[11px] sm:text-xs md:text-[13px] text-slate-800 print:text-black leading-tight'
+                          placeholder='Nomor Registrasi / SK Akreditasi'
+                        />
+                      )}
+                      {/* Baris 5: Alamat & Kontak */}
+                      {Boolean(docHeader.addressLine && docHeader.addressLine.trim()) && (
+                        <input
+                          value={docHeader.addressLine}
+                          onChange={(e) =>
+                            updateDocHeader({ addressLine: e.target.value })
+                          }
+                          className='w-full bg-transparent border-0 border-b border-transparent hover:border-slate-300 focus:border-emerald-600 focus:bg-emerald-50/20 p-0 text-center outline-none transition-all print:border-none print:p-0 font-serif font-normal text-[11px] sm:text-xs md:text-[13px] text-slate-800 print:text-black leading-tight'
+                          placeholder='Alamat Lengkap & Kontak'
+                        />
+                      )}
+                      {/* Baris 6: Kabupaten / Kota */}
+                      {Boolean(docHeader.cityRegency && docHeader.cityRegency.trim()) && (
+                        <input
+                          value={docHeader.cityRegency}
+                          onChange={(e) =>
+                            updateDocHeader({ cityRegency: e.target.value })
+                          }
+                          className='w-full bg-transparent border-0 border-b border-transparent hover:border-slate-300 focus:border-emerald-600 focus:bg-emerald-50/20 p-0 text-center outline-none transition-all print:border-none print:p-0 font-serif font-bold uppercase text-xs sm:text-sm md:text-[14.5px] text-slate-900 print:text-black leading-tight tracking-normal'
+                          placeholder='KABUPATEN / KOTA'
+                        />
+                      )}
+                      {!docHeader.schoolName?.trim() &&
+                        !docHeader.subHeader1?.trim() &&
+                        !docHeader.subHeader2?.trim() &&
+                        !docHeader.subHeader3?.trim() &&
+                        !docHeader.addressLine?.trim() &&
+                        !docHeader.cityRegency?.trim() && (
+                          <div className='py-4 text-center text-slate-400 text-xs italic print:hidden'>
+                            *Kop surat dinas masih kosong. Klik tombol &quot;Edit Kop &amp; TTD&quot; untuk mengisi teks kop surat.
+                          </div>
+                        )}
+                    </div>
+
+                    {/* Right spacer for centering symmetry */}
+                    <div
+                      className='w-28 sm:w-32 shrink-0 hidden sm:block pointer-events-none'
+                      aria-hidden='true'
+                    />
+                  </div>
+
+                  {/* Official Double Line Divider */}
+                  <div className='mt-2.5 mb-4 space-y-[2px] print:mt-1.5 print:mb-3'>
+                    <div className='border-b-[3px] border-black' />
+                    <div className='border-b border-black' />
+                  </div>
+
+                  {/* Report Title & Subtitle */}
+                  <div className='text-center space-y-1 mb-4'>
+                    <Input
+                      value={docHeaderTitle}
+                      onChange={(e) => setDocHeaderTitle(e.target.value)}
+                      className='text-center font-black uppercase tracking-wider text-base sm:text-2xl text-slate-900 print:text-black border-b border-transparent hover:border-slate-300 focus:border-emerald-600 rounded-none h-auto py-1 outline-none transition-all print:border-none print:p-0 bg-transparent w-full font-sans'
+                      placeholder='AGENDA JURNAL HARIAN KBM'
+                    />
+                    <Input
+                      value={docHeaderSubtitle}
+                      onChange={(e) => setDocHeaderSubtitle(e.target.value)}
+                      className='text-center font-bold uppercase text-xs sm:text-sm text-slate-800 print:text-black border-b border-transparent hover:border-slate-300 focus:border-emerald-600 rounded-none h-auto py-1 outline-none transition-all print:border-none print:p-0 bg-transparent w-full mt-1 font-sans'
+                      placeholder='SEMESTER I (GANJIL) TAHUN PELAJARAN 2026/2027'
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className='text-center mb-8 border-b-2 border-slate-900 pb-4 print:border-black space-y-1'>
+                  <Input
+                    value={docHeaderTitle}
+                    onChange={(e) => setDocHeaderTitle(e.target.value)}
+                    className='text-center font-black uppercase tracking-wider text-base sm:text-2xl text-slate-900 print:text-black border-b border-transparent hover:border-slate-300 focus:border-emerald-600 rounded-none h-auto py-1 outline-none transition-all print:border-none print:p-0 bg-transparent w-full font-sans'
+                    placeholder='AGENDA JURNAL HARIAN KBM'
+                  />
+                  <Input
+                    value={docHeaderSubtitle}
+                    onChange={(e) => setDocHeaderSubtitle(e.target.value)}
+                    className='text-center font-bold uppercase text-xs sm:text-sm text-slate-800 print:text-black border-b border-transparent hover:border-slate-300 focus:border-emerald-600 rounded-none h-auto py-1 outline-none transition-all print:border-none print:p-0 bg-transparent w-full mt-1 font-sans'
+                    placeholder='SEMESTER I (GANJIL) TAHUN PELAJARAN 2026/2027'
+                  />
+                </div>
+              )}
 
               {/* Document Metadata Grid */}
               <div className='grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-8 text-xs font-semibold text-slate-800 print:text-black mb-6 border-b border-slate-200 pb-4 print:border-zinc-300'>
@@ -742,95 +1023,138 @@ export default function JurnalClient() {
                 </table>
               </div>
 
-              {/* Official Interactive Signature Section (Matching user reference UI) */}
-              <div className='grid grid-cols-1 sm:grid-cols-2 gap-8 pt-6 mt-8 text-xs text-slate-900 print:text-black font-semibold'>
-                {/* Left Column: Supervisor / School Principal */}
-                <div className='space-y-1.5'>
-                  <p className='font-bold text-slate-800 print:text-black'>
-                    Mengetahui,
-                  </p>
-                  <Input
-                    value={signatureData.supervisorTitle}
-                    onChange={(e) =>
-                      setSignatureData({
-                        ...signatureData,
-                        supervisorTitle: e.target.value,
-                      })
-                    }
-                    className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 w-full max-w-xs print:border-none print:p-0'
-                  />
-                  <div className='h-20' /> {/* Signature Blank Space */}
-                  <div className='space-y-1'>
-                    <Input
-                      placeholder='Ketik nama kepsek...'
-                      value={signatureData.supervisorName}
-                      onChange={(e) =>
-                        setSignatureData({
-                          ...signatureData,
-                          supervisorName: e.target.value,
-                        })
-                      }
-                      className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 w-full max-w-xs print:border-none print:p-0'
-                    />
-                    <div className='flex items-center gap-1 text-[11px] text-slate-700 print:text-black'>
-                      <span>NIP.</span>
+              {/* Official Interactive Signature Section (Matching refined layout) */}
+              <div className='mt-12 pt-6 text-xs text-slate-900 print:text-black font-semibold break-inside-avoid'>
+                {/* Baris Tempat & Tanggal Cetak (Satu Baris di Atas 'Mengetahui,') */}
+                <div className='grid grid-cols-2 gap-8 mb-2'>
+                  <div />{' '}
+                  {/* Kolom kiri kosong agar tanggal tepat di atas tanda tangan kanan */}
+                  <div className='sm:pl-8'>
+                    <div className='flex items-center gap-1 mb-1'>
                       <Input
-                        placeholder='Ketik NIP kepsek...'
-                        value={signatureData.supervisorNip}
+                        value={signatureData.place}
                         onChange={(e) =>
-                          setSignatureData({
-                            ...signatureData,
-                            supervisorNip: e.target.value,
+                          updateSignatureData({
+                            place: e.target.value,
                           })
                         }
-                        className='text-[11px] border-b border-slate-300 border-x-0 border-t-0 rounded-none h-5 px-0 focus:border-emerald-600 w-44 print:border-none print:p-0'
+                        style={{
+                          width: `${Math.max((signatureData.place || '').length * 7.5 + 4, 60)}px`,
+                        }}
+                        className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 print:border-none print:p-0'
+                      />
+                      <span>,</span>
+                      <Input
+                        value={signatureData.date}
+                        onChange={(e) =>
+                          updateSignatureData({
+                            date: e.target.value,
+                          })
+                        }
+                        style={{
+                          width: `${Math.max((signatureData.date || '').length * 7.5 + 4, 80)}px`,
+                        }}
+                        className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 print:border-none print:p-0'
                       />
                     </div>
                   </div>
                 </div>
 
-                {/* Right Column: Class / Subject Teacher */}
-                <div className='space-y-1.5 sm:pl-8'>
-                  <div className='flex items-center gap-1 mb-1'>
+                {/* Grid 2 Kolom Pengesahan: Kiri (Kepala Sekolah) & Kanan (Guru) */}
+                <div className='grid grid-cols-2 gap-8'>
+                  {/* Left Column: Supervisor / Principal */}
+                  <div className='space-y-1.5'>
+                    <p className='font-bold text-slate-800 print:text-black'>
+                      Mengetahui,
+                    </p>
                     <Input
-                      value={signatureData.place}
+                      value={signatureData.supervisorTitle}
+                      placeholder='Kepala Sekolah'
                       onChange={(e) =>
-                        setSignatureData({
-                          ...signatureData,
-                          place: e.target.value,
+                        updateSignatureData({
+                          supervisorTitle: e.target.value,
                         })
                       }
-                      style={{
-                        width: `${Math.max((signatureData.place || '').length * 7.5 + 4, 60)}px`,
-                      }}
-                      className='text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 print:border-none'
+                      className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 w-full max-w-xs print:border-none print:p-0'
                     />
-                    <span>,</span>
-                    <Input
-                      value={signatureData.date}
-                      onChange={(e) =>
-                        setSignatureData({
-                          ...signatureData,
-                          date: e.target.value,
-                        })
-                      }
-                      style={{
-                        width: `${Math.max((signatureData.date || '').length * 7.5 + 4, 80)}px`,
-                      }}
-                      className='text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 print:border-none'
-                    />
+                    <div className='h-20' /> {/* Signature Space */}
+                    <div className='space-y-1'>
+                      <Input
+                        placeholder='Ketik nama kepsek...'
+                        value={signatureData.supervisorName}
+                        onChange={(e) =>
+                          updateSignatureData({
+                            supervisorName: e.target.value,
+                          })
+                        }
+                        className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 w-full max-w-xs print:border-none print:p-0'
+                      />
+                      <div className='flex items-center gap-1 text-[11px] text-slate-700 print:text-black'>
+                        <span>NIP/NUPTK.</span>
+                        <Input
+                          placeholder='Ketik NIP...'
+                          value={signatureData.supervisorNip}
+                          onChange={(e) =>
+                            updateSignatureData({
+                              supervisorNip: e.target.value,
+                            })
+                          }
+                          className='text-[11px] border-b border-slate-300 border-x-0 border-t-0 rounded-none h-5 px-0 focus:border-emerald-600 w-44 print:border-none print:p-0'
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <p className='font-bold text-slate-800 print:text-black'>
-                    Guru Kelas / Wali Kelas,
-                  </p>
-                  <div className='h-20' /> {/* Signature Blank Space */}
-                  <div>
-                    <p className='font-bold underline text-slate-900 print:text-black'>
-                      {headerForm.teacherName || 'Nama Guru'}
-                    </p>
-                    <p className='text-[11px] text-slate-700 print:text-black mt-0.5'>
-                      NIP/NUPTK. {headerForm.nip || '-'}
-                    </p>
+
+                  {/* Right Column: Class / Subject Teacher */}
+                  <div className='space-y-1.5 sm:pl-8'>
+                    <div className='h-5 select-none' aria-hidden='true' />{' '}
+                    {/* Penyeimbang vertikal setara teks 'Mengetahui,' */}
+                    <Input
+                      value={signatureData.teacherTitle}
+                      placeholder='Guru Kelas / Wali Kelas'
+                      onChange={(e) =>
+                        updateSignatureData({
+                          teacherTitle: e.target.value,
+                        })
+                      }
+                      className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 w-full max-w-xs print:border-none print:p-0'
+                    />
+                    <div className='h-20' /> {/* Signature Space */}
+                    <div className='space-y-1'>
+                      <Input
+                        value={
+                          signatureData.teacherName || headerForm.teacherName
+                        }
+                        placeholder='Nama Guru...'
+                        onChange={(e) => {
+                          updateSignatureData({
+                            teacherName: e.target.value,
+                          });
+                          setHeaderForm((prev) => ({
+                            ...prev,
+                            teacherName: e.target.value,
+                          }));
+                        }}
+                        className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 w-full max-w-xs print:border-none print:p-0'
+                      />
+                      <div className='flex items-center gap-1 text-[11px] text-slate-700 print:text-black'>
+                        <span>NIP/NUPTK.</span>
+                        <Input
+                          value={signatureData.teacherNip || headerForm.nip}
+                          placeholder='NIP/NUPTK...'
+                          onChange={(e) => {
+                            updateSignatureData({
+                              teacherNip: e.target.value,
+                            });
+                            setHeaderForm((prev) => ({
+                              ...prev,
+                              nip: e.target.value,
+                            }));
+                          }}
+                          className='text-[11px] border-b border-slate-300 border-x-0 border-t-0 rounded-none h-5 px-0 focus:border-emerald-600 w-44 print:border-none print:p-0'
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -843,80 +1167,80 @@ export default function JurnalClient() {
           {/* Overview Cards & Analytics Section (Print Hidden) */}
           <div className='space-y-4 print:hidden'>
             <div className='grid gap-4 sm:grid-cols-2 md:grid-cols-4'>
-              <Card className='bg-white border-slate-200/80 shadow-xs rounded-2xl'>
-                <CardHeader className='flex flex-row items-center justify-between pb-2'>
-                  <CardTitle className='text-xs font-bold text-slate-500 uppercase tracking-wider'>
+              <Card className='bg-white border-slate-200/80 shadow-xs rounded-2xl p-4 sm:p-5 py-3.5 sm:py-4'>
+                <div className='flex items-center justify-between'>
+                  <span className='text-xs font-bold text-slate-500 uppercase tracking-wider'>
                     Total Pertemuan
-                  </CardTitle>
+                  </span>
                   <div className='p-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700'>
                     <BookOpen className='h-4 w-4' />
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <div className='text-2xl font-bold tracking-tight text-slate-900 mb-1'>
+                </div>
+                <div className='mt-2'>
+                  <div className='text-2xl font-bold tracking-tight text-slate-900 leading-none'>
                     {totalEntries} Kali
                   </div>
-                  <p className='text-[10px] text-slate-500'>
+                  <p className='text-[10px] text-slate-500 mt-1'>
                     {thisMonthCount} pertemuan di bulan ini
                   </p>
-                </CardContent>
+                </div>
               </Card>
 
-              <Card className='bg-white border-slate-200/80 shadow-xs rounded-2xl'>
-                <CardHeader className='flex flex-row items-center justify-between pb-2'>
-                  <CardTitle className='text-xs font-bold text-slate-500 uppercase tracking-wider'>
+              <Card className='bg-white border-slate-200/80 shadow-xs rounded-2xl p-4 sm:p-5 py-3.5 sm:py-4'>
+                <div className='flex items-center justify-between'>
+                  <span className='text-xs font-bold text-slate-500 uppercase tracking-wider'>
                     Sakit (S)
-                  </CardTitle>
+                  </span>
                   <div className='p-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-700'>
                     <Activity className='h-4 w-4' />
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <div className='text-2xl font-bold tracking-tight text-slate-900 mb-1'>
+                </div>
+                <div className='mt-2'>
+                  <div className='text-2xl font-bold tracking-tight text-slate-900 leading-none'>
                     {totalS} Siswa
                   </div>
-                  <p className='text-[10px] text-slate-500'>
+                  <p className='text-[10px] text-slate-500 mt-1'>
                     Akumulasi siswa sakit
                   </p>
-                </CardContent>
+                </div>
               </Card>
 
-              <Card className='bg-white border-slate-200/80 shadow-xs rounded-2xl'>
-                <CardHeader className='flex flex-row items-center justify-between pb-2'>
-                  <CardTitle className='text-xs font-bold text-slate-500 uppercase tracking-wider'>
+              <Card className='bg-white border-slate-200/80 shadow-xs rounded-2xl p-4 sm:p-5 py-3.5 sm:py-4'>
+                <div className='flex items-center justify-between'>
+                  <span className='text-xs font-bold text-slate-500 uppercase tracking-wider'>
                     Izin (I)
-                  </CardTitle>
+                  </span>
                   <div className='p-2 rounded-xl bg-blue-50 border border-blue-200 text-blue-700'>
                     <UserCheck className='h-4 w-4' />
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <div className='text-2xl font-bold tracking-tight text-slate-900 mb-1'>
+                </div>
+                <div className='mt-2'>
+                  <div className='text-2xl font-bold tracking-tight text-slate-900 leading-none'>
                     {totalI} Siswa
                   </div>
-                  <p className='text-[10px] text-slate-500'>
+                  <p className='text-[10px] text-slate-500 mt-1'>
                     Akumulasi siswa izin
                   </p>
-                </CardContent>
+                </div>
               </Card>
 
-              <Card className='bg-white border-slate-200/80 shadow-xs rounded-2xl'>
-                <CardHeader className='flex flex-row items-center justify-between pb-2'>
-                  <CardTitle className='text-xs font-bold text-slate-500 uppercase tracking-wider'>
+              <Card className='bg-white border-slate-200/80 shadow-xs rounded-2xl p-4 sm:p-5 py-3.5 sm:py-4'>
+                <div className='flex items-center justify-between'>
+                  <span className='text-xs font-bold text-slate-500 uppercase tracking-wider'>
                     Tanpa Keterangan (A)
-                  </CardTitle>
+                  </span>
                   <div className='p-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-700'>
                     <FileText className='h-4 w-4' />
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <div className='text-2xl font-bold tracking-tight text-slate-900 mb-1'>
+                </div>
+                <div className='mt-2'>
+                  <div className='text-2xl font-bold tracking-tight text-slate-900 leading-none'>
                     {totalA} Siswa
                   </div>
-                  <p className='text-[10px] text-slate-500'>
+                  <p className='text-[10px] text-slate-500 mt-1'>
                     Total tanpa keterangan
                   </p>
-                </CardContent>
+                </div>
               </Card>
             </div>
           </div>
@@ -1471,170 +1795,551 @@ export default function JurnalClient() {
         </DialogContent>
       </Dialog>
 
-      {/* Modal Dialog: Settings Header Info */}
+      {/* Modal Dialog: Kustomisasi Kop Surat & Tanda Tangan */}
       <Dialog open={headerModalOpen} onOpenChange={setHeaderModalOpen}>
-        <DialogContent className='bg-white border border-slate-200 text-slate-900 rounded-2xl w-[calc(100%-2.5rem)] sm:w-full max-w-lg p-4 sm:p-6 shadow-2xl'>
+        <DialogContent className='bg-white border border-slate-200 text-slate-900 rounded-2xl w-[calc(100vw-1.5rem)] max-w-[calc(100vw-1.5rem)] sm:w-full sm:max-w-4xl lg:max-w-5xl p-0 overflow-hidden shadow-2xl max-h-[90vh] flex flex-col'>
           <form
             onSubmit={(e) => {
               e.preventDefault();
               saveHeaderMutation.mutate(headerForm);
+              updateDocHeader(docHeader);
+              updateSignatureData(signatureData);
             }}
+            className='flex flex-col h-full max-h-[90vh]'
           >
-            <DialogHeader className='pb-4 border-b border-slate-200'>
-              <DialogTitle className='text-lg font-bold text-slate-900 flex items-center gap-2'>
-                <Settings2 className='h-5 w-5 text-emerald-600' />
-                Pengaturan Header Informasi Jurnal
+            <DialogHeader className='p-5 sm:px-7 sm:py-5 border-b border-slate-200 shrink-0 bg-slate-50/70'>
+              <DialogTitle className='text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2.5'>
+                <div>
+                  <div>Kustomisasi Kop Surat & Tanda Tangan</div>
+                  <DialogDescription className='text-xs text-slate-500 font-normal mt-0.5'>
+                    Konfigurasi format kop dinas, logo instansi, metadata
+                    jurnal, dan identitas pengesahan laporan.
+                  </DialogDescription>
+                </div>
               </DialogTitle>
-              <DialogDescription className='text-xs text-slate-500'>
-                Sesuaikan metadata identitas jurnal harian guru untuk keperluan
-                laporan dan cetak.
-              </DialogDescription>
             </DialogHeader>
 
-            <div className='space-y-3.5 py-4 text-xs'>
-              <div className='space-y-1'>
-                <Label className='text-slate-700 text-xs font-semibold'>
-                  Nama Sekolah
-                </Label>
-                <Input
-                  required
-                  placeholder='Contoh: SMK 17 Seyegan'
-                  value={headerForm.schoolName}
-                  onChange={(e) =>
-                    setHeaderForm({ ...headerForm, schoolName: e.target.value })
+            <div className='p-5 sm:p-7 pb-8 overflow-y-auto space-y-6 text-xs flex-1'>
+              {/* Switch / Toggle: Gunakan Kop Resmi */}
+              <div className='flex items-center justify-between p-3.5 rounded-xl bg-emerald-50/50 border border-emerald-200/60'>
+                <div className='space-y-0.5'>
+                  <div className='font-bold text-slate-900 text-sm flex items-center gap-2'>
+                    Format Kop Surat Dinas
+                    <span className='px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800'>
+                      {docHeader.useOfficialKop ? 'Aktif (Resmi)' : 'Standar'}
+                    </span>
+                  </div>
+                  <p className='text-[11px] text-slate-500'>
+                    Tampilkan logo sekolah di sisi kiri, 6 baris identitas
+                    serif, dan garis ganda kop surat dinas.
+                  </p>
+                </div>
+                <Button
+                  type='button'
+                  size='sm'
+                  variant={docHeader.useOfficialKop ? 'default' : 'outline'}
+                  onClick={() =>
+                    updateDocHeader({
+                      useOfficialKop: !docHeader.useOfficialKop,
+                    })
                   }
-                  className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-9'
-                />
+                  className={`rounded-xl text-xs font-semibold h-8 px-3 transition-all cursor-pointer ${
+                    docHeader.useOfficialKop
+                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                      : 'border-slate-300 text-slate-700 hover:bg-slate-100'
+                  }`}
+                >
+                  {docHeader.useOfficialKop
+                    ? 'Gunakan Format Standar'
+                    : 'Aktifkan Kop Resmi'}
+                </Button>
               </div>
 
-              <div className='grid grid-cols-2 gap-3'>
-                <div className='space-y-1'>
-                  <Label className='text-slate-700 text-xs font-semibold'>
-                    Mata Pelajaran
-                  </Label>
-                  <Input
-                    required
-                    placeholder='Contoh: Sistem Operasi'
-                    value={headerForm.subject}
-                    onChange={(e) =>
-                      setHeaderForm({ ...headerForm, subject: e.target.value })
-                    }
-                    className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-9'
-                  />
+              {/* Section Kop Surat Resmi (Jika diaktifkan) */}
+              {docHeader.useOfficialKop && (
+                <div className='space-y-4 rounded-xl border border-slate-200 bg-slate-50/30 p-4'>
+                  <div className='flex items-center justify-between pb-2 border-b border-slate-200/80'>
+                    <h5 className='font-bold text-slate-800 flex items-center gap-1.5 uppercase tracking-wider text-[11px]'>
+                      <ImageIcon className='h-3.5 w-3.5 text-emerald-600' />
+                      Logo Lembaga / Sekolah
+                    </h5>
+                    <div className='flex items-center gap-2'>
+                      <label
+                        htmlFor='modal-logo-file-input-jurnal'
+                        className='cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-xs font-semibold transition-colors'
+                      >
+                        <Upload className='h-3 w-3' />
+                        Upload Logo Baru
+                      </label>
+                      <input
+                        id='modal-logo-file-input-jurnal'
+                        type='file'
+                        accept='image/*'
+                        onChange={handleLogoUpload}
+                        className='hidden'
+                      />
+                      <Button
+                        type='button'
+                        variant='ghost'
+                        size='sm'
+                        onClick={handleResetLogo}
+                        className='h-7 px-2 text-slate-500 hover:text-slate-700 text-xs gap-1 cursor-pointer'
+                        title='Kembalikan ke logo default'
+                      >
+                        <RotateCcw className='h-3 w-3' />
+                        Reset
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Preset Template Selector */}
+                  <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3 bg-slate-50 border border-slate-200 rounded-xl'>
+                    <div>
+                      <p className='text-xs font-bold text-slate-800'>
+                        Pilihan Template Format Kop
+                      </p>
+                      <p className='text-[11px] text-slate-500'>
+                        Terapkan format standar sekolah atau gunakan format
+                        khusus.
+                      </p>
+                    </div>
+                    <div className='flex items-center gap-2'>
+                      <Button
+                        type='button'
+                        variant='outline'
+                        size='sm'
+                        onClick={() => {
+                          updateDocHeader({
+                            logoUrl: '/icon.svg',
+                            schoolName:
+                              profile?.schoolName ||
+                              headerForm.schoolName ||
+                              'NAMA SEKOLAH',
+                            subHeader1: '',
+                            subHeader2: '',
+                            subHeader3: '',
+                            addressLine: '',
+                            cityRegency: '',
+                          });
+                          toast.success(
+                            'Format kop di-reset ke format standar sekolah.',
+                          );
+                        }}
+                        className='text-[11px] h-7 px-2.5 rounded-lg border-slate-200 hover:bg-slate-100 text-slate-700 cursor-pointer'
+                      >
+                        Format Standar
+                      </Button>
+                      <Button
+                        type='button'
+                        variant='outline'
+                        size='sm'
+                        onClick={() => {
+                          updateDocHeader({
+                            ...SLB_PURNAMA_ASIH_KOP,
+                          });
+                          toast.success(
+                            'Template resmi SLB Purnama Asih berhasil dimuat.',
+                          );
+                        }}
+                        className='text-[11px] h-7 px-2.5 rounded-lg border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-semibold cursor-pointer'
+                      >
+                        Template SLB Purnama Asih
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Logo Preview & Tip */}
+                  <div className='flex items-center gap-3 bg-white p-2.5 rounded-lg border border-slate-200'>
+                    <div className='w-14 h-14 shrink-0 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-center p-1 overflow-hidden shadow-xs'>
+                      <img
+                        src={docHeader.logoUrl || '/icon.svg'}
+                        alt='Preview Logo'
+                        className='max-w-full max-h-full object-contain'
+                      />
+                    </div>
+                    <div className='text-[11px] text-slate-600 leading-tight'>
+                      <p className='font-semibold text-slate-800'>
+                        Logo Kop Laporan
+                      </p>
+                      <p className='text-slate-500 mt-0.5'>
+                        Format JPG/PNG/WebP/SVG, disarankan logo transparan atau
+                        latar putih bundar.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* 6 Baris Teks Kop Dinas */}
+                  <div className='space-y-3 pt-1'>
+                    <div className='space-y-1'>
+                      <Label className='text-slate-700 font-semibold flex items-center justify-between'>
+                        <span>Baris 1 (Nama Yayasan / Lembaga)</span>
+                        <span className='text-[10px] text-slate-400 font-normal'>
+                          Font Besar / Tebal
+                        </span>
+                      </Label>
+                      <Input
+                        value={docHeader.schoolName}
+                        onChange={(e) =>
+                          updateDocHeader({ schoolName: e.target.value })
+                        }
+                        placeholder='Contoh: DINAS PENDIDIKAN PROVINSI / NAMA YAYASAN'
+                        className='bg-white border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9 text-xs'
+                      />
+                    </div>
+
+                    <div className='space-y-1'>
+                      <Label className='text-slate-700 font-semibold flex items-center justify-between'>
+                        <span>Baris 2 (Satuan Pendidikan)</span>
+                        <span className='text-[10px] text-slate-400 font-normal'>
+                          Font Tebal
+                        </span>
+                      </Label>
+                      <Input
+                        value={docHeader.subHeader1}
+                        onChange={(e) =>
+                          updateDocHeader({ subHeader1: e.target.value })
+                        }
+                        placeholder='Contoh: SEKOLAH MENENGAH PERTAMA / NAMA SEKOLAH'
+                        className='bg-white border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9 text-xs'
+                      />
+                    </div>
+
+                    <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+                      <div className='space-y-1'>
+                        <Label className='text-slate-700 font-semibold'>
+                          Baris 3 (Izin Operasional / NPSN)
+                        </Label>
+                        <Input
+                          value={docHeader.subHeader2}
+                          onChange={(e) =>
+                            updateDocHeader({ subHeader2: e.target.value })
+                          }
+                          placeholder='Contoh: NPSN: 12345678 / Izin Kanwil'
+                          className='bg-white border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9 text-xs'
+                        />
+                      </div>
+                      <div className='space-y-1'>
+                        <Label className='text-slate-700 font-semibold'>
+                          Baris 4 (Nomor Registrasi / Akreditasi)
+                        </Label>
+                        <Input
+                          value={docHeader.subHeader3}
+                          onChange={(e) =>
+                            updateDocHeader({ subHeader3: e.target.value })
+                          }
+                          placeholder='Contoh: Akreditasi A (Unggul)'
+                          className='bg-white border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9 text-xs'
+                        />
+                      </div>
+                    </div>
+
+                    <div className='space-y-1'>
+                      <Label className='text-slate-700 font-semibold'>
+                        Baris 5 (Alamat & Kontak)
+                      </Label>
+                      <Input
+                        value={docHeader.addressLine}
+                        onChange={(e) =>
+                          updateDocHeader({ addressLine: e.target.value })
+                        }
+                        placeholder='Contoh: Jl. Merdeka No. 45 Telp. (022) 123456'
+                        className='bg-white border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9 text-xs'
+                      />
+                    </div>
+
+                    <div className='space-y-1'>
+                      <Label className='text-slate-700 font-semibold flex items-center justify-between'>
+                        <span>Baris 6 (Kabupaten / Kota)</span>
+                        <span className='text-[10px] text-slate-400 font-normal'>
+                          Huruf Kapital Tebal
+                        </span>
+                      </Label>
+                      <Input
+                        value={docHeader.cityRegency}
+                        onChange={(e) =>
+                          updateDocHeader({ cityRegency: e.target.value })
+                        }
+                        placeholder='Contoh: KABUPATEN BANDUNG'
+                        className='bg-white border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9 text-xs font-semibold'
+                      />
+                    </div>
+                  </div>
                 </div>
+              )}
+
+              {/* Section: Identitas & Metadata Dokumen Jurnal */}
+              <div className='space-y-3 rounded-xl border border-slate-200 bg-slate-50/50 p-4'>
+                <h5 className='font-bold text-slate-800 flex items-center gap-1.5 uppercase tracking-wider text-[11px] pb-1 border-b border-slate-200/80'>
+                  <BookOpen className='h-3.5 w-3.5 text-emerald-600' />
+                  Metadata Dokumen Jurnal
+                </h5>
 
                 <div className='space-y-1'>
-                  <Label className='text-slate-700 text-xs font-semibold'>
-                    Kelas / Semester
+                  <Label className='text-slate-700 font-semibold'>
+                    Nama Sekolah
                   </Label>
                   <Input
                     required
-                    placeholder='Contoh: XTKJ/Genap'
-                    value={headerForm.classNameSemester}
+                    placeholder='Nama Sekolah'
+                    value={headerForm.schoolName}
                     onChange={(e) =>
                       setHeaderForm({
                         ...headerForm,
-                        classNameSemester: e.target.value,
+                        schoolName: e.target.value,
                       })
                     }
-                    className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-9'
+                    className='bg-white border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-9'
                   />
+                </div>
+
+                <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+                  <div className='space-y-1'>
+                    <Label className='text-slate-700 font-semibold'>
+                      Mata Pelajaran
+                    </Label>
+                    <Input
+                      required
+                      placeholder='Contoh: Matematika'
+                      value={headerForm.subject}
+                      onChange={(e) =>
+                        setHeaderForm({
+                          ...headerForm,
+                          subject: e.target.value,
+                        })
+                      }
+                      className='bg-white border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-9'
+                    />
+                  </div>
+
+                  <div className='space-y-1'>
+                    <Label className='text-slate-700 font-semibold'>
+                      Kelas / Semester
+                    </Label>
+                    <Input
+                      required
+                      placeholder='Contoh: Kelas 7A / Ganjil'
+                      value={headerForm.classNameSemester}
+                      onChange={(e) =>
+                        setHeaderForm({
+                          ...headerForm,
+                          classNameSemester: e.target.value,
+                        })
+                      }
+                      className='bg-white border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-9'
+                    />
+                  </div>
+                </div>
+
+                <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+                  <div className='space-y-1'>
+                    <Label className='text-slate-700 font-semibold'>
+                      Tahun Pelajaran
+                    </Label>
+                    <Input
+                      required
+                      placeholder='Contoh: 2026/2027'
+                      value={headerForm.academicYear}
+                      onChange={(e) =>
+                        setHeaderForm({
+                          ...headerForm,
+                          academicYear: e.target.value,
+                        })
+                      }
+                      className='bg-white border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-9'
+                    />
+                  </div>
+
+                  <div className='space-y-1'>
+                    <Label className='text-slate-700 font-semibold'>
+                      Kurikulum
+                    </Label>
+                    <Input
+                      required
+                      placeholder='Contoh: Kurikulum Merdeka'
+                      value={headerForm.curriculum}
+                      onChange={(e) =>
+                        setHeaderForm({
+                          ...headerForm,
+                          curriculum: e.target.value,
+                        })
+                      }
+                      className='bg-white border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-9'
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className='grid grid-cols-2 gap-3'>
-                <div className='space-y-1'>
-                  <Label className='text-slate-700 text-xs font-semibold'>
-                    Tahun Pelajaran
-                  </Label>
-                  <Input
-                    required
-                    placeholder='Contoh: 2022/2023'
-                    value={headerForm.academicYear}
-                    onChange={(e) =>
-                      setHeaderForm({
-                        ...headerForm,
-                        academicYear: e.target.value,
-                      })
-                    }
-                    className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-9'
-                  />
+              {/* Section: Pengesahan & Tanda Tangan */}
+              <div className='space-y-3 rounded-xl border border-slate-200 bg-slate-50/50 p-4'>
+                <h5 className='font-bold text-slate-800 flex items-center gap-1.5 uppercase tracking-wider text-[11px] pb-1 border-b border-slate-200/80'>
+                  <UserCheck className='h-3.5 w-3.5 text-emerald-600' />
+                  Identitas Pengesahan & Tanda Tangan
+                </h5>
+
+                <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+                  <div className='space-y-1'>
+                    <Label className='text-slate-700 font-semibold'>
+                      Tempat Pengesahan
+                    </Label>
+                    <Input
+                      value={signatureData.place}
+                      onChange={(e) =>
+                        updateSignatureData({ place: e.target.value })
+                      }
+                      placeholder='Contoh: Bandung'
+                      className='bg-white border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-9'
+                    />
+                  </div>
+                  <div className='space-y-1'>
+                    <Label className='text-slate-700 font-semibold'>
+                      Tanggal Pengesahan
+                    </Label>
+                    <Input
+                      value={signatureData.date}
+                      onChange={(e) =>
+                        updateSignatureData({ date: e.target.value })
+                      }
+                      placeholder='Contoh: 10 September 2026'
+                      className='bg-white border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-9'
+                    />
+                  </div>
                 </div>
 
-                <div className='space-y-1'>
-                  <Label className='text-slate-700 text-xs font-semibold'>
-                    Kurikulum
-                  </Label>
-                  <Input
-                    required
-                    placeholder='Contoh: 2013 / Merdeka'
-                    value={headerForm.curriculum}
-                    onChange={(e) =>
-                      setHeaderForm({
-                        ...headerForm,
-                        curriculum: e.target.value,
-                      })
-                    }
-                    className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-9'
-                  />
-                </div>
-              </div>
+                <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1'>
+                  {/* Supervisor / Kepala Sekolah */}
+                  <div className='space-y-2 p-3 bg-white border border-slate-200 rounded-xl'>
+                    <p className='font-bold text-slate-800 text-[11px]'>
+                      Pihak Mengetahui (Kiri)
+                    </p>
+                    <div className='space-y-1'>
+                      <Label className='text-slate-600 text-[11px]'>
+                        Jabatan
+                      </Label>
+                      <Input
+                        value={signatureData.supervisorTitle}
+                        onChange={(e) =>
+                          updateSignatureData({
+                            supervisorTitle: e.target.value,
+                          })
+                        }
+                        placeholder='Kepala Sekolah'
+                        className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-lg text-xs h-8'
+                      />
+                    </div>
+                    <div className='space-y-1'>
+                      <Label className='text-slate-600 text-[11px]'>
+                        Nama Kepala Sekolah
+                      </Label>
+                      <Input
+                        value={signatureData.supervisorName}
+                        onChange={(e) =>
+                          updateSignatureData({
+                            supervisorName: e.target.value,
+                          })
+                        }
+                        placeholder='Nama lengkap & gelar'
+                        className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-lg text-xs h-8'
+                      />
+                    </div>
+                    <div className='space-y-1'>
+                      <Label className='text-slate-600 text-[11px]'>
+                        NIP/NUPTK
+                      </Label>
+                      <Input
+                        value={signatureData.supervisorNip}
+                        onChange={(e) =>
+                          updateSignatureData({ supervisorNip: e.target.value })
+                        }
+                        placeholder='NIP/NUPTK'
+                        className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-lg text-xs h-8'
+                      />
+                    </div>
+                  </div>
 
-              <div className='grid grid-cols-2 gap-3'>
-                <div className='space-y-1'>
-                  <Label className='text-slate-700 text-xs font-semibold'>
-                    Nama Guru
-                  </Label>
-                  <Input
-                    required
-                    placeholder='Nama lengkap guru'
-                    value={headerForm.teacherName}
-                    onChange={(e) =>
-                      setHeaderForm({
-                        ...headerForm,
-                        teacherName: e.target.value,
-                      })
-                    }
-                    className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-9'
-                  />
-                </div>
-
-                <div className='space-y-1'>
-                  <Label className='text-slate-700 text-xs font-semibold'>
-                    NIP/NUPTK
-                  </Label>
-                  <Input
-                    placeholder='-'
-                    value={headerForm.nip}
-                    onChange={(e) =>
-                      setHeaderForm({ ...headerForm, nip: e.target.value })
-                    }
-                    className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl text-xs h-9'
-                  />
+                  {/* Guru */}
+                  <div className='space-y-2 p-3 bg-white border border-slate-200 rounded-xl'>
+                    <p className='font-bold text-slate-800 text-[11px]'>
+                      Pihak Pembuat (Kanan)
+                    </p>
+                    <div className='space-y-1'>
+                      <Label className='text-slate-600 text-[11px]'>
+                        Jabatan
+                      </Label>
+                      <Input
+                        value={signatureData.teacherTitle}
+                        onChange={(e) =>
+                          updateSignatureData({ teacherTitle: e.target.value })
+                        }
+                        placeholder='Guru Kelas / Wali Kelas'
+                        className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-lg text-xs h-8'
+                      />
+                    </div>
+                    <div className='space-y-1'>
+                      <Label className='text-slate-600 text-[11px]'>
+                        Nama Guru
+                      </Label>
+                      <Input
+                        value={
+                          signatureData.teacherName || headerForm.teacherName
+                        }
+                        onChange={(e) => {
+                          updateSignatureData({ teacherName: e.target.value });
+                          setHeaderForm((prev) => ({
+                            ...prev,
+                            teacherName: e.target.value,
+                          }));
+                        }}
+                        placeholder='Nama lengkap & gelar'
+                        className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-lg text-xs h-8'
+                      />
+                    </div>
+                    <div className='space-y-1'>
+                      <Label className='text-slate-600 text-[11px]'>
+                        NIP/NUPTK
+                      </Label>
+                      <Input
+                        value={signatureData.teacherNip || headerForm.nip}
+                        onChange={(e) => {
+                          updateSignatureData({ teacherNip: e.target.value });
+                          setHeaderForm((prev) => ({
+                            ...prev,
+                            nip: e.target.value,
+                          }));
+                        }}
+                        placeholder='NIP/NUPTK'
+                        className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-lg text-xs h-8'
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <DialogFooter className='pt-3 border-t border-slate-200 gap-2 sm:gap-0'>
-              <Button
-                type='button'
-                variant='ghost'
-                onClick={() => setHeaderModalOpen(false)}
-                className='text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 text-xs'
-              >
-                Batal
-              </Button>
-              <Button
-                type='submit'
-                disabled={saveHeaderMutation.isPending}
-                className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl px-5 gap-2 shadow-xs'
-              >
-                {saveHeaderMutation.isPending ? (
-                  <Loader2 className='h-4 w-4 animate-spin' />
-                ) : (
-                  'Simpan Header'
-                )}
-              </Button>
+            <DialogFooter className='p-4 sm:px-7 sm:py-4 border-t border-slate-200 gap-3 shrink-0 bg-slate-50 flex flex-row items-center justify-between'>
+              <span className='text-xs text-slate-500 font-medium hidden sm:inline'>
+                Perubahan tersimpan otomatis di browser & profil jurnal
+              </span>
+              <div className='flex items-center gap-2 ml-auto'>
+                <Button
+                  type='button'
+                  variant='ghost'
+                  onClick={() => setHeaderModalOpen(false)}
+                  className='text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 text-xs rounded-xl h-9 px-4 cursor-pointer'
+                >
+                  Batal
+                </Button>
+                <Button
+                  type='submit'
+                  disabled={saveHeaderMutation.isPending}
+                  className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl px-5 h-9 gap-2 shadow-xs cursor-pointer'
+                >
+                  {saveHeaderMutation.isPending ? (
+                    <Loader2 className='h-4 w-4 animate-spin' />
+                  ) : (
+                    'Simpan Pengaturan'
+                  )}
+                </Button>
+              </div>
             </DialogFooter>
           </form>
         </DialogContent>

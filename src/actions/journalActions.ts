@@ -45,14 +45,16 @@ export async function getJournalHeader() {
           ? header.nip.trim()
           : '-';
 
+    const activeClass = teacher?.activeClass || teacher?.className || '';
+
     if (!header) {
       // Default fallback header based on teacher info
       return {
-        schoolName: teacher?.schoolName || 'SMK 17 Seyegan',
-        subject: 'Sistem Operasi',
-        classNameSemester: teacher?.className ? `${teacher.className}/Genap` : 'XTKJ/Genap',
-        academicYear: '2022/2023',
-        curriculum: '2013',
+        schoolName: teacher?.schoolName || '',
+        subject: 'Mata Pelajaran',
+        classNameSemester: activeClass ? `Kelas ${activeClass} / Ganjil` : '',
+        academicYear: '2026/2027',
+        curriculum: 'Kurikulum Merdeka',
         teacherName: teacher?.name || '',
         nip: validNip,
         principalName: teacher?.principalName || '',
@@ -66,6 +68,9 @@ export async function getJournalHeader() {
     result.principalNip = teacher?.principalNip || result.supervisorNip || '-';
     if (teacher?.name) result.teacherName = teacher.name;
     if (teacher?.schoolName) result.schoolName = teacher.schoolName;
+    if ((!result.classNameSemester || result.classNameSemester.includes('XTKJ')) && activeClass) {
+      result.classNameSemester = `Kelas ${activeClass} / Ganjil`;
+    }
 
     return result;
   } catch (error: any) {
