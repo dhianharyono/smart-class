@@ -16,13 +16,12 @@ export const metadata: Metadata = {
     template: '%s | Smart Class',
   },
   description:
-    'Aplikasi produktivitas dan pengelolaan kelas terpadu untuk wali kelas: absensi siswa, jurnal harian guru, rekap nilai, dan buku tabungan kelas.',
+    'Aplikasi produktivitas dan pengelolaan kelas terpadu untuk wali kelas: absensi siswa, jurnal harian guru, dan rekap nilai.',
   keywords: [
     'Smart Class',
     'Dashboard Wali Kelas',
     'Jurnal Guru Harian',
     'Absensi Siswa Online',
-    'Tabungan Kelas',
     'Rekap Nilai Siswa',
     'Aplikasi Sekolah',
     'Manajemen Kelas',
@@ -50,7 +49,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Smart Class - Dashboard Wali Kelas',
     description:
-      'Aplikasi produktivitas dan pengelolaan kelas terpadu untuk wali kelas: absensi siswa, jurnal harian guru, rekap nilai, dan buku tabungan kelas.',
+      'Aplikasi produktivitas dan pengelolaan kelas terpadu untuk wali kelas: absensi siswa, jurnal harian guru, dan rekap nilai.',
     url: '/',
     siteName: 'Smart Class',
     locale: 'id_ID',
@@ -68,7 +67,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Smart Class - Dashboard Wali Kelas',
     description:
-      'Aplikasi produktivitas dan pengelolaan kelas terpadu untuk wali kelas: absensi siswa, jurnal harian guru, rekap nilai, dan buku tabungan kelas.',
+      'Aplikasi produktivitas dan pengelolaan kelas terpadu untuk wali kelas: absensi siswa, jurnal harian guru, dan rekap nilai.',
     images: ['/og-image.png'],
   },
   icons: {

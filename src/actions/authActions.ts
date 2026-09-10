@@ -188,7 +188,6 @@ export async function registerTeacher(rawData: {
         '/siswa',
         '/absensi',
         '/nilai',
-        '/tabungan',
         '/jurnal',
       ],
     });

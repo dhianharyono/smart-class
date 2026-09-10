@@ -610,7 +610,6 @@ export default function ManageTeachersClient({
                   <li>Semua data Siswa di kelas tersebut</li>
                   <li>Semua histori Absensi Kelas</li>
                   <li>Semua rekam Nilai Akademik</li>
-                  <li>Semua riwayat Tabungan Siswa</li>
                 </ul>
               </div>
             </div>

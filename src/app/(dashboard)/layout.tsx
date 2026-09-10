@@ -59,7 +59,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           const base =
             teacher.enabledMenus && teacher.enabledMenus.length > 0
               ? (teacher.enabledMenus as string[])
-              : ['/dashboard', '/kelas', '/siswa', '/absensi', '/nilai', '/tabungan', '/jadwal', '/piket', '/jurnal', '/profile', '/settings'];
+              : ['/dashboard', '/kelas', '/jadwal-mengajar', '/siswa', '/absensi', '/nilai', '/jurnal', '/profile', '/settings'];
           return base.includes('/kelas') ? base : [...base, '/kelas'];
         })(),
       }}

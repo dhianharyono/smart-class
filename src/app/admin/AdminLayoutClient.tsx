@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   LogOut,
   User,
+  Home,
   MessageSquareText,
   ChevronDown,
   Lock,
@@ -323,6 +324,14 @@ export default function AdminLayoutClient({
                 <User className='h-4 w-4 text-slate-400' />
                 <span>Profil Admin</span>
               </button>
+              <Link
+                href='/'
+                onClick={() => setIsProfileDropdownOpen(false)}
+                className='w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition-colors cursor-pointer text-left'
+              >
+                <Home className='h-4 w-4 text-slate-400' />
+                <span>Halaman Utama</span>
+              </Link>
             </div>
 
             <div className='pt-1.5'>

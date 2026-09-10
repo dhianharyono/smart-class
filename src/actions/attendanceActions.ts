@@ -48,9 +48,22 @@ export async function getAttendanceHeaderInfo() {
 
     const activeClass = teacher?.activeClass || teacher?.className || journalHeader?.classNameSemester || 'Kelas Utama';
 
+    let classesList: string[] = [];
+    if (Array.isArray(teacher?.classes) && teacher.classes.length > 0) {
+      classesList = Array.from(new Set(teacher.classes.filter(Boolean)));
+    }
+    if (classesList.length === 0) {
+      const distinctClasses = await Student.distinct('className', { teacherId });
+      classesList = distinctClasses.filter(Boolean);
+    }
+    if (classesList.length === 0 && activeClass) {
+      classesList = [activeClass];
+    }
+
     return {
       schoolName: teacher?.schoolName || journalHeader?.schoolName || 'SMK Negeri 1',
       className: activeClass,
+      classes: classesList,
       teacherName: teacher?.name || journalHeader?.teacherName || '',
       nip: validNip,
       principalName: teacher?.principalName || '',
@@ -64,6 +77,7 @@ export async function getAttendanceHeaderInfo() {
     return {
       schoolName: 'SMK Negeri 1',
       className: 'Kelas Utama',
+      classes: [],
       teacherName: 'Guru Kelas',
       nip: '-',
       academicYear: `${new Date().getFullYear()}/${new Date().getFullYear() + 1}`,
@@ -216,6 +230,163 @@ export async function getWeeklyAttendanceReport(startDateStr: string, endDateStr
   }
 }
 
+export async function getAllClassesWeeklyAttendanceReport(startDateStr: string, endDateStr: string) {
+  try {
+    await dbConnect();
+    const teacherId = await requireAuth();
+    const teacher = await Teacher.findById(teacherId).lean();
+
+    let classesList: string[] = [];
+    if (Array.isArray(teacher?.classes) && teacher.classes.length > 0) {
+      classesList = Array.from(new Set(teacher.classes.filter(Boolean)));
+    }
+    if (classesList.length === 0) {
+      const distinctClasses = await Student.distinct('className', { teacherId });
+      classesList = distinctClasses.filter(Boolean);
+    }
+    if (classesList.length === 0 && (teacher?.activeClass || teacher?.className)) {
+      classesList = [teacher.activeClass || teacher.className || 'Kelas Utama'];
+    }
+
+    const startDate = parseLocalDate(startDateStr);
+    const [endY, endM, endD] = endDateStr.split('-').map(Number);
+    const endDate = new Date(Date.UTC(endY, endM - 1, endD, 23, 59, 59, 999));
+
+    const allStudents = await Student.find({ teacherId }).sort({ name: 1 }).lean();
+    const attendanceRecords = await Attendance.find({
+      teacherId,
+      date: { $gte: startDate, $lte: endDate },
+    }).lean();
+
+    const datesList: string[] = [];
+    const curr = new Date(startDate);
+    while (curr <= endDate) {
+      const year = curr.getUTCFullYear();
+      const month = String(curr.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(curr.getUTCDate()).padStart(2, '0');
+      datesList.push(`${year}-${month}-${day}`);
+      curr.setUTCDate(curr.getUTCDate() + 1);
+    }
+
+    const studentDateMap: Record<string, Record<string, string>> = {};
+    attendanceRecords.forEach((rec) => {
+      const sId = rec.studentId.toString();
+      const recDate = new Date(rec.date);
+      const year = recDate.getUTCFullYear();
+      const month = String(recDate.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(recDate.getUTCDate()).padStart(2, '0');
+      const dStr = `${year}-${month}-${day}`;
+      if (!studentDateMap[sId]) {
+        studentDateMap[sId] = {};
+      }
+      studentDateMap[sId][dStr] = rec.status;
+    });
+
+    const studentsByClass: Record<string, typeof allStudents> = {};
+    classesList.forEach((cls) => {
+      studentsByClass[cls] = [];
+    });
+
+    allStudents.forEach((student) => {
+      const cls = student.className || 'Tanpa Kelas';
+      if (!studentsByClass[cls]) {
+        studentsByClass[cls] = [];
+        if (!classesList.includes(cls)) {
+          classesList.push(cls);
+        }
+      }
+      studentsByClass[cls].push(student);
+    });
+
+    const classesReport = classesList.map((className) => {
+      const classStudents = studentsByClass[className] || [];
+      let totalClassHadir = 0;
+      let totalClassSakit = 0;
+      let totalClassIzin = 0;
+      let totalClassAlfa = 0;
+
+      const studentsReport = classStudents.map((student) => {
+        const sId = student._id.toString();
+        const dateMap = studentDateMap[sId] || {};
+
+        let hadir = 0;
+        let sakit = 0;
+        let izin = 0;
+        let alfa = 0;
+
+        Object.values(dateMap).forEach((st) => {
+          if (st === 'Hadir') hadir++;
+          else if (st === 'Sakit') sakit++;
+          else if (st === 'Izin') izin++;
+          else if (st === 'Alfa') alfa++;
+        });
+
+        totalClassHadir += hadir;
+        totalClassSakit += sakit;
+        totalClassIzin += izin;
+        totalClassAlfa += alfa;
+
+        const totalRecorded = hadir + sakit + izin + alfa;
+        const percentage = totalRecorded > 0 ? Math.round((hadir / totalRecorded) * 100) : 0;
+
+        return {
+          studentId: sId,
+          nis: student.nis,
+          name: student.name,
+          className: student.className || className,
+          gender: student.gender,
+          dailyMap: dateMap,
+          hadir,
+          sakit,
+          izin,
+          alfa,
+          totalRecorded,
+          percentage,
+        };
+      });
+
+      const totalClassRecorded = totalClassHadir + totalClassSakit + totalClassIzin + totalClassAlfa;
+      const classAvgPercentage =
+        studentsReport.length > 0
+          ? Math.round(
+              studentsReport.reduce((acc, curr) => acc + curr.percentage, 0) /
+                studentsReport.length
+            )
+          : 0;
+
+      return {
+        className,
+        totalStudents: studentsReport.length,
+        studentsReport,
+        stats: {
+          hadir: totalClassHadir,
+          sakit: totalClassSakit,
+          izin: totalClassIzin,
+          alfa: totalClassAlfa,
+          totalRecorded: totalClassRecorded,
+          avgPercentage: classAvgPercentage,
+        },
+      };
+    });
+
+    return JSON.parse(
+      JSON.stringify({
+        startDateStr,
+        endDateStr,
+        datesList,
+        classesList,
+        classesReport,
+      })
+    );
+  } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+    console.error('Error fetching all classes weekly attendance report:', error);
+    throw new Error(error.message || 'Gagal memuat rekap absensi mingguan semua kelas.');
+  }
+}
+
 export async function getMonthlyAttendanceReport(year: number, month: number) {
   try {
     await dbConnect();
@@ -299,6 +470,150 @@ export async function getMonthlyAttendanceReport(year: number, month: number) {
     }
     console.error('Error fetching monthly attendance report:', error);
     throw new Error(error.message || 'Gagal memuat rekap absensi bulanan.');
+  }
+}
+
+export async function getAllClassesMonthlyAttendanceReport(year: number, month: number) {
+  try {
+    await dbConnect();
+    const teacherId = await requireAuth();
+    const teacher = await Teacher.findById(teacherId).lean();
+
+    let classesList: string[] = [];
+    if (Array.isArray(teacher?.classes) && teacher.classes.length > 0) {
+      classesList = Array.from(new Set(teacher.classes.filter(Boolean)));
+    }
+    if (classesList.length === 0) {
+      const distinctClasses = await Student.distinct('className', { teacherId });
+      classesList = distinctClasses.filter(Boolean);
+    }
+    if (classesList.length === 0 && (teacher?.activeClass || teacher?.className)) {
+      classesList = [teacher.activeClass || teacher.className || 'Kelas Utama'];
+    }
+
+    const startDate = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0, 0));
+    const endDate = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
+    const daysInMonth = new Date(year, month, 0).getDate();
+
+    const allStudents = await Student.find({ teacherId }).sort({ name: 1 }).lean();
+    const attendanceRecords = await Attendance.find({
+      teacherId,
+      date: { $gte: startDate, $lte: endDate },
+    }).lean();
+
+    const studentDayMap: Record<string, Record<number, string>> = {};
+    attendanceRecords.forEach((rec) => {
+      const sId = rec.studentId.toString();
+      const recDate = new Date(rec.date);
+      const day = recDate.getUTCDate();
+      if (!studentDayMap[sId]) {
+        studentDayMap[sId] = {};
+      }
+      studentDayMap[sId][day] = rec.status;
+    });
+
+    const studentsByClass: Record<string, typeof allStudents> = {};
+    classesList.forEach((cls) => {
+      studentsByClass[cls] = [];
+    });
+
+    allStudents.forEach((student) => {
+      const cls = student.className || 'Tanpa Kelas';
+      if (!studentsByClass[cls]) {
+        studentsByClass[cls] = [];
+        if (!classesList.includes(cls)) {
+          classesList.push(cls);
+        }
+      }
+      studentsByClass[cls].push(student);
+    });
+
+    const classesReport = classesList.map((className) => {
+      const classStudents = studentsByClass[className] || [];
+      let totalClassHadir = 0;
+      let totalClassSakit = 0;
+      let totalClassIzin = 0;
+      let totalClassAlfa = 0;
+
+      const studentsReport = classStudents.map((student) => {
+        const sId = student._id.toString();
+        const dayMap = studentDayMap[sId] || {};
+
+        let hadir = 0;
+        let sakit = 0;
+        let izin = 0;
+        let alfa = 0;
+
+        Object.values(dayMap).forEach((st) => {
+          if (st === 'Hadir') hadir++;
+          else if (st === 'Sakit') sakit++;
+          else if (st === 'Izin') izin++;
+          else if (st === 'Alfa') alfa++;
+        });
+
+        totalClassHadir += hadir;
+        totalClassSakit += sakit;
+        totalClassIzin += izin;
+        totalClassAlfa += alfa;
+
+        const totalRecorded = hadir + sakit + izin + alfa;
+        const percentage = totalRecorded > 0 ? Math.round((hadir / totalRecorded) * 100) : 0;
+
+        return {
+          studentId: sId,
+          nis: student.nis,
+          name: student.name,
+          className: student.className || className,
+          gender: student.gender,
+          dailyMap: dayMap,
+          hadir,
+          sakit,
+          izin,
+          alfa,
+          totalRecorded,
+          percentage,
+        };
+      });
+
+      const totalClassRecorded = totalClassHadir + totalClassSakit + totalClassIzin + totalClassAlfa;
+      const classAvgPercentage =
+        studentsReport.length > 0
+          ? Math.round(
+              studentsReport.reduce((acc, curr) => acc + curr.percentage, 0) /
+                studentsReport.length
+            )
+          : 0;
+
+      return {
+        className,
+        totalStudents: studentsReport.length,
+        studentsReport,
+        stats: {
+          hadir: totalClassHadir,
+          sakit: totalClassSakit,
+          izin: totalClassIzin,
+          alfa: totalClassAlfa,
+          totalRecorded: totalClassRecorded,
+          avgPercentage: classAvgPercentage,
+        },
+      };
+    });
+
+    return JSON.parse(
+      JSON.stringify({
+        year,
+        month,
+        daysInMonth,
+        classesList,
+        classesReport,
+      })
+    );
+  } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+    console.error('Error fetching all classes monthly attendance report:', error);
+    throw new Error(error.message || 'Gagal memuat rekap absensi semua kelas.');
   }
 }
 
@@ -395,6 +710,167 @@ export async function getYearlyAttendanceReport(year: number) {
     }
     console.error('Error fetching yearly attendance report:', error);
     throw new Error(error.message || 'Gagal memuat rekap absensi tahunan.');
+  }
+}
+
+export async function getAllClassesYearlyAttendanceReport(year: number) {
+  try {
+    await dbConnect();
+    const teacherId = await requireAuth();
+    const teacher = await Teacher.findById(teacherId).lean();
+
+    let classesList: string[] = [];
+    if (Array.isArray(teacher?.classes) && teacher.classes.length > 0) {
+      classesList = Array.from(new Set(teacher.classes.filter(Boolean)));
+    }
+    if (classesList.length === 0) {
+      const distinctClasses = await Student.distinct('className', { teacherId });
+      classesList = distinctClasses.filter(Boolean);
+    }
+    if (classesList.length === 0 && (teacher?.activeClass || teacher?.className)) {
+      classesList = [teacher.activeClass || teacher.className || 'Kelas Utama'];
+    }
+
+    const startDate = new Date(Date.UTC(year, 0, 1, 0, 0, 0, 0));
+    const endDate = new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999));
+
+    const allStudents = await Student.find({ teacherId }).sort({ name: 1 }).lean();
+    const attendanceRecords = await Attendance.find({
+      teacherId,
+      date: { $gte: startDate, $lte: endDate },
+    }).lean();
+
+    const studentMonthMap: Record<
+      string,
+      Record<number, { hadir: number; sakit: number; izin: number; alfa: number }>
+    > = {};
+
+    attendanceRecords.forEach((rec) => {
+      const sId = rec.studentId.toString();
+      const recDate = new Date(rec.date);
+      const mIdx = recDate.getUTCMonth();
+
+      if (!studentMonthMap[sId]) {
+        studentMonthMap[sId] = {};
+      }
+      if (!studentMonthMap[sId][mIdx]) {
+        studentMonthMap[sId][mIdx] = { hadir: 0, sakit: 0, izin: 0, alfa: 0 };
+      }
+
+      if (rec.status === 'Hadir') studentMonthMap[sId][mIdx].hadir++;
+      else if (rec.status === 'Sakit') studentMonthMap[sId][mIdx].sakit++;
+      else if (rec.status === 'Izin') studentMonthMap[sId][mIdx].izin++;
+      else if (rec.status === 'Alfa') studentMonthMap[sId][mIdx].alfa++;
+    });
+
+    const studentsByClass: Record<string, typeof allStudents> = {};
+    classesList.forEach((cls) => {
+      studentsByClass[cls] = [];
+    });
+
+    allStudents.forEach((student) => {
+      const cls = student.className || 'Tanpa Kelas';
+      if (!studentsByClass[cls]) {
+        studentsByClass[cls] = [];
+        if (!classesList.includes(cls)) {
+          classesList.push(cls);
+        }
+      }
+      studentsByClass[cls].push(student);
+    });
+
+    const classesReport = classesList.map((className) => {
+      const classStudents = studentsByClass[className] || [];
+      let totalClassHadir = 0;
+      let totalClassSakit = 0;
+      let totalClassIzin = 0;
+      let totalClassAlfa = 0;
+
+      const studentsReport = classStudents.map((student) => {
+        const sId = student._id.toString();
+        const monthData = studentMonthMap[sId] || {};
+
+        let totalHadir = 0;
+        let totalSakit = 0;
+        let totalIzin = 0;
+        let totalAlfa = 0;
+
+        const monthlyBreakdown = Array.from({ length: 12 }, (_, i) => {
+          const m = monthData[i] || { hadir: 0, sakit: 0, izin: 0, alfa: 0 };
+          totalHadir += m.hadir;
+          totalSakit += m.sakit;
+          totalIzin += m.izin;
+          totalAlfa += m.alfa;
+          return {
+            monthIndex: i,
+            hadir: m.hadir,
+            sakit: m.sakit,
+            izin: m.izin,
+            alfa: m.alfa,
+          };
+        });
+
+        totalClassHadir += totalHadir;
+        totalClassSakit += totalSakit;
+        totalClassIzin += totalIzin;
+        totalClassAlfa += totalAlfa;
+
+        const totalRecorded = totalHadir + totalSakit + totalIzin + totalAlfa;
+        const percentage = totalRecorded > 0 ? Math.round((totalHadir / totalRecorded) * 100) : 0;
+
+        return {
+          studentId: sId,
+          nis: student.nis,
+          name: student.name,
+          className: student.className || className,
+          gender: student.gender,
+          monthlyBreakdown,
+          hadir: totalHadir,
+          sakit: totalSakit,
+          izin: totalIzin,
+          alfa: totalAlfa,
+          totalRecorded,
+          percentage,
+        };
+      });
+
+      const totalClassRecorded = totalClassHadir + totalClassSakit + totalClassIzin + totalClassAlfa;
+      const classAvgPercentage =
+        studentsReport.length > 0
+          ? Math.round(
+              studentsReport.reduce((acc, curr) => acc + curr.percentage, 0) /
+                studentsReport.length
+            )
+          : 0;
+
+      return {
+        className,
+        totalStudents: studentsReport.length,
+        studentsReport,
+        stats: {
+          hadir: totalClassHadir,
+          sakit: totalClassSakit,
+          izin: totalClassIzin,
+          alfa: totalClassAlfa,
+          totalRecorded: totalClassRecorded,
+          avgPercentage: classAvgPercentage,
+        },
+      };
+    });
+
+    return JSON.parse(
+      JSON.stringify({
+        year,
+        classesList,
+        classesReport,
+      })
+    );
+  } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+    console.error('Error fetching all classes yearly attendance report:', error);
+    throw new Error(error.message || 'Gagal memuat rekap absensi tahunan semua kelas.');
   }
 }
 

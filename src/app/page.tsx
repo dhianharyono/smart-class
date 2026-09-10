@@ -8,7 +8,6 @@ import {
   BookOpen,
   CalendarCheck2,
   GraduationCap,
-  Wallet,
   BookMarked,
   ArrowUp,
   ChevronDown,
@@ -72,7 +71,7 @@ export default function LandingPage() {
   };
 
   const [activeTab, setActiveTab] = useState<
-    'absensi' | 'nilai' | 'jurnal' | 'tabungan' | 'jadwal' | 'multikelas'
+    'absensi' | 'nilai' | 'jurnal' | 'jadwal' | 'multikelas'
   >('absensi');
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -503,9 +502,9 @@ export default function LandingPage() {
                   color: 'text-emerald-600',
                 },
                 {
-                  num: '7+ Modul',
+                  num: '6+ Modul',
                   title: 'Terintegrasi Sempurna',
-                  desc: 'Jadwal, Piket, Absensi, Nilai, Tabungan, Jurnal & Cetak',
+                  desc: 'Jadwal, Piket, Absensi, Nilai, Jurnal & Dokumen Cetak',
                   color: 'text-emerald-600',
                 },
                 {
@@ -585,7 +584,6 @@ export default function LandingPage() {
               { id: 'jurnal', label: 'Jurnal KBM', icon: BookMarked },
               { id: 'multikelas', label: 'Multi-Kelas Guru', icon: School },
               { id: 'jadwal', label: 'Jadwal & Alokasi', icon: Calendar },
-              { id: 'tabungan', label: 'Tabungan Siswa', icon: Wallet },
             ].map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -816,80 +814,6 @@ export default function LandingPage() {
                 </div>
               )}
 
-              {activeTab === 'tabungan' && (
-                <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 items-center'>
-                  <div className='space-y-6'>
-                    <div className='inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-50 text-cyan-700 text-xs font-bold border border-cyan-200'>
-                      <Wallet className='h-3.5 w-3.5' />
-                      <span>Buku Tabungan Digital</span>
-                    </div>
-                    <h3 className='text-2xl sm:text-3xl font-extrabold text-slate-900'>
-                      Pencatatan Kas & Tabungan Siswa Transparan
-                    </h3>
-                    <p className='text-slate-600 text-sm leading-relaxed font-medium'>
-                      Pencatatan transaksi setoran dan penarikan tabungan siswa
-                      secara akurat. Bebas kesalahan hitung manual dengan
-                      pencatatan saldo real-time.
-                    </p>
-                    <ul className='space-y-3 text-sm text-slate-700 font-medium'>
-                      <li className='flex items-center gap-3'>
-                        <Check className='h-4 w-4 text-teal-600' />
-                        <span>
-                          Catat setoran & penarikan kas tabungan kelas
-                        </span>
-                      </li>
-                      <li className='flex items-center gap-3'>
-                        <Check className='h-4 w-4 text-teal-600' />
-                        <span>Histori mutasi saldo lengkap per siswa</span>
-                      </li>
-                      <li className='flex items-center gap-3'>
-                        <Check className='h-4 w-4 text-teal-600' />
-                        <span>Laporan keuangan kelas yang transparan</span>
-                      </li>
-                    </ul>
-                  </div>
-                  {/* Visual Card */}
-                  <div className='bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-4 shadow-xs'>
-                    <div className='flex items-center justify-between border-b border-slate-200 pb-3'>
-                      <span className='text-xs font-extrabold text-slate-900'>
-                        Saldo Tabungan Kelas
-                      </span>
-                      <span className='text-xs font-extrabold text-teal-700'>
-                        Rp 4.850.000
-                      </span>
-                    </div>
-                    <div className='space-y-2.5'>
-                      <div className='flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200 text-xs shadow-xs'>
-                        <div>
-                          <div className='font-bold text-slate-800'>
-                            Setoran - Ahmad Fauzi
-                          </div>
-                          <div className='text-[10px] text-slate-500 font-medium'>
-                            24 Jul 2026
-                          </div>
-                        </div>
-                        <span className='font-mono font-extrabold text-emerald-700'>
-                          + Rp 50.000
-                        </span>
-                      </div>
-                      <div className='flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200 text-xs shadow-xs'>
-                        <div>
-                          <div className='font-bold text-slate-800'>
-                            Penarikan - Budi Santoso
-                          </div>
-                          <div className='text-[10px] text-slate-500 font-medium'>
-                            23 Jul 2026
-                          </div>
-                        </div>
-                        <span className='font-mono font-extrabold text-rose-600'>
-                          - Rp 20.000
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
               {activeTab === 'jadwal' && (
                 <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 items-center'>
                   <div className='space-y-6'>
@@ -1058,7 +982,7 @@ export default function LandingPage() {
               </span>
             </div>
             <div className='flex items-center gap-1.5 shrink-0 font-extrabold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200'>
-              <span>7+ Modul Terintegrasi</span>
+              <span>6+ Modul Terintegrasi</span>
             </div>
           </motion.div>
         </section>

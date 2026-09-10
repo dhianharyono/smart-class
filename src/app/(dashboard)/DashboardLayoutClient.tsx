@@ -10,7 +10,6 @@ import {
   Users,
   CalendarCheck2,
   GraduationCap,
-  Wallet,
   Menu,
   X,
   BookOpen,
@@ -24,6 +23,7 @@ import {
   ChevronDown,
   ChevronRight,
   Calendar,
+  CalendarClock,
   School,
   ArrowLeft,
   IdCard,
@@ -89,7 +89,6 @@ const sidebarMenuGroups: SidebarGroup[] = [
           { name: 'Data Siswa', href: '/siswa', icon: Users },
           { name: 'Absensi Kelas', href: '/absensi', icon: CalendarCheck2 },
           { name: 'Nilai Akademik', href: '/nilai', icon: GraduationCap },
-          { name: 'Tabungan Siswa', href: '/tabungan', icon: Wallet },
         ],
       },
       {
@@ -97,8 +96,7 @@ const sidebarMenuGroups: SidebarGroup[] = [
         icon: School,
         children: [
           { name: 'Daftar Kelas', href: '/kelas', icon: School },
-          { name: 'Jadwal & Alokasi', href: '/jadwal', icon: Calendar },
-          { name: 'Piket Kelas', href: '/piket', icon: CheckSquare },
+          { name: 'Jadwal Mengajar', href: '/jadwal-mengajar', icon: CalendarClock },
         ],
       },
       { name: 'Jurnal Wali Kelas', href: '/jurnal', icon: BookMarked },
@@ -119,6 +117,11 @@ const CONFIGURABLE_MENUS = [
     desc: 'Kelola daftar kelas yang diampu (multi-kelas)',
   },
   {
+    href: '/jadwal-mengajar',
+    label: 'Jadwal Mengajar',
+    desc: 'Jadwal mengajar tatap muka guru & monitoring beban jam mengajar mingguan (JJM)',
+  },
+  {
     href: '/siswa',
     label: 'Data Siswa',
     desc: 'Manajemen data profil dan informasi siswa',
@@ -132,21 +135,6 @@ const CONFIGURABLE_MENUS = [
     href: '/nilai',
     label: 'Nilai Akademik',
     desc: 'Penginputan nilai mata pelajaran & KKM',
-  },
-  {
-    href: '/tabungan',
-    label: 'Tabungan Siswa',
-    desc: 'Pencatatan setoran & penarikan kas siswa',
-  },
-  {
-    href: '/jadwal',
-    label: 'Jadwal & Alokasi',
-    desc: 'Plotting jadwal pelajaran mingguan kelas',
-  },
-  {
-    href: '/piket',
-    label: 'Piket Kelas',
-    desc: 'Pengaturan kelompok petugas piket harian siswa',
   },
   {
     href: '/jurnal',
@@ -187,7 +175,7 @@ export default function DashboardLayoutClient({
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Menu Preferences state (auto-includes /kelas, /jadwal and /piket for existing profiles)
+  // Menu Preferences state (auto-includes /kelas and /jadwal-mengajar for existing profiles)
   const [enabledMenus, setEnabledMenus] = useState<string[]>(() => {
     const base =
       teacher.enabledMenus && teacher.enabledMenus.length > 0
@@ -195,12 +183,10 @@ export default function DashboardLayoutClient({
         : [
           '/dashboard',
           '/kelas',
+          '/jadwal-mengajar',
           '/siswa',
           '/absensi',
           '/nilai',
-          '/tabungan',
-          '/jadwal',
-          '/piket',
           '/jurnal',
           '/feedback',
           '/profile',
@@ -496,6 +482,13 @@ export default function DashboardLayoutClient({
         name: profileModalForm.name.trim(),
         email: profileModalForm.email.trim(),
         schoolName: profileModalForm.schoolName.trim(),
+        classes:
+          teacher.classes && teacher.classes.length > 0
+            ? teacher.classes
+            : teacher.className
+              ? [teacher.className]
+              : undefined,
+        activeClass: teacher.activeClass || teacher.className,
         nip: profileModalForm.nip.trim() || '-',
         principalName: profileModalForm.principalName.trim(),
         principalNip: profileModalForm.principalNip.trim() || '-',

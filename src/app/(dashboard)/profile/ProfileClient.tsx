@@ -92,11 +92,10 @@ export default function ProfileClient() {
         profile.enabledMenus || [
           '/',
           '/kelas',
+          '/jadwal-mengajar',
           '/siswa',
           '/absensi',
           '/nilai',
-          '/tabungan',
-          '/jadwal',
           '/jurnal',
         ],
       );

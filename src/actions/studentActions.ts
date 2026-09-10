@@ -4,7 +4,6 @@ import dbConnect from '@/lib/db';
 import Student, { IStudent } from '@/models/Student';
 import Attendance from '@/models/Attendance';
 import Grade from '@/models/Grade';
-import Saving from '@/models/Saving';
 import { cookies } from 'next/headers';
 import { verifySession } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
@@ -179,7 +178,6 @@ export async function deleteStudent(id: string) {
     // Cascading deletes for related collections
     await Attendance.deleteMany({ studentId: id });
     await Grade.deleteMany({ studentId: id });
-    await Saving.deleteMany({ studentId: id });
 
     revalidatePath('/siswa');
     revalidatePath('/');
