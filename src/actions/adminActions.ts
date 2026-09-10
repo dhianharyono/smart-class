@@ -5,7 +5,6 @@ import Teacher from '@/models/Teacher';
 import Student from '@/models/Student';
 import Attendance from '@/models/Attendance';
 import Grade from '@/models/Grade';
-import Saving from '@/models/Saving';
 import Journal from '@/models/Journal';
 import JournalHeader from '@/models/JournalHeader';
 import AdminUser from '@/models/AdminUser';
@@ -82,7 +81,6 @@ export async function getAdminStats() {
       allJournals,
       allAttendances,
       allGrades,
-      allSavings,
       recentJournalDocs,
       activeTeachers,
     ] = await Promise.all([
@@ -90,7 +88,6 @@ export async function getAdminStats() {
       Journal.find({ teacherId: { $in: validTeacherIdStrs } }, { _id: 1, teacherId: 1, className: 1, createdAt: 1, subject: 1, material: 1, date: 1 }).lean(),
       Attendance.find({ teacherId: { $in: validTeacherIdStrs } }, { _id: 1, teacherId: 1, studentId: 1, status: 1, createdAt: 1 }).lean(),
       Grade.find({ teacherId: { $in: validTeacherIdStrs } }, { _id: 1, teacherId: 1, studentId: 1, createdAt: 1 }).lean(),
-      Saving.find({ teacherId: { $in: validTeacherIdStrs } }, { _id: 1, teacherId: 1, studentId: 1, type: 1, amount: 1, createdAt: 1 }).lean(),
       Journal.find({ teacherId: { $in: validTeacherIdStrs } })
         .sort({ createdAt: -1 })
         .limit(6)
@@ -104,12 +101,6 @@ export async function getAdminStats() {
     const studentCount = allStudents.length;
     const totalJournalCount = allJournals.length;
     const totalGradeCount = allGrades.length;
-
-    // Hitung total saldo tabungan di seluruh sistem
-    let totalSavingsBalance = 0;
-    allSavings.forEach((tx) => {
-      totalSavingsBalance += tx.type === 'Kredit' ? tx.amount : -tx.amount;
-    });
 
     // Presensi Sistem
     let totalHadir = 0;
@@ -185,14 +176,6 @@ export async function getAdminStats() {
       teacherGradesMap.set(tId, list);
     });
 
-    const teacherSavingsMap = new Map<string, typeof allSavings>();
-    allSavings.forEach((s) => {
-      const tId = s.teacherId;
-      const list = teacherSavingsMap.get(tId) || [];
-      list.push(s);
-      teacherSavingsMap.set(tId, list);
-    });
-
     // Olah statistik per guru
     const teacherStats = teachers.map((t) => {
       const teacherIdStr = t._id.toString();
@@ -265,6 +248,7 @@ export async function getAdminStats() {
       const journalCount = tJournals.length;
 
       const tGrades = teacherGradesMap.get(teacherIdStr) || [];
+      const gradeCount = tGrades.length;
       const gradeCountByClass = new Map<string, number>();
       tGrades.forEach((g) => {
         const sId = g.studentId?.toString();
@@ -276,25 +260,6 @@ export async function getAdminStats() {
         className: cls,
         count: gradeCountByClass.get(cls) || 0,
       }));
-      const gradeCount = tGrades.length;
-
-      const tSavings = teacherSavingsMap.get(teacherIdStr) || [];
-      const savingsByClass = new Map<string, number>();
-      let classSavingsBalance = 0;
-
-      tSavings.forEach((tx) => {
-        const amt = tx.type === 'Kredit' ? tx.amount : -tx.amount;
-        classSavingsBalance += amt;
-        const sId = tx.studentId?.toString();
-        const cls = (sId ? studentClassMap.get(sId) : null) || teacherClasses[0] || '-';
-        savingsByClass.set(cls, (savingsByClass.get(cls) || 0) + amt);
-      });
-
-      const classSavings = allClasses.map((cls) => ({
-        className: cls,
-        amount: savingsByClass.get(cls) || 0,
-      }));
-
       return {
         id: teacherIdStr,
         name: t.name,
@@ -306,9 +271,7 @@ export async function getAdminStats() {
         classAttendanceRates,
         classJournalCounts,
         classGradeCounts,
-        classSavings,
         studentCount: tStudents.length,
-        totalSavings: classSavingsBalance,
         journalCount,
         gradeCount,
         attendanceRate,
@@ -364,12 +327,6 @@ export async function getAdminStats() {
         if (t >= startOfDay && t <= endOfDay) gCount++;
       }
 
-      let sCount = 0;
-      for (const s of allSavings) {
-        const t = new Date((s as any).createdAt).getTime();
-        if (t >= startOfDay && t <= endOfDay) sCount++;
-      }
-
       const dayLabel = dayNames[d.getDay()];
       const dateStr = `${d.getDate()}/${d.getMonth() + 1}`;
 
@@ -380,8 +337,7 @@ export async function getAdminStats() {
         jurnal: jCount,
         presensi: aCount,
         nilai: gCount,
-        tabungan: sCount,
-        total: jCount + aCount + gCount + sCount,
+        total: jCount + aCount + gCount,
       });
     }
 
@@ -389,7 +345,6 @@ export async function getAdminStats() {
       teacherCount,
       schoolCount,
       studentCount,
-      totalSavingsBalance,
       totalJournalCount,
       totalGradeCount,
       overallAttendanceRate,
@@ -518,7 +473,6 @@ export async function deleteTeacher(id: string) {
     await Student.deleteMany({ teacherId: id });
     await Attendance.deleteMany({ teacherId: id });
     await Grade.deleteMany({ teacherId: id });
-    await Saving.deleteMany({ teacherId: id });
     await Journal.deleteMany({ teacherId: id });
     await JournalHeader.deleteMany({ teacherId: id });
 

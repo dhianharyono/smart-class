@@ -15,7 +15,6 @@ import {
   BookOpen,
   CheckCircle2,
   FileText,
-  Home,
   Search,
   Clock,
   ChevronDown,
@@ -49,7 +48,6 @@ export interface ActivityTrendItem {
   jurnal: number;
   presensi: number;
   nilai: number;
-  tabungan: number;
   total: number;
 }
 
@@ -74,11 +72,6 @@ export interface ClassGradeCount {
   count: number;
 }
 
-export interface ClassSaving {
-  className: string;
-  amount: number;
-}
-
 interface TeacherStat {
   id: string;
   name: string;
@@ -90,9 +83,7 @@ interface TeacherStat {
   classAttendanceRates?: ClassAttendanceRate[];
   classJournalCounts?: ClassJournalCount[];
   classGradeCounts?: ClassGradeCount[];
-  classSavings?: ClassSaving[];
   studentCount: number;
-  totalSavings: number;
   journalCount?: number;
   gradeCount?: number;
   attendanceRate?: number;
@@ -143,7 +134,6 @@ interface AdminDashboardClientProps {
     teacherCount: number;
     schoolCount: number;
     studentCount: number;
-    totalSavingsBalance: number;
     totalJournalCount?: number;
     totalGradeCount?: number;
     overallAttendanceRate?: number;
@@ -188,14 +178,6 @@ export default function AdminDashboardClient({
       </div>
     );
   }
-
-  const formatIDR = (num: number) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0,
-    }).format(num);
-  };
 
 
 
@@ -245,25 +227,14 @@ export default function AdminDashboardClient({
   return (
     <div className='space-y-8'>
       {/* Header */}
-      <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
-        <div>
-          <h1 className='text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight'>
-            Dashboard Administrator
-          </h1>
-          <p className='text-xs sm:text-sm text-slate-500 font-medium mt-1'>
-            Ikhtisar operasional, tren aktivitas wali kelas, presensi, dan
-            sekolah terdaftar di seluruh sistem.
-          </p>
-        </div>
-        <Link href='/' className='w-full sm:w-auto'>
-          <Button
-            variant='outline'
-            className='w-full sm:w-auto border-slate-200 bg-white hover:bg-emerald-50 hover:border-emerald-200 text-slate-700 hover:text-emerald-800 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-xs transition-colors'
-          >
-            <Home className='h-4 w-4 text-emerald-600' />
-            <span>Halaman Utama</span>
-          </Button>
-        </Link>
+      <div>
+        <h1 className='text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight'>
+          Dashboard Administrator
+        </h1>
+        <p className='text-xs sm:text-sm text-slate-500 font-medium mt-1'>
+          Ikhtisar operasional, tren aktivitas wali kelas, presensi, dan
+          sekolah terdaftar di seluruh sistem.
+        </p>
       </div>
 
 
@@ -400,8 +371,8 @@ export default function AdminDashboardClient({
                 <span>Tren Aktivitas Wali Kelas (7 Hari Terakhir)</span>
               </CardTitle>
               <CardDescription className='text-xs text-slate-500 mt-1'>
-                Grafik penginputan Jurnal KBM, Presensi Siswa, Nilai Akademik, &
-                Tabungan oleh seluruh wali kelas.
+                Grafik penginputan Jurnal KBM, Presensi Siswa, dan Nilai
+                Akademik oleh seluruh wali kelas.
               </CardDescription>
             </div>
 
@@ -455,16 +426,6 @@ export default function AdminDashboardClient({
                     <linearGradient id='colorNilai' x1='0' y1='0' x2='0' y2='1'>
                       <stop offset='5%' stopColor='#0284c7' stopOpacity={0.4} />
                       <stop offset='95%' stopColor='#0284c7' stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient
-                      id='colorTabungan'
-                      x1='0'
-                      y1='0'
-                      x2='0'
-                      y2='1'
-                    >
-                      <stop offset='5%' stopColor='#8b5cf6' stopOpacity={0.4} />
-                      <stop offset='95%' stopColor='#8b5cf6' stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid
@@ -528,15 +489,6 @@ export default function AdminDashboardClient({
                     strokeWidth={2.5}
                     fillOpacity={1}
                     fill='url(#colorNilai)'
-                  />
-                  <Area
-                    type='monotone'
-                    dataKey='tabungan'
-                    name='Tabungan'
-                    stroke='#8b5cf6'
-                    strokeWidth={2.5}
-                    fillOpacity={1}
-                    fill='url(#colorTabungan)'
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -610,7 +562,7 @@ export default function AdminDashboardClient({
             </CardTitle>
             <CardDescription className='text-xs text-slate-500 mt-1'>
               Ringkasan aktivitas pembelajaran, tingkat kehadiran siswa, jurnal,
-              nilai, dan total tabungan kelas.
+              dan rekap nilai kelas.
             </CardDescription>
           </div>
           <div className='flex items-center gap-3 w-full sm:w-auto'>
@@ -706,7 +658,6 @@ export default function AdminDashboardClient({
                     <th className='py-3 px-4 text-center'>Tingkat Kehadiran</th>
                     <th className='py-3 px-4 text-center'>Jurnal</th>
                     <th className='py-3 px-4 text-center'>Nilai</th>
-                    <th className='py-3 px-4 text-right'>Tabungan Kelas</th>
                     <th className='py-3 px-4 text-center'>Rincian</th>
                   </tr>
                 </thead>
@@ -742,7 +693,6 @@ export default function AdminDashboardClient({
                       const attData = teacher.classAttendanceRates?.find((c) => c.className === clsName);
                       const jCount = teacher.classJournalCounts?.find((c) => c.className === clsName)?.count ?? 0;
                       const gCount = teacher.classGradeCounts?.find((c) => c.className === clsName)?.count ?? 0;
-                      const savAmt = teacher.classSavings?.find((c) => c.className === clsName)?.amount ?? 0;
 
                       return {
                         className: clsName,
@@ -750,7 +700,6 @@ export default function AdminDashboardClient({
                         attendanceRate: attData?.rate ?? null,
                         journalCount: jCount,
                         gradeCount: gCount,
-                        savings: savAmt,
                       };
                     });
 
@@ -846,11 +795,6 @@ export default function AdminDashboardClient({
                               {teacher.gradeCount || 0}
                             </span>
                           </td>
-                          <td className='py-3.5 px-4 text-right'>
-                            <span className='text-xs font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg'>
-                              {formatIDR(teacher.totalSavings || 0)}
-                            </span>
-                          </td>
                           <td className='py-3.5 px-4 text-center'>
                             {isMultiClass ? (
                               <button
@@ -881,7 +825,7 @@ export default function AdminDashboardClient({
 
                         {isExpanded && (
                           <tr className='bg-slate-50/80 border-b border-slate-200'>
-                            <td colSpan={8} className='p-3 sm:p-4 pl-4 sm:pl-8'>
+                            <td colSpan={7} className='p-3 sm:p-4 pl-4 sm:pl-8'>
                               <div className='bg-white border border-slate-200/90 rounded-xl p-3.5 sm:p-4 shadow-sm space-y-3'>
                                 <div className='flex items-center justify-between border-b border-slate-100 pb-2.5'>
                                   <div className='flex items-center gap-2'>
@@ -911,7 +855,6 @@ export default function AdminDashboardClient({
                                         <th className='py-2.5 px-3.5 text-center'>Tingkat Kehadiran</th>
                                         <th className='py-2.5 px-3.5 text-center'>Jurnal Mengajar</th>
                                         <th className='py-2.5 px-3.5 text-center'>Input Nilai</th>
-                                        <th className='py-2.5 px-3.5 text-right'>Tabungan Kelas</th>
                                       </tr>
                                     </thead>
                                     <tbody className='divide-y divide-slate-100 text-slate-700'>
@@ -948,9 +891,6 @@ export default function AdminDashboardClient({
                                               <FileText className='h-3 w-3 text-emerald-600' />
                                               {clsData.gradeCount} Nilai
                                             </span>
-                                          </td>
-                                          <td className='py-2.5 px-3.5 text-right font-extrabold text-emerald-700'>
-                                            {formatIDR(clsData.savings)}
                                           </td>
                                         </tr>
                                       ))}

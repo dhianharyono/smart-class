@@ -4,7 +4,6 @@ import dbConnect from '@/lib/db';
 import Student from '@/models/Student';
 import Attendance from '@/models/Attendance';
 import Grade from '@/models/Grade';
-import Saving from '@/models/Saving';
 import Teacher from '@/models/Teacher';
 import Journal from '@/models/Journal';
 import { cookies } from 'next/headers';
@@ -52,20 +51,19 @@ export async function getDashboardStats() {
     const studentIds = activeStudents.map((s) => s._id.toString());
 
     // Parallelize DB queries for active class student subset
-    const [monthlyAttendance, savingsTx, journals] = await Promise.all([
+    const [monthlyAttendance, journals] = await Promise.all([
       Attendance.find({
         teacherId,
         studentId: { $in: studentIds },
         date: { $gte: startOfMonth, $lte: endOfMonth },
       }).lean(),
-      Saving.find({ teacherId, studentId: { $in: studentIds } }).sort({ date: 1 }).lean(),
       Journal.find({ teacherId }).sort({ date: -1 }).lean(),
     ]);
 
     const kkm = teacher?.kkm ?? 70;
     const enabledMenus = teacher?.enabledMenus && teacher.enabledMenus.length > 0
       ? teacher.enabledMenus
-      : ['/', '/siswa', '/absensi', '/nilai', '/tabungan', '/jurnal'];
+      : ['/', '/siswa', '/absensi', '/nilai', '/jurnal'];
 
     const attendanceBreakdown = {
       Hadir: 0,
@@ -85,28 +83,6 @@ export async function getDashboardStats() {
       totalLogs > 0
         ? Math.round((attendanceBreakdown.Hadir / totalLogs) * 100)
         : 0;
-
-    // 3. Savings total balance
-    let totalSavingsBalance = 0;
-    
-    // Accumulate trend data points
-    const savingsTrendRaw: { [key: string]: number } = {};
-    
-    savingsTx.forEach((tx) => {
-      const change = tx.type === 'Kredit' ? tx.amount : -tx.amount;
-      totalSavingsBalance += change;
-      
-      // format date to YYYY-MM-DD
-      const dateStr = tx.date.toISOString().split('T')[0];
-      savingsTrendRaw[dateStr] = totalSavingsBalance;
-    });
-
-    const savingsTrend = Object.entries(savingsTrendRaw)
-      .map(([date, amount]) => ({
-        date: new Date(date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }),
-        "Saldo": amount,
-      }))
-      .slice(-10); // get last 10 points
 
     // 4. Low grade alerts (score < KKM)
     // Find all grades < KKM for active class students
@@ -194,10 +170,8 @@ export async function getDashboardStats() {
       studentCount,
       monthlyAttendanceRate,
       totalAttendanceLogs: totalLogs,
-      totalSavingsBalance,
       lowGradeCount: lowGradeNotifications.length,
       lowGradeNotifications: lowGradeNotifications.slice(0, 5), // top 5 most urgent alerts
-      savingsTrend,
       attendanceBreakdown,
       attendanceChartData,
       journalMonthlyStats,

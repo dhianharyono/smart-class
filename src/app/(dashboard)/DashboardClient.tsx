@@ -12,9 +12,7 @@ function useIsMounted() {
 import Link from 'next/link';
 import {
   Users,
-  Wallet,
   AlertTriangle,
-  TrendingUp,
   AlertCircle,
   BookMarked,
   Home,
@@ -53,7 +51,6 @@ interface DashboardClientProps {
     studentCount: number;
     monthlyAttendanceRate: number;
     totalAttendanceLogs?: number;
-    totalSavingsBalance: number;
     lowGradeCount: number;
     lowGradeNotifications: Array<{
       gradeId: string;
@@ -64,7 +61,6 @@ interface DashboardClientProps {
       category: string;
       score: number;
     }>;
-    savingsTrend: Array<{ date: string; Saldo: number }>;
     attendanceBreakdown: {
       Hadir: number;
       Sakit: number;
@@ -132,19 +128,17 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
 
   const enabled = stats.enabledMenus || [
     '/',
+    '/kelas',
+    '/jadwal-mengajar',
     '/siswa',
     '/absensi',
     '/nilai',
-    '/tabungan',
-    '/jadwal',
-    '/piket',
     '/jurnal',
   ];
 
   const isSiswaEnabled = enabled.includes('/siswa');
   const isAbsensiEnabled =
     enabled.includes('/siswa') || enabled.includes('/absensi');
-  const isTabunganEnabled = enabled.includes('/tabungan');
   const isNilaiEnabled = enabled.includes('/nilai');
   const isJurnalEnabled = enabled.includes('/jurnal');
 
@@ -165,14 +159,6 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
       icon: CalendarCheck2,
       color: 'from-blue-50 to-indigo-50/30 text-blue-700 border-blue-200/70',
       visible: isAbsensiEnabled,
-    },
-    {
-      title: 'Tabungan Kelas',
-      value: formatIDR(stats.totalSavingsBalance),
-      description: 'Total dana terkumpul',
-      icon: Wallet,
-      color: 'from-amber-50 to-orange-50/30 text-amber-700 border-amber-200/70',
-      visible: isTabunganEnabled,
     },
     {
       title: 'Evaluasi Nilai',
@@ -229,7 +215,6 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
 
       {/* Empty State – when no modules are active */}
       {statCards.length === 0 &&
-        !isTabunganEnabled &&
         !isAbsensiEnabled &&
         !isJurnalEnabled &&
         !isNilaiEnabled && (
@@ -539,118 +524,6 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
             </Card>
           )}
         </div>
-      )}
-
-      {/* Savings Growth Trend Chart */}
-      {isTabunganEnabled && (
-        <Card className='bg-white border-slate-200/80 rounded-2xl shadow-xs flex flex-col justify-between'>
-          <CardHeader className='flex flex-row items-center justify-between pb-3'>
-            <div>
-              <CardTitle className='text-base font-bold text-slate-900'>
-                Tren Tabungan Kelas
-              </CardTitle>
-              <CardDescription className='text-xs text-slate-500 mt-0.5'>
-                Pertumbuhan total saldo tabungan kelas
-              </CardDescription>
-            </div>
-            <div className='p-2 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-600 shrink-0'>
-              <TrendingUp className='h-4.5 w-4.5' />
-            </div>
-          </CardHeader>
-          <CardContent className='pt-0 flex-1 flex flex-col justify-center'>
-            {stats.savingsTrend.length > 0 ? (
-              <div className='h-60 sm:h-64 w-full'>
-                <ResponsiveContainer width='100%' height='100%'>
-                  <AreaChart
-                    data={stats.savingsTrend}
-                    margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-                  >
-                    <defs>
-                      <linearGradient
-                        id='colorSaldo'
-                        x1='0'
-                        y1='0'
-                        x2='0'
-                        y2='1'
-                      >
-                        <stop
-                          offset='5%'
-                          stopColor='#10b981'
-                          stopOpacity={0.25}
-                        />
-                        <stop
-                          offset='95%'
-                          stopColor='#10b981'
-                          stopOpacity={0}
-                        />
-                      </linearGradient>
-                    </defs>
-                    <XAxis
-                      dataKey='date'
-                      stroke='#64748b'
-                      fontSize={10}
-                      tickLine={false}
-                      axisLine={false}
-                    />
-                    <YAxis
-                      stroke='#64748b'
-                      fontSize={10}
-                      tickLine={false}
-                      axisLine={false}
-                      tickFormatter={(val: number) => `Rp ${val / 1000}k`}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: '#ffffff',
-                        borderColor: '#e2e8f0',
-                        borderRadius: '12px',
-                        boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
-                      }}
-                      labelStyle={{ color: '#0f172a', fontWeight: 'bold' }}
-                      itemStyle={{ color: '#059669' }}
-                      formatter={(value: any) => [
-                        formatIDR(Number(value)),
-                        'Saldo',
-                      ]}
-                    />
-                    <Area
-                      type='monotone'
-                      dataKey='Saldo'
-                      stroke='#059669'
-                      strokeWidth={2.5}
-                      fillOpacity={1}
-                      fill='url(#colorSaldo)'
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <div className='flex flex-col items-center justify-center py-8 text-center gap-2.5 rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 my-2 px-4'>
-                <div className='p-3 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-600 shadow-xs'>
-                  <Wallet className='h-6 w-6' />
-                </div>
-                <div>
-                  <p className='text-xs font-bold text-slate-800'>
-                    Belum Ada Transaksi Tabungan
-                  </p>
-                  <p className='text-[11px] text-slate-500 mt-1 max-w-xs leading-relaxed font-medium'>
-                    Riwayat setoran & penarikan kas siswa akan otomatis
-                    ditampilkan pada grafik ini.
-                  </p>
-                </div>
-                <Link href='/tabungan'>
-                  <Button
-                    size='sm'
-                    className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl h-8.5 px-4 gap-1.5 shadow-xs cursor-pointer mt-1'
-                  >
-                    <Plus className='h-3.5 w-3.5' />
-                    Input Transaksi Tabungan
-                  </Button>
-                </Link>
-              </div>
-            )}
-          </CardContent>
-        </Card>
       )}
 
       {/* Monthly Journal Meetings & Absence Analytics Chart */}
