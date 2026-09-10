@@ -402,8 +402,8 @@ export default function SiswaClient({ initialStudents }: SiswaClientProps) {
         open={!!detailStudent}
         onOpenChange={() => setDetailStudent(null)}
       >
-        <DialogContent className='bg-white border border-slate-200 text-slate-900 rounded-2xl w-[calc(100vw-1.5rem)] max-w-3xl max-h-[88vh] p-0 shadow-2xl overflow-hidden flex flex-col'>
-          <DialogHeader className='p-5 border-b border-slate-200 shrink-0 bg-slate-50/50 flex flex-row items-center justify-between'>
+        <DialogContent className='bg-white border border-slate-200 text-slate-900 rounded-2xl w-[calc(100vw-1.5rem)] sm:max-w-4xl lg:max-w-5xl max-h-[90vh] p-0 shadow-2xl overflow-hidden flex flex-col'>
+          <DialogHeader className='p-5 sm:px-7 sm:py-5 border-b border-slate-200 shrink-0 bg-slate-50/70 flex flex-row items-center justify-between'>
             <div>
               <DialogTitle className='text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2'>
                 <User className='h-5 w-5 text-emerald-600' />
@@ -425,10 +425,10 @@ export default function SiswaClient({ initialStudents }: SiswaClientProps) {
           </DialogHeader>
 
           {detailStudent && (
-            <div className='flex-1 overflow-y-auto p-6 space-y-6 text-xs text-slate-800'>
+            <div className='flex-1 overflow-y-auto p-5 sm:p-7 space-y-6 text-xs text-slate-800'>
               {/* Header Card Profile Summary */}
-              <div className='bg-emerald-50/60 border border-emerald-200/80 rounded-2xl p-5 flex flex-col sm:flex-row items-center sm:items-start gap-4'>
-                <div className='w-24 h-24 rounded-full overflow-hidden bg-white border-2 border-emerald-300 flex items-center justify-center shrink-0 shadow-sm'>
+              <div className='bg-emerald-50/60 border border-emerald-200/80 rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row items-center sm:items-start gap-5'>
+                <div className='w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden bg-white border-2 border-emerald-300 flex items-center justify-center shrink-0 shadow-sm'>
                   {detailStudent.photo ? (
                     <img
                       src={detailStudent.photo}
@@ -440,29 +440,29 @@ export default function SiswaClient({ initialStudents }: SiswaClientProps) {
                   )}
                 </div>
 
-                <div className='flex-1 space-y-1 text-center sm:text-left'>
-                  <h3 className='text-lg font-extrabold text-slate-900'>
+                <div className='flex-1 space-y-1.5 text-center sm:text-left'>
+                  <h3 className='text-xl sm:text-2xl font-black text-slate-900 tracking-tight'>
                     {detailStudent.name}
                   </h3>
-                  <div className='flex flex-wrap items-center justify-center sm:justify-start gap-2 text-slate-600 text-xs font-medium'>
-                    <span>
-                      NIS: <strong>{detailStudent.nis}</strong>
+                  <div className='flex flex-wrap items-center justify-center sm:justify-start gap-2.5 text-slate-600 text-xs font-medium'>
+                    <span className='bg-white px-2.5 py-1 rounded-lg border border-slate-200/80 shadow-2xs'>
+                      NIS: <strong className='text-slate-900'>{detailStudent.nis}</strong>
                     </span>
                     {detailStudent.nisn && (
-                      <span>
-                        &bull; NISN: <strong>{detailStudent.nisn}</strong>
+                      <span className='bg-white px-2.5 py-1 rounded-lg border border-slate-200/80 shadow-2xs'>
+                        NISN: <strong className='text-slate-900'>{detailStudent.nisn}</strong>
                       </span>
                     )}
-                    <span>
-                      &bull; Kelas: <strong>{detailStudent.className}</strong>
+                    <span className='bg-white px-2.5 py-1 rounded-lg border border-slate-200/80 shadow-2xs'>
+                      Kelas: <strong className='text-emerald-800'>{detailStudent.className}</strong>
                     </span>
                   </div>
                   <div className='pt-1'>
                     <span
-                      className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                      className={`inline-block px-3 py-1 rounded-full text-xs font-bold border ${
                         detailStudent.gender === 'L'
-                          ? 'bg-blue-100 text-blue-800'
-                          : 'bg-rose-100 text-rose-800'
+                          ? 'bg-blue-50 text-blue-800 border-blue-200'
+                          : 'bg-rose-50 text-rose-800 border-rose-200'
                       }`}
                     >
                       {detailStudent.gender === 'L'
@@ -475,7 +475,7 @@ export default function SiswaClient({ initialStudents }: SiswaClientProps) {
                 <Link href={`/siswa/${detailStudent._id}/edit`}>
                   <Button
                     size='sm'
-                    className='bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs px-4 py-2 gap-1.5'
+                    className='bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs px-4 py-2 gap-1.5 shadow-xs cursor-pointer'
                   >
                     <Pencil className='h-3.5 w-3.5' />
                     <span>Edit Biodata</span>
@@ -485,16 +485,16 @@ export default function SiswaClient({ initialStudents }: SiswaClientProps) {
 
               {/* SECTION 1: IDENTITAS & PRIBADI */}
               <div className='space-y-3'>
-                <h4 className='font-bold text-xs uppercase tracking-wider text-emerald-800 border-b border-slate-200 pb-1.5 flex items-center gap-2'>
+                <h4 className='font-bold text-xs uppercase tracking-wider text-emerald-800 border-b border-slate-200 pb-2 flex items-center gap-2'>
                   <User className='h-4 w-4 text-emerald-600' />
                   <span>1. Identitas & Biodata Pribadi</span>
                 </h4>
-                <div className='grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 bg-slate-50 p-4 rounded-xl border border-slate-200/80'>
-                  <div>
-                    <span className='text-slate-500 font-medium block'>
+                <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 bg-slate-50/70 p-4 sm:p-5 rounded-2xl border border-slate-200/80'>
+                  <div className='bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200/70 shadow-2xs'>
+                    <span className='text-slate-500 text-[11px] font-medium block mb-0.5'>
                       Tempat, Tanggal Lahir
                     </span>
-                    <span className='font-bold text-slate-900'>
+                    <span className='font-bold text-slate-900 text-xs sm:text-sm'>
                       {detailStudent.birthPlace || '-'}
                       {detailStudent.birthDate
                         ? `, ${new Date(
@@ -507,19 +507,29 @@ export default function SiswaClient({ initialStudents }: SiswaClientProps) {
                         : ''}
                     </span>
                   </div>
-                  <div>
-                    <span className='text-slate-500 font-medium block'>
+                  <div className='bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200/70 shadow-2xs'>
+                    <span className='text-slate-500 text-[11px] font-medium block mb-0.5'>
+                      Jenis Kelamin
+                    </span>
+                    <span className='font-bold text-slate-900 text-xs sm:text-sm'>
+                      {detailStudent.gender === 'L'
+                        ? 'Laki-laki (L)'
+                        : 'Perempuan (P)'}
+                    </span>
+                  </div>
+                  <div className='bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200/70 shadow-2xs'>
+                    <span className='text-slate-500 text-[11px] font-medium block mb-0.5'>
                       Agama
                     </span>
-                    <span className='font-bold text-slate-900'>
+                    <span className='font-bold text-slate-900 text-xs sm:text-sm'>
                       {detailStudent.religion || '-'}
                     </span>
                   </div>
-                  <div className='sm:col-span-2 pt-1'>
-                    <span className='text-slate-500 font-medium block'>
-                      Alamat Lengkap
+                  <div className='sm:col-span-2 lg:col-span-3 bg-white p-3.5 rounded-xl border border-slate-200/70 shadow-2xs'>
+                    <span className='text-slate-500 text-[11px] font-medium block mb-0.5'>
+                      Alamat Lengkap Siswa
                     </span>
-                    <span className='font-semibold text-slate-900 whitespace-pre-line leading-relaxed'>
+                    <span className='font-semibold text-slate-900 whitespace-pre-line leading-relaxed text-xs sm:text-sm'>
                       {detailStudent.address || '-'}
                     </span>
                   </div>
@@ -528,58 +538,58 @@ export default function SiswaClient({ initialStudents }: SiswaClientProps) {
 
               {/* SECTION 2: DATA ORANG TUA / WALI */}
               <div className='space-y-3'>
-                <h4 className='font-bold text-xs uppercase tracking-wider text-emerald-800 border-b border-slate-200 pb-1.5 flex items-center gap-2'>
+                <h4 className='font-bold text-xs uppercase tracking-wider text-emerald-800 border-b border-slate-200 pb-2 flex items-center gap-2'>
                   <HeartHandshake className='h-4 w-4 text-emerald-600' />
                   <span>2. Data Orang Tua / Wali</span>
                 </h4>
-                <div className='grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 bg-slate-50 p-4 rounded-xl border border-slate-200/80'>
-                  <div>
-                    <span className='text-slate-500 font-medium block'>
+                <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 bg-slate-50/70 p-4 sm:p-5 rounded-2xl border border-slate-200/80'>
+                  <div className='bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200/70 shadow-2xs'>
+                    <span className='text-slate-500 text-[11px] font-medium block mb-0.5'>
                       Nama Ayah Kandung
                     </span>
-                    <span className='font-bold text-slate-900'>
+                    <span className='font-bold text-slate-900 text-xs sm:text-sm'>
                       {detailStudent.fatherName || '-'}
                     </span>
                   </div>
-                  <div>
-                    <span className='text-slate-500 font-medium block'>
+                  <div className='bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200/70 shadow-2xs'>
+                    <span className='text-slate-500 text-[11px] font-medium block mb-0.5'>
                       Pekerjaan Ayah
                     </span>
-                    <span className='font-bold text-slate-900'>
+                    <span className='font-bold text-slate-900 text-xs sm:text-sm'>
                       {detailStudent.fatherJob || '-'}
                     </span>
                   </div>
-                  <div>
-                    <span className='text-slate-500 font-medium block'>
+                  <div className='bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200/70 shadow-2xs'>
+                    <span className='text-slate-500 text-[11px] font-medium block mb-0.5'>
                       Nama Ibu Kandung
                     </span>
-                    <span className='font-bold text-slate-900'>
+                    <span className='font-bold text-slate-900 text-xs sm:text-sm'>
                       {detailStudent.motherName || '-'}
                     </span>
                   </div>
-                  <div>
-                    <span className='text-slate-500 font-medium block'>
+                  <div className='bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200/70 shadow-2xs'>
+                    <span className='text-slate-500 text-[11px] font-medium block mb-0.5'>
                       Pekerjaan Ibu
                     </span>
-                    <span className='font-bold text-slate-900'>
+                    <span className='font-bold text-slate-900 text-xs sm:text-sm'>
                       {detailStudent.motherJob || '-'}
                     </span>
                   </div>
                   {detailStudent.guardianName && (
                     <>
-                      <div>
-                        <span className='text-slate-500 font-medium block'>
-                          Nama Wali
+                      <div className='bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200/70 shadow-2xs sm:col-span-2'>
+                        <span className='text-slate-500 text-[11px] font-medium block mb-0.5'>
+                          Nama Wali Siswa
                         </span>
-                        <span className='font-bold text-slate-900'>
+                        <span className='font-bold text-slate-900 text-xs sm:text-sm'>
                           {detailStudent.guardianName}
                         </span>
                       </div>
-                      <div>
-                        <span className='text-slate-500 font-medium block'>
+                      <div className='bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200/70 shadow-2xs sm:col-span-2'>
+                        <span className='text-slate-500 text-[11px] font-medium block mb-0.5'>
                           Pekerjaan Wali
                         </span>
-                        <span className='font-bold text-slate-900'>
+                        <span className='font-bold text-slate-900 text-xs sm:text-sm'>
                           {detailStudent.guardianJob || '-'}
                         </span>
                       </div>
@@ -590,16 +600,16 @@ export default function SiswaClient({ initialStudents }: SiswaClientProps) {
 
               {/* SECTION 3: RIWAYAT MASUK */}
               <div className='space-y-3'>
-                <h4 className='font-bold text-xs uppercase tracking-wider text-emerald-800 border-b border-slate-200 pb-1.5 flex items-center gap-2'>
+                <h4 className='font-bold text-xs uppercase tracking-wider text-emerald-800 border-b border-slate-200 pb-2 flex items-center gap-2'>
                   <GraduationCap className='h-4 w-4 text-emerald-600' />
                   <span>3. Riwayat Pendaftaran & Sekolah Asal</span>
                 </h4>
-                <div className='grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 bg-slate-50 p-4 rounded-xl border border-slate-200/80'>
-                  <div>
-                    <span className='text-slate-500 font-medium block'>
+                <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 bg-slate-50/70 p-4 sm:p-5 rounded-2xl border border-slate-200/80'>
+                  <div className='bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200/70 shadow-2xs'>
+                    <span className='text-slate-500 text-[11px] font-medium block mb-0.5'>
                       Tanggal Masuk Sekolah
                     </span>
-                    <span className='font-bold text-slate-900'>
+                    <span className='font-bold text-slate-900 text-xs sm:text-sm'>
                       {detailStudent.entryDate
                         ? new Date(detailStudent.entryDate).toLocaleDateString(
                             'id-ID',
@@ -612,27 +622,27 @@ export default function SiswaClient({ initialStudents }: SiswaClientProps) {
                         : '-'}
                     </span>
                   </div>
-                  <div>
-                    <span className='text-slate-500 font-medium block'>
+                  <div className='bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200/70 shadow-2xs'>
+                    <span className='text-slate-500 text-[11px] font-medium block mb-0.5'>
                       Diterima di Tingkat Kelas
                     </span>
-                    <span className='font-bold text-slate-900'>
+                    <span className='font-bold text-slate-900 text-xs sm:text-sm'>
                       {detailStudent.entryClass || '-'}
                     </span>
                   </div>
-                  <div>
-                    <span className='text-slate-500 font-medium block'>
+                  <div className='bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200/70 shadow-2xs'>
+                    <span className='text-slate-500 text-[11px] font-medium block mb-0.5'>
                       Tahun Ajaran Pendaftaran
                     </span>
-                    <span className='font-bold text-slate-900'>
+                    <span className='font-bold text-slate-900 text-xs sm:text-sm'>
                       {detailStudent.entryAcademicYear || '-'}
                     </span>
                   </div>
-                  <div>
-                    <span className='text-slate-500 font-medium block'>
+                  <div className='bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200/70 shadow-2xs'>
+                    <span className='text-slate-500 text-[11px] font-medium block mb-0.5'>
                       Nama Sekolah Asal
                     </span>
-                    <span className='font-bold text-slate-900'>
+                    <span className='font-bold text-slate-900 text-xs sm:text-sm'>
                       {detailStudent.previousSchool || '-'}
                     </span>
                   </div>
@@ -641,11 +651,11 @@ export default function SiswaClient({ initialStudents }: SiswaClientProps) {
             </div>
           )}
 
-          <DialogFooter className='p-4 border-t border-slate-200 bg-slate-50 shrink-0'>
+          <DialogFooter className='p-4 sm:px-7 sm:py-4 border-t border-slate-200 bg-slate-50 shrink-0 flex justify-end'>
             <Button
               onClick={() => setDetailStudent(null)}
               variant='outline'
-              className='border-slate-200 bg-white text-slate-700 text-xs font-semibold rounded-xl'
+              className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl px-5'
             >
               Tutup
             </Button>
@@ -665,8 +675,8 @@ export default function SiswaClient({ initialStudents }: SiswaClientProps) {
             </DialogTitle>
             <DialogDescription className='text-xs text-slate-500 leading-relaxed'>
               Apakah Anda yakin ingin menghapus data siswa{' '}
-              <strong>{selectedStudent?.name}</strong>? Seluruh data presensi,
-              nilai, dan tabungan terkait siswa ini akan ikut terhapus.
+              <strong>{selectedStudent?.name}</strong>? Seluruh data presensi dan
+              nilai terkait siswa ini akan ikut terhapus.
             </DialogDescription>
           </DialogHeader>
 

@@ -25,7 +25,7 @@ async function requireAuth() {
   return session.userId;
 }
 
-const DEFAULT_MENUS = ['/', '/kelas', '/siswa', '/absensi', '/nilai', '/tabungan', '/jurnal'];
+const DEFAULT_MENUS = ['/', '/kelas', '/jadwal-mengajar', '/siswa', '/absensi', '/nilai', '/jurnal'];
 
 export async function getProfile() {
   try {
@@ -75,6 +75,51 @@ export async function getProfile() {
   }
 }
 
+export interface ClassStatItem {
+  className: string;
+  totalStudents: number;
+  maleStudents: number;
+  femaleStudents: number;
+  activeStudents: number;
+}
+
+export async function getClassesStatistics(): Promise<Record<string, ClassStatItem>> {
+  try {
+    await dbConnect();
+    const teacherId = await requireAuth();
+
+    const students = await Student.find({ teacherId })
+      .select('className gender status')
+      .lean();
+
+    const statsMap: Record<string, ClassStatItem> = {};
+
+    for (const s of students) {
+      const cName = (s.className || '').trim();
+      if (!cName) continue;
+      if (!statsMap[cName]) {
+        statsMap[cName] = {
+          className: cName,
+          totalStudents: 0,
+          maleStudents: 0,
+          femaleStudents: 0,
+          activeStudents: 0,
+        };
+      }
+      statsMap[cName].totalStudents += 1;
+      if (s.gender === 'L') statsMap[cName].maleStudents += 1;
+      if (s.gender === 'P') statsMap[cName].femaleStudents += 1;
+      if (s.status === 'Aktif' || !s.status) statsMap[cName].activeStudents += 1;
+    }
+
+    return JSON.parse(JSON.stringify(statsMap));
+  } catch (err: any) {
+    if (isRedirectError(err)) throw err;
+    console.error('Error in getClassesStatistics:', err);
+    return {};
+  }
+}
+
 export async function updateProfile(data: {
   name: string;
   email: string;
@@ -90,6 +135,11 @@ export async function updateProfile(data: {
     await dbConnect();
     const teacherId = await requireAuth();
 
+    const teacher = await Teacher.findById(teacherId);
+    if (!teacher) {
+      throw new Error('Data guru tidak ditemukan.');
+    }
+
     if (!data.name || data.name.trim().length < 3) {
       throw new Error('Nama lengkap & gelar minimal 3 karakter.');
     }
@@ -102,30 +152,45 @@ export async function updateProfile(data: {
       throw new Error('Nama sekolah wajib diisi minimal 3 karakter.');
     }
 
-    const rawClasses = Array.isArray(data.classes) && data.classes.length > 0
-      ? data.classes.map((c) => c.trim()).filter(Boolean)
-      : (data.className?.trim() ? [data.className.trim()] : []);
-    
-    const uniqueClasses = Array.from(new Set(rawClasses));
+    // Retain existing classes if not explicitly provided in the profile update form
+    let uniqueClasses: string[] = [];
+    if (Array.isArray(data.classes) && data.classes.length > 0) {
+      uniqueClasses = Array.from(
+        new Set(data.classes.map((c) => c.trim()).filter(Boolean))
+      );
+    } else if (data.className?.trim()) {
+      uniqueClasses = [data.className.trim()];
+    } else if (Array.isArray(teacher.classes) && teacher.classes.length > 0) {
+      uniqueClasses = teacher.classes;
+    } else if (teacher.className?.trim()) {
+      uniqueClasses = [teacher.className.trim()];
+    }
+
     if (uniqueClasses.length === 0) {
-      throw new Error('Setidaknya 1 kelas diajar wajib dimasukkan.');
+      uniqueClasses = ['Kelas 1'];
     }
 
-    const selectedActiveClass = data.activeClass && uniqueClasses.includes(data.activeClass.trim())
-      ? data.activeClass.trim()
-      : uniqueClasses[0];
+    const selectedActiveClass =
+      data.activeClass && uniqueClasses.includes(data.activeClass.trim())
+        ? data.activeClass.trim()
+        : (teacher.activeClass && uniqueClasses.includes(teacher.activeClass)
+            ? teacher.activeClass
+            : uniqueClasses[0]);
 
-    if (!data.nip || data.nip.trim() === '-' || data.nip.trim().length < 3) {
-      throw new Error('NIP/NUPTK Guru wajib diisi dengan NIP/NUPTK yang valid (tidak boleh "-").');
-    }
+    const finalNip =
+      data.nip !== undefined && data.nip.trim() !== ''
+        ? data.nip.trim()
+        : (teacher.nip || '-');
 
-    if (!data.principalName || data.principalName.trim().length < 3) {
-      throw new Error('Nama Kepala Sekolah minimal 3 karakter.');
-    }
+    const finalPrincipalName =
+      data.principalName !== undefined && data.principalName.trim() !== ''
+        ? data.principalName.trim()
+        : (teacher.principalName || '');
 
-    if (!data.principalNip || data.principalNip.trim() === '-' || data.principalNip.trim().length < 3) {
-      throw new Error('NIP Kepala Sekolah wajib diisi dengan NIP yang valid (tidak boleh "-").');
-    }
+    const finalPrincipalNip =
+      data.principalNip !== undefined && data.principalNip.trim() !== ''
+        ? data.principalNip.trim()
+        : (teacher.principalNip || '-');
 
     const normalizedEmail = data.email.toLowerCase().trim();
 
@@ -152,9 +217,9 @@ export async function updateProfile(data: {
           className: selectedActiveClass,
           classes: uniqueClasses,
           activeClass: selectedActiveClass,
-          nip: data.nip.trim(),
-          principalName: data.principalName?.trim() || '',
-          principalNip: data.principalNip.trim(),
+          nip: finalNip,
+          principalName: finalPrincipalName,
+          principalNip: finalPrincipalNip,
         },
       },
       { new: true, runValidators: true }
@@ -166,10 +231,10 @@ export async function updateProfile(data: {
       {
         $set: {
           teacherName: data.name.trim(),
-          nip: data.nip.trim(),
+          nip: finalNip,
           schoolName: data.schoolName?.trim() || '',
-          supervisorName: data.principalName?.trim() || '',
-          supervisorNip: data.principalNip.trim(),
+          supervisorName: finalPrincipalName,
+          supervisorNip: finalPrincipalNip,
         },
       }
     );
@@ -305,7 +370,6 @@ export async function switchActiveClass(newClass: string) {
     revalidatePath('/siswa');
     revalidatePath('/absensi');
     revalidatePath('/nilai');
-    revalidatePath('/tabungan');
     revalidatePath('/jurnal');
 
     return { success: true, activeClass: cleanClass, classes };
