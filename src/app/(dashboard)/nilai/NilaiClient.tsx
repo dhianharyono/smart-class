@@ -8,6 +8,9 @@ import {
   Loader2,
   Check,
   Plus,
+  Pencil,
+  Trash2,
+  AlertTriangle,
   GraduationCap,
   Settings,
   Printer,
@@ -48,6 +51,9 @@ import {
   saveBulkGrades,
   getAllGradesRecap,
   getAllSubjectsGradesRecap,
+  addSubject,
+  renameSubject,
+  deleteSubject,
 } from '@/actions/gradeActions';
 import { updateTeacherKkm } from '@/actions/dashboardActions';
 import { getAttendanceHeaderInfo } from '@/actions/attendanceActions';
@@ -128,6 +134,15 @@ export default function NilaiClient({
   const [localGrades, setLocalGrades] = useState<GradeRow[]>([]);
   const [newSubjectName, setNewSubjectName] = useState('');
   const [addSubjectOpen, setAddSubjectOpen] = useState(false);
+  const [isAddingSubject, setIsAddingSubject] = useState(false);
+
+  // Edit & Delete Subject states
+  const [editSubjectOpen, setEditSubjectOpen] = useState(false);
+  const [editSubjectName, setEditSubjectName] = useState('');
+  const [isRenamingSubject, setIsRenamingSubject] = useState(false);
+
+  const [deleteSubjectOpen, setDeleteSubjectOpen] = useState(false);
+  const [isDeletingSubject, setIsDeletingSubject] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   // Fetch header info for formal print document
@@ -240,7 +255,7 @@ export default function NilaiClient({
     );
   };
 
-  const handleAddSubject = (e: React.FormEvent) => {
+  const handleAddSubject = async (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = newSubjectName.trim();
     if (!trimmed) {
@@ -253,11 +268,109 @@ export default function NilaiClient({
       return;
     }
 
-    setSubjects((prev) => [...prev, trimmed].sort());
-    setSelectedSubject(trimmed);
-    setNewSubjectName('');
-    setAddSubjectOpen(false);
-    toast.success(`Berhasil menambahkan mata pelajaran "${trimmed}"`);
+    setIsAddingSubject(true);
+    try {
+      const res = await addSubject(trimmed);
+      if (res.success && res.subjects) {
+        setSubjects(res.subjects);
+        setSelectedSubject(trimmed);
+        setNewSubjectName('');
+        setAddSubjectOpen(false);
+        queryClient.invalidateQueries({ queryKey: ['grades'] });
+        queryClient.invalidateQueries({ queryKey: ['gradesRecap'] });
+        queryClient.invalidateQueries({ queryKey: ['allSubjectsGradesRecap'] });
+        toast.success(`Berhasil menambahkan mata pelajaran "${trimmed}"`);
+      } else {
+        toast.error(res.error || 'Gagal menambahkan mata pelajaran.');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Terjadi kesalahan saat menambahkan mata pelajaran.');
+    } finally {
+      setIsAddingSubject(false);
+    }
+  };
+
+  const openEditSubjectDialog = () => {
+    if (!selectedSubject) return;
+    setEditSubjectName(selectedSubject);
+    setEditSubjectOpen(true);
+  };
+
+  const handleRenameSubject = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = editSubjectName.trim();
+    if (!trimmed) {
+      toast.error('Nama mata pelajaran tidak boleh kosong!');
+      return;
+    }
+
+    if (trimmed.toLowerCase() === selectedSubject.toLowerCase()) {
+      setEditSubjectOpen(false);
+      return;
+    }
+
+    if (
+      subjects.some(
+        (s) =>
+          s.toLowerCase() === trimmed.toLowerCase() &&
+          s.toLowerCase() !== selectedSubject.toLowerCase()
+      )
+    ) {
+      toast.error('Mata pelajaran dengan nama tersebut sudah ada.');
+      return;
+    }
+
+    setIsRenamingSubject(true);
+    try {
+      const res = await renameSubject(selectedSubject, trimmed);
+      if (res.success && res.subjects) {
+        setSubjects(res.subjects);
+        setSelectedSubject(trimmed);
+        setEditSubjectOpen(false);
+        queryClient.invalidateQueries({ queryKey: ['grades'] });
+        queryClient.invalidateQueries({ queryKey: ['gradesRecap'] });
+        queryClient.invalidateQueries({ queryKey: ['allSubjectsGradesRecap'] });
+        toast.success(`Mata pelajaran berhasil diubah menjadi "${trimmed}"`);
+      } else {
+        toast.error(res.error || 'Gagal mengubah nama mata pelajaran.');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Terjadi kesalahan saat mengubah nama mata pelajaran.');
+    } finally {
+      setIsRenamingSubject(false);
+    }
+  };
+
+  const handleDeleteSubject = async () => {
+    if (!selectedSubject) return;
+    if (subjects.length <= 1) {
+      toast.error('Minimal harus ada satu mata pelajaran di kelas.');
+      return;
+    }
+
+    setIsDeletingSubject(true);
+    try {
+      const subjectToDelete = selectedSubject;
+      const res = await deleteSubject(subjectToDelete);
+      if (res.success && res.subjects) {
+        setSubjects(res.subjects);
+        const nextSubject = res.subjects[0] || '';
+        setSelectedSubject(nextSubject);
+        setDeleteSubjectOpen(false);
+        queryClient.invalidateQueries({ queryKey: ['grades'] });
+        queryClient.invalidateQueries({ queryKey: ['gradesRecap'] });
+        queryClient.invalidateQueries({ queryKey: ['allSubjectsGradesRecap'] });
+        toast.success(
+          `Mata pelajaran "${subjectToDelete}" dan seluruh nilai terkait berhasil dihapus.`
+        );
+      } else {
+        toast.error(res.error || 'Gagal menghapus mata pelajaran.');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Terjadi kesalahan saat menghapus mata pelajaran.');
+    } finally {
+      setIsDeletingSubject(false);
+    }
   };
 
   const handleSave = () => {
@@ -532,24 +645,163 @@ export default function NilaiClient({
       {activeViewTab === 'data' && (
         <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white border border-slate-200/80 rounded-2xl p-4 shadow-xs print:hidden'>
           <div className='flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1 w-full'>
-            {/* Subject Dropdown */}
-            <div className='w-full sm:max-w-xs sm:flex-1'>
-              <Select
-                value={selectedSubject}
-                onValueChange={(val) => val && setSelectedSubject(val)}
+            {/* Subject Dropdown with Edit and Delete Action Buttons */}
+            <div className='flex items-center gap-1.5 w-full sm:max-w-md sm:flex-1'>
+              <div className='flex-1'>
+                <Select
+                  value={selectedSubject}
+                  onValueChange={(val) => val && setSelectedSubject(val)}
+                >
+                  <SelectTrigger className='bg-slate-50 border-slate-200 text-slate-900 rounded-xl h-10 w-full font-medium'>
+                    <SelectValue placeholder='Pilih Mata Pelajaran' />
+                  </SelectTrigger>
+                  <SelectContent className='bg-white border-slate-200 text-slate-900 rounded-xl'>
+                    {subjects.map((subj) => (
+                      <SelectItem key={subj} value={subj}>
+                        {subj}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Edit Subject Button */}
+              <Button
+                type='button'
+                variant='ghost'
+                size='icon'
+                onClick={openEditSubjectDialog}
+                disabled={!selectedSubject}
+                title={`Ubah nama mata pelajaran "${selectedSubject}"`}
+                className='h-10 w-10 shrink-0 rounded-xl border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 text-slate-600 transition-colors cursor-pointer'
               >
-                <SelectTrigger className='bg-slate-50 border-slate-200 text-slate-900 rounded-xl h-10 w-full'>
-                  <SelectValue placeholder='Pilih Mata Pelajaran' />
-                </SelectTrigger>
-                <SelectContent className='bg-white border-slate-200 text-slate-900 rounded-xl'>
-                  {subjects.map((subj) => (
-                    <SelectItem key={subj} value={subj}>
-                      {subj}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <Pencil className='h-4 w-4' />
+                <span className='sr-only'>Edit Mata Pelajaran</span>
+              </Button>
+
+              {/* Delete Subject Button */}
+              <Button
+                type='button'
+                variant='ghost'
+                size='icon'
+                onClick={() => setDeleteSubjectOpen(true)}
+                disabled={!selectedSubject || subjects.length <= 1}
+                title={
+                  subjects.length <= 1
+                    ? 'Minimal harus ada 1 mata pelajaran'
+                    : `Hapus mata pelajaran "${selectedSubject}"`
+                }
+                className='h-10 w-10 shrink-0 rounded-xl border border-slate-200 bg-slate-50 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 text-slate-600 transition-colors cursor-pointer disabled:opacity-40'
+              >
+                <Trash2 className='h-4 w-4' />
+                <span className='sr-only'>Hapus Mata Pelajaran</span>
+              </Button>
             </div>
+
+            {/* Edit Subject Dialog */}
+            <Dialog open={editSubjectOpen} onOpenChange={setEditSubjectOpen}>
+              <DialogContent className='bg-white border border-slate-200 text-slate-900 rounded-2xl max-w-sm p-5 sm:p-6 shadow-2xl'>
+                <form onSubmit={handleRenameSubject}>
+                  <DialogHeader>
+                    <DialogTitle className='text-lg font-bold text-slate-900 flex items-center gap-2'>
+                      <Pencil className='h-4 w-4 text-emerald-600' />
+                      Ubah Nama Mapel
+                    </DialogTitle>
+                    <DialogDescription className='text-xs text-slate-500'>
+                      Ubah nama mata pelajaran &quot;{selectedSubject}&quot;. Seluruh nilai siswa yang sudah tersimpan akan otomatis disinkronkan.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className='space-y-4 py-4'>
+                    <div className='space-y-1.5'>
+                      <Label
+                        htmlFor='edit-subj-name'
+                        className='text-slate-700 text-sm font-semibold'
+                      >
+                        Nama Mata Pelajaran
+                      </Label>
+                      <Input
+                        id='edit-subj-name'
+                        required
+                        value={editSubjectName}
+                        onChange={(e) => setEditSubjectName(e.target.value)}
+                        className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl'
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter className='gap-2 sm:gap-0'>
+                    <Button
+                      type='button'
+                      variant='ghost'
+                      onClick={() => setEditSubjectOpen(false)}
+                      className='text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 rounded-xl'
+                    >
+                      Batal
+                    </Button>
+                    <Button
+                      type='submit'
+                      disabled={isRenamingSubject || !editSubjectName.trim()}
+                      className='bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl px-4 shadow-xs'
+                    >
+                      {isRenamingSubject ? (
+                        <Loader2 className='h-4 w-4 animate-spin' />
+                      ) : (
+                        'Simpan Perubahan'
+                      )}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+
+            {/* Delete Subject Confirmation Dialog */}
+            <Dialog open={deleteSubjectOpen} onOpenChange={setDeleteSubjectOpen}>
+              <DialogContent className='bg-white border border-slate-200 text-slate-900 rounded-2xl max-w-md p-5 sm:p-6 shadow-2xl'>
+                <DialogHeader>
+                  <div className='w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center mb-2'>
+                    <AlertTriangle className='h-5 w-5' />
+                  </div>
+                  <DialogTitle className='text-lg font-bold text-slate-900'>
+                    Hapus Mata Pelajaran?
+                  </DialogTitle>
+                  <div className='text-xs text-slate-500 space-y-2 pt-1'>
+                    <p>
+                      Apakah Anda yakin ingin menghapus mata pelajaran{' '}
+                      <strong className='text-slate-800 font-semibold'>
+                        &quot;{selectedSubject}&quot;
+                      </strong>
+                      ?
+                    </p>
+                    <p className='text-rose-600 font-medium bg-rose-50 border border-rose-100 rounded-xl p-3'>
+                      Peringatan: Seluruh riwayat nilai siswa (Tugas, UH, UTS, UAS) pada mata pelajaran ini akan dihapus secara permanen dari basis data.
+                    </p>
+                  </div>
+                </DialogHeader>
+                <DialogFooter className='gap-2 sm:gap-0 pt-3'>
+                  <Button
+                    type='button'
+                    variant='ghost'
+                    onClick={() => setDeleteSubjectOpen(false)}
+                    disabled={isDeletingSubject}
+                    className='text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 rounded-xl'
+                  >
+                    Batal
+                  </Button>
+                  <Button
+                    type='button'
+                    onClick={handleDeleteSubject}
+                    disabled={isDeletingSubject}
+                    className='bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl px-4 shadow-xs gap-1.5 cursor-pointer'
+                  >
+                    {isDeletingSubject ? (
+                      <Loader2 className='h-4 w-4 animate-spin' />
+                    ) : (
+                      <Trash2 className='h-4 w-4' />
+                    )}
+                    Hapus Mata Pelajaran
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
 
             {/* Add Subject Dialog */}
             <Dialog open={addSubjectOpen} onOpenChange={setAddSubjectOpen}>
@@ -591,15 +843,20 @@ export default function NilaiClient({
                       type='button'
                       variant='ghost'
                       onClick={() => setAddSubjectOpen(false)}
-                      className='text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200'
+                      className='text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 rounded-xl'
                     >
                       Batal
                     </Button>
                     <Button
                       type='submit'
+                      disabled={isAddingSubject || !newSubjectName.trim()}
                       className='bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl px-4 shadow-xs'
                     >
-                      Tambah
+                      {isAddingSubject ? (
+                        <Loader2 className='h-4 w-4 animate-spin' />
+                      ) : (
+                        'Tambah'
+                      )}
                     </Button>
                   </DialogFooter>
                 </form>
@@ -609,15 +866,15 @@ export default function NilaiClient({
             <span className='hidden sm:inline text-slate-300'>|</span>
 
             {/* Test Category Dropdown */}
-            <div className='w-full sm:w-48'>
+            <div className='w-full sm:w-56 shrink-0'>
               <Select
                 value={selectedCategory}
                 onValueChange={(val) => val && setSelectedCategory(val as any)}
               >
-                <SelectTrigger className='bg-slate-50 border-slate-200 text-slate-900 rounded-xl h-10'>
+                <SelectTrigger className='bg-slate-50 border-slate-200 text-slate-900 rounded-xl h-10 px-3.5'>
                   <SelectValue placeholder='Pilih Kategori' />
                 </SelectTrigger>
-                <SelectContent className='bg-white border-slate-200 text-slate-900 rounded-xl'>
+                <SelectContent className='bg-white border-slate-200 text-slate-900 rounded-xl min-w-[220px] shadow-xl'>
                   <SelectItem value='Tugas'>Tugas</SelectItem>
                   <SelectItem value='UH'>UH (Ulangan Harian)</SelectItem>
                   <SelectItem value='UTS'>UTS (Tengah Semester)</SelectItem>

@@ -25,22 +25,169 @@ async function requireAuth() {
 }
 
 
+const DEFAULT_SUBJECTS = [
+  'Matematika',
+  'IPA',
+  'IPS',
+  'Bahasa Indonesia',
+  'Bahasa Inggris',
+  'Pendidikan Pancasila',
+];
+
 export async function getSubjects() {
   try {
     await dbConnect();
     const teacherId = await requireAuth();
-    const subjects = await Grade.distinct('subject', { teacherId });
-    // Return default subjects if none exist to get the user started
-    if (subjects.length === 0) {
-      return ['Matematika', 'IPA', 'IPS', 'Bahasa Indonesia', 'Bahasa Inggris', 'Pendidikan Pancasila'];
+    const teacher = await Teacher.findById(teacherId);
+    if (!teacher) {
+      throw new Error('Data guru tidak ditemukan.');
     }
-    return subjects.sort();
+
+    if (teacher.subjects && teacher.subjects.length > 0) {
+      return teacher.subjects;
+    }
+
+    const distinctGrades = await Grade.distinct('subject', { teacherId });
+    const initialList = Array.from(new Set([...DEFAULT_SUBJECTS, ...distinctGrades]));
+    teacher.subjects = initialList;
+    await teacher.save();
+    return teacher.subjects;
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
     }
     console.error('Error fetching subjects:', error);
     throw new Error(error.message || 'Failed to fetch subjects.');
+  }
+}
+
+export async function addSubject(name: string) {
+  try {
+    await dbConnect();
+    const teacherId = await requireAuth();
+    const trimmed = name.trim();
+    if (!trimmed) {
+      return { success: false, error: 'Nama mata pelajaran tidak boleh kosong.' };
+    }
+
+    const teacher = await Teacher.findById(teacherId);
+    if (!teacher) {
+      return { success: false, error: 'Data guru tidak ditemukan.' };
+    }
+
+    const currentSubjects =
+      teacher.subjects && teacher.subjects.length > 0
+        ? [...teacher.subjects]
+        : [...DEFAULT_SUBJECTS];
+
+    if (currentSubjects.some((s) => s.toLowerCase() === trimmed.toLowerCase())) {
+      return { success: false, error: `Mata pelajaran "${trimmed}" sudah ada.` };
+    }
+
+    currentSubjects.push(trimmed);
+    teacher.subjects = currentSubjects;
+    await teacher.save();
+
+    revalidatePath('/nilai');
+    return { success: true, subjects: teacher.subjects };
+  } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+    console.error('Error adding subject:', error);
+    return { success: false, error: error.message || 'Gagal menambahkan mata pelajaran.' };
+  }
+}
+
+export async function renameSubject(oldName: string, newName: string) {
+  try {
+    await dbConnect();
+    const teacherId = await requireAuth();
+    const trimmedOld = oldName.trim();
+    const trimmedNew = newName.trim();
+
+    if (!trimmedOld || !trimmedNew) {
+      return { success: false, error: 'Nama mata pelajaran tidak boleh kosong.' };
+    }
+
+    if (trimmedOld.toLowerCase() === trimmedNew.toLowerCase()) {
+      return { success: true };
+    }
+
+    const teacher = await Teacher.findById(teacherId);
+    if (!teacher) {
+      return { success: false, error: 'Data guru tidak ditemukan.' };
+    }
+
+    const currentSubjects =
+      teacher.subjects && teacher.subjects.length > 0
+        ? [...teacher.subjects]
+        : [...DEFAULT_SUBJECTS];
+
+    if (
+      currentSubjects.some(
+        (s) =>
+          s.toLowerCase() === trimmedNew.toLowerCase() &&
+          s.toLowerCase() !== trimmedOld.toLowerCase()
+      )
+    ) {
+      return { success: false, error: `Mata pelajaran "${trimmedNew}" sudah ada.` };
+    }
+
+    const updatedSubjects = currentSubjects.map((s) =>
+      s === trimmedOld ? trimmedNew : s
+    );
+    teacher.subjects = updatedSubjects;
+    await teacher.save();
+
+    // Update all grades stored under this subject for this teacher
+    await Grade.updateMany(
+      { teacherId, subject: trimmedOld },
+      { $set: { subject: trimmedNew } }
+    );
+
+    revalidatePath('/nilai');
+    return { success: true, subjects: updatedSubjects };
+  } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+    console.error('Error renaming subject:', error);
+    return { success: false, error: error.message || 'Gagal mengubah nama mata pelajaran.' };
+  }
+}
+
+export async function deleteSubject(subjectName: string) {
+  try {
+    await dbConnect();
+    const teacherId = await requireAuth();
+    const trimmed = subjectName.trim();
+
+    const teacher = await Teacher.findById(teacherId);
+    if (!teacher) {
+      return { success: false, error: 'Data guru tidak ditemukan.' };
+    }
+
+    const currentSubjects =
+      teacher.subjects && teacher.subjects.length > 0
+        ? [...teacher.subjects]
+        : [...DEFAULT_SUBJECTS];
+
+    const updatedSubjects = currentSubjects.filter((s) => s !== trimmed);
+    teacher.subjects = updatedSubjects;
+    await teacher.save();
+
+    // Delete all grade records for this subject and teacher
+    await Grade.deleteMany({ teacherId, subject: trimmed });
+
+    revalidatePath('/nilai');
+    return { success: true, subjects: updatedSubjects };
+  } catch (error: any) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+    console.error('Error deleting subject:', error);
+    return { success: false, error: error.message || 'Gagal menghapus mata pelajaran.' };
   }
 }
 
@@ -239,10 +386,11 @@ export async function getAllSubjectsGradesRecap() {
     const teacherId = await requireAuth();
 
     const students = await Student.find({ teacherId }).sort({ name: 1 }).lean();
-
-    const defaultSubjects = ['Matematika', 'IPA', 'IPS', 'Bahasa Indonesia', 'Bahasa Inggris', 'Pendidikan Pancasila'];
-    const distinctSubjects = await Grade.distinct('subject', { teacherId });
-    const subjects = Array.from(new Set([...defaultSubjects, ...distinctSubjects])).sort();
+    const teacher = await Teacher.findById(teacherId).lean();
+    const subjects =
+      teacher?.subjects && teacher.subjects.length > 0
+        ? teacher.subjects
+        : DEFAULT_SUBJECTS;
 
     const grades = await Grade.find({ teacherId }).lean();
 

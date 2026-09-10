@@ -16,6 +16,7 @@ export interface ITeacher extends Document {
   kkm: number;
   isFirstLogin?: boolean;
   enabledMenus?: string[];
+  subjects?: string[];
   isEmailVerified?: boolean;
   emailVerificationToken?: string;
   emailVerificationExpires?: Date;
@@ -27,11 +28,20 @@ export interface ITeacher extends Document {
 const DEFAULT_MENUS = [
   '/',
   '/kelas',
+  '/jadwal-mengajar',
   '/siswa',
   '/absensi',
   '/nilai',
-  '/tabungan',
   '/jurnal',
+];
+
+const DEFAULT_SUBJECTS = [
+  'Matematika',
+  'IPA',
+  'IPS',
+  'Bahasa Indonesia',
+  'Bahasa Inggris',
+  'Pendidikan Pancasila',
 ];
 
 const TeacherSchema = new Schema<ITeacher>({
@@ -50,6 +60,7 @@ const TeacherSchema = new Schema<ITeacher>({
   kkm: { type: Number, default: 70, min: 0, max: 100 },
   isFirstLogin: { type: Boolean, default: true },
   enabledMenus: { type: [String], default: DEFAULT_MENUS },
+  subjects: { type: [String], default: DEFAULT_SUBJECTS },
   isEmailVerified: { type: Boolean, default: false },
   emailVerificationToken: { type: String },
   emailVerificationExpires: { type: Date },
@@ -63,7 +74,8 @@ if (
   (!mongoose.models.Teacher.schema.path('classes') ||
     !mongoose.models.Teacher.schema.path('activeClass') ||
     !mongoose.models.Teacher.schema.path('principalName') ||
-    !mongoose.models.Teacher.schema.path('tokenVersion'))
+    !mongoose.models.Teacher.schema.path('tokenVersion') ||
+    !mongoose.models.Teacher.schema.path('subjects'))
 ) {
   delete (mongoose.models as any).Teacher;
 }
