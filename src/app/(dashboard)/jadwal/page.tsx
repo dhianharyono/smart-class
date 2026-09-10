@@ -1,8 +1,7 @@
-import React from 'react';
-import JadwalClient from './JadwalClient';
+import { redirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
 export default function JadwalPage() {
-  return <JadwalClient />;
+  redirect('/jadwal-mengajar');
 }
