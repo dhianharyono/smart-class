@@ -207,6 +207,46 @@ export default function JadwalMengajarClient() {
   });
 
   // Load from LocalStorage
+  const [kopSettings, setKopSettings] = useState<{
+    useOfficialKop: boolean;
+    schoolName: string;
+    subHeader1: string;
+    subHeader2: string;
+    subHeader3: string;
+    addressLine: string;
+    cityRegency: string;
+    logoUrl: string;
+  }>({
+    useOfficialKop: false,
+    schoolName: '',
+    subHeader1: '',
+    subHeader2: '',
+    subHeader3: '',
+    addressLine: '',
+    cityRegency: '',
+    logoUrl: '/icon.svg',
+  });
+
+  const [sigSettings, setSigSettings] = useState<{
+    supervisorTitle: string;
+    supervisorName: string;
+    supervisorNip: string;
+    teacherTitle: string;
+    teacherName: string;
+    teacherNip: string;
+    place: string;
+    date: string;
+  }>({
+    supervisorTitle: 'Kepala Sekolah',
+    supervisorName: '',
+    supervisorNip: '',
+    teacherTitle: 'Guru Mata Pelajaran / Wali Kelas',
+    teacherName: '',
+    teacherNip: '',
+    place: 'Bandung',
+    date: '',
+  });
+
   useEffect(() => {
     try {
       const saved = localStorage.getItem('smart_class_jadwal_mengajar');
@@ -215,6 +255,16 @@ export default function JadwalMengajarClient() {
         if (Array.isArray(parsed) && parsed.length > 0) {
           setTeachingSlots(parsed);
         }
+      }
+      const savedKop = localStorage.getItem('smart_class_kop_settings');
+      if (savedKop) {
+        const parsedKop = JSON.parse(savedKop);
+        setKopSettings((prev) => ({ ...prev, ...parsedKop }));
+      }
+      const savedSig = localStorage.getItem('smart_class_sig_settings');
+      if (savedSig) {
+        const parsedSig = JSON.parse(savedSig);
+        setSigSettings((prev) => ({ ...prev, ...parsedSig }));
       }
     } catch (e) {}
   }, []);
@@ -956,19 +1006,91 @@ export default function JadwalMengajarClient() {
       )}
 
       {/* PRINT VIEW (Clean A4 Document layout for print) */}
-      <div className='hidden print:block p-4 space-y-6 text-black'>
-        <div className='text-center border-b-2 border-black pb-4'>
-          <h2 className='text-xl font-bold uppercase tracking-wide'>
-            {profile?.schoolName || 'SMART CLASS'}
-          </h2>
-          <h3 className='text-base font-bold uppercase mt-0.5'>
-            JADWAL MENGAJAR GURU (TATAP MUKA MINGGUAN)
-          </h3>
-          <p className='text-xs mt-1'>
-            Nama Guru: <strong>{profile?.name || '-'}</strong> | NIP:{' '}
-            {profile?.nip || '-'}
-          </p>
-        </div>
+      <div className='hidden print:block p-0 space-y-6 text-black'>
+        {kopSettings.useOfficialKop ? (
+          <div className='mb-6'>
+            <div className='flex items-center justify-between gap-4'>
+              {/* Left: School Emblem */}
+              <div className='w-28 shrink-0 flex items-center justify-center'>
+                <img
+                  src={kopSettings.logoUrl || '/icon.svg'}
+                  alt='Logo Sekolah'
+                  className='w-24 h-24 object-contain'
+                />
+              </div>
+
+              {/* Center: Official Letterhead Text */}
+              <div className='flex-1 text-center font-serif text-black space-y-[2px] px-1'>
+                {Boolean(kopSettings.schoolName?.trim()) && (
+                  <div className='font-serif font-bold uppercase text-lg leading-tight tracking-normal'>
+                    {kopSettings.schoolName}
+                  </div>
+                )}
+                {Boolean(kopSettings.subHeader1?.trim()) && (
+                  <div className='font-serif font-normal uppercase text-xs leading-tight tracking-normal'>
+                    {kopSettings.subHeader1}
+                  </div>
+                )}
+                {Boolean(kopSettings.subHeader2?.trim()) && (
+                  <div className='font-serif font-normal text-[11px] leading-tight'>
+                    {kopSettings.subHeader2}
+                  </div>
+                )}
+                {Boolean(kopSettings.subHeader3?.trim()) && (
+                  <div className='font-serif font-normal text-[11px] leading-tight'>
+                    {kopSettings.subHeader3}
+                  </div>
+                )}
+                {Boolean(kopSettings.addressLine?.trim()) && (
+                  <div className='font-serif font-normal text-[11px] leading-tight'>
+                    {kopSettings.addressLine}
+                  </div>
+                )}
+                {Boolean(kopSettings.cityRegency?.trim()) && (
+                  <div className='font-serif font-bold uppercase text-xs leading-tight tracking-normal'>
+                    {kopSettings.cityRegency}
+                  </div>
+                )}
+              </div>
+
+              {/* Right spacer for symmetry */}
+              <div className='w-28 shrink-0' aria-hidden='true' />
+            </div>
+
+            {/* Double line divider */}
+            <div className='mt-2.5 mb-4 space-y-[2px]'>
+              <div className='border-b-[3px] border-black' />
+              <div className='border-b border-black' />
+            </div>
+
+            {/* Title */}
+            <div className='text-center space-y-1 mb-4'>
+              <h2 className='text-base font-bold uppercase tracking-wide'>
+                JADWAL MENGAJAR GURU (TATAP MUKA MINGGUAN)
+              </h2>
+              <p className='text-xs'>
+                Nama Guru:{' '}
+                <strong>
+                  {profile?.name || sigSettings.teacherName || '-'}
+                </strong>{' '}
+                | NIP: {profile?.nip || sigSettings.teacherNip || '-'}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className='text-center border-b-2 border-black pb-4'>
+            <h2 className='text-xl font-bold uppercase tracking-wide'>
+              {profile?.schoolName || 'SMART CLASS'}
+            </h2>
+            <h3 className='text-base font-bold uppercase mt-0.5'>
+              JADWAL MENGAJAR GURU (TATAP MUKA MINGGUAN)
+            </h3>
+            <p className='text-xs mt-1'>
+              Nama Guru: <strong>{profile?.name || '-'}</strong> | NIP:{' '}
+              {profile?.nip || '-'}
+            </p>
+          </div>
+        )}
 
         <table className='w-full border-collapse border border-black text-xs'>
           <thead>
@@ -1029,25 +1151,73 @@ export default function JadwalMengajarClient() {
           </tbody>
         </table>
 
-        <div className='flex justify-between items-start pt-8 text-xs'>
-          <div className='text-center'>
-            <p>Mengetahui,</p>
-            <p className='font-bold mt-1'>Kepala Sekolah</p>
-            <div className='h-16' />
-            <p className='font-bold underline'>
-              {profile?.principalName || '................................'}
-            </p>
-            <p>
-              NIP. {profile?.principalNip || '................................'}
-            </p>
-          </div>
-          <div className='text-center'>
-            <p>Guru Mata Pelajaran / Wali Kelas,</p>
-            <div className='h-20' />
-            <p className='font-bold underline'>
-              {profile?.name || '................................'}
-            </p>
-            <p>NIP. {profile?.nip || '................................'}</p>
+        <div className='pt-8 text-xs break-inside-avoid'>
+          <div className='grid grid-cols-2 gap-8'>
+            {/* Kolom Kiri: Pengesahan Kepala Sekolah */}
+            <div className='w-full max-w-[280px] space-y-1.5 text-left'>
+              {/* Baris 1: Mengetahui, */}
+              <p className='font-bold h-6 flex items-center'>
+                Mengetahui,
+              </p>
+              {/* Baris 2: Jabatan */}
+              <p className='font-bold h-6 flex items-center'>
+                {sigSettings.supervisorTitle || 'Kepala Sekolah'}
+              </p>
+              {/* Baris 3: Ruang Tanda Tangan */}
+              <div className='h-16' />
+              {/* Baris 4: Nama */}
+              <p className='font-bold underline h-6 flex items-center'>
+                {sigSettings.supervisorName ||
+                  profile?.principalName ||
+                  '................................'}
+              </p>
+              {/* Baris 5: NIP */}
+              <div className='flex items-center gap-1 h-5'>
+                <span>NIP/NUPTK.</span>
+                <span>
+                  {sigSettings.supervisorNip ||
+                    profile?.principalNip ||
+                    '................................'}
+                </span>
+              </div>
+            </div>
+
+            {/* Kolom Kanan: Guru (Rata Kanan) */}
+            <div className='flex justify-end'>
+              <div className='w-full max-w-[280px] space-y-1.5 flex flex-col items-end text-right'>
+                {/* Baris 1: Tempat & Tanggal */}
+                <p className='font-bold h-6 flex items-center justify-end w-full text-right'>
+                  {sigSettings.place ? `${sigSettings.place}, ` : ''}
+                  {sigSettings.date ||
+                    new Date().toLocaleDateString('id-ID', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                    })}
+                </p>
+                {/* Baris 2: Jabatan */}
+                <p className='font-bold h-6 flex items-center justify-end w-full text-right'>
+                  {sigSettings.teacherTitle || 'Guru Mata Pelajaran / Wali Kelas'}
+                </p>
+                {/* Baris 3: Ruang Tanda Tangan */}
+                <div className='h-16' />
+                {/* Baris 4: Nama */}
+                <p className='font-bold underline h-6 flex items-center justify-end w-full text-right'>
+                  {sigSettings.teacherName ||
+                    profile?.name ||
+                    '................................'}
+                </p>
+                {/* Baris 5: NIP */}
+                <div className='flex items-center justify-end gap-1 h-5 w-full text-right'>
+                  <span>NIP/NUPTK.</span>
+                  <span>
+                    {sigSettings.teacherNip ||
+                      profile?.nip ||
+                      '................................'}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

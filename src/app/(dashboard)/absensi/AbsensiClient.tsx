@@ -200,7 +200,7 @@ export default function AbsensiClient({
       if (savedSig) {
         const parsedSig = JSON.parse(savedSig);
         if (
-          parsedSig.supervisorTitle === 'Mengetahui, Kepala Sekolah' ||
+          parsedSig.supervisorTitle === 'Kepala Sekolah' ||
           parsedSig.supervisorTitle === 'Mengetahui,'
         ) {
           parsedSig.supervisorTitle = 'Kepala Sekolah';
@@ -1611,7 +1611,7 @@ export default function AbsensiClient({
 
           {/* Printable Document Wrapper (A4 Simulation with Interactive Dynamic Headers) */}
           <div className='bg-slate-200/70 p-2 sm:p-10 rounded-2xl border border-slate-300/80 flex justify-start sm:justify-center overflow-x-auto shadow-inner print:p-0 print:m-0 print:bg-white print:border-none'>
-            <div className='w-full max-w-[950px] min-w-[340px] bg-white text-slate-900 shadow-2xl rounded-sm border border-slate-300 p-4 sm:p-14 print:p-6 print:m-0 print:shadow-none print:border-none print:w-full print:max-w-none print:text-black font-sans leading-relaxed overflow-x-auto'>
+            <div className='w-full max-w-[950px] min-w-[340px] bg-white text-slate-900 shadow-2xl rounded-sm border border-slate-300 p-4 sm:p-14 print:p-0 print:m-0 print:shadow-none print:border-none print:w-full print:max-w-none print:text-black font-sans leading-relaxed overflow-x-auto'>
               {/* Document KOP / Interactive Header Title */}
               {docHeader.useOfficialKop ? (
                 <div className='mb-6'>
@@ -1644,7 +1644,9 @@ export default function AbsensiClient({
                     {/* Center: Official Letterhead Text Block (Times New Roman / Serif style) */}
                     <div className='flex-1 text-center font-serif text-slate-900 print:text-black space-y-[2px] px-1'>
                       {/* Baris 1: Nama Sekolah / Yayasan */}
-                      {Boolean(docHeader.schoolName && docHeader.schoolName.trim()) && (
+                      {Boolean(
+                        docHeader.schoolName && docHeader.schoolName.trim(),
+                      ) && (
                         <input
                           value={docHeader.schoolName}
                           onChange={(e) =>
@@ -1655,7 +1657,9 @@ export default function AbsensiClient({
                         />
                       )}
                       {/* Baris 2: Satuan Pendidikan */}
-                      {Boolean(docHeader.subHeader1 && docHeader.subHeader1.trim()) && (
+                      {Boolean(
+                        docHeader.subHeader1 && docHeader.subHeader1.trim(),
+                      ) && (
                         <input
                           value={docHeader.subHeader1}
                           onChange={(e) =>
@@ -1666,7 +1670,9 @@ export default function AbsensiClient({
                         />
                       )}
                       {/* Baris 3: Izin Kanwil */}
-                      {Boolean(docHeader.subHeader2 && docHeader.subHeader2.trim()) && (
+                      {Boolean(
+                        docHeader.subHeader2 && docHeader.subHeader2.trim(),
+                      ) && (
                         <input
                           value={docHeader.subHeader2}
                           onChange={(e) =>
@@ -1677,7 +1683,9 @@ export default function AbsensiClient({
                         />
                       )}
                       {/* Baris 4: Nomor Registrasi */}
-                      {Boolean(docHeader.subHeader3 && docHeader.subHeader3.trim()) && (
+                      {Boolean(
+                        docHeader.subHeader3 && docHeader.subHeader3.trim(),
+                      ) && (
                         <input
                           value={docHeader.subHeader3}
                           onChange={(e) =>
@@ -1688,7 +1696,9 @@ export default function AbsensiClient({
                         />
                       )}
                       {/* Baris 5: Alamat & Kontak */}
-                      {Boolean(docHeader.addressLine && docHeader.addressLine.trim()) && (
+                      {Boolean(
+                        docHeader.addressLine && docHeader.addressLine.trim(),
+                      ) && (
                         <input
                           value={docHeader.addressLine}
                           onChange={(e) =>
@@ -1699,7 +1709,9 @@ export default function AbsensiClient({
                         />
                       )}
                       {/* Baris 6: Kabupaten / Kota */}
-                      {Boolean(docHeader.cityRegency && docHeader.cityRegency.trim()) && (
+                      {Boolean(
+                        docHeader.cityRegency && docHeader.cityRegency.trim(),
+                      ) && (
                         <input
                           value={docHeader.cityRegency}
                           onChange={(e) =>
@@ -1716,7 +1728,9 @@ export default function AbsensiClient({
                         !docHeader.addressLine?.trim() &&
                         !docHeader.cityRegency?.trim() && (
                           <div className='py-4 text-center text-slate-400 text-xs italic print:hidden'>
-                            *Kop surat dinas masih kosong. Klik tombol &quot;Kustomisasi Header &amp; Tanda Tangan&quot; untuk mengisi teks kop surat.
+                            *Kop surat dinas masih kosong. Klik tombol
+                            &quot;Kustomisasi Header &amp; Tanda Tangan&quot;
+                            untuk mengisi teks kop surat.
                           </div>
                         )}
                     </div>
@@ -2841,50 +2855,19 @@ export default function AbsensiClient({
                 </div>
               )}
 
-              {/* Official Interactive Signature Section (Matching Jurnal Wali Kelas) */}
+              {/* Official Interactive Signature Section */}
               <div className='mt-12 pt-6 text-xs text-slate-900 print:text-black font-semibold break-inside-avoid'>
-                {/* Baris Tempat & Tanggal Cetak (Satu Baris di Atas 'Mengetahui,') */}
-                <div className='grid grid-cols-2 gap-8 mb-2'>
-                  <div />{' '}
-                  {/* Kolom kiri kosong agar tanggal tepat di atas tanda tangan kanan */}
-                  <div className='sm:pl-8'>
-                    <div className='flex items-center gap-1 mb-1'>
-                      <Input
-                        value={signatureData.place}
-                        onChange={(e) =>
-                          updateSignatureData({
-                            place: e.target.value,
-                          })
-                        }
-                        style={{
-                          width: `${Math.max((signatureData.place || '').length * 7.5 + 4, 60)}px`,
-                        }}
-                        className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 print:border-none print:p-0'
-                      />
-                      <span>,</span>
-                      <Input
-                        value={signatureData.date}
-                        onChange={(e) =>
-                          updateSignatureData({
-                            date: e.target.value,
-                          })
-                        }
-                        style={{
-                          width: `${Math.max((signatureData.date || '').length * 7.5 + 4, 80)}px`,
-                        }}
-                        className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 print:border-none print:p-0'
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Grid 2 Kolom Pengesahan: Kiri (Kepala Sekolah) & Kanan (Guru Kelas) */}
                 <div className='grid grid-cols-2 gap-8'>
-                  {/* Left Column: Supervisor / Principal */}
-                  <div className='space-y-1.5'>
-                    <p className='font-bold text-slate-800 print:text-black'>
+                  {/* Kolom Kiri: Pengesahan Kepala Sekolah */}
+                  <div className='w-full max-w-[280px] sm:max-w-[320px] space-y-1.5 text-left'>
+                    {/* Baris 1: Mengetahui, */}
+                    <p className='font-bold text-xs h-6 flex items-center text-slate-800 print:text-black'>
                       Mengetahui,
                     </p>
+                    {/* Baris 2: Jabatan Kepala Sekolah */}
+                    <div className='hidden print:flex font-bold text-xs text-black h-6 items-center'>
+                      {signatureData.supervisorTitle || 'Kepala Sekolah'}
+                    </div>
                     <Input
                       value={signatureData.supervisorTitle}
                       placeholder='Kepala Sekolah'
@@ -2893,51 +2876,107 @@ export default function AbsensiClient({
                           supervisorTitle: e.target.value,
                         })
                       }
-                      className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 w-full max-w-xs print:border-none print:p-0'
+                      className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 w-full print:hidden'
                     />
-                    <div className='h-20' /> {/* Signature Space */}
-                    <div className='space-y-1'>
+                    {/* Baris 3: Ruang Tanda Tangan */}
+                    <div className='h-20' />
+                    {/* Baris 4: Nama Kepala Sekolah */}
+                    <div className='hidden print:flex font-bold text-xs text-black h-6 items-center'>
+                      {signatureData.supervisorName || '................................'}
+                    </div>
+                    <Input
+                      placeholder='Ketik nama kepsek...'
+                      value={signatureData.supervisorName}
+                      onChange={(e) =>
+                        updateSignatureData({
+                          supervisorName: e.target.value,
+                        })
+                      }
+                      className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 w-full print:hidden'
+                    />
+                    {/* Baris 5: NIP Kepala Sekolah */}
+                    <div className='hidden print:flex text-[11px] text-black h-5 items-center gap-1'>
+                      <span>NIP/NUPTK.</span>
+                      <span>{signatureData.supervisorNip || '................................'}</span>
+                    </div>
+                    <div className='flex items-center gap-1 text-[11px] text-slate-700 h-5 print:hidden'>
+                      <span>NIP/NUPTK.</span>
                       <Input
-                        placeholder='Ketik nama kepsek...'
-                        value={signatureData.supervisorName}
+                        placeholder='Ketik NIP...'
+                        value={signatureData.supervisorNip}
                         onChange={(e) =>
                           updateSignatureData({
-                            supervisorName: e.target.value,
+                            supervisorNip: e.target.value,
                           })
                         }
-                        className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 w-full max-w-xs print:border-none print:p-0'
+                        className='text-[11px] border-b border-slate-300 border-x-0 border-t-0 rounded-none h-5 px-0 focus:border-emerald-600 w-44'
                       />
-                      <div className='flex items-center gap-1 text-[11px] text-slate-700 print:text-black'>
-                        <span>NIP/NUPTK.</span>
-                        <Input
-                          placeholder='Ketik NIP...'
-                          value={signatureData.supervisorNip}
-                          onChange={(e) =>
-                            updateSignatureData({
-                              supervisorNip: e.target.value,
-                            })
-                          }
-                          className='text-[11px] border-b border-slate-300 border-x-0 border-t-0 rounded-none h-5 px-0 focus:border-emerald-600 w-44 print:border-none print:p-0'
-                        />
-                      </div>
                     </div>
                   </div>
 
-                  {/* Right Column: Class / Subject Teacher */}
-                  <div className='space-y-1.5 sm:pl-8'>
-                    <div className='h-5 select-none' aria-hidden='true' />{' '}
-                    {/* Penyeimbang vertikal setara teks 'Mengetahui,' */}
-                    <Input
-                      value={signatureData.teacherTitle}
-                      onChange={(e) =>
-                        updateSignatureData({
-                          teacherTitle: e.target.value,
-                        })
-                      }
-                      className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 w-full max-w-xs print:border-none print:p-0'
-                    />
-                    <div className='h-20' /> {/* Signature Space */}
-                    <div className='space-y-1'>
+                  {/* Kolom Kanan: Guru Kelas / Wali Kelas (Rata Kanan) */}
+                  <div className='flex justify-end'>
+                    <div className='w-full max-w-[280px] sm:max-w-[320px] space-y-1.5 flex flex-col items-end text-right'>
+                      {/* Baris 1: Tempat & Tanggal (Sejajar dengan 'Mengetahui,') */}
+                      <div className='h-6 flex items-center justify-end font-bold text-xs text-slate-900 print:text-black w-full'>
+                        {/* Teks murni saat dicetak agar rapi dan tanpa celah sebelum tanda koma */}
+                        <div className='hidden print:block text-right w-full'>
+                          {signatureData.place ? `${signatureData.place}, ` : ''}
+                          {signatureData.date}
+                        </div>
+                        {/* Input interaktif saat di layar */}
+                        <div className='flex items-center justify-end gap-1 print:hidden w-full'>
+                          <Input
+                            value={signatureData.place}
+                            onChange={(e) =>
+                              updateSignatureData({
+                                place: e.target.value,
+                              })
+                            }
+                            style={{
+                              width: `${Math.max((signatureData.place || '').length * 9 + 18, 95)}px`,
+                              fieldSizing: 'content',
+                            }}
+                            className='font-bold text-xs text-right border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-1 focus:border-emerald-600'
+                          />
+                          <span>,</span>
+                          <Input
+                            value={signatureData.date}
+                            onChange={(e) =>
+                              updateSignatureData({
+                                date: e.target.value,
+                              })
+                            }
+                            style={{
+                              width: `${Math.max((signatureData.date || '').length * 8.5 + 14, 135)}px`,
+                              fieldSizing: 'content',
+                            }}
+                            className='font-bold text-xs text-right border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-1 focus:border-emerald-600'
+                          />
+                        </div>
+                      </div>
+
+                      {/* Baris 2: Jabatan Guru (Sejajar dengan 'Kepala Sekolah') */}
+                      <div className='hidden print:flex font-bold text-xs text-black h-6 items-center justify-end w-full text-right'>
+                        {signatureData.teacherTitle || 'Guru Kelas / Wali Kelas'}
+                      </div>
+                      <Input
+                        value={signatureData.teacherTitle}
+                        onChange={(e) =>
+                          updateSignatureData({
+                            teacherTitle: e.target.value,
+                          })
+                        }
+                        className='font-bold text-xs text-right border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 w-full print:hidden'
+                      />
+
+                      {/* Baris 3: Ruang Tanda Tangan */}
+                      <div className='h-20' />
+
+                      {/* Baris 4: Nama Guru (Sejajar dengan Nama Kepala Sekolah) */}
+                      <div className='hidden print:flex font-bold text-xs text-black h-6 items-center justify-end w-full text-right'>
+                        {signatureData.teacherName || '................................'}
+                      </div>
                       <Input
                         value={signatureData.teacherName}
                         onChange={(e) => {
@@ -2948,11 +2987,19 @@ export default function AbsensiClient({
                             teacherName: e.target.value,
                           });
                         }}
-                        className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 w-full max-w-xs print:border-none print:p-0'
+                        className='font-bold text-xs text-right border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 w-full print:hidden'
                       />
-                      <div className='flex items-center gap-1 text-[11px] text-slate-700 print:text-black'>
+
+                      {/* Baris 5: NIP Guru (Sejajar dengan NIP Kepala Sekolah) */}
+                      {/* Teks murni saat dicetak agar rapi dan rata kanan sempurna */}
+                      <div className='hidden print:flex text-[11px] text-black h-5 items-center justify-end w-full text-right'>
+                        {signatureData.teacherNip ? `NIP/NUPTK. ${signatureData.teacherNip}` : 'NIP/NUPTK. -'}
+                      </div>
+                      {/* Input interaktif saat di layar */}
+                      <div className='flex items-center justify-end gap-1 text-[11px] text-slate-700 h-5 w-full print:hidden'>
                         <span>NIP/NUPTK.</span>
-                        <Input
+                        <input
+                          type='text'
                           value={signatureData.teacherNip}
                           onChange={(e) => {
                             updateSignatureData({
@@ -2962,7 +3009,14 @@ export default function AbsensiClient({
                               nip: e.target.value,
                             });
                           }}
-                          className='text-[11px] border-b border-slate-300 border-x-0 border-t-0 rounded-none h-5 px-0 focus:border-emerald-600 w-44 print:border-none print:p-0'
+                          placeholder='-'
+                          style={{
+                            width: signatureData.teacherNip
+                              ? `${Math.max(signatureData.teacherNip.length, 1) * 7.5 + 4}px`
+                              : '28px',
+                            fieldSizing: 'content',
+                          }}
+                          className='text-[11px] text-right border-b border-slate-300 border-x-0 border-t-0 rounded-none h-5 px-0 focus:border-emerald-600 bg-transparent outline-none'
                         />
                       </div>
                     </div>

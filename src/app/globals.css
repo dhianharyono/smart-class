@@ -162,14 +162,19 @@
     margin: 0;
     size: landscape;
   }
-  html,
+  html {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+  }
   body {
     height: auto !important;
     min-height: 0 !important;
     margin: 0 !important;
-    padding: 0 !important;
+    padding: 12mm 15mm !important;
     background: #ffffff !important;
     overflow: visible !important;
+    box-sizing: border-box !important;
   }
   div,
   main,
@@ -180,6 +185,19 @@
   .min-h-screen {
     min-height: 0 !important;
     height: auto !important;
+  }
+  table {
+    page-break-inside: auto;
+  }
+  tr {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+  thead {
+    display: table-header-group !important;
+  }
+  tfoot {
+    display: table-footer-group !important;
   }
 }
 

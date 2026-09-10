@@ -96,7 +96,11 @@ const sidebarMenuGroups: SidebarGroup[] = [
         icon: School,
         children: [
           { name: 'Daftar Kelas', href: '/kelas', icon: School },
-          { name: 'Jadwal Mengajar', href: '/jadwal-mengajar', icon: CalendarClock },
+          {
+            name: 'Jadwal Mengajar',
+            href: '/jadwal-mengajar',
+            icon: CalendarClock,
+          },
         ],
       },
       { name: 'Jurnal Wali Kelas', href: '/jurnal', icon: BookMarked },
@@ -181,17 +185,17 @@ export default function DashboardLayoutClient({
       teacher.enabledMenus && teacher.enabledMenus.length > 0
         ? teacher.enabledMenus
         : [
-          '/dashboard',
-          '/kelas',
-          '/jadwal-mengajar',
-          '/siswa',
-          '/absensi',
-          '/nilai',
-          '/jurnal',
-          '/feedback',
-          '/profile',
-          '/settings',
-        ];
+            '/dashboard',
+            '/kelas',
+            '/jadwal-mengajar',
+            '/siswa',
+            '/absensi',
+            '/nilai',
+            '/jurnal',
+            '/feedback',
+            '/profile',
+            '/settings',
+          ];
     return base.includes('/kelas') ? base : [...base, '/kelas'];
   });
 
@@ -247,14 +251,19 @@ export default function DashboardLayoutClient({
 
   // States for Profile Modal
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [profileModalTab, setProfileModalTab] = useState<'profile' | 'security'>('profile');
+  const [profileModalTab, setProfileModalTab] = useState<
+    'profile' | 'security'
+  >('profile');
   const [profileModalForm, setProfileModalForm] = useState({
     name: teacher.name || '',
     email: teacher.email || '',
     schoolName: teacher.schoolName || '',
     nip: teacher.nip && teacher.nip !== '-' ? teacher.nip : '',
     principalName: teacher.principalName || '',
-    principalNip: teacher.principalNip && teacher.principalNip !== '-' ? teacher.principalNip : '',
+    principalNip:
+      teacher.principalNip && teacher.principalNip !== '-'
+        ? teacher.principalNip
+        : '',
   });
   const [passwordModalForm, setPasswordModalForm] = useState({
     currentPassword: '',
@@ -269,11 +278,13 @@ export default function DashboardLayoutClient({
 
   // States for Settings Modal
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
-  const [settingsSelectedMenus, setSettingsSelectedMenus] = useState<string[]>(() => {
-    return teacher.enabledMenus && teacher.enabledMenus.length > 0
-      ? teacher.enabledMenus
-      : CONFIGURABLE_MENUS.map((m) => m.href);
-  });
+  const [settingsSelectedMenus, setSettingsSelectedMenus] = useState<string[]>(
+    () => {
+      return teacher.enabledMenus && teacher.enabledMenus.length > 0
+        ? teacher.enabledMenus
+        : CONFIGURABLE_MENUS.map((m) => m.href);
+    },
+  );
   const [isSavingSettings, setIsSavingSettings] = useState(false);
 
   // Sync states when teacher changes
@@ -284,7 +295,10 @@ export default function DashboardLayoutClient({
       schoolName: teacher.schoolName || '',
       nip: teacher.nip && teacher.nip !== '-' ? teacher.nip : '',
       principalName: teacher.principalName || '',
-      principalNip: teacher.principalNip && teacher.principalNip !== '-' ? teacher.principalNip : '',
+      principalNip:
+        teacher.principalNip && teacher.principalNip !== '-'
+          ? teacher.principalNip
+          : '',
     });
     if (teacher.enabledMenus && teacher.enabledMenus.length > 0) {
       setSettingsSelectedMenus(teacher.enabledMenus);
@@ -472,7 +486,10 @@ export default function DashboardLayoutClient({
   // Profile Modal Submit Handler
   const handleProfileModalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!profileModalForm.name.trim() || profileModalForm.name.trim().length < 3) {
+    if (
+      !profileModalForm.name.trim() ||
+      profileModalForm.name.trim().length < 3
+    ) {
       toast.error('Nama lengkap & gelar minimal 3 karakter.');
       return;
     }
@@ -861,17 +878,19 @@ export default function DashboardLayoutClient({
                                 [item.name]: !isOpen,
                               }))
                             }
-                            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer ${isChildActive
+                            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer ${
+                              isChildActive
                                 ? 'bg-emerald-50/70 text-emerald-900 border border-emerald-200/80 font-bold'
                                 : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 border border-transparent'
-                              }`}
+                            }`}
                           >
                             <div className='flex items-center gap-3'>
                               <Icon
-                                className={`h-4.5 w-4.5 transition-transform duration-200 ${isChildActive
+                                className={`h-4.5 w-4.5 transition-transform duration-200 ${
+                                  isChildActive
                                     ? 'text-emerald-600'
                                     : 'text-slate-400'
-                                  }`}
+                                }`}
                               />
                               <span>{item.name}</span>
                             </div>
@@ -895,16 +914,18 @@ export default function DashboardLayoutClient({
                                     key={child.href}
                                     href={child.href}
                                     onClick={() => setMobileOpen(false)}
-                                    className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all duration-200 ${isSubActive
+                                    className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all duration-200 ${
+                                      isSubActive
                                         ? 'bg-emerald-600 text-white font-bold shadow-xs'
                                         : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium'
-                                      }`}
+                                    }`}
                                   >
                                     <SubIcon
-                                      className={`h-4 w-4 ${isSubActive
+                                      className={`h-4 w-4 ${
+                                        isSubActive
                                           ? 'text-white'
                                           : 'text-slate-400'
-                                        }`}
+                                      }`}
                                     />
                                     <span>{child.name}</span>
                                   </Link>
@@ -927,16 +948,18 @@ export default function DashboardLayoutClient({
                         key={item.href}
                         href={item.href!}
                         onClick={() => setMobileOpen(false)}
-                        className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group ${isActive
+                        className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group ${
+                          isActive
                             ? 'bg-emerald-50/90 text-emerald-800 border border-emerald-200/80 shadow-xs font-bold'
                             : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 border border-transparent'
-                          }`}
+                        }`}
                       >
                         <Icon
-                          className={`h-4.5 w-4.5 transition-transform duration-200 group-hover:scale-110 ${isActive
+                          className={`h-4.5 w-4.5 transition-transform duration-200 group-hover:scale-110 ${
+                            isActive
                               ? 'text-emerald-600'
                               : 'text-slate-400 group-hover:text-slate-600'
-                            }`}
+                          }`}
                         />
                         <span>{item.name}</span>
                         {isActive && (
@@ -993,10 +1016,11 @@ export default function DashboardLayoutClient({
                 return (
                   <div
                     key={cls}
-                    className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${isActive
+                    className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                      isActive
                         ? 'bg-emerald-600 text-white shadow-2xs'
                         : 'text-slate-700 hover:bg-slate-100'
-                      }`}
+                    }`}
                   >
                     <button
                       type='button'
@@ -1341,16 +1365,18 @@ export default function DashboardLayoutClient({
               <button
                 type='button'
                 onClick={() => setOnboardingStep(1)}
-                className={`w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-xl border text-[11px] sm:text-xs font-bold transition-all cursor-pointer min-w-0 ${onboardingStep === 1
+                className={`w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-xl border text-[11px] sm:text-xs font-bold transition-all cursor-pointer min-w-0 ${
+                  onboardingStep === 1
                     ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
                     : 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
-                  }`}
+                }`}
               >
                 <span
-                  className={`h-5 w-5 rounded-lg flex items-center justify-center font-black text-[11px] shrink-0 ${onboardingStep === 1
+                  className={`h-5 w-5 rounded-lg flex items-center justify-center font-black text-[11px] shrink-0 ${
+                    onboardingStep === 1
                       ? 'bg-white/25 text-white'
                       : 'bg-emerald-600 text-white'
-                    }`}
+                  }`}
                 >
                   1
                 </span>
@@ -1362,16 +1388,18 @@ export default function DashboardLayoutClient({
               <button
                 type='button'
                 onClick={() => handleNextStep()}
-                className={`w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-xl border text-[11px] sm:text-xs font-bold transition-all cursor-pointer min-w-0 ${onboardingStep === 2
+                className={`w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-xl border text-[11px] sm:text-xs font-bold transition-all cursor-pointer min-w-0 ${
+                  onboardingStep === 2
                     ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
                     : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100 hover:text-slate-600'
-                  }`}
+                }`}
               >
                 <span
-                  className={`h-5 w-5 rounded-lg flex items-center justify-center font-black text-[11px] shrink-0 ${onboardingStep === 2
+                  className={`h-5 w-5 rounded-lg flex items-center justify-center font-black text-[11px] shrink-0 ${
+                    onboardingStep === 2
                       ? 'bg-white/25 text-white'
                       : 'bg-slate-200 text-slate-500'
-                    }`}
+                  }`}
                 >
                   2
                 </span>
@@ -1404,10 +1432,11 @@ export default function DashboardLayoutClient({
                       if (onboardingErrors.name)
                         setOnboardingErrors((prev) => ({ ...prev, name: '' }));
                     }}
-                    className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${onboardingErrors.name
+                    className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${
+                      onboardingErrors.name
                         ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
                         : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
-                      } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
+                    } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
                   />
                 </div>
                 {onboardingErrors.name && (
@@ -1437,10 +1466,11 @@ export default function DashboardLayoutClient({
                       if (onboardingErrors.nip)
                         setOnboardingErrors((prev) => ({ ...prev, nip: '' }));
                     }}
-                    className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${onboardingErrors.nip
+                    className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${
+                      onboardingErrors.nip
                         ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
                         : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
-                      } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
+                    } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
                   />
                 </div>
                 {onboardingErrors.nip && (
@@ -1472,10 +1502,11 @@ export default function DashboardLayoutClient({
                           }));
                       }}
                       disabled={loadingSchools}
-                      className={`w-full pl-10 pr-8 py-2.5 bg-slate-50/50 border ${onboardingErrors.school
+                      className={`w-full pl-10 pr-8 py-2.5 bg-slate-50/50 border ${
+                        onboardingErrors.school
                           ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
                           : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
-                        } text-slate-900 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium appearance-none cursor-pointer transition-all`}
+                      } text-slate-900 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium appearance-none cursor-pointer transition-all`}
                     >
                       {loadingSchools ? (
                         <option value=''>Memuat...</option>
@@ -1504,6 +1535,40 @@ export default function DashboardLayoutClient({
                   )}
                 </div>
 
+                {/* Sekolah Baru (conditional) */}
+                {onboardingSchool === '__NEW_SCHOOL__' && (
+                  <div className='space-y-1.5'>
+                    <label className='text-xs font-bold uppercase tracking-wider text-slate-700 block'>
+                      NAMA SEKOLAH BARU <span className='text-rose-500'>*</span>
+                    </label>
+                    <input
+                      type='text'
+                      required
+                      placeholder='Masukkan nama sekolah lengkap Anda'
+                      value={onboardingCustomSchool}
+                      onChange={(e) => {
+                        setOnboardingCustomSchool(e.target.value);
+                        if (onboardingErrors.school)
+                          setOnboardingErrors((prev) => ({
+                            ...prev,
+                            school: '',
+                          }));
+                      }}
+                      className={`w-full px-4 py-2.5 bg-slate-50/50 border ${
+                        onboardingErrors.school
+                          ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
+                          : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
+                      } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
+                    />
+                    {onboardingErrors.school && (
+                      <p className='text-[11px] text-rose-500 font-medium flex items-center gap-1 mt-1'>
+                        <AlertCircle className='h-3.5 w-3.5 shrink-0' />
+                        <span>{onboardingErrors.school}</span>
+                      </p>
+                    )}
+                  </div>
+                )}
+
                 <div className='space-y-1.5 sm:col-span-2'>
                   <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-0.5 sm:gap-2'>
                     <label className='text-xs font-bold uppercase tracking-wider text-slate-700 block'>
@@ -1529,10 +1594,11 @@ export default function DashboardLayoutClient({
                             handleAddOnboardingClassTag();
                           }
                         }}
-                        className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${onboardingErrors.className
+                        className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${
+                          onboardingErrors.className
                             ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
                             : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
-                          } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
+                        } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
                       />
                     </div>
                     <Button
@@ -1579,39 +1645,6 @@ export default function DashboardLayoutClient({
                 </div>
               </div>
 
-              {/* Sekolah Baru (conditional) */}
-              {onboardingSchool === '__NEW_SCHOOL__' && (
-                <div className='space-y-1.5'>
-                  <label className='text-xs font-bold uppercase tracking-wider text-slate-700 block'>
-                    NAMA SEKOLAH BARU <span className='text-rose-500'>*</span>
-                  </label>
-                  <input
-                    type='text'
-                    required
-                    placeholder='Masukkan nama sekolah lengkap Anda'
-                    value={onboardingCustomSchool}
-                    onChange={(e) => {
-                      setOnboardingCustomSchool(e.target.value);
-                      if (onboardingErrors.school)
-                        setOnboardingErrors((prev) => ({
-                          ...prev,
-                          school: '',
-                        }));
-                    }}
-                    className={`w-full px-4 py-2.5 bg-slate-50/50 border ${onboardingErrors.school
-                        ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
-                        : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
-                      } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
-                  />
-                  {onboardingErrors.school && (
-                    <p className='text-[11px] text-rose-500 font-medium flex items-center gap-1 mt-1'>
-                      <AlertCircle className='h-3.5 w-3.5 shrink-0' />
-                      <span>{onboardingErrors.school}</span>
-                    </p>
-                  )}
-                </div>
-              )}
-
               {/* Kepala Sekolah & NIP Kepala Sekolah – 2 column grid */}
               <div className='grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1'>
                 <div className='space-y-1.5'>
@@ -1635,10 +1668,11 @@ export default function DashboardLayoutClient({
                             principalName: '',
                           }));
                       }}
-                      className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${onboardingErrors.principalName
+                      className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${
+                        onboardingErrors.principalName
                           ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
                           : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
-                        } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
+                      } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
                     />
                   </div>
                   {onboardingErrors.principalName && (
@@ -1670,10 +1704,11 @@ export default function DashboardLayoutClient({
                             principalNip: '',
                           }));
                       }}
-                      className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${onboardingErrors.principalNip
+                      className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${
+                        onboardingErrors.principalNip
                           ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
                           : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
-                        } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
+                      } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
                     />
                   </div>
                   {onboardingErrors.principalNip && (
@@ -1714,16 +1749,18 @@ export default function DashboardLayoutClient({
                           ]);
                         }
                       }}
-                      className={`flex items-start gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer select-none ${isChecked
+                      className={`flex items-start gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer select-none ${
+                        isChecked
                           ? 'bg-emerald-50/80 border-emerald-300 text-emerald-950 shadow-2xs'
                           : 'bg-slate-50/60 border-slate-200 text-slate-600 hover:border-slate-300'
-                        }`}
+                      }`}
                     >
                       <div
-                        className={`mt-0.5 h-5 w-5 rounded-lg border flex items-center justify-center shrink-0 transition-colors ${isChecked
+                        className={`mt-0.5 h-5 w-5 rounded-lg border flex items-center justify-center shrink-0 transition-colors ${
+                          isChecked
                             ? 'bg-emerald-600 border-emerald-600 text-white shadow-2xs'
                             : 'border-slate-300 bg-white'
-                          }`}
+                        }`}
                       >
                         {isChecked && (
                           <Check className='h-3.5 w-3.5 stroke-[3]' />
@@ -1870,17 +1907,26 @@ export default function DashboardLayoutClient({
 
             {/* Tab 1: Profile Form */}
             {profileModalTab === 'profile' && (
-              <form onSubmit={handleProfileModalSubmit} className='p-6 space-y-4 max-h-[calc(85vh-180px)] overflow-y-auto'>
+              <form
+                onSubmit={handleProfileModalSubmit}
+                className='p-6 space-y-4 max-h-[calc(85vh-180px)] overflow-y-auto'
+              >
                 <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                   <div className='space-y-1.5'>
                     <label className='text-xs font-bold text-slate-700 block'>
-                      Nama Lengkap & Gelar <span className='text-rose-500'>*</span>
+                      Nama Lengkap & Gelar{' '}
+                      <span className='text-rose-500'>*</span>
                     </label>
                     <input
                       type='text'
                       required
                       value={profileModalForm.name}
-                      onChange={(e) => setProfileModalForm({ ...profileModalForm, name: e.target.value })}
+                      onChange={(e) =>
+                        setProfileModalForm({
+                          ...profileModalForm,
+                          name: e.target.value,
+                        })
+                      }
                       placeholder='Contoh: Ahmad Dahlan, S.Pd.'
                       className='w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-xs sm:text-sm font-medium transition-all'
                     />
@@ -1903,7 +1949,12 @@ export default function DashboardLayoutClient({
                     <input
                       type='text'
                       value={profileModalForm.nip}
-                      onChange={(e) => setProfileModalForm({ ...profileModalForm, nip: e.target.value })}
+                      onChange={(e) =>
+                        setProfileModalForm({
+                          ...profileModalForm,
+                          nip: e.target.value,
+                        })
+                      }
                       placeholder='Masukkan NIP / NUPTK'
                       className='w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-xs sm:text-sm font-medium transition-all'
                     />
@@ -1915,7 +1966,12 @@ export default function DashboardLayoutClient({
                     <input
                       type='text'
                       value={profileModalForm.schoolName}
-                      onChange={(e) => setProfileModalForm({ ...profileModalForm, schoolName: e.target.value })}
+                      onChange={(e) =>
+                        setProfileModalForm({
+                          ...profileModalForm,
+                          schoolName: e.target.value,
+                        })
+                      }
                       placeholder='Contoh: SDN 1 Mentari Pagi'
                       className='w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-xs sm:text-sm font-medium transition-all'
                     />
@@ -1927,7 +1983,12 @@ export default function DashboardLayoutClient({
                     <input
                       type='text'
                       value={profileModalForm.principalName}
-                      onChange={(e) => setProfileModalForm({ ...profileModalForm, principalName: e.target.value })}
+                      onChange={(e) =>
+                        setProfileModalForm({
+                          ...profileModalForm,
+                          principalName: e.target.value,
+                        })
+                      }
                       placeholder='Contoh: Dr. H. Mulyadi, M.Pd.'
                       className='w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-xs sm:text-sm font-medium transition-all'
                     />
@@ -1939,7 +2000,12 @@ export default function DashboardLayoutClient({
                     <input
                       type='text'
                       value={profileModalForm.principalNip}
-                      onChange={(e) => setProfileModalForm({ ...profileModalForm, principalNip: e.target.value })}
+                      onChange={(e) =>
+                        setProfileModalForm({
+                          ...profileModalForm,
+                          principalNip: e.target.value,
+                        })
+                      }
                       placeholder='Masukkan NIP Kepala Sekolah'
                       className='w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-xs sm:text-sm font-medium transition-all'
                     />
@@ -1975,7 +2041,10 @@ export default function DashboardLayoutClient({
 
             {/* Tab 2: Security Form */}
             {profileModalTab === 'security' && (
-              <form onSubmit={handlePasswordModalSubmit} className='p-6 space-y-4 max-h-[calc(85vh-180px)] overflow-y-auto'>
+              <form
+                onSubmit={handlePasswordModalSubmit}
+                className='p-6 space-y-4 max-h-[calc(85vh-180px)] overflow-y-auto'
+              >
                 <div className='space-y-1.5'>
                   <label className='text-xs font-bold text-slate-700 block'>
                     Password Saat Ini <span className='text-rose-500'>*</span>
@@ -1985,16 +2054,27 @@ export default function DashboardLayoutClient({
                       type={showCurrentPassword ? 'text' : 'password'}
                       required
                       value={passwordModalForm.currentPassword}
-                      onChange={(e) => setPasswordModalForm({ ...passwordModalForm, currentPassword: e.target.value })}
+                      onChange={(e) =>
+                        setPasswordModalForm({
+                          ...passwordModalForm,
+                          currentPassword: e.target.value,
+                        })
+                      }
                       placeholder='Masukkan password saat ini'
                       className='w-full px-3.5 py-2.5 pr-10 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-xs sm:text-sm font-medium transition-all'
                     />
                     <button
                       type='button'
-                      onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                      onClick={() =>
+                        setShowCurrentPassword(!showCurrentPassword)
+                      }
                       className='absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer'
                     >
-                      {showCurrentPassword ? <EyeOff className='h-4 w-4' /> : <Eye className='h-4 w-4' />}
+                      {showCurrentPassword ? (
+                        <EyeOff className='h-4 w-4' />
+                      ) : (
+                        <Eye className='h-4 w-4' />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -2008,7 +2088,12 @@ export default function DashboardLayoutClient({
                       type={showNewPassword ? 'text' : 'password'}
                       required
                       value={passwordModalForm.newPassword}
-                      onChange={(e) => setPasswordModalForm({ ...passwordModalForm, newPassword: e.target.value })}
+                      onChange={(e) =>
+                        setPasswordModalForm({
+                          ...passwordModalForm,
+                          newPassword: e.target.value,
+                        })
+                      }
                       placeholder='Minimal 6 karakter'
                       className='w-full px-3.5 py-2.5 pr-10 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-xs sm:text-sm font-medium transition-all'
                     />
@@ -2017,30 +2102,46 @@ export default function DashboardLayoutClient({
                       onClick={() => setShowNewPassword(!showNewPassword)}
                       className='absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer'
                     >
-                      {showNewPassword ? <EyeOff className='h-4 w-4' /> : <Eye className='h-4 w-4' />}
+                      {showNewPassword ? (
+                        <EyeOff className='h-4 w-4' />
+                      ) : (
+                        <Eye className='h-4 w-4' />
+                      )}
                     </button>
                   </div>
                 </div>
 
                 <div className='space-y-1.5'>
                   <label className='text-xs font-bold text-slate-700 block'>
-                    Konfirmasi Password Baru <span className='text-rose-500'>*</span>
+                    Konfirmasi Password Baru{' '}
+                    <span className='text-rose-500'>*</span>
                   </label>
                   <div className='relative'>
                     <input
                       type={showConfirmPassword ? 'text' : 'password'}
                       required
                       value={passwordModalForm.confirmPassword}
-                      onChange={(e) => setPasswordModalForm({ ...passwordModalForm, confirmPassword: e.target.value })}
+                      onChange={(e) =>
+                        setPasswordModalForm({
+                          ...passwordModalForm,
+                          confirmPassword: e.target.value,
+                        })
+                      }
                       placeholder='Ulangi password baru'
                       className='w-full px-3.5 py-2.5 pr-10 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-xs sm:text-sm font-medium transition-all'
                     />
                     <button
                       type='button'
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
                       className='absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer'
                     >
-                      {showConfirmPassword ? <EyeOff className='h-4 w-4' /> : <Eye className='h-4 w-4' />}
+                      {showConfirmPassword ? (
+                        <EyeOff className='h-4 w-4' />
+                      ) : (
+                        <Eye className='h-4 w-4' />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -2096,7 +2197,8 @@ export default function DashboardLayoutClient({
                     Pengaturan Menu Sidebar
                   </h2>
                   <p className='text-xs text-slate-500 font-medium'>
-                    Pilih modul yang ingin diaktifkan atau disembunyikan pada navigasi sidebar
+                    Pilih modul yang ingin diaktifkan atau disembunyikan pada
+                    navigasi sidebar
                   </p>
                 </div>
               </div>
@@ -2120,7 +2222,9 @@ export default function DashboardLayoutClient({
                   onClick={handleSelectAllSettingsMenus}
                   className='text-xs font-bold text-emerald-600 hover:text-emerald-700 hover:underline cursor-pointer'
                 >
-                  {CONFIGURABLE_MENUS.map((m) => m.href).every((h) => settingsSelectedMenus.includes(h))
+                  {CONFIGURABLE_MENUS.map((m) => m.href).every((h) =>
+                    settingsSelectedMenus.includes(h),
+                  )
                     ? 'Hapus Semua'
                     : 'Pilih Semua'}
                 </button>
@@ -2147,7 +2251,9 @@ export default function DashboardLayoutClient({
                               : 'bg-slate-200 text-slate-500'
                           }`}
                         >
-                          <Check className={`h-4 w-4 transition-transform ${isSelected ? 'scale-100' : 'scale-0'}`} />
+                          <Check
+                            className={`h-4 w-4 transition-transform ${isSelected ? 'scale-100' : 'scale-0'}`}
+                          />
                         </div>
                         <div className='min-w-0 flex-1'>
                           <div className='text-xs font-bold text-slate-900 truncate'>

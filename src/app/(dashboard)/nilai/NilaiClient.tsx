@@ -16,6 +16,9 @@ import {
   Printer,
   FileText,
   Settings2,
+  Upload,
+  RotateCcw,
+  ImageIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -94,12 +97,31 @@ export default function NilaiClient({
   const [editKkmOpen, setEditKkmOpen] = useState(false);
   const [isUpdatingKkm, setIsUpdatingKkm] = useState(false);
 
+  // Preset Kop Resmi Khusus SLB Purnama Asih
+  const SLB_PURNAMA_ASIH_KOP = {
+    logoUrl: '/logo-resmi-slb.png',
+    schoolName: 'SEKOLAH LUAR BIASA PURNAMA ASIH',
+    subHeader1: 'SATUAN PENDIDIKAN TKLB, SDLB, SMPLB, SMALB',
+    subHeader2: 'Izin Kanwil Depdikbud Jawa Barat No. 293/I.02.3/T./17-4-1985',
+    subHeader3: 'Registrasi Nomor : 421.9/1761-Disdik Tanggal 01 Mei 2007',
+    addressLine:
+      'Jl. Villa Duta No. 2 Desa Ciwaruga Kec. Parongpong Telp. (022) 2014794',
+    cityRegency: 'KABUPATEN BANDUNG BARAT',
+  };
+
   // Dynamic Header & Document Settings Modal State
   const [headerModalOpen, setHeaderModalOpen] = useState(false);
 
   // Dynamic Document Header State
   const [docHeader, setDocHeader] = useState({
+    useOfficialKop: false,
+    logoUrl: '/icon.svg',
     schoolName: 'SMK NEGERI 1',
+    subHeader1: '',
+    subHeader2: '',
+    subHeader3: '',
+    addressLine: '',
+    cityRegency: '',
     teacherName: '',
     nip: '-',
     className: '',
@@ -114,13 +136,69 @@ export default function NilaiClient({
       month: 'long',
       year: 'numeric',
     }),
-    supervisorTitle: 'Mengetahui, Kepala Sekolah',
+    supervisorTitle: 'Kepala Sekolah',
     supervisorName: '',
     supervisorNip: '-',
     teacherTitle: 'Guru Mata Pelajaran / Wali Kelas',
     teacherName: '',
     teacherNip: '-',
   });
+
+  const updateDocHeader = (
+    updater:
+      | Partial<typeof docHeader>
+      | ((prev: typeof docHeader) => typeof docHeader),
+  ) => {
+    setDocHeader((prev) => {
+      const next =
+        typeof updater === 'function' ? updater(prev) : { ...prev, ...updater };
+      try {
+        localStorage.setItem('smart_class_kop_settings', JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
+  };
+
+  const updateSignatureData = (
+    updater:
+      | Partial<typeof signatureData>
+      | ((prev: typeof signatureData) => typeof signatureData),
+  ) => {
+    setSignatureData((prev) => {
+      const next =
+        typeof updater === 'function' ? updater(prev) : { ...prev, ...updater };
+      try {
+        localStorage.setItem('smart_class_sig_settings', JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
+  };
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Ukuran logo maksimal 2MB');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        updateDocHeader({ logoUrl: reader.result });
+        toast.success('Logo sekolah berhasil diperbarui!');
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleResetLogo = () => {
+    const isSlb =
+      headerInfo?.schoolName?.toLowerCase().includes('purnama asih') ||
+      docHeader.schoolName?.toLowerCase().includes('purnama asih');
+    const defaultLogo = isSlb ? '/logo-resmi-slb.png' : '/icon.svg';
+    updateDocHeader({ logoUrl: defaultLogo });
+    toast.success('Logo dikembalikan ke logo default.');
+  };
 
   // Active filter states
   const [selectedSubject, setSelectedSubject] = useState<string>(
@@ -145,6 +223,28 @@ export default function NilaiClient({
   const [isDeletingSubject, setIsDeletingSubject] = useState(false);
   const [isPending, startTransition] = useTransition();
 
+  // Load saved kop settings & signature from localStorage on client mount
+  useEffect(() => {
+    try {
+      const savedKop = localStorage.getItem('smart_class_kop_settings');
+      if (savedKop) {
+        const parsedKop = JSON.parse(savedKop);
+        setDocHeader((prev) => ({ ...prev, ...parsedKop }));
+      }
+      const savedSig = localStorage.getItem('smart_class_sig_settings');
+      if (savedSig) {
+        const parsedSig = JSON.parse(savedSig);
+        if (
+          parsedSig.supervisorTitle === 'Kepala Sekolah' ||
+          parsedSig.supervisorTitle === 'Mengetahui,'
+        ) {
+          parsedSig.supervisorTitle = 'Kepala Sekolah';
+        }
+        setSignatureData((prev) => ({ ...prev, ...parsedSig }));
+      }
+    } catch (e) {}
+  }, []);
+
   // Fetch header info for formal print document
   const { data: headerInfo } = useQuery({
     queryKey: ['attendanceHeaderInfo'],
@@ -158,20 +258,22 @@ export default function NilaiClient({
         headerInfo.nip && headerInfo.nip.trim() !== '' ? headerInfo.nip : '-';
       setDocHeader((prev) => ({
         ...prev,
-        schoolName: headerInfo.schoolName || prev.schoolName,
-        teacherName: headerInfo.teacherName || prev.teacherName,
-        nip: activeNip,
-        className: headerInfo.className || prev.className,
+        schoolName: prev.schoolName || headerInfo.schoolName || 'SMK NEGERI 1',
+        teacherName: prev.teacherName || headerInfo.teacherName || '',
+        nip: prev.nip && prev.nip !== '-' ? prev.nip : activeNip,
+        className: prev.className || headerInfo.className || '',
       }));
       setSignatureData((prev) => ({
         ...prev,
-        teacherName: headerInfo.teacherName || prev.teacherName,
-        teacherNip: activeNip,
-        supervisorName: headerInfo.principalName || prev.supervisorName,
+        teacherName: prev.teacherName || headerInfo.teacherName || '',
+        teacherNip:
+          prev.teacherNip && prev.teacherNip !== '-' ? prev.teacherNip : activeNip,
+        supervisorName:
+          prev.supervisorName || headerInfo.principalName || '',
         supervisorNip:
-          headerInfo.principalNip && headerInfo.principalNip.trim() !== ''
-            ? headerInfo.principalNip
-            : prev.supervisorNip,
+          prev.supervisorNip && prev.supervisorNip !== '-'
+            ? prev.supervisorNip
+            : headerInfo.principalNip || '-',
       }));
     }
   }, [headerInfo]);
@@ -284,7 +386,9 @@ export default function NilaiClient({
         toast.error(res.error || 'Gagal menambahkan mata pelajaran.');
       }
     } catch (err: any) {
-      toast.error(err.message || 'Terjadi kesalahan saat menambahkan mata pelajaran.');
+      toast.error(
+        err.message || 'Terjadi kesalahan saat menambahkan mata pelajaran.',
+      );
     } finally {
       setIsAddingSubject(false);
     }
@@ -313,7 +417,7 @@ export default function NilaiClient({
       subjects.some(
         (s) =>
           s.toLowerCase() === trimmed.toLowerCase() &&
-          s.toLowerCase() !== selectedSubject.toLowerCase()
+          s.toLowerCase() !== selectedSubject.toLowerCase(),
       )
     ) {
       toast.error('Mata pelajaran dengan nama tersebut sudah ada.');
@@ -335,7 +439,9 @@ export default function NilaiClient({
         toast.error(res.error || 'Gagal mengubah nama mata pelajaran.');
       }
     } catch (err: any) {
-      toast.error(err.message || 'Terjadi kesalahan saat mengubah nama mata pelajaran.');
+      toast.error(
+        err.message || 'Terjadi kesalahan saat mengubah nama mata pelajaran.',
+      );
     } finally {
       setIsRenamingSubject(false);
     }
@@ -361,13 +467,15 @@ export default function NilaiClient({
         queryClient.invalidateQueries({ queryKey: ['gradesRecap'] });
         queryClient.invalidateQueries({ queryKey: ['allSubjectsGradesRecap'] });
         toast.success(
-          `Mata pelajaran "${subjectToDelete}" dan seluruh nilai terkait berhasil dihapus.`
+          `Mata pelajaran "${subjectToDelete}" dan seluruh nilai terkait berhasil dihapus.`,
         );
       } else {
         toast.error(res.error || 'Gagal menghapus mata pelajaran.');
       }
     } catch (err: any) {
-      toast.error(err.message || 'Terjadi kesalahan saat menghapus mata pelajaran.');
+      toast.error(
+        err.message || 'Terjadi kesalahan saat menghapus mata pelajaran.',
+      );
     } finally {
       setIsDeletingSubject(false);
     }
@@ -708,7 +816,9 @@ export default function NilaiClient({
                       Ubah Nama Mapel
                     </DialogTitle>
                     <DialogDescription className='text-xs text-slate-500'>
-                      Ubah nama mata pelajaran &quot;{selectedSubject}&quot;. Seluruh nilai siswa yang sudah tersimpan akan otomatis disinkronkan.
+                      Ubah nama mata pelajaran &quot;{selectedSubject}&quot;.
+                      Seluruh nilai siswa yang sudah tersimpan akan otomatis
+                      disinkronkan.
                     </DialogDescription>
                   </DialogHeader>
                   <div className='space-y-4 py-4'>
@@ -754,7 +864,10 @@ export default function NilaiClient({
             </Dialog>
 
             {/* Delete Subject Confirmation Dialog */}
-            <Dialog open={deleteSubjectOpen} onOpenChange={setDeleteSubjectOpen}>
+            <Dialog
+              open={deleteSubjectOpen}
+              onOpenChange={setDeleteSubjectOpen}
+            >
               <DialogContent className='bg-white border border-slate-200 text-slate-900 rounded-2xl max-w-md p-5 sm:p-6 shadow-2xl'>
                 <DialogHeader>
                   <div className='w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center mb-2'>
@@ -772,7 +885,9 @@ export default function NilaiClient({
                       ?
                     </p>
                     <p className='text-rose-600 font-medium bg-rose-50 border border-rose-100 rounded-xl p-3'>
-                      Peringatan: Seluruh riwayat nilai siswa (Tugas, UH, UTS, UAS) pada mata pelajaran ini akan dihapus secara permanen dari basis data.
+                      Peringatan: Seluruh riwayat nilai siswa (Tugas, UH, UTS,
+                      UAS) pada mata pelajaran ini akan dihapus secara permanen
+                      dari basis data.
                     </p>
                   </div>
                 </DialogHeader>
@@ -978,7 +1093,8 @@ export default function NilaiClient({
                     Tidak ada siswa terdaftar di kelas.
                   </p>
                   <p className='text-xs text-slate-500 mt-1 font-medium leading-relaxed'>
-                    Silakan tambahkan siswa terlebih dahulu di halaman Data Siswa.
+                    Silakan tambahkan siswa terlebih dahulu di halaman Data
+                    Siswa.
                   </p>
                 </div>
                 <Link href='/siswa'>
@@ -1023,7 +1139,10 @@ export default function NilaiClient({
               {/* Filter Group: Modal Trigger & Selectors */}
               <div className='flex flex-wrap items-center gap-2 w-full sm:w-auto'>
                 {/* Header Info Dialog Modal Trigger Button */}
-                <Dialog open={headerModalOpen} onOpenChange={setHeaderModalOpen}>
+                <Dialog
+                  open={headerModalOpen}
+                  onOpenChange={setHeaderModalOpen}
+                >
                   <DialogTrigger
                     render={
                       <Button
@@ -1035,176 +1154,452 @@ export default function NilaiClient({
                     <Settings2 className='h-4 w-4 text-emerald-600' />
                     <span>Pengaturan Header</span>
                   </DialogTrigger>
-                  <DialogContent className='bg-white border border-slate-200 text-slate-900 rounded-2xl max-w-md p-5 sm:p-6 shadow-2xl'>
-                    <DialogHeader className='pb-3 border-b border-slate-200'>
-                      <DialogTitle className='text-lg font-bold text-slate-900 flex items-center gap-2'>
-                        <Settings2 className='h-5 w-5 text-emerald-600' />
-                        Pengaturan Header & Tanda Tangan
+                  <DialogContent className='bg-white border border-slate-200 text-slate-900 rounded-2xl w-[calc(100vw-1.5rem)] max-w-[calc(100vw-1.5rem)] sm:w-full sm:max-w-4xl lg:max-w-5xl p-0 shadow-2xl overflow-hidden'>
+                    <DialogHeader className='p-5 sm:p-6 pb-4 border-b border-slate-100 bg-slate-50/50'>
+                      <DialogTitle className='text-lg font-bold text-slate-900 flex items-center gap-2.5'>
+                        <div>
+                          <div>Kustomisasi Kop Surat & Tanda Tangan</div>
+                          <DialogDescription className='text-xs text-slate-500 font-normal mt-0.5'>
+                            Konfigurasi logo instansi, teks kop surat resmi dinas,
+                            dan identitas pengesahan laporan.
+                          </DialogDescription>
+                        </div>
                       </DialogTitle>
-                      <DialogDescription className='text-xs text-slate-500'>
-                        Edit metadata identitas sekolah, guru, dan pengesahan
-                        cetak laporan secara dinamis.
-                      </DialogDescription>
                     </DialogHeader>
-                    <div className='space-y-3.5 py-3 text-xs'>
-                      <div className='space-y-1'>
-                        <Label className='text-slate-700 font-semibold'>
-                          Nama Sekolah / Instansi
-                        </Label>
-                        <Input
-                          value={docHeader.schoolName}
-                          onChange={(e) =>
-                            setDocHeader({
-                              ...docHeader,
-                              schoolName: e.target.value,
+
+                    <div className='p-5 sm:p-7 pb-8 max-h-[70vh] overflow-y-auto space-y-6 text-xs'>
+                      {/* Switch / Toggle: Gunakan Kop Resmi */}
+                      <div className='flex items-center justify-between p-3.5 rounded-xl bg-emerald-50/50 border border-emerald-200/60'>
+                        <div className='space-y-0.5'>
+                          <div className='font-bold text-slate-900 text-sm flex items-center gap-2'>
+                            Format Kop Surat Dinas
+                            <span className='px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800'>
+                              {docHeader.useOfficialKop
+                                ? 'Aktif (Resmi)'
+                                : 'Standar'}
+                            </span>
+                          </div>
+                          <p className='text-[11px] text-slate-500'>
+                            Tampilkan logo sekolah di sisi kiri, 6 baris identitas
+                            serif, dan garis ganda kop surat dinas.
+                          </p>
+                        </div>
+                        <Button
+                          type='button'
+                          size='sm'
+                          variant={
+                            docHeader.useOfficialKop ? 'default' : 'outline'
+                          }
+                          onClick={() =>
+                            updateDocHeader({
+                              useOfficialKop: !docHeader.useOfficialKop,
                             })
                           }
-                          className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
-                        />
+                          className={`rounded-xl text-xs font-semibold h-8 px-3 transition-all ${
+                            docHeader.useOfficialKop
+                              ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                              : 'border-slate-300 text-slate-700 hover:bg-slate-100'
+                          }`}
+                        >
+                          {docHeader.useOfficialKop
+                            ? 'Gunakan Format Standar'
+                            : 'Aktifkan Kop Resmi'}
+                        </Button>
                       </div>
-                      <div className='grid grid-cols-2 gap-3'>
-                        <div className='space-y-1'>
-                          <Label className='text-slate-700 font-semibold'>
-                            Nama Guru / Wali Kelas
-                          </Label>
-                          <Input
-                            value={docHeader.teacherName}
-                            onChange={(e) => {
-                              setDocHeader({
-                                ...docHeader,
-                                teacherName: e.target.value,
-                              });
-                              setSignatureData((prev) => ({
-                                ...prev,
-                                teacherName: e.target.value,
-                              }));
-                            }}
-                            className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
-                          />
+
+                      {/* Section Kop Surat Resmi (Jika diaktifkan) */}
+                      {docHeader.useOfficialKop && (
+                        <div className='space-y-4 rounded-xl border border-slate-200 bg-slate-50/30 p-4'>
+                          <div className='flex items-center justify-between pb-2 border-b border-slate-200/80'>
+                            <h5 className='font-bold text-slate-800 flex items-center gap-1.5 uppercase tracking-wider text-[11px]'>
+                              <ImageIcon className='h-3.5 w-3.5 text-emerald-600' />
+                              Logo Lembaga / Sekolah
+                            </h5>
+                            <div className='flex items-center gap-2'>
+                              <label
+                                htmlFor='modal-logo-file-input-nilai'
+                                className='cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-xs font-semibold transition-colors'
+                              >
+                                <Upload className='h-3 w-3' />
+                                Upload Logo Baru
+                              </label>
+                              <input
+                                id='modal-logo-file-input-nilai'
+                                type='file'
+                                accept='image/*'
+                                onChange={handleLogoUpload}
+                                className='hidden'
+                              />
+                              <Button
+                                type='button'
+                                variant='ghost'
+                                size='sm'
+                                onClick={handleResetLogo}
+                                className='h-7 px-2 text-slate-500 hover:text-slate-700 text-xs gap-1'
+                                title='Kembalikan ke logo default'
+                              >
+                                <RotateCcw className='h-3 w-3' />
+                                Reset
+                              </Button>
+                            </div>
+                          </div>
+
+                          {/* Preset Template Selector */}
+                          <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3 bg-slate-50 border border-slate-200 rounded-xl'>
+                            <div>
+                              <p className='text-xs font-bold text-slate-800'>
+                                Pilihan Template Format Kop
+                              </p>
+                              <p className='text-[11px] text-slate-500'>
+                                Terapkan format standar sekolah atau gunakan
+                                format khusus.
+                              </p>
+                            </div>
+                            <div className='flex items-center gap-2'>
+                              <Button
+                                type='button'
+                                variant='outline'
+                                size='sm'
+                                onClick={() => {
+                                  updateDocHeader({
+                                    logoUrl: '/icon.svg',
+                                    schoolName:
+                                      headerInfo?.schoolName || 'SMK NEGERI 1',
+                                    subHeader1: '',
+                                    subHeader2: '',
+                                    subHeader3: '',
+                                    addressLine: '',
+                                    cityRegency: '',
+                                  });
+                                  toast.success(
+                                    'Format kop di-reset ke format standar sekolah.',
+                                  );
+                                }}
+                                className='text-[11px] h-7 px-2.5 rounded-lg border-slate-200 hover:bg-slate-100 text-slate-700 cursor-pointer'
+                              >
+                                Format Standar
+                              </Button>
+                              <Button
+                                type='button'
+                                variant='outline'
+                                size='sm'
+                                onClick={() => {
+                                  updateDocHeader({
+                                    ...SLB_PURNAMA_ASIH_KOP,
+                                  });
+                                  toast.success(
+                                    'Template resmi SLB Purnama Asih berhasil dimuat.',
+                                  );
+                                }}
+                                className='text-[11px] h-7 px-2.5 rounded-lg border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-semibold cursor-pointer'
+                              >
+                                Template SLB Purnama Asih
+                              </Button>
+                            </div>
+                          </div>
+
+                          {/* Logo Preview & Tip */}
+                          <div className='flex items-center gap-3 bg-white p-2.5 rounded-lg border border-slate-200'>
+                            <div className='w-14 h-14 shrink-0 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-center p-1 overflow-hidden shadow-xs'>
+                              <img
+                                src={docHeader.logoUrl || '/icon.svg'}
+                                alt='Preview Logo'
+                                className='max-w-full max-h-full object-contain'
+                              />
+                            </div>
+                            <div className='text-[11px] text-slate-600 leading-tight'>
+                              <p className='font-semibold text-slate-800'>
+                                Logo Kop Laporan
+                              </p>
+                              <p className='text-slate-500 mt-0.5'>
+                                Format JPG/PNG/WebP/SVG, disarankan logo
+                                transparan atau latar putih bundar.
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* 6 Baris Teks Kop Dinas */}
+                          <div className='space-y-3 pt-1'>
+                            <div className='space-y-1'>
+                              <Label className='text-slate-700 font-semibold flex items-center justify-between'>
+                                <span>Baris 1 (Nama Yayasan / Lembaga)</span>
+                                <span className='text-[10px] text-slate-400 font-normal'>
+                                  Font Besar / Tebal
+                                </span>
+                              </Label>
+                              <Input
+                                value={docHeader.schoolName}
+                                onChange={(e) =>
+                                  updateDocHeader({ schoolName: e.target.value })
+                                }
+                                placeholder='Contoh: DINAS PENDIDIKAN PROVINSI / NAMA YAYASAN'
+                                className='bg-white border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9 text-xs'
+                              />
+                            </div>
+
+                            <div className='space-y-1'>
+                              <Label className='text-slate-700 font-semibold flex items-center justify-between'>
+                                <span>Baris 2 (Satuan Pendidikan)</span>
+                                <span className='text-[10px] text-slate-400 font-normal'>
+                                  Font Tebal
+                                </span>
+                              </Label>
+                              <Input
+                                value={docHeader.subHeader1}
+                                onChange={(e) =>
+                                  updateDocHeader({ subHeader1: e.target.value })
+                                }
+                                placeholder='Contoh: SMA NEGERI 1 / SATUAN PENDIDIKAN'
+                                className='bg-white border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9 text-xs'
+                              />
+                            </div>
+
+                            <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+                              <div className='space-y-1'>
+                                <Label className='text-slate-700 font-semibold'>
+                                  Baris 3 (Izin Operasional)
+                                </Label>
+                                <Input
+                                  value={docHeader.subHeader2}
+                                  onChange={(e) =>
+                                    updateDocHeader({
+                                      subHeader2: e.target.value,
+                                    })
+                                  }
+                                  placeholder='Contoh: NPSN: 12345678 / Akreditasi A'
+                                  className='bg-white border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9 text-xs'
+                                />
+                              </div>
+                              <div className='space-y-1'>
+                                <Label className='text-slate-700 font-semibold'>
+                                  Baris 4 (Nomor Registrasi)
+                                </Label>
+                                <Input
+                                  value={docHeader.subHeader3}
+                                  onChange={(e) =>
+                                    updateDocHeader({
+                                      subHeader3: e.target.value,
+                                    })
+                                  }
+                                  placeholder='Contoh: SK Izin Operasional No: ...'
+                                  className='bg-white border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9 text-xs'
+                                />
+                              </div>
+                            </div>
+
+                            <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+                              <div className='space-y-1'>
+                                <Label className='text-slate-700 font-semibold'>
+                                  Baris 5 (Alamat Lengkap & Kontak)
+                                </Label>
+                                <Input
+                                  value={docHeader.addressLine}
+                                  onChange={(e) =>
+                                    updateDocHeader({
+                                      addressLine: e.target.value,
+                                    })
+                                  }
+                                  placeholder='Contoh: Jl. Pendidikan No. 12 Telp. (021) 1234567'
+                                  className='bg-white border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9 text-xs'
+                                />
+                              </div>
+                              <div className='space-y-1'>
+                                <Label className='text-slate-700 font-semibold'>
+                                  Baris 6 (Kabupaten / Kota)
+                                </Label>
+                                <Input
+                                  value={docHeader.cityRegency}
+                                  onChange={(e) =>
+                                    updateDocHeader({
+                                      cityRegency: e.target.value,
+                                    })
+                                  }
+                                  placeholder='Contoh: KOTA / KABUPATEN'
+                                  className='bg-white border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9 text-xs'
+                                />
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                        <div className='space-y-1'>
-                          <Label className='text-slate-700 font-semibold'>
-                            NIP/NUPTK Guru
-                          </Label>
-                          <Input
-                            value={docHeader.nip}
-                            onChange={(e) => {
-                              setDocHeader({ ...docHeader, nip: e.target.value });
-                              setSignatureData((prev) => ({
-                                ...prev,
-                                teacherNip: e.target.value,
-                              }));
-                            }}
-                            className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
-                          />
+                      )}
+
+                      {/* Section Identitas Pengesahan & Tanda Tangan */}
+                      <div className='space-y-3.5 rounded-xl border border-slate-200 bg-white p-4'>
+                        <h5 className='font-bold text-slate-800 uppercase tracking-wider text-[11px] pb-1 border-b border-slate-100 flex items-center gap-1.5'>
+                          <FileText className='h-3.5 w-3.5 text-emerald-600' />
+                          Identitas Guru & Pengesahan Dokumen
+                        </h5>
+
+                        <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+                          <div className='space-y-1'>
+                            <Label className='text-slate-700 font-semibold'>
+                              Nama Guru / Wali Kelas
+                            </Label>
+                            <Input
+                              value={docHeader.teacherName}
+                              onChange={(e) => {
+                                updateDocHeader({ teacherName: e.target.value });
+                                updateSignatureData({
+                                  teacherName: e.target.value,
+                                });
+                              }}
+                              className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9 text-xs'
+                            />
+                          </div>
+                          <div className='space-y-1'>
+                            <Label className='text-slate-700 font-semibold'>
+                              NIP/NUPTK Guru
+                            </Label>
+                            <Input
+                              value={docHeader.nip}
+                              onChange={(e) => {
+                                updateDocHeader({ nip: e.target.value });
+                                updateSignatureData({
+                                  teacherNip: e.target.value,
+                                });
+                              }}
+                              className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9 text-xs'
+                            />
+                          </div>
                         </div>
-                      </div>
-                      <div className='grid grid-cols-2 gap-3'>
-                        <div className='space-y-1'>
-                          <Label className='text-slate-700 font-semibold'>
-                            Kelas
-                          </Label>
-                          <Input
-                            value={docHeader.className}
-                            onChange={(e) =>
-                              setDocHeader({
-                                ...docHeader,
-                                className: e.target.value,
-                              })
-                            }
-                            className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
-                          />
+
+                        <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+                          <div className='space-y-1'>
+                            <Label className='text-slate-700 font-semibold'>
+                              Kelas (Laporan)
+                            </Label>
+                            <Input
+                              value={docHeader.className}
+                              onChange={(e) =>
+                                updateDocHeader({ className: e.target.value })
+                              }
+                              className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9 text-xs'
+                            />
+                          </div>
+                          <div className='space-y-1'>
+                            <Label className='text-slate-700 font-semibold'>
+                              Jabatan Pengesah (Kiri)
+                            </Label>
+                            <Input
+                              value={signatureData.supervisorTitle}
+                              placeholder='Kepala Sekolah'
+                              onChange={(e) =>
+                                updateSignatureData({
+                                  supervisorTitle: e.target.value,
+                                })
+                              }
+                              className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9 text-xs'
+                            />
+                          </div>
                         </div>
-                        <div className='space-y-1'>
-                          <Label className='text-slate-700 font-semibold'>
-                            Jabatan Pengesah (Kiri)
-                          </Label>
-                          <Input
-                            value={signatureData.supervisorTitle}
-                            onChange={(e) =>
-                              setSignatureData({
-                                ...signatureData,
-                                supervisorTitle: e.target.value,
-                              })
-                            }
-                            className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
-                          />
+
+                        <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+                          <div className='space-y-1'>
+                            <Label className='text-slate-700 font-semibold'>
+                              Nama Kepala Sekolah
+                            </Label>
+                            <Input
+                              placeholder='Drs. H. Ahmad Dahlan, M.Pd.'
+                              value={signatureData.supervisorName}
+                              onChange={(e) =>
+                                updateSignatureData({
+                                  supervisorName: e.target.value,
+                                })
+                              }
+                              className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9 text-xs'
+                            />
+                          </div>
+                          <div className='space-y-1'>
+                            <Label className='text-slate-700 font-semibold'>
+                              NIP/NUPTK Kepala Sekolah
+                            </Label>
+                            <Input
+                              placeholder='19750812 200003 1 002'
+                              value={signatureData.supervisorNip}
+                              onChange={(e) =>
+                                updateSignatureData({
+                                  supervisorNip: e.target.value,
+                                })
+                              }
+                              className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9 text-xs'
+                            />
+                          </div>
                         </div>
-                      </div>
-                      <div className='grid grid-cols-2 gap-3'>
-                        <div className='space-y-1'>
-                          <Label className='text-slate-700 font-semibold'>
-                            Nama Kepala Sekolah
-                          </Label>
-                          <Input
-                            placeholder='Drs. H. Ahmad Dahlan, M.Pd.'
-                            value={signatureData.supervisorName}
-                            onChange={(e) =>
-                              setSignatureData({
-                                ...signatureData,
-                                supervisorName: e.target.value,
-                              })
-                            }
-                            className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
-                          />
-                        </div>
-                        <div className='space-y-1'>
-                          <Label className='text-slate-700 font-semibold'>
-                            NIP Kepala Sekolah
-                          </Label>
-                          <Input
-                            placeholder='19750812 200003 1 002'
-                            value={signatureData.supervisorNip}
-                            onChange={(e) =>
-                              setSignatureData({
-                                ...signatureData,
-                                supervisorNip: e.target.value,
-                              })
-                            }
-                            className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
-                          />
-                        </div>
-                      </div>
-                      <div className='grid grid-cols-2 gap-3'>
-                        <div className='space-y-1'>
-                          <Label className='text-slate-700 font-semibold'>
-                            Kota Cetak
-                          </Label>
-                          <Input
-                            value={signatureData.place}
-                            onChange={(e) =>
-                              setSignatureData({
-                                ...signatureData,
-                                place: e.target.value,
-                              })
-                            }
-                            className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
-                          />
-                        </div>
-                        <div className='space-y-1'>
-                          <Label className='text-slate-700 font-semibold'>
-                            Tanggal Cetak
-                          </Label>
-                          <Input
-                            value={signatureData.date}
-                            onChange={(e) =>
-                              setSignatureData({
-                                ...signatureData,
-                                date: e.target.value,
-                              })
-                            }
-                            className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9'
-                          />
+
+                        <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+                          <div className='space-y-1'>
+                            <Label className='text-slate-700 font-semibold'>
+                              Jabatan Pembuat Laporan (Kanan)
+                            </Label>
+                            <Input
+                              value={signatureData.teacherTitle}
+                              placeholder='Guru Mata Pelajaran / Wali Kelas'
+                              onChange={(e) =>
+                                updateSignatureData({
+                                  teacherTitle: e.target.value,
+                                })
+                              }
+                              className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9 text-xs'
+                            />
+                          </div>
+                          <div className='grid grid-cols-2 gap-2'>
+                            <div className='space-y-1'>
+                              <Label className='text-slate-700 font-semibold'>
+                                Tempat Cetak
+                              </Label>
+                              <Input
+                                value={signatureData.place}
+                                onChange={(e) =>
+                                  updateSignatureData({
+                                    place: e.target.value,
+                                  })
+                                }
+                                className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9 text-xs'
+                              />
+                            </div>
+                            <div className='space-y-1'>
+                              <Label className='text-slate-700 font-semibold'>
+                                Tanggal Cetak
+                              </Label>
+                              <Input
+                                value={signatureData.date}
+                                onChange={(e) =>
+                                  updateSignatureData({
+                                    date: e.target.value,
+                                  })
+                                }
+                                className='bg-slate-50 border-slate-200 focus:border-emerald-500 text-slate-900 rounded-xl h-9 text-xs'
+                              />
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
-                    <DialogFooter>
-                      <Button
-                        onClick={() => setHeaderModalOpen(false)}
-                        className='bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl w-full'
-                      >
-                        Selesai Edit
-                      </Button>
+
+                    <DialogFooter className='p-4 sm:px-7 sm:py-4 border-t border-slate-200 gap-3 shrink-0 bg-slate-50 flex flex-row items-center justify-between'>
+                      <span className='text-xs text-slate-500 font-medium hidden sm:inline'>
+                        Perubahan tersimpan otomatis di browser & profil laporan
+                      </span>
+                      <div className='flex items-center gap-2 ml-auto'>
+                        <Button
+                          type='button'
+                          variant='ghost'
+                          onClick={() => setHeaderModalOpen(false)}
+                          className='text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 text-xs rounded-xl h-9 px-4 cursor-pointer'
+                        >
+                          Tutup
+                        </Button>
+                        <Button
+                          type='button'
+                          onClick={() => {
+                            setHeaderModalOpen(false);
+                            toast.success('Pengaturan header berhasil disimpan.');
+                          }}
+                          className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl px-5 h-9 gap-2 shadow-xs cursor-pointer'
+                        >
+                          Simpan Pengaturan
+                        </Button>
+                      </div>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
@@ -1213,7 +1608,9 @@ export default function NilaiClient({
                   value={reportViewMode}
                   onValueChange={(val) =>
                     val &&
-                    setReportViewMode(val as 'all_subjects' | 'recap' | 'single')
+                    setReportViewMode(
+                      val as 'all_subjects' | 'recap' | 'single',
+                    )
                   }
                 >
                   <SelectTrigger className='bg-slate-50 border-slate-200 text-slate-900 rounded-xl h-10 w-full sm:w-52 text-xs font-bold shadow-xs cursor-pointer'>
@@ -1248,7 +1645,8 @@ export default function NilaiClient({
                 </Select>
 
                 {/* Subject Selector (Visible in recap & single modes) */}
-                {(reportViewMode === 'recap' || reportViewMode === 'single') && (
+                {(reportViewMode === 'recap' ||
+                  reportViewMode === 'single') && (
                   <Select
                     value={selectedSubject}
                     onValueChange={(val) => val && setSelectedSubject(val)}
@@ -1311,40 +1709,203 @@ export default function NilaiClient({
 
           {/* Printable A4 Document Wrapper (With Interactive Editable Dynamic Headers & Signatures) */}
           <div className='bg-slate-200/70 p-2 sm:p-10 rounded-2xl border border-slate-300/80 flex justify-start sm:justify-center overflow-x-auto shadow-inner print:p-0 print:bg-white print:border-none'>
-            <div className='w-full max-w-[950px] min-w-[340px] bg-white text-slate-900 shadow-2xl rounded-sm border border-slate-300 p-4 sm:p-14 print:p-0 print:shadow-none print:border-none print:w-full print:max-w-none print:text-black font-sans leading-relaxed overflow-x-auto'>
+            <div className='w-full max-w-[950px] min-w-[340px] bg-white text-slate-900 shadow-2xl rounded-sm border border-slate-300 p-4 sm:p-14 print:p-0 print:shadow-none print:border-none print:w-full print:max-w-none print:text-black font-sans leading-relaxed overflow-x-auto print:overflow-visible'>
               {/* Document KOP / Interactive Header Title */}
-              <div className='text-center mb-6 border-b-2 border-slate-900 pb-4 print:border-black space-y-1'>
-                <Input
-                  value={docHeader.schoolName}
-                  onChange={(e) =>
-                    setDocHeader({ ...docHeader, schoolName: e.target.value })
-                  }
-                  className='text-center font-black uppercase tracking-wider text-lg sm:text-2xl text-slate-900 print:text-black border-b border-transparent hover:border-slate-300 focus:border-emerald-600 rounded-none h-auto py-1 outline-none transition-all print:border-none print:p-0 bg-transparent w-full font-sans'
-                  placeholder='SMK NEGERI 1'
-                />
-                <Input
-                  value={
-                    reportViewMode === 'all_subjects'
-                      ? `LEGER REKAPITULASI HASIL EVALUASI NILAI AKADEMIK KELAS (SEMUA MAPEL)`
-                      : reportViewMode === 'recap'
-                        ? `LEGER REKAPITULASI HASIL EVALUASI NILAI AKADEMIK (${selectedSubject.toUpperCase()})`
-                        : `LAPORAN HASIL EVALUASI NILAI AKADEMIK (${selectedSubject.toUpperCase()} - ${selectedCategory.toUpperCase()})`
-                  }
-                  readOnly
-                  className='text-center font-bold uppercase text-xs sm:text-sm text-slate-800 print:text-black border-b border-transparent rounded-none h-auto py-1 outline-none print:border-none print:p-0 bg-transparent w-full font-sans cursor-default'
-                />
-                <Input
-                  value={
-                    reportViewMode === 'all_subjects'
-                      ? `Transkrip Nilai Rapor Semua Mata Pelajaran Bimbingan`
-                      : reportViewMode === 'recap'
-                        ? `Mata Pelajaran: ${selectedSubject} | Rekapan Semua Nilai (Tugas, UH, UTS, UAS)`
-                        : `Mata Pelajaran: ${selectedSubject} | Kategori: ${selectedCategory}`
-                  }
-                  readOnly
-                  className='text-center font-medium italic text-xs text-slate-500 print:text-slate-800 border-b border-transparent rounded-none h-auto py-0.5 outline-none print:border-none print:p-0 bg-transparent w-full font-sans cursor-default'
-                />
-              </div>
+              {docHeader.useOfficialKop ? (
+                <div className='mb-6'>
+                  <div className='flex items-center justify-between gap-3 sm:gap-4'>
+                    {/* Left: School Emblem / Circular Logo */}
+                    <div className='w-28 sm:w-32 shrink-0 flex flex-col items-center justify-center relative group'>
+                      <img
+                        src={docHeader.logoUrl || '/icon.svg'}
+                        alt='Logo Sekolah'
+                        className='w-28 h-28 sm:w-[124px] sm:h-[124px] object-contain transition-transform group-hover:scale-105'
+                      />
+                      {/* Floating edit button on hover (hidden in print) */}
+                      <label
+                        htmlFor='quick-logo-upload-nilai'
+                        className='absolute inset-0 bg-black/40 text-white text-[10px] font-bold rounded-full opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center cursor-pointer transition-opacity print:hidden'
+                        title='Klik untuk ganti logo'
+                      >
+                        <Upload className='h-4 w-4 mb-0.5' />
+                        <span>Ganti</span>
+                      </label>
+                      <input
+                        id='quick-logo-upload-nilai'
+                        type='file'
+                        accept='image/*'
+                        onChange={handleLogoUpload}
+                        className='hidden'
+                      />
+                    </div>
+
+                    {/* Center: Official Letterhead Text Block (Times New Roman / Serif style) */}
+                    <div className='flex-1 text-center font-serif text-slate-900 print:text-black space-y-[2px] px-1'>
+                      {/* Baris 1: Nama Sekolah / Yayasan */}
+                      {Boolean(
+                        docHeader.schoolName && docHeader.schoolName.trim(),
+                      ) && (
+                        <input
+                          value={docHeader.schoolName}
+                          onChange={(e) =>
+                            updateDocHeader({ schoolName: e.target.value })
+                          }
+                          className='w-full bg-transparent border-0 border-b border-transparent hover:border-slate-300 focus:border-emerald-600 focus:bg-emerald-50/20 p-0 text-center outline-none transition-all print:border-none print:p-0 font-serif font-bold uppercase text-base sm:text-xl md:text-[22px] text-slate-900 print:text-black leading-tight tracking-normal'
+                          placeholder='NAMA YAYASAN / DINAS PENDIDIKAN'
+                        />
+                      )}
+                      {/* Baris 2: Satuan Pendidikan */}
+                      {Boolean(
+                        docHeader.subHeader1 && docHeader.subHeader1.trim(),
+                      ) && (
+                        <input
+                          value={docHeader.subHeader1}
+                          onChange={(e) =>
+                            updateDocHeader({ subHeader1: e.target.value })
+                          }
+                          className='w-full bg-transparent border-0 border-b border-transparent hover:border-slate-300 focus:border-emerald-600 focus:bg-emerald-50/20 p-0 text-center outline-none transition-all print:border-none print:p-0 font-serif font-normal uppercase text-xs sm:text-sm md:text-[14.5px] text-slate-900 print:text-black leading-tight tracking-normal'
+                          placeholder='SATUAN PENDIDIKAN / NAMA SEKOLAH'
+                        />
+                      )}
+                      {/* Baris 3: Izin Kanwil */}
+                      {Boolean(
+                        docHeader.subHeader2 && docHeader.subHeader2.trim(),
+                      ) && (
+                        <input
+                          value={docHeader.subHeader2}
+                          onChange={(e) =>
+                            updateDocHeader({ subHeader2: e.target.value })
+                          }
+                          className='w-full bg-transparent border-0 border-b border-transparent hover:border-slate-300 focus:border-emerald-600 focus:bg-emerald-50/20 p-0 text-center outline-none transition-all print:border-none print:p-0 font-serif font-normal text-[11px] sm:text-xs md:text-[13px] text-slate-800 print:text-black leading-tight'
+                          placeholder='Izin Operasional / NPSN'
+                        />
+                      )}
+                      {/* Baris 4: Nomor Registrasi */}
+                      {Boolean(
+                        docHeader.subHeader3 && docHeader.subHeader3.trim(),
+                      ) && (
+                        <input
+                          value={docHeader.subHeader3}
+                          onChange={(e) =>
+                            updateDocHeader({ subHeader3: e.target.value })
+                          }
+                          className='w-full bg-transparent border-0 border-b border-transparent hover:border-slate-300 focus:border-emerald-600 focus:bg-emerald-50/20 p-0 text-center outline-none transition-all print:border-none print:p-0 font-serif font-normal text-[11px] sm:text-xs md:text-[13px] text-slate-800 print:text-black leading-tight'
+                          placeholder='Nomor Registrasi / SK Akreditasi'
+                        />
+                      )}
+                      {/* Baris 5: Alamat & Kontak */}
+                      {Boolean(
+                        docHeader.addressLine && docHeader.addressLine.trim(),
+                      ) && (
+                        <input
+                          value={docHeader.addressLine}
+                          onChange={(e) =>
+                            updateDocHeader({ addressLine: e.target.value })
+                          }
+                          className='w-full bg-transparent border-0 border-b border-transparent hover:border-slate-300 focus:border-emerald-600 focus:bg-emerald-50/20 p-0 text-center outline-none transition-all print:border-none print:p-0 font-serif font-normal text-[11px] sm:text-xs md:text-[13px] text-slate-800 print:text-black leading-tight'
+                          placeholder='Alamat Lengkap & Kontak'
+                        />
+                      )}
+                      {/* Baris 6: Kabupaten / Kota */}
+                      {Boolean(
+                        docHeader.cityRegency && docHeader.cityRegency.trim(),
+                      ) && (
+                        <input
+                          value={docHeader.cityRegency}
+                          onChange={(e) =>
+                            updateDocHeader({ cityRegency: e.target.value })
+                          }
+                          className='w-full bg-transparent border-0 border-b border-transparent hover:border-slate-300 focus:border-emerald-600 focus:bg-emerald-50/20 p-0 text-center outline-none transition-all print:border-none print:p-0 font-serif font-bold uppercase text-xs sm:text-sm md:text-[14.5px] text-slate-900 print:text-black leading-tight tracking-normal'
+                          placeholder='KABUPATEN / KOTA'
+                        />
+                      )}
+                      {!docHeader.schoolName?.trim() &&
+                        !docHeader.subHeader1?.trim() &&
+                        !docHeader.subHeader2?.trim() &&
+                        !docHeader.subHeader3?.trim() &&
+                        !docHeader.addressLine?.trim() &&
+                        !docHeader.cityRegency?.trim() && (
+                          <div className='py-4 text-center text-slate-400 text-xs italic print:hidden'>
+                            *Kop surat dinas masih kosong. Buka
+                            &quot;Pengaturan Header&quot; untuk memilih template
+                            atau melengkapi identitas surat.
+                          </div>
+                        )}
+                    </div>
+
+                    {/* Right spacer for mathematical centering symmetry */}
+                    <div
+                      className='w-28 sm:w-32 shrink-0 hidden sm:block pointer-events-none'
+                      aria-hidden='true'
+                    />
+                  </div>
+
+                  {/* Official Double Line Divider (Garis Ganda Kop Dinas) */}
+                  <div className='mt-2.5 mb-4 space-y-[2px] print:mt-1.5 print:mb-3'>
+                    <div className='border-b-[3px] border-black' />
+                    <div className='border-b border-black' />
+                  </div>
+
+                  {/* Report Title & Subtitle */}
+                  <div className='text-center space-y-1 mb-4'>
+                    <Input
+                      value={
+                        reportViewMode === 'all_subjects'
+                          ? `LEGER REKAPITULASI HASIL EVALUASI NILAI AKADEMIK KELAS (SEMUA MAPEL)`
+                          : reportViewMode === 'recap'
+                            ? `LEGER REKAPITULASI HASIL EVALUASI NILAI AKADEMIK (${selectedSubject.toUpperCase()})`
+                            : `LAPORAN HASIL EVALUASI NILAI AKADEMIK (${selectedSubject.toUpperCase()} - ${selectedCategory.toUpperCase()})`
+                      }
+                      readOnly
+                      className='text-center font-bold uppercase text-xs sm:text-sm md:text-base text-slate-900 print:text-black border-b border-transparent rounded-none h-auto py-0.5 outline-none print:border-none print:p-0 bg-transparent w-full font-sans cursor-default'
+                    />
+                    <Input
+                      value={
+                        reportViewMode === 'all_subjects'
+                          ? `Transkrip Nilai Rapor Semua Mata Pelajaran Bimbingan`
+                          : reportViewMode === 'recap'
+                            ? `Mata Pelajaran: ${selectedSubject} | Rekapan Semua Nilai (Tugas, UH, UTS, UAS)`
+                            : `Mata Pelajaran: ${selectedSubject} | Kategori: ${selectedCategory}`
+                      }
+                      readOnly
+                      className='text-center font-medium italic text-xs text-slate-500 print:text-slate-800 border-b border-transparent rounded-none h-auto py-0 outline-none print:border-none print:p-0 bg-transparent w-full font-sans cursor-default'
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className='text-center mb-6 border-b-2 border-slate-900 pb-4 print:border-black space-y-1'>
+                  <Input
+                    value={docHeader.schoolName}
+                    onChange={(e) =>
+                      updateDocHeader({ schoolName: e.target.value })
+                    }
+                    className='text-center font-black uppercase tracking-wider text-lg sm:text-2xl text-slate-900 print:text-black border-b border-transparent hover:border-slate-300 focus:border-emerald-600 rounded-none h-auto py-1 outline-none transition-all print:border-none print:p-0 bg-transparent w-full font-sans'
+                    placeholder='SMK NEGERI 1'
+                  />
+                  <Input
+                    value={
+                      reportViewMode === 'all_subjects'
+                        ? `LEGER REKAPITULASI HASIL EVALUASI NILAI AKADEMIK KELAS (SEMUA MAPEL)`
+                        : reportViewMode === 'recap'
+                          ? `LEGER REKAPITULASI HASIL EVALUASI NILAI AKADEMIK (${selectedSubject.toUpperCase()})`
+                          : `LAPORAN HASIL EVALUASI NILAI AKADEMIK (${selectedSubject.toUpperCase()} - ${selectedCategory.toUpperCase()})`
+                    }
+                    readOnly
+                    className='text-center font-bold uppercase text-xs sm:text-sm text-slate-800 print:text-black border-b border-transparent rounded-none h-auto py-1 outline-none print:border-none print:p-0 bg-transparent w-full font-sans cursor-default'
+                  />
+                  <Input
+                    value={
+                      reportViewMode === 'all_subjects'
+                        ? `Transkrip Nilai Rapor Semua Mata Pelajaran Bimbingan`
+                        : reportViewMode === 'recap'
+                          ? `Mata Pelajaran: ${selectedSubject} | Rekapan Semua Nilai (Tugas, UH, UTS, UAS)`
+                          : `Mata Pelajaran: ${selectedSubject} | Kategori: ${selectedCategory}`
+                    }
+                    readOnly
+                    className='text-center font-medium italic text-xs text-slate-500 print:text-slate-800 border-b border-transparent rounded-none h-auto py-0.5 outline-none print:border-none print:p-0 bg-transparent w-full font-sans cursor-default'
+                  />
+                </div>
+              )}
 
               {/* Metadata Info Grid (Interactive Inputs) */}
               <div className='grid grid-cols-2 gap-y-2 gap-x-8 text-xs font-semibold text-slate-800 print:text-black mb-6 border-b border-slate-200 pb-4 print:border-zinc-300'>
@@ -1770,118 +2331,164 @@ export default function NilaiClient({
                 </div>
               )}
 
-              {/* Official Interactive Signature Section (Matching Jurnal Wali Kelas) */}
-              <div className='mt-12 pt-6 grid grid-cols-2 gap-8 text-xs text-slate-900 print:text-black font-semibold break-inside-avoid'>
-                {/* Left Column: Supervisor / Principal */}
-                <div className='space-y-1.5'>
-                  <p className='font-bold text-slate-800 print:text-black'>
-                    Mengetahui,
-                  </p>
-                  <Input
-                    value={signatureData.supervisorTitle}
-                    onChange={(e) =>
-                      setSignatureData({
-                        ...signatureData,
-                        supervisorTitle: e.target.value,
-                      })
-                    }
-                    className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 w-full max-w-xs print:border-none print:p-0'
-                  />
-                  <div className='h-20' /> {/* Signature Space */}
-                  <div className='space-y-1'>
+              {/* Official Interactive Signature Section */}
+              <div className='mt-12 pt-6 text-xs text-slate-900 print:text-black font-semibold break-inside-avoid'>
+                <div className='grid grid-cols-2 gap-8'>
+                  {/* Kolom Kiri: Pengesahan Kepala Sekolah */}
+                  <div className='w-full max-w-[280px] sm:max-w-[320px] space-y-1.5 text-left'>
+                    {/* Baris 1: Mengetahui, */}
+                    <p className='font-bold text-xs h-6 flex items-center text-slate-800 print:text-black'>
+                      Mengetahui,
+                    </p>
+                    {/* Baris 2: Jabatan Kepala Sekolah */}
+                    <div className='hidden print:flex font-bold text-xs text-black h-6 items-center'>
+                      {signatureData.supervisorTitle || 'Kepala Sekolah'}
+                    </div>
+                    <Input
+                      value={signatureData.supervisorTitle}
+                      placeholder='Kepala Sekolah'
+                      onChange={(e) =>
+                        updateSignatureData({
+                          supervisorTitle: e.target.value,
+                        })
+                      }
+                      className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 w-full print:hidden'
+                    />
+                    {/* Baris 3: Ruang Tanda Tangan */}
+                    <div className='h-20' />
+                    {/* Baris 4: Nama Kepala Sekolah */}
+                    <div className='hidden print:flex font-bold text-xs text-black h-6 items-center'>
+                      {signatureData.supervisorName || '................................'}
+                    </div>
                     <Input
                       placeholder='Ketik nama kepsek...'
                       value={signatureData.supervisorName}
                       onChange={(e) =>
-                        setSignatureData({
-                          ...signatureData,
+                        updateSignatureData({
                           supervisorName: e.target.value,
                         })
                       }
-                      className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 w-full max-w-xs print:border-none print:p-0'
+                      className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 w-full print:hidden'
                     />
-                    <div className='flex items-center gap-1 text-[11px] text-slate-700 print:text-black'>
-                      <span>NIP.</span>
+                    {/* Baris 5: NIP Kepala Sekolah */}
+                    <div className='hidden print:flex text-[11px] text-black h-5 items-center gap-1'>
+                      <span>NIP/NUPTK.</span>
+                      <span>{signatureData.supervisorNip || '................................'}</span>
+                    </div>
+                    <div className='flex items-center gap-1 text-[11px] text-slate-700 h-5 print:hidden'>
+                      <span>NIP/NUPTK.</span>
                       <Input
                         placeholder='Ketik NIP...'
                         value={signatureData.supervisorNip}
                         onChange={(e) =>
-                          setSignatureData({
-                            ...signatureData,
+                          updateSignatureData({
                             supervisorNip: e.target.value,
                           })
                         }
-                        className='text-[11px] border-b border-slate-300 border-x-0 border-t-0 rounded-none h-5 px-0 focus:border-emerald-600 w-44 print:border-none print:p-0'
+                        className='text-[11px] border-b border-slate-300 border-x-0 border-t-0 rounded-none h-5 px-0 focus:border-emerald-600 w-44'
                       />
                     </div>
                   </div>
-                </div>
 
-                {/* Right Column: Class / Subject Teacher */}
-                <div className='space-y-1.5 sm:pl-8'>
-                  <div className='flex items-center gap-1 mb-1'>
-                    <Input
-                      value={signatureData.place}
-                      onChange={(e) =>
-                        setSignatureData({
-                          ...signatureData,
-                          place: e.target.value,
-                        })
-                      }
-                      style={{
-                        width: `${Math.max((signatureData.place || '').length * 7.5 + 4, 60)}px`,
-                      }}
-                      className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 print:border-none print:p-0'
-                    />
-                    <span>,</span>
-                    <Input
-                      value={signatureData.date}
-                      onChange={(e) =>
-                        setSignatureData({
-                          ...signatureData,
-                          date: e.target.value,
-                        })
-                      }
-                      style={{
-                        width: `${Math.max((signatureData.date || '').length * 7.5 + 4, 80)}px`,
-                      }}
-                      className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 print:border-none print:p-0'
-                    />
-                  </div>
-                  <Input
-                    value={signatureData.teacherTitle}
-                    onChange={(e) =>
-                      setSignatureData({
-                        ...signatureData,
-                        teacherTitle: e.target.value,
-                      })
-                    }
-                    className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 w-full max-w-xs print:border-none print:p-0'
-                  />
-                  <div className='h-20' /> {/* Signature Space */}
-                  <div className='space-y-1'>
-                    <Input
-                      value={signatureData.teacherName}
-                      onChange={(e) =>
-                        setSignatureData({
-                          ...signatureData,
-                          teacherName: e.target.value,
-                        })
-                      }
-                      className='font-bold text-xs border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 w-full max-w-xs print:border-none print:p-0'
-                    />
-                    <div className='flex items-center gap-1 text-[11px] text-slate-700 print:text-black'>
-                      <span>NIP/NUPTK.</span>
+                  {/* Kolom Kanan: Guru Kelas / Wali Kelas (Rata Kanan) */}
+                  <div className='flex justify-end'>
+                    <div className='w-full max-w-[280px] sm:max-w-[320px] space-y-1.5 flex flex-col items-end text-right'>
+                      {/* Baris 1: Tempat & Tanggal (Sejajar dengan 'Mengetahui,') */}
+                      <div className='h-6 flex items-center justify-end font-bold text-xs text-slate-900 print:text-black w-full'>
+                        {/* Teks murni saat dicetak agar rapi dan tanpa celah sebelum tanda koma */}
+                        <div className='hidden print:block text-right w-full'>
+                          {signatureData.place ? `${signatureData.place}, ` : ''}
+                          {signatureData.date}
+                        </div>
+                        {/* Input interaktif saat di layar */}
+                        <div className='flex items-center justify-end gap-1 print:hidden w-full'>
+                          <Input
+                            value={signatureData.place}
+                            onChange={(e) =>
+                              updateSignatureData({
+                                place: e.target.value,
+                              })
+                            }
+                            style={{
+                              width: `${Math.max((signatureData.place || '').length * 9 + 18, 95)}px`,
+                              fieldSizing: 'content',
+                            }}
+                            className='font-bold text-xs text-right border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-1 focus:border-emerald-600'
+                          />
+                          <span>,</span>
+                          <Input
+                            value={signatureData.date}
+                            onChange={(e) =>
+                              updateSignatureData({
+                                date: e.target.value,
+                              })
+                            }
+                            style={{
+                              width: `${Math.max((signatureData.date || '').length * 8.5 + 14, 135)}px`,
+                              fieldSizing: 'content',
+                            }}
+                            className='font-bold text-xs text-right border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-1 focus:border-emerald-600'
+                          />
+                        </div>
+                      </div>
+
+                      {/* Baris 2: Jabatan Guru (Sejajar dengan 'Kepala Sekolah') */}
+                      <div className='hidden print:flex font-bold text-xs text-black h-6 items-center justify-end w-full text-right'>
+                        {signatureData.teacherTitle || 'Guru Kelas / Wali Kelas'}
+                      </div>
                       <Input
-                        value={signatureData.teacherNip}
+                        value={signatureData.teacherTitle}
                         onChange={(e) =>
-                          setSignatureData({
-                            ...signatureData,
-                            teacherNip: e.target.value,
+                          updateSignatureData({
+                            teacherTitle: e.target.value,
                           })
                         }
-                        className='text-[11px] border-b border-slate-300 border-x-0 border-t-0 rounded-none h-5 px-0 focus:border-emerald-600 w-44 print:border-none print:p-0'
+                        className='font-bold text-xs text-right border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 w-full print:hidden'
                       />
+
+                      {/* Baris 3: Ruang Tanda Tangan */}
+                      <div className='h-20' />
+
+                      {/* Baris 4: Nama Guru (Sejajar dengan Nama Kepala Sekolah) */}
+                      <div className='hidden print:flex font-bold text-xs text-black h-6 items-center justify-end w-full text-right'>
+                        {signatureData.teacherName || '................................'}
+                      </div>
+                      <Input
+                        value={signatureData.teacherName}
+                        onChange={(e) =>
+                          updateSignatureData({
+                            teacherName: e.target.value,
+                          })
+                        }
+                        className='font-bold text-xs text-right border-b border-slate-300 border-x-0 border-t-0 rounded-none h-6 px-0 focus:border-emerald-600 w-full print:hidden'
+                      />
+
+                      {/* Baris 5: NIP Guru (Sejajar dengan NIP Kepala Sekolah) */}
+                      {/* Teks murni saat dicetak agar rapi dan rata kanan sempurna */}
+                      <div className='hidden print:flex text-[11px] text-black h-5 items-center justify-end w-full text-right'>
+                        {signatureData.teacherNip ? `NIP/NUPTK. ${signatureData.teacherNip}` : 'NIP/NUPTK. -'}
+                      </div>
+                      {/* Input interaktif saat di layar */}
+                      <div className='flex items-center justify-end gap-1 text-[11px] text-slate-700 h-5 w-full print:hidden'>
+                        <span>NIP/NUPTK.</span>
+                        <input
+                          type='text'
+                          value={signatureData.teacherNip}
+                          onChange={(e) =>
+                            updateSignatureData({
+                              teacherNip: e.target.value,
+                            })
+                          }
+                          placeholder='-'
+                          style={{
+                            width: signatureData.teacherNip
+                              ? `${Math.max(signatureData.teacherNip.length, 1) * 7.5 + 4}px`
+                              : '28px',
+                            fieldSizing: 'content',
+                          }}
+                          className='text-[11px] text-right border-b border-slate-300 border-x-0 border-t-0 rounded-none h-5 px-0 focus:border-emerald-600 bg-transparent outline-none'
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
