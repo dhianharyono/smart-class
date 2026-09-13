@@ -101,9 +101,13 @@ const sidebarMenuGroups: SidebarGroup[] = [
             href: '/jadwal-mengajar',
             icon: CalendarClock,
           },
+          {
+            name: 'Jurnal Mengajar',
+            href: '/jurnal',
+            icon: BookMarked,
+          },
         ],
       },
-      { name: 'Jurnal Wali Kelas', href: '/jurnal', icon: BookMarked },
     ],
   },
   {
@@ -142,7 +146,7 @@ const CONFIGURABLE_MENUS = [
   },
   {
     href: '/jurnal',
-    label: 'Jurnal Wali Kelas',
+    label: 'Jurnal Mengajar',
     desc: 'Agenda harian mengajar guru & KBM',
   },
   {

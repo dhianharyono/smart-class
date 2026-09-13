@@ -32,6 +32,7 @@ import {
   ImageIcon,
   School,
 } from 'lucide-react';
+import { triggerPrint } from '@/lib/printUtils';
 import { getProfile } from '@/actions/profileActions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -507,8 +508,8 @@ export default function JurnalClient() {
       return;
     }
     toast.promise(exportJournalToExcel(headerForm, journals), {
-      loading: 'Menyusun laporan Excel Jurnal Wali Kelas...',
-      success: 'Excel Jurnal Wali Kelas berhasil diunduh!',
+      loading: 'Menyusun laporan Excel Jurnal Mengajar...',
+      success: 'Excel Jurnal Mengajar berhasil diunduh!',
       error: 'Gagal mengunduh Excel.',
     });
   };
@@ -599,7 +600,7 @@ export default function JurnalClient() {
       <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between print:hidden'>
         <div>
           <h2 className='text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2.5 sm:gap-3'>
-            <span>Jurnal Wali Kelas</span>
+            <span>Jurnal Mengajar</span>
           </h2>
           <p className='text-slate-600 text-xs sm:text-sm mt-1'>
             Pencatatan agenda harian mengajar guru, materi, KBM, dan
@@ -656,7 +657,7 @@ export default function JurnalClient() {
               <div>
                 <div className='flex items-center gap-2 flex-wrap'>
                   <h3 className='text-sm sm:text-base font-extrabold text-slate-900'>
-                    Live Preview Cetak Agenda Jurnal Wali Kelas
+                    Live Preview Cetak Agenda Jurnal Mengajar
                   </h3>
                   <span className='text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider'>
                     FORMAT A4 PDF
@@ -669,7 +670,7 @@ export default function JurnalClient() {
               </div>
             </div>
 
-            <div className='flex items-center gap-2.5 shrink-0'>
+            <div className='flex flex-wrap items-center gap-2.5 shrink-0'>
               <Button
                 onClick={() => setHeaderModalOpen(true)}
                 variant='outline'
@@ -679,7 +680,7 @@ export default function JurnalClient() {
                 Edit Kop & TTD
               </Button>
               <Button
-                onClick={() => window.print()}
+                onClick={() => triggerPrint()}
                 variant='outline'
                 className='border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl h-10 px-4.5 gap-2 shadow-xs cursor-pointer'
               >

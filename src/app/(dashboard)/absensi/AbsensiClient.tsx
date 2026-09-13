@@ -20,6 +20,7 @@ import {
   RotateCcw,
   Image as ImageIcon,
 } from 'lucide-react';
+import { triggerPrint } from '@/lib/printUtils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -650,7 +651,7 @@ export default function AbsensiClient({
   };
 
   const handlePrint = () => {
-    window.print();
+    triggerPrint();
   };
 
   const counts = localRecords.reduce(
@@ -943,7 +944,7 @@ export default function AbsensiClient({
             </div>
 
             {/* Actions: Export Excel & Cetak PDF */}
-            <div className='flex items-center gap-2.5 w-full sm:w-auto shrink-0 justify-end'>
+            <div className='flex flex-wrap items-center gap-2.5 w-full sm:w-auto shrink-0 justify-end'>
               <Button
                 onClick={handleExportExcel}
                 variant='outline'

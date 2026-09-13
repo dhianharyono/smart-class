@@ -93,6 +93,39 @@ interface DashboardClientProps {
   };
 }
 
+function formatActivityLines(text?: string): string[] {
+  if (!text || !text.trim()) return [];
+  const trimmed = text.trim();
+
+  // If text contains newline characters, split by newline
+  if (trimmed.includes('\n')) {
+    return trimmed
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
+  }
+
+  // If text does not contain newlines, but contains multiple bullets like "- item1 - item2"
+  if (/(?<!^)\s+[-•*]\s+/.test(trimmed)) {
+    return trimmed
+      .split(/\s+[-•*]\s+/)
+      .map((item) => {
+        const clean = item.trim();
+        if (
+          clean.startsWith('-') ||
+          clean.startsWith('•') ||
+          clean.startsWith('*')
+        ) {
+          return clean;
+        }
+        return `- ${clean}`;
+      })
+      .filter((line) => line.length > 0);
+  }
+
+  return [trimmed];
+}
+
 export default function DashboardClient({ stats }: DashboardClientProps) {
   const mounted = useIsMounted();
   const [kkm] = useState<number>(stats.kkm);
@@ -312,53 +345,100 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
                           </tr>
                         </thead>
                         <tbody className='divide-y divide-slate-100 bg-white font-medium'>
-                          {stats.recentJournals.map((j: any) => (
-                            <tr
-                              key={j.id}
-                              className='hover:bg-slate-50/80 transition-colors'
-                            >
-                              <td className='py-3.5 px-4 whitespace-nowrap'>
-                                <div className='flex items-center gap-2'>
-                                  <span className='px-2 py-0.5 rounded-md bg-purple-100 text-purple-800 text-[10px] font-extrabold shrink-0'>
-                                    Sesi {j.meetingNo}
-                                  </span>
-                                  <span className='text-slate-900 font-bold'>
-                                    {j.date}
-                                  </span>
-                                </div>
-                              </td>
-                              <td className='py-3.5 px-4'>
-                                <div>
-                                  <p className='font-bold text-slate-900'>
-                                    {j.subject}
-                                  </p>
-                                  <p className='text-slate-500 text-[11px] truncate max-w-xs mt-0.5'>
-                                    {j.material}
-                                  </p>
-                                </div>
-                              </td>
-                              <td className='py-3.5 px-4 text-center whitespace-nowrap'>
-                                <div className='inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200 text-[11px] font-bold'>
-                                  <span className='text-amber-600'>
-                                    S: {j.absentS}
-                                  </span>
-                                  <span className='text-slate-300'>•</span>
-                                  <span className='text-blue-600'>
-                                    I: {j.absentI}
-                                  </span>
-                                  <span className='text-slate-300'>•</span>
-                                  <span className='text-rose-600'>
-                                    A: {j.absentA}
-                                  </span>
-                                </div>
-                              </td>
-                              <td className='py-3.5 px-4'>
-                                <p className='text-slate-600 text-[11px] truncate max-w-xs'>
-                                  {j.notes || j.learningActivity || '-'}
-                                </p>
-                              </td>
-                            </tr>
-                          ))}
+                          {stats.recentJournals.map((j: any) => {
+                            const activityLines = formatActivityLines(
+                              j.learningActivity || j.notes,
+                            );
+                            const hasSeparateNotes =
+                              Boolean(j.notes) &&
+                              Boolean(j.learningActivity) &&
+                              j.notes.trim() !== j.learningActivity.trim();
+                            const notesLines = hasSeparateNotes
+                              ? formatActivityLines(j.notes)
+                              : [];
+
+                            return (
+                              <tr
+                                key={j.id}
+                                className='hover:bg-slate-50/80 transition-colors'
+                              >
+                                <td className='py-3.5 px-4 whitespace-nowrap align-top'>
+                                  <div className='flex items-center gap-2'>
+                                    <span className='px-2 py-0.5 rounded-md bg-purple-100 text-purple-800 text-[10px] font-extrabold shrink-0'>
+                                      Sesi {j.meetingNo}
+                                    </span>
+                                    <span className='text-slate-900 font-bold'>
+                                      {j.date}
+                                    </span>
+                                  </div>
+                                </td>
+                                <td className='py-3.5 px-4 align-top'>
+                                  <div>
+                                    <p className='font-bold text-slate-900'>
+                                      {j.subject}
+                                    </p>
+                                    <p className='text-slate-500 text-[11px] mt-0.5 whitespace-pre-line break-words max-w-xs'>
+                                      {j.material}
+                                    </p>
+                                  </div>
+                                </td>
+                                <td className='py-3.5 px-4 text-center whitespace-nowrap align-top'>
+                                  <div className='inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200 text-[11px] font-bold'>
+                                    <span className='text-amber-600'>
+                                      S: {j.absentS}
+                                    </span>
+                                    <span className='text-slate-300'>•</span>
+                                    <span className='text-blue-600'>
+                                      I: {j.absentI}
+                                    </span>
+                                    <span className='text-slate-300'>•</span>
+                                    <span className='text-rose-600'>
+                                      A: {j.absentA}
+                                    </span>
+                                  </div>
+                                </td>
+                                <td className='py-3.5 px-4 align-top min-w-[200px] max-w-sm'>
+                                  {activityLines.length === 0 &&
+                                  notesLines.length === 0 ? (
+                                    <span className='text-slate-400 text-[11px]'>
+                                      -
+                                    </span>
+                                  ) : (
+                                    <div className='space-y-1.5 text-[11px] leading-relaxed'>
+                                      {activityLines.length > 0 && (
+                                        <div className='space-y-1 text-slate-700 font-medium'>
+                                          {activityLines.map((line, idx) => (
+                                            <div
+                                              key={idx}
+                                              className='break-words whitespace-pre-line'
+                                            >
+                                              {line}
+                                            </div>
+                                          ))}
+                                        </div>
+                                      )}
+
+                                      {notesLines.length > 0 && (
+                                        <div className='pt-1 border-t border-slate-100 text-slate-500 space-y-0.5'>
+                                          <span className='font-bold text-[10px] uppercase tracking-wider text-slate-400 block'>
+                                            Catatan:
+                                          </span>
+                                          {notesLines.map((line, idx) => (
+                                            <div
+                                              key={idx}
+                                              className='italic break-words whitespace-pre-line'
+                                            >
+                                              {line}
+                                            </div>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>

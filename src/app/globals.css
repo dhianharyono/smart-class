@@ -160,7 +160,6 @@
 @media print {
   @page {
     margin: 0;
-    size: landscape;
   }
   html {
     margin: 0 !important;
@@ -171,11 +170,46 @@
     height: auto !important;
     min-height: 0 !important;
     margin: 0 !important;
-    padding: 12mm 15mm !important;
+    padding: 8mm 10mm !important;
     background: #ffffff !important;
     overflow: visible !important;
     box-sizing: border-box !important;
   }
+
+  /* Adaptive Print Landscape Styling (Evaluated by browser when Landscape is chosen in print dialog) */
+  @media (orientation: landscape) {
+    body {
+      padding: 10mm 12mm !important;
+    }
+  }
+
+  /* Adaptive Print Portrait Styling (Evaluated by browser when Portrait is chosen in print dialog) */
+  @media (orientation: portrait) {
+    body {
+      padding: 5mm 6mm !important;
+    }
+    table {
+      font-size: 8px !important;
+      line-height: 1.15 !important;
+      max-width: 100% !important;
+      table-layout: auto !important;
+    }
+    th,
+    td {
+      padding: 1px 2px !important;
+      letter-spacing: -0.01em !important;
+    }
+    .kop-surat-logo,
+    img {
+      max-height: 75px !important;
+      width: auto !important;
+    }
+    .signature-block {
+      margin-top: 8px !important;
+      font-size: 9px !important;
+    }
+  }
+
   div,
   main,
   section,
@@ -188,6 +222,7 @@
   }
   table {
     page-break-inside: auto;
+    max-width: 100% !important;
   }
   tr {
     page-break-inside: avoid !important;

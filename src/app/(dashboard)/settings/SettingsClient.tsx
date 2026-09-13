@@ -68,7 +68,7 @@ const CONFIGURABLE_MENUS = [
   },
   {
     href: '/jurnal',
-    label: 'Jurnal Wali Kelas',
+    label: 'Jurnal Mengajar',
     desc: 'Agenda harian mengajar guru & rekaman kegiatan KBM',
     icon: BookMarked,
     color: 'text-teal-400 bg-teal-500/10 border-teal-500/20',

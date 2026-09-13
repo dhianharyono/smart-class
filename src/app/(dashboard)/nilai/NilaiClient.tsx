@@ -20,6 +20,7 @@ import {
   RotateCcw,
   ImageIcon,
 } from 'lucide-react';
+import { triggerPrint } from '@/lib/printUtils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -557,7 +558,7 @@ export default function NilaiClient({
   };
 
   const handlePrint = () => {
-    window.print();
+    triggerPrint();
   };
 
   // Stats for All Subjects Mode
@@ -1686,7 +1687,7 @@ export default function NilaiClient({
               </div>
 
               {/* Action Group: Excel & PDF Buttons */}
-              <div className='flex items-center gap-2 w-full sm:w-auto shrink-0'>
+              <div className='flex flex-wrap items-center gap-2 w-full sm:w-auto shrink-0'>
                 <Button
                   onClick={handleExcelExport}
                   variant='outline'

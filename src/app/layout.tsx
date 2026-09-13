@@ -16,13 +16,15 @@ export const metadata: Metadata = {
     template: '%s | Smart Class',
   },
   description:
-    'Aplikasi produktivitas dan pengelolaan kelas terpadu untuk wali kelas: absensi siswa, jurnal harian guru, dan rekap nilai.',
+    'Aplikasi produktivitas dan pengelolaan kelas terpadu untuk wali kelas: absensi siswa, jurnal harian guru, jadwal mengajar, dan rekap nilai.',
   keywords: [
     'Smart Class',
     'Dashboard Wali Kelas',
+    'Jadwal Mengajar Guru',
     'Jurnal Guru Harian',
     'Absensi Siswa Online',
     'Rekap Nilai Siswa',
+    'Multi Kelas Guru',
     'Aplikasi Sekolah',
     'Manajemen Kelas',
   ],
