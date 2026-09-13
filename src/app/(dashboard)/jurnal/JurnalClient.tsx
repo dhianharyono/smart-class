@@ -111,7 +111,17 @@ export default function JurnalClient() {
   };
 
   // Dynamic Document Header State (Kop Surat Resmi Dinas / Lembaga - Default Generik)
-  const [docHeader, setDocHeader] = useState({
+  const [docHeader, setDocHeader] = useState<{
+    useOfficialKop: boolean;
+    logoUrl: string;
+    schoolName: string;
+    subHeader1: string;
+    subHeader2: string;
+    subHeader3: string;
+    addressLine: string;
+    cityRegency: string;
+    selectedPreset?: 'standar' | 'slb';
+  }>({
     useOfficialKop: false,
     logoUrl: '/icon.svg',
     schoolName: '',
@@ -120,6 +130,7 @@ export default function JurnalClient() {
     subHeader3: '',
     addressLine: '',
     cityRegency: '',
+    selectedPreset: 'standar',
   });
 
   // Dynamic Interactive Signature Block State (Matching refined Absensi format)
@@ -185,14 +196,7 @@ export default function JurnalClient() {
     reader.readAsDataURL(file);
   };
 
-  const handleResetLogo = () => {
-    const isSlb =
-      profile?.schoolName?.toLowerCase().includes('purnama asih') ||
-      docHeader.schoolName?.toLowerCase().includes('purnama asih');
-    const defaultLogo = isSlb ? '/logo-resmi-slb.png' : '/icon.svg';
-    updateDocHeader({ logoUrl: defaultLogo });
-    toast.success('Logo dikembalikan ke logo default.');
-  };
+
 
   // Dialog States
   const [journalModalOpen, setJournalModalOpen] = useState(false);
@@ -244,6 +248,30 @@ export default function JurnalClient() {
     queryKey: ['journalHeader'],
     queryFn: () => getJournalHeader(),
   });
+
+  const userSchoolName = (
+    profile?.schoolName ||
+    headerData?.schoolName ||
+    ''
+  )
+    .toLowerCase()
+    .trim();
+  const isUserSlbPurnamaAsih = userSchoolName.includes('purnama asih');
+
+  const isSlbActive =
+    isUserSlbPurnamaAsih &&
+    (docHeader.selectedPreset === 'slb' ||
+      (docHeader.selectedPreset !== 'standar' &&
+        docHeader.schoolName === SLB_PURNAMA_ASIH_KOP.schoolName &&
+        docHeader.subHeader1 === SLB_PURNAMA_ASIH_KOP.subHeader1));
+
+  const isStandarActive = !isSlbActive;
+
+  const handleResetLogo = () => {
+    const defaultLogo = isUserSlbPurnamaAsih ? '/logo-resmi-slb.png' : '/icon.svg';
+    updateDocHeader({ logoUrl: defaultLogo });
+    toast.success('Logo dikembalikan ke logo default.');
+  };
 
   // Load saved kop settings & signature from localStorage on client mount
   React.useEffect(() => {
@@ -317,6 +345,47 @@ export default function JurnalClient() {
         schoolName: prev.schoolName || school,
       }));
     }
+
+    const isSlb = (profile?.schoolName || headerData?.schoolName || '')
+      .toLowerCase()
+      .includes('purnama asih');
+
+    setDocHeader((prev) => {
+      // Jika akun guru terdaftar di SLB Purnama Asih dan belum pernah kustomisasi
+      if (isSlb && (!prev.schoolName || prev.schoolName === '')) {
+        if (prev.selectedPreset !== 'standar') {
+          return {
+            ...prev,
+            ...SLB_PURNAMA_ASIH_KOP,
+            selectedPreset: 'slb',
+            useOfficialKop: true,
+          };
+        }
+      }
+
+      // Jika di localStorage masih ada sisa hardcoded lama SLB Purnama Asih padahal guru dari sekolah lain
+      const shouldResetOldSlbDefault =
+        !isSlb &&
+        prev.schoolName === 'SEKOLAH LUAR BIASA PURNAMA ASIH' &&
+        school &&
+        !school.toLowerCase().includes('purnama asih');
+
+      if (shouldResetOldSlbDefault) {
+        return {
+          ...prev,
+          schoolName: school,
+          logoUrl: '/icon.svg',
+          subHeader1: '',
+          subHeader2: '',
+          subHeader3: '',
+          addressLine: '',
+          cityRegency: '',
+          selectedPreset: 'standar',
+        };
+      }
+
+      return prev;
+    });
 
     setSignatureData((prev) => ({
       ...prev,
@@ -1966,7 +2035,9 @@ export default function JurnalClient() {
                         size='sm'
                         onClick={() => {
                           updateDocHeader({
-                            logoUrl: '/icon.svg',
+                            logoUrl: isUserSlbPurnamaAsih
+                              ? '/logo-resmi-slb.png'
+                              : '/icon.svg',
                             schoolName:
                               profile?.schoolName ||
                               headerForm.schoolName ||
@@ -1976,31 +2047,43 @@ export default function JurnalClient() {
                             subHeader3: '',
                             addressLine: '',
                             cityRegency: '',
+                            selectedPreset: 'standar',
                           });
                           toast.success(
                             'Format kop di-reset ke format standar sekolah.',
                           );
                         }}
-                        className='text-[11px] h-7 px-2.5 rounded-lg border-slate-200 hover:bg-slate-100 text-slate-700 cursor-pointer'
+                        className={`text-[11px] h-7 px-2.5 rounded-lg border transition-all cursor-pointer ${
+                          isStandarActive
+                            ? 'border-emerald-400 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-semibold shadow-xs'
+                            : 'border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-normal'
+                        }`}
                       >
                         Format Standar
                       </Button>
-                      <Button
-                        type='button'
-                        variant='outline'
-                        size='sm'
-                        onClick={() => {
-                          updateDocHeader({
-                            ...SLB_PURNAMA_ASIH_KOP,
-                          });
-                          toast.success(
-                            'Template resmi SLB Purnama Asih berhasil dimuat.',
-                          );
-                        }}
-                        className='text-[11px] h-7 px-2.5 rounded-lg border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-semibold cursor-pointer'
-                      >
-                        Template SLB Purnama Asih
-                      </Button>
+                      {isUserSlbPurnamaAsih && (
+                        <Button
+                          type='button'
+                          variant='outline'
+                          size='sm'
+                          onClick={() => {
+                            updateDocHeader({
+                              ...SLB_PURNAMA_ASIH_KOP,
+                              selectedPreset: 'slb',
+                            });
+                            toast.success(
+                              'Template resmi SLB Purnama Asih berhasil dimuat.',
+                            );
+                          }}
+                          className={`text-[11px] h-7 px-2.5 rounded-lg border transition-all cursor-pointer ${
+                            isSlbActive
+                              ? 'border-emerald-400 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-semibold shadow-xs'
+                              : 'border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-normal'
+                          }`}
+                        >
+                          Template SLB Purnama Asih
+                        </Button>
+                      )}
                     </div>
                   </div>
 

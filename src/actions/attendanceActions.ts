@@ -62,6 +62,7 @@ export async function getAttendanceHeaderInfo() {
 
     return {
       schoolName: teacher?.schoolName || journalHeader?.schoolName || 'SMK Negeri 1',
+      teacherSchoolName: teacher?.schoolName || '',
       className: activeClass,
       classes: classesList,
       teacherName: teacher?.name || journalHeader?.teacherName || '',
@@ -76,6 +77,7 @@ export async function getAttendanceHeaderInfo() {
     }
     return {
       schoolName: 'SMK Negeri 1',
+      teacherSchoolName: '',
       className: 'Kelas Utama',
       classes: [],
       teacherName: 'Guru Kelas',
