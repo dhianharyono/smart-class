@@ -16,16 +16,13 @@ import {
   LogOut,
   BookMarked,
   User,
-  CheckSquare,
   Sparkles,
   Check,
   Settings,
   ChevronDown,
   ChevronRight,
-  Calendar,
   CalendarClock,
   School,
-  ArrowLeft,
   IdCard,
   UserCheck,
   AlertCircle,
@@ -189,17 +186,17 @@ export default function DashboardLayoutClient({
       teacher.enabledMenus && teacher.enabledMenus.length > 0
         ? teacher.enabledMenus
         : [
-            '/dashboard',
-            '/kelas',
-            '/jadwal-mengajar',
-            '/siswa',
-            '/absensi',
-            '/nilai',
-            '/jurnal',
-            '/feedback',
-            '/profile',
-            '/settings',
-          ];
+          '/dashboard',
+          '/kelas',
+          '/jadwal-mengajar',
+          '/siswa',
+          '/absensi',
+          '/nilai',
+          '/jurnal',
+          '/feedback',
+          '/profile',
+          '/settings',
+        ];
     return base.includes('/kelas') ? base : [...base, '/kelas'];
   });
 
@@ -213,26 +210,12 @@ export default function DashboardLayoutClient({
     }
   }, [teacher.enabledMenus]);
 
-  // Check if teacher profile data is incomplete (including NIP & Principal info)
+  // Check if teacher profile data is incomplete
   const isProfileIncomplete = React.useMemo(() => {
-    const isNipInvalid =
-      !teacher.nip || teacher.nip.trim() === '' || teacher.nip.trim() === '-';
-    const isPrincipalNameInvalid =
-      !teacher.principalName || teacher.principalName.trim() === '';
-    const isPrincipalNipInvalid =
-      !teacher.principalNip ||
-      teacher.principalNip.trim() === '' ||
-      teacher.principalNip.trim() === '-';
     const isBasicInfoInvalid =
       !teacher.name || !teacher.schoolName || !teacher.className;
 
-    return (
-      !!teacher.isFirstLogin ||
-      isNipInvalid ||
-      isPrincipalNameInvalid ||
-      isPrincipalNipInvalid ||
-      isBasicInfoInvalid
-    );
+    return !!teacher.isFirstLogin || isBasicInfoInvalid;
   }, [teacher]);
 
   // Active Teacher Multi-Class State
@@ -256,7 +239,7 @@ export default function DashboardLayoutClient({
   // States for Profile Modal
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [profileModalTab, setProfileModalTab] = useState<
-    'profile' | 'security'
+    'profile' | 'security' | 'signature'
   >('profile');
   const [profileModalForm, setProfileModalForm] = useState({
     name: teacher.name || '',
@@ -619,14 +602,6 @@ export default function DashboardLayoutClient({
       errors.name = 'Nama lengkap & gelar minimal 3 karakter.';
     }
 
-    const cleanNip = onboardingNip.trim();
-    if (!cleanNip || cleanNip === '-') {
-      errors.nip =
-        'NIP/NUPTK wajib diisi dengan NIP/NUPTK yang valid (tidak boleh "-").';
-    } else if (cleanNip.length < 3) {
-      errors.nip = 'NIP/NUPTK minimal 3 karakter.';
-    }
-
     const finalSchoolName =
       onboardingSchool === '__NEW_SCHOOL__'
         ? onboardingCustomSchool.trim()
@@ -656,21 +631,6 @@ export default function DashboardLayoutClient({
     if (finalClasses.length === 0) {
       errors.className =
         'Kelas diajar wajib dimasukkan minimal 1 kelas (contoh: 5A).';
-    }
-
-    const cleanPrincipalName = onboardingPrincipalName.trim();
-    if (!cleanPrincipalName) {
-      errors.principalName = 'Nama kepala sekolah wajib diisi.';
-    } else if (cleanPrincipalName.length < 3) {
-      errors.principalName = 'Nama kepala sekolah minimal 3 karakter.';
-    }
-
-    const cleanPrincipalNip = onboardingPrincipalNip.trim();
-    if (!cleanPrincipalNip || cleanPrincipalNip === '-') {
-      errors.principalNip =
-        'NIP kepala sekolah wajib diisi dengan NIP yang valid (tidak boleh "-").';
-    } else if (cleanPrincipalNip.length < 3) {
-      errors.principalNip = 'NIP kepala sekolah minimal 3 karakter.';
     }
 
     setOnboardingErrors(errors);
@@ -882,19 +842,17 @@ export default function DashboardLayoutClient({
                                 [item.name]: !isOpen,
                               }))
                             }
-                            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer ${
-                              isChildActive
-                                ? 'bg-emerald-50/70 text-emerald-900 border border-emerald-200/80 font-bold'
-                                : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 border border-transparent'
-                            }`}
+                            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer ${isChildActive
+                              ? 'bg-emerald-50/70 text-emerald-900 border border-emerald-200/80 font-bold'
+                              : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 border border-transparent'
+                              }`}
                           >
                             <div className='flex items-center gap-3'>
                               <Icon
-                                className={`h-4.5 w-4.5 transition-transform duration-200 ${
-                                  isChildActive
-                                    ? 'text-emerald-600'
-                                    : 'text-slate-400'
-                                }`}
+                                className={`h-4.5 w-4.5 transition-transform duration-200 ${isChildActive
+                                  ? 'text-emerald-600'
+                                  : 'text-slate-400'
+                                  }`}
                               />
                               <span>{item.name}</span>
                             </div>
@@ -918,18 +876,16 @@ export default function DashboardLayoutClient({
                                     key={child.href}
                                     href={child.href}
                                     onClick={() => setMobileOpen(false)}
-                                    className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all duration-200 ${
-                                      isSubActive
-                                        ? 'bg-emerald-600 text-white font-bold shadow-xs'
-                                        : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium'
-                                    }`}
+                                    className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all duration-200 ${isSubActive
+                                      ? 'bg-emerald-600 text-white font-bold shadow-xs'
+                                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium'
+                                      }`}
                                   >
                                     <SubIcon
-                                      className={`h-4 w-4 ${
-                                        isSubActive
-                                          ? 'text-white'
-                                          : 'text-slate-400'
-                                      }`}
+                                      className={`h-4 w-4 ${isSubActive
+                                        ? 'text-white'
+                                        : 'text-slate-400'
+                                        }`}
                                     />
                                     <span>{child.name}</span>
                                   </Link>
@@ -952,18 +908,16 @@ export default function DashboardLayoutClient({
                         key={item.href}
                         href={item.href!}
                         onClick={() => setMobileOpen(false)}
-                        className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group ${
-                          isActive
-                            ? 'bg-emerald-50/90 text-emerald-800 border border-emerald-200/80 shadow-xs font-bold'
-                            : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 border border-transparent'
-                        }`}
+                        className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group ${isActive
+                          ? 'bg-emerald-50/90 text-emerald-800 border border-emerald-200/80 shadow-xs font-bold'
+                          : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 border border-transparent'
+                          }`}
                       >
                         <Icon
-                          className={`h-4.5 w-4.5 transition-transform duration-200 group-hover:scale-110 ${
-                            isActive
-                              ? 'text-emerald-600'
-                              : 'text-slate-400 group-hover:text-slate-600'
-                          }`}
+                          className={`h-4.5 w-4.5 transition-transform duration-200 group-hover:scale-110 ${isActive
+                            ? 'text-emerald-600'
+                            : 'text-slate-400 group-hover:text-slate-600'
+                            }`}
                         />
                         <span>{item.name}</span>
                         {isActive && (
@@ -987,9 +941,8 @@ export default function DashboardLayoutClient({
         type='button'
         onClick={() => setIsClassDropdownOpen(!isClassDropdownOpen)}
         disabled={isSwitchingClass}
-        className={`inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100/90 border border-emerald-200/90 text-emerald-900 text-xs font-bold transition-all cursor-pointer shadow-2xs ${
-          isSwitchingClass ? 'opacity-50' : ''
-        }`}
+        className={`inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100/90 border border-emerald-200/90 text-emerald-900 text-xs font-bold transition-all cursor-pointer shadow-2xs ${isSwitchingClass ? 'opacity-50' : ''
+          }`}
       >
         <School className='h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-600 shrink-0' />
         <span className='truncate max-w-[80px] xs:max-w-[110px] sm:max-w-none'>
@@ -1020,11 +973,10 @@ export default function DashboardLayoutClient({
                 return (
                   <div
                     key={cls}
-                    className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
-                      isActive
-                        ? 'bg-emerald-600 text-white shadow-2xs'
-                        : 'text-slate-700 hover:bg-slate-100'
-                    }`}
+                    className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${isActive
+                      ? 'bg-emerald-600 text-white shadow-2xs'
+                      : 'text-slate-700 hover:bg-slate-100'
+                      }`}
                   >
                     <button
                       type='button'
@@ -1069,9 +1021,8 @@ export default function DashboardLayoutClient({
       <button
         type='button'
         onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-        className={`flex items-center ${
-          isMobile ? 'gap-1 p-0.5' : 'gap-2.5 p-1 sm:px-2.5 sm:py-1.5'
-        } rounded-full hover:bg-slate-100/80 text-left transition-all duration-200 cursor-pointer group`}
+        className={`flex items-center ${isMobile ? 'gap-1 p-0.5' : 'gap-2.5 p-1 sm:px-2.5 sm:py-1.5'
+          } rounded-full hover:bg-slate-100/80 text-left transition-all duration-200 cursor-pointer group`}
       >
         {/* Avatar */}
         <div className='h-8 w-8 shrink-0 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white font-bold text-xs shadow-xs border border-emerald-500/30 group-hover:scale-105 transition-transform'>
@@ -1091,11 +1042,9 @@ export default function DashboardLayoutClient({
         )}
 
         <ChevronDown
-          className={`${
-            isMobile ? 'h-3 w-3' : 'h-3.5 w-3.5'
-          } text-slate-400 group-hover:text-slate-600 transition-transform duration-200 shrink-0 mr-0.5 ${
-            isProfileDropdownOpen ? 'rotate-180 text-emerald-600' : ''
-          }`}
+          className={`${isMobile ? 'h-3 w-3' : 'h-3.5 w-3.5'
+            } text-slate-400 group-hover:text-slate-600 transition-transform duration-200 shrink-0 mr-0.5 ${isProfileDropdownOpen ? 'rotate-180 text-emerald-600' : ''
+            }`}
         />
       </button>
 
@@ -1327,7 +1276,7 @@ export default function DashboardLayoutClient({
       >
         <DialogContent
           showCloseButton={false}
-          className='bg-white border border-slate-200 text-slate-900 rounded-3xl w-[calc(100vw-1.5rem)] sm:w-full sm:max-w-2xl p-4 sm:p-7 shadow-2xl overflow-hidden text-left'
+          className='bg-white border border-slate-200 text-slate-900 rounded-3xl w-[calc(100vw-1.5rem)] sm:w-full sm:max-w-2xl p-4 sm:p-5 shadow-2xl overflow-hidden text-left'
         >
           <DialogHeader className='pb-3 border-b border-slate-100'>
             {/* Top Bar with Badge & Logout Option */}
@@ -1346,7 +1295,6 @@ export default function DashboardLayoutClient({
                 onClick={() => setShowLogoutConfirm(true)}
                 className='text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200/80 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-rose-300 rounded-xl px-2.5 sm:px-3 py-1.5 h-8 gap-1.5 transition-all cursor-pointer shrink-0 whitespace-nowrap shadow-2xs'
               >
-                <LogOut className='h-3.5 w-3.5 shrink-0' />
                 <span>Keluar</span>
               </Button>
             </div>
@@ -1369,18 +1317,16 @@ export default function DashboardLayoutClient({
               <button
                 type='button'
                 onClick={() => setOnboardingStep(1)}
-                className={`w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-xl border text-[11px] sm:text-xs font-bold transition-all cursor-pointer min-w-0 ${
-                  onboardingStep === 1
-                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
-                    : 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
-                }`}
+                className={`w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-xl border text-[11px] sm:text-xs font-bold transition-all cursor-pointer min-w-0 ${onboardingStep === 1
+                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                  : 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
+                  }`}
               >
                 <span
-                  className={`h-5 w-5 rounded-lg flex items-center justify-center font-black text-[11px] shrink-0 ${
-                    onboardingStep === 1
-                      ? 'bg-white/25 text-white'
-                      : 'bg-emerald-600 text-white'
-                  }`}
+                  className={`h-5 w-5 rounded-lg flex items-center justify-center font-black text-[11px] shrink-0 ${onboardingStep === 1
+                    ? 'bg-white/25 text-white'
+                    : 'bg-emerald-600 text-white'
+                    }`}
                 >
                   1
                 </span>
@@ -1392,18 +1338,16 @@ export default function DashboardLayoutClient({
               <button
                 type='button'
                 onClick={() => handleNextStep()}
-                className={`w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-xl border text-[11px] sm:text-xs font-bold transition-all cursor-pointer min-w-0 ${
-                  onboardingStep === 2
-                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
-                    : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100 hover:text-slate-600'
-                }`}
+                className={`w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 rounded-xl border text-[11px] sm:text-xs font-bold transition-all cursor-pointer min-w-0 ${onboardingStep === 2
+                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                  : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100 hover:text-slate-600'
+                  }`}
               >
                 <span
-                  className={`h-5 w-5 rounded-lg flex items-center justify-center font-black text-[11px] shrink-0 ${
-                    onboardingStep === 2
-                      ? 'bg-white/25 text-white'
-                      : 'bg-slate-200 text-slate-500'
-                  }`}
+                  className={`h-5 w-5 rounded-lg flex items-center justify-center font-black text-[11px] shrink-0 ${onboardingStep === 2
+                    ? 'bg-white/25 text-white'
+                    : 'bg-slate-200 text-slate-500'
+                    }`}
                 >
                   2
                 </span>
@@ -1416,7 +1360,7 @@ export default function DashboardLayoutClient({
 
           {/* STEP 1: INFORMASI DIRI & SEKOLAH */}
           {onboardingStep === 1 && (
-            <div className='space-y-4 py-4 max-h-[55vh] overflow-y-auto pr-1 text-left'>
+            <div className='space-y-3 py-2 max-h-[75vh] overflow-y-auto pr-1 text-left scrollbar-hide'>
               {/* Nama Lengkap */}
               <div className='space-y-1.5'>
                 <label className='text-xs font-bold uppercase tracking-wider text-slate-700 block'>
@@ -1436,51 +1380,16 @@ export default function DashboardLayoutClient({
                       if (onboardingErrors.name)
                         setOnboardingErrors((prev) => ({ ...prev, name: '' }));
                     }}
-                    className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${
-                      onboardingErrors.name
-                        ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
-                        : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
-                    } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
+                    className={`w-full pl-10 pr-4 py-2 bg-slate-50/50 border ${onboardingErrors.name
+                      ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
+                      : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
+                      } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
                   />
                 </div>
                 {onboardingErrors.name && (
                   <p className='text-[11px] text-rose-500 font-medium flex items-center gap-1 mt-1'>
                     <AlertCircle className='h-3.5 w-3.5 shrink-0' />
                     <span>{onboardingErrors.name}</span>
-                  </p>
-                )}
-              </div>
-
-              {/* NIP / NUPTK */}
-              <div className='space-y-1.5'>
-                <label className='text-xs font-bold uppercase tracking-wider text-slate-700 block'>
-                  NIP / NUPTK <span className='text-rose-500'>*</span>
-                </label>
-                <div className='relative'>
-                  <div className='absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400'>
-                    <IdCard className='h-4 w-4' />
-                  </div>
-                  <input
-                    type='text'
-                    required
-                    placeholder='Misal: 19850101 201001 1 001 / NUPTK'
-                    value={onboardingNip}
-                    onChange={(e) => {
-                      setOnboardingNip(e.target.value);
-                      if (onboardingErrors.nip)
-                        setOnboardingErrors((prev) => ({ ...prev, nip: '' }));
-                    }}
-                    className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${
-                      onboardingErrors.nip
-                        ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
-                        : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
-                    } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
-                  />
-                </div>
-                {onboardingErrors.nip && (
-                  <p className='text-[11px] text-rose-500 font-medium flex items-center gap-1 mt-1'>
-                    <AlertCircle className='h-3.5 w-3.5 shrink-0' />
-                    <span>{onboardingErrors.nip}</span>
                   </p>
                 )}
               </div>
@@ -1506,11 +1415,10 @@ export default function DashboardLayoutClient({
                           }));
                       }}
                       disabled={loadingSchools}
-                      className={`w-full pl-10 pr-8 py-2.5 bg-slate-50/50 border ${
-                        onboardingErrors.school
-                          ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
-                          : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
-                      } text-slate-900 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium appearance-none cursor-pointer transition-all`}
+                      className={`w-full pl-10 pr-8 py-2 bg-slate-50/50 border ${onboardingErrors.school
+                        ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
+                        : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
+                        } text-slate-900 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium appearance-none cursor-pointer transition-all`}
                     >
                       {loadingSchools ? (
                         <option value=''>Memuat...</option>
@@ -1558,11 +1466,10 @@ export default function DashboardLayoutClient({
                             school: '',
                           }));
                       }}
-                      className={`w-full px-4 py-2.5 bg-slate-50/50 border ${
-                        onboardingErrors.school
-                          ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
-                          : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
-                      } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
+                      className={`w-full px-4 py-2 bg-slate-50/50 border ${onboardingErrors.school
+                        ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
+                        : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
+                        } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
                     />
                     {onboardingErrors.school && (
                       <p className='text-[11px] text-rose-500 font-medium flex items-center gap-1 mt-1'>
@@ -1579,7 +1486,7 @@ export default function DashboardLayoutClient({
                       KELAS DIAJAR <span className='text-rose-500'>*</span>
                     </label>
                     <span className='text-[10px] text-slate-500 font-medium'>
-                      (Bisa lebih dari 1 kelas. Tekan Enter atau klik + Tambah)
+                      (Bisa lebih dari 1 kelas. Tekan Enter atau klik Tambah)
                     </span>
                   </div>
                   <div className='flex gap-2'>
@@ -1598,11 +1505,10 @@ export default function DashboardLayoutClient({
                             handleAddOnboardingClassTag();
                           }
                         }}
-                        className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${
-                          onboardingErrors.className
-                            ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
-                            : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
-                        } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
+                        className={`w-full pl-10 pr-4 py-2 bg-slate-50/50 border ${onboardingErrors.className
+                          ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
+                          : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
+                          } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
                       />
                     </div>
                     <Button
@@ -1610,7 +1516,7 @@ export default function DashboardLayoutClient({
                       onClick={handleAddOnboardingClassTag}
                       className='bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 rounded-xl text-xs shrink-0 cursor-pointer h-[42px]'
                     >
-                      + Tambah
+                      Tambah
                     </Button>
                   </div>
 
@@ -1649,78 +1555,88 @@ export default function DashboardLayoutClient({
                 </div>
               </div>
 
-              {/* Kepala Sekolah & NIP Kepala Sekolah – 2 column grid */}
-              <div className='grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1'>
-                <div className='space-y-1.5'>
-                  <label className='text-xs font-bold uppercase tracking-wider text-slate-700 block'>
-                    NAMA KEPALA SEKOLAH <span className='text-rose-500'>*</span>
-                  </label>
-                  <div className='relative'>
-                    <div className='absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400'>
-                      <UserCheck className='h-4 w-4' />
-                    </div>
-                    <input
-                      type='text'
-                      required
-                      placeholder='Contoh: Dr. H. Ahmad Dahlan, M.Pd'
-                      value={onboardingPrincipalName}
-                      onChange={(e) => {
-                        setOnboardingPrincipalName(e.target.value);
-                        if (onboardingErrors.principalName)
-                          setOnboardingErrors((prev) => ({
-                            ...prev,
-                            principalName: '',
-                          }));
-                      }}
-                      className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${
-                        onboardingErrors.principalName
-                          ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
-                          : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
-                      } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
-                    />
-                  </div>
-                  {onboardingErrors.principalName && (
-                    <p className='text-[11px] text-rose-500 font-medium flex items-center gap-1 mt-1'>
-                      <AlertCircle className='h-3.5 w-3.5 shrink-0' />
-                      <span>{onboardingErrors.principalName}</span>
-                    </p>
-                  )}
+              {/* Optional Section: NIP & Kepala Sekolah */}
+              <div className='mt-4 pt-4 border-t border-slate-200'>
+                <div className='mb-3 bg-emerald-50 border border-emerald-200 p-2.5 rounded-xl flex gap-2 items-start'>
+                  <Sparkles className='h-4 w-4 text-emerald-600 mt-0.5 shrink-0' />
+                  <p className='text-[11px] sm:text-xs text-emerald-800 font-medium leading-relaxed'>
+                    Data ini digunakan untuk mempermudah Anda saat menambahkan
+                    informasi tanda tangan pada dokumen cetak (Jurnal, Nilai,
+                    dll).
+                  </p>
                 </div>
 
-                <div className='space-y-1.5'>
-                  <label className='text-xs font-bold uppercase tracking-wider text-slate-700 block'>
-                    NIP KEPALA SEKOLAH <span className='text-rose-500'>*</span>
-                  </label>
-                  <div className='relative'>
-                    <div className='absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400'>
-                      <IdCard className='h-4 w-4' />
+                <div className='space-y-3'>
+                  {/* NIP / NUPTK */}
+                  <div className='space-y-1.5'>
+                    <label className='text-xs font-bold uppercase tracking-wider text-slate-700 block'>
+                      NIP / NUPTK{' '}
+                      <span className='text-slate-400 font-medium normal-case ml-1'>
+                        (Opsional)
+                      </span>
+                    </label>
+                    <div className='relative'>
+                      <div className='absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400'>
+                        <IdCard className='h-4 w-4' />
+                      </div>
+                      <input
+                        type='text'
+                        placeholder='Misal: 19850101 201001 1 001 / NUPTK'
+                        value={onboardingNip}
+                        onChange={(e) => setOnboardingNip(e.target.value)}
+                        className='w-full pl-10 pr-4 py-2 bg-slate-50/50 border border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20 text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all'
+                      />
                     </div>
-                    <input
-                      type='text'
-                      required
-                      placeholder='Misal: 19700101 199503 1 002'
-                      value={onboardingPrincipalNip}
-                      onChange={(e) => {
-                        setOnboardingPrincipalNip(e.target.value);
-                        if (onboardingErrors.principalNip)
-                          setOnboardingErrors((prev) => ({
-                            ...prev,
-                            principalNip: '',
-                          }));
-                      }}
-                      className={`w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border ${
-                        onboardingErrors.principalNip
-                          ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20 bg-rose-50/20'
-                          : 'border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20'
-                      } text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all`}
-                    />
                   </div>
-                  {onboardingErrors.principalNip && (
-                    <p className='text-[11px] text-rose-500 font-medium flex items-center gap-1 mt-1'>
-                      <AlertCircle className='h-3.5 w-3.5 shrink-0' />
-                      <span>{onboardingErrors.principalNip}</span>
-                    </p>
-                  )}
+
+                  {/* Kepala Sekolah & NIP Kepala Sekolah – 2 column grid */}
+                  <div className='grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1'>
+                    <div className='space-y-1.5'>
+                      <label className='text-xs font-bold uppercase tracking-wider text-slate-700 block'>
+                        NAMA KEPALA SEKOLAH{' '}
+                        <span className='text-slate-400 font-medium normal-case ml-1'>
+                          (Opsional)
+                        </span>
+                      </label>
+                      <div className='relative'>
+                        <div className='absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400'>
+                          <UserCheck className='h-4 w-4' />
+                        </div>
+                        <input
+                          type='text'
+                          placeholder='Contoh: Dr. H. Ahmad Dahlan, M.Pd'
+                          value={onboardingPrincipalName}
+                          onChange={(e) =>
+                            setOnboardingPrincipalName(e.target.value)
+                          }
+                          className='w-full pl-10 pr-4 py-2 bg-slate-50/50 border border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20 text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all'
+                        />
+                      </div>
+                    </div>
+
+                    <div className='space-y-1.5'>
+                      <label className='text-xs font-bold uppercase tracking-wider text-slate-700 block'>
+                        NIP KEPALA SEKOLAH{' '}
+                        <span className='text-slate-400 font-medium normal-case ml-1'>
+                          (Opsional)
+                        </span>
+                      </label>
+                      <div className='relative'>
+                        <div className='absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400'>
+                          <IdCard className='h-4 w-4' />
+                        </div>
+                        <input
+                          type='text'
+                          placeholder='Misal: 19700101 199503 1 002'
+                          value={onboardingPrincipalNip}
+                          onChange={(e) =>
+                            setOnboardingPrincipalNip(e.target.value)
+                          }
+                          className='w-full pl-10 pr-4 py-2 bg-slate-50/50 border border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20 text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:outline-none rounded-xl text-sm font-medium transition-all'
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1728,7 +1644,7 @@ export default function DashboardLayoutClient({
 
           {/* STEP 2: KUSTOMISASI SIDEBAR */}
           {onboardingStep === 2 && (
-            <div className='py-4 max-h-[55vh] overflow-y-auto pr-1 text-left'>
+            <div className='py-4 max-h-[75vh] overflow-y-auto pr-1 text-left scrollbar-hide'>
               <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
                 {CONFIGURABLE_MENUS.map((menu) => {
                   const isChecked = selectedOnboardingMenus.includes(menu.href);
@@ -1753,18 +1669,16 @@ export default function DashboardLayoutClient({
                           ]);
                         }
                       }}
-                      className={`flex items-start gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer select-none ${
-                        isChecked
-                          ? 'bg-emerald-50/80 border-emerald-300 text-emerald-950 shadow-2xs'
-                          : 'bg-slate-50/60 border-slate-200 text-slate-600 hover:border-slate-300'
-                      }`}
+                      className={`flex items-start gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer select-none ${isChecked
+                        ? 'bg-emerald-50/80 border-emerald-300 text-emerald-950 shadow-2xs'
+                        : 'bg-slate-50/60 border-slate-200 text-slate-600 hover:border-slate-300'
+                        }`}
                     >
                       <div
-                        className={`mt-0.5 h-5 w-5 rounded-lg border flex items-center justify-center shrink-0 transition-colors ${
-                          isChecked
-                            ? 'bg-emerald-600 border-emerald-600 text-white shadow-2xs'
-                            : 'border-slate-300 bg-white'
-                        }`}
+                        className={`mt-0.5 h-5 w-5 rounded-lg border flex items-center justify-center shrink-0 transition-colors ${isChecked
+                          ? 'bg-emerald-600 border-emerald-600 text-white shadow-2xs'
+                          : 'border-slate-300 bg-white'
+                          }`}
                       >
                         {isChecked && (
                           <Check className='h-3.5 w-3.5 stroke-[3]' />
@@ -1809,7 +1723,6 @@ export default function DashboardLayoutClient({
                   onClick={() => setOnboardingStep(1)}
                   className='rounded-xl text-xs sm:text-sm px-5 h-10 gap-2 cursor-pointer border-slate-200 text-slate-700 hover:bg-slate-100 font-semibold w-full sm:w-auto justify-center'
                 >
-                  <ArrowLeft className='h-4 w-4' />
                   <span>Kembali</span>
                 </Button>
                 <Button
@@ -1882,30 +1795,39 @@ export default function DashboardLayoutClient({
             </div>
 
             {/* Tabs */}
-            <div className='flex border-b border-slate-200/80 px-6 pt-3 bg-white gap-2'>
+            <div className='flex flex-wrap border-b border-slate-200/80 px-6 pt-3 bg-white gap-2'>
               <button
                 type='button'
                 onClick={() => setProfileModalTab('profile')}
-                className={`pb-3 px-3 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
-                  profileModalTab === 'profile'
-                    ? 'border-emerald-600 text-emerald-700'
-                    : 'border-transparent text-slate-500 hover:text-slate-800'
-                }`}
+                className={`pb-3 px-3 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${profileModalTab === 'profile'
+                  ? 'border-emerald-600 text-emerald-700'
+                  : 'border-transparent text-slate-500 hover:text-slate-800'
+                  }`}
               >
                 <User className='h-4 w-4' />
                 <span>Informasi Diri & Sekolah</span>
               </button>
               <button
                 type='button'
+                onClick={() => setProfileModalTab('signature')}
+                className={`pb-3 px-3 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${profileModalTab === 'signature'
+                  ? 'border-emerald-600 text-emerald-700'
+                  : 'border-transparent text-slate-500 hover:text-slate-800'
+                  }`}
+              >
+                <IdCard className='h-4 w-4' />
+                <span>Informasi Cetak</span>
+              </button>
+              <button
+                type='button'
                 onClick={() => setProfileModalTab('security')}
-                className={`pb-3 px-3 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${
-                  profileModalTab === 'security'
-                    ? 'border-emerald-600 text-emerald-700'
-                    : 'border-transparent text-slate-500 hover:text-slate-800'
-                }`}
+                className={`pb-3 px-3 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap ${profileModalTab === 'security'
+                  ? 'border-emerald-600 text-emerald-700'
+                  : 'border-transparent text-slate-500 hover:text-slate-800'
+                  }`}
               >
                 <Lock className='h-4 w-4' />
-                <span>Keamanan (Ganti Password)</span>
+                <span>Ubah Password</span>
               </button>
             </div>
 
@@ -1948,23 +1870,6 @@ export default function DashboardLayoutClient({
                   </div>
                   <div className='space-y-1.5'>
                     <label className='text-xs font-bold text-slate-700 block'>
-                      NIP / NUPTK Guru
-                    </label>
-                    <input
-                      type='text'
-                      value={profileModalForm.nip}
-                      onChange={(e) =>
-                        setProfileModalForm({
-                          ...profileModalForm,
-                          nip: e.target.value,
-                        })
-                      }
-                      placeholder='Masukkan NIP / NUPTK'
-                      className='w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-xs sm:text-sm font-medium transition-all'
-                    />
-                  </div>
-                  <div className='space-y-1.5'>
-                    <label className='text-xs font-bold text-slate-700 block'>
                       Nama Sekolah
                     </label>
                     <input
@@ -1980,6 +1885,60 @@ export default function DashboardLayoutClient({
                       className='w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-xs sm:text-sm font-medium transition-all'
                     />
                   </div>
+                </div>
+
+                <div className='pt-3 flex items-center justify-end gap-2 border-t border-slate-100 mt-4'>
+                  <Button
+                    type='button'
+                    variant='outline'
+                    onClick={() => setIsProfileModalOpen(false)}
+                    className='rounded-xl text-xs font-semibold'
+                  >
+                    Batal
+                  </Button>
+                  <Button
+                    type='submit'
+                    disabled={isSavingProfile}
+                    className='bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs px-5 shadow-sm shadow-emerald-600/20 cursor-pointer'
+                  >
+                    {isSavingProfile ? (
+                      <>
+                        <Loader2 className='h-4 w-4 animate-spin mr-1.5' />
+                        <span>Menyimpan...</span>
+                      </>
+                    ) : (
+                      <span>Simpan Perubahan</span>
+                    )}
+                  </Button>
+                </div>
+              </form>
+            )}
+
+            {/* Tab 3: Signature Form */}
+            {profileModalTab === 'signature' && (
+              <form
+                onSubmit={handleProfileModalSubmit}
+                className='p-6 space-y-4 max-h-[calc(85vh-180px)] overflow-y-auto'
+              >
+                <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+                  <div className='space-y-1.5'>
+                    <label className='text-xs font-bold text-slate-700 block'>
+                      NIP / NUPTK Guru
+                    </label>
+                    <input
+                      type='text'
+                      value={profileModalForm.nip}
+                      onChange={(e) =>
+                        setProfileModalForm({
+                          ...profileModalForm,
+                          nip: e.target.value,
+                        })
+                      }
+                      placeholder='Masukkan NIP / NUPTK'
+                      className='w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-1 focus:ring-emerald-500 focus:outline-none rounded-xl text-xs sm:text-sm font-medium transition-all'
+                    />
+                  </div>
+                  <div className='hidden sm:block'></div>
                   <div className='space-y-1.5'>
                     <label className='text-xs font-bold text-slate-700 block'>
                       Nama Kepala Sekolah
@@ -2016,7 +1975,7 @@ export default function DashboardLayoutClient({
                   </div>
                 </div>
 
-                <div className='pt-3 flex items-center justify-end gap-2 border-t border-slate-100'>
+                <div className='pt-3 flex items-center justify-end gap-2 border-t border-slate-100 mt-4'>
                   <Button
                     type='button'
                     variant='outline'
@@ -2241,19 +2200,17 @@ export default function DashboardLayoutClient({
                     <div
                       key={menu.href}
                       onClick={() => handleToggleSettingsMenu(menu.href)}
-                      className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-start justify-between gap-3 ${
-                        isSelected
-                          ? 'bg-emerald-50/70 border-emerald-300/80 shadow-2xs'
-                          : 'bg-slate-50/60 border-slate-200/80 hover:bg-slate-100/60'
-                      }`}
+                      className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-start justify-between gap-3 ${isSelected
+                        ? 'bg-emerald-50/70 border-emerald-300/80 shadow-2xs'
+                        : 'bg-slate-50/60 border-slate-200/80 hover:bg-slate-100/60'
+                        }`}
                     >
                       <div className='flex items-start gap-2.5 min-w-0'>
                         <div
-                          className={`h-7 w-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${
-                            isSelected
-                              ? 'bg-emerald-600 text-white shadow-2xs'
-                              : 'bg-slate-200 text-slate-500'
-                          }`}
+                          className={`h-7 w-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${isSelected
+                            ? 'bg-emerald-600 text-white shadow-2xs'
+                            : 'bg-slate-200 text-slate-500'
+                            }`}
                         >
                           <Check
                             className={`h-4 w-4 transition-transform ${isSelected ? 'scale-100' : 'scale-0'}`}
