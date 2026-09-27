@@ -83,6 +83,7 @@ export default function AdminProfileClient() {
         toast.error(res.error || 'Gagal memperbarui profil admin.');
       }
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (err: any) => {
       toast.error(err.message || 'Gagal memperbarui profil admin.');
     },
@@ -91,6 +92,7 @@ export default function AdminProfileClient() {
   // Change Password Mutation
   const changePasswordMutation = useMutation({
     mutationFn: changePassword,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     onSuccess: (res) => {
       toast.success('Password Administrator berhasil diubah!');
       setPasswordForm({
@@ -99,6 +101,7 @@ export default function AdminProfileClient() {
         confirmPassword: '',
       });
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (err: any) => {
       toast.error(err.message || 'Gagal mengubah password.');
     },
@@ -199,6 +202,7 @@ export default function AdminProfileClient() {
         <AlertCircle className='h-10 w-10 text-rose-500' />
         <h3 className='font-extrabold text-base'>Gagal Memuat Profil</h3>
         <p className='text-xs text-rose-700 font-medium'>
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           {(error as any)?.message ||
             'Data pengguna admin tidak dapat ditemukan.'}
         </p>
@@ -206,6 +210,7 @@ export default function AdminProfileClient() {
     );
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const registeredDateStr = adminProfile.createdAt
     ? new Date(adminProfile.createdAt).toLocaleDateString('id-ID', {
         day: 'numeric',

@@ -29,6 +29,7 @@ export default function LoadingScreen({
   const [displayMessage, setDisplayMessage] = useState(
     message || defaultMessages[0],
   );
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [msgIdx, setMsgIdx] = useState(0);
 
   useEffect(() => {

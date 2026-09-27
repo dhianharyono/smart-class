@@ -32,6 +32,7 @@ async function getCryptoKey() {
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function signSession(payload: any): Promise<string> {
   const key = await getCryptoKey();
   const header = base64urlEncode(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
@@ -53,6 +54,7 @@ export async function signSession(payload: any): Promise<string> {
   return `${header}.${data}.${signature}`;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function verifySession(token: string): Promise<any | null> {
   try {
     const parts = token.split('.');

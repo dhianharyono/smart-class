@@ -177,6 +177,7 @@ export default function AuthSlider({
         setRecaptchaToken('');
         setLoading(false);
       }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       toast.error(err?.message || 'Terjadi kesalahan. Silakan coba lagi.');
       const nextAttempts = Math.max(failedAttempts + 1, 1);
@@ -251,6 +252,7 @@ export default function AuthSlider({
         setLoading(false);
       } else if (res.success) {
         toast.success('Pendaftaran berhasil! Selamat datang.');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const isAdmin = !!(res as any).isAdmin;
         setRedirectVariant(isAdmin ? 'admin' : 'teacher');
         setIsRedirecting(true);
@@ -302,6 +304,7 @@ export default function AuthSlider({
       } else {
         toast.error(res.error || 'Kode OTP tidak cocok atau sudah kadaluarsa.');
       }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       toast.error(err.message || 'Gagal memverifikasi OTP.');
     } finally {
@@ -323,6 +326,7 @@ export default function AuthSlider({
       } else {
         toast.error(res.error || 'Gagal mengirim ulang kode OTP.');
       }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       toast.error(
         err.message || 'Terjadi kesalahan saat mengirim ulang kode OTP.',

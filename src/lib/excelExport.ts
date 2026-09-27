@@ -74,6 +74,7 @@ function appendSignatureBlock(
   });
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function exportStudentsToExcel(students: any[]) {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Daftar Siswa');
@@ -143,6 +144,7 @@ export async function exportStudentsToExcel(students: any[]) {
 }
 
 export async function exportAttendanceToExcel(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   attendanceData: any[],
   dateStr: string,
   headerInfo?: {
@@ -229,6 +231,7 @@ export async function exportAttendanceToExcel(
 }
 
 export async function exportGradesToExcel(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   gradesData: any[],
   subject: string,
   category: string,
@@ -302,6 +305,7 @@ export async function exportGradesToExcel(
 }
 
 export async function exportGradesRecapToExcel(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   recapData: any[],
   subject: string,
   kkm: number
@@ -382,12 +386,14 @@ export async function exportGradesRecapToExcel(
 
 export async function exportAllSubjectsGradesRecapToExcel(
   subjects: string[],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   recapData: any[],
   kkm: number
 ) {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Leger Nilai Kelas');
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const columns: any[] = [
     { header: 'No', key: 'no', width: 6 },
     { header: 'NIS', key: 'nis', width: 14 },
@@ -424,6 +430,7 @@ export async function exportAllSubjectsGradesRecapToExcel(
         ? 'Tuntas'
         : 'Remedial';
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rowObj: any = {
       no: index + 1,
       nis: sanitizeExcelCell(record.nis),
@@ -481,6 +488,7 @@ export async function exportJournalToExcel(
     teacherName: string;
     nip: string;
   },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   journalEntries: any[]
 ) {
   const workbook = new ExcelJS.Workbook();
@@ -560,6 +568,7 @@ export async function exportJournalToExcel(
     (cellId) => {
       const cell = worksheet.getCell(cellId);
       cell.font = { name: 'Arial', size: 10, bold: true };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       cell.fill = headerFill as any;
       cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
     }
@@ -660,6 +669,7 @@ export async function exportWeeklyAttendanceToExcel(
     startDateStr: string;
     endDateStr: string;
     datesList: string[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     studentsReport: any[];
   },
   weekLabel: string,
@@ -831,7 +841,9 @@ export async function exportAllClassesWeeklyAttendanceToExcel(
     classesReport: Array<{
       className: string;
       totalStudents: number;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       studentsReport: any[];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       stats: any;
     }>;
   },
@@ -1003,6 +1015,7 @@ export async function exportMonthlyAttendanceToExcel(
     year: number;
     month: number;
     daysInMonth: number;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     studentsReport: any[];
   },
   monthLabel: string,
@@ -1169,7 +1182,9 @@ export async function exportAllClassesMonthlyAttendanceToExcel(
     classesReport: Array<{
       className: string;
       totalStudents: number;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       studentsReport: any[];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       stats: any;
     }>;
   },
@@ -1334,6 +1349,7 @@ export async function exportAllClassesMonthlyAttendanceToExcel(
 export async function exportYearlyAttendanceToExcel(
   reportData: {
     year: number;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     studentsReport: any[];
   },
   headerInfo: {
@@ -1427,6 +1443,7 @@ export async function exportYearlyAttendanceToExcel(
     row.getCell(3).alignment = { horizontal: 'left', vertical: 'middle' };
     row.getCell(4).alignment = { horizontal: 'center', vertical: 'middle' };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     student.monthlyBreakdown.forEach((mb: any, idx: number) => {
       const cell = row.getCell(4 + idx + 1);
       cell.value = mb.hadir > 0 ? mb.hadir : '-';
@@ -1480,7 +1497,9 @@ export async function exportAllClassesYearlyAttendanceToExcel(
     classesReport: Array<{
       className: string;
       totalStudents: number;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       studentsReport: any[];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       stats: any;
     }>;
   },

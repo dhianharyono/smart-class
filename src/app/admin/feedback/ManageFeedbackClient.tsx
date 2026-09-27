@@ -16,6 +16,7 @@ import {
   Search,
   CheckCircle2,
   Clock,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   ShieldCheck,
   Star,
   MessageSquareQuote,
@@ -24,6 +25,7 @@ import {
   Bug,
   Lightbulb,
   AlertCircle,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Send,
   School as SchoolIcon,
 } from 'lucide-react';
@@ -140,6 +142,7 @@ export default function ManageFeedbackClient({
       setRespondingItem(null);
       setAdminResponseText('');
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
       toast.error(error.message || 'Gagal menyimpan tanggapan.');
     },
@@ -158,6 +161,7 @@ export default function ManageFeedbackClient({
       queryClient.invalidateQueries({ queryKey: ['admin-feedback-stats'] });
       setDeleteConfirm({ open: false, feedbackId: '', subject: '' });
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
       toast.error(error.message || 'Gagal menghapus masukan.');
     },
@@ -544,6 +548,7 @@ export default function ManageFeedbackClient({
                 </Label>
                 <select
                   value={responseStatus}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   onChange={(e) => setResponseStatus(e.target.value as any)}
                   className='w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer'
                 >

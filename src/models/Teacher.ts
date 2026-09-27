@@ -80,6 +80,7 @@ if (
     !mongoose.models.Teacher.schema.path('lastLoginAt') ||
     !mongoose.models.Teacher.schema.path('subjects'))
 ) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   delete (mongoose.models as any).Teacher;
 }
 

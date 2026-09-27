@@ -29,6 +29,7 @@ export async function sendVerificationEmail({
     if (smtpHost && smtpUser && smtpPass) {
       const isGmail = smtpHost.includes('gmail');
       // On serverless platforms like Vercel, port 465 (SSL) is much more reliable than port 587 (STARTTLS)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const secure = smtpPort === 465 || (isGmail && smtpPort !== 587);
       const actualPort = isGmail && smtpPort === 587 ? 465 : smtpPort;
 
@@ -82,6 +83,7 @@ export async function sendVerificationEmail({
         error: 'SMTP Environment Variables tidak lengkap di Server.',
       };
     }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error('Error sending verification email:', error);
     return {

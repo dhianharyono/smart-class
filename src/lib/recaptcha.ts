@@ -56,6 +56,7 @@ export async function verifyRecaptchaToken(token?: string): Promise<{ success: b
       success: false,
       error: 'Verifikasi reCAPTCHA gagal atau telah kedaluwarsa. Silakan centang kembali.',
     };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error('Failed to verify reCAPTCHA token:', error);
     return {

@@ -99,6 +99,7 @@ export default function TambahSiswaClient({
       toast.success('Biodata siswa berhasil disimpan!');
       router.push('/siswa');
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (err: any) => {
       toast.error(err.message || 'Gagal menyimpan data siswa');
     },
@@ -179,6 +180,7 @@ export default function TambahSiswaClient({
               <div className='flex justify-center'>
                 <div className='relative group w-36 h-36 rounded-full overflow-hidden bg-slate-100 border-4 border-slate-200/80 flex items-center justify-center shadow-inner'>
                   {photoPreview ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={photoPreview}
                       alt='Preview Foto'

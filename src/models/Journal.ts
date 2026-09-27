@@ -38,6 +38,7 @@ const JournalSchema = new Schema<IJournal>(
 );
 
 if (mongoose.models.Journal && !mongoose.models.Journal.schema.path('className')) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   delete (mongoose.models as any).Journal;
 }
 

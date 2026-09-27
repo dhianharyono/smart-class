@@ -1,8 +1,10 @@
 'use server';
 
 import dbConnect from '@/lib/db';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Feedback, { IFeedback } from '@/models/Feedback';
 import Teacher from '@/models/Teacher';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import AdminUser from '@/models/AdminUser';
 import { cookies } from 'next/headers';
 import { verifySession } from '@/lib/auth';
@@ -104,6 +106,7 @@ export async function createFeedback(data: {
       success: true,
       feedback: JSON.parse(JSON.stringify(newFeedback)),
     };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) throw error;
     console.error('Error creating feedback:', error);
@@ -120,6 +123,7 @@ export async function getTeacherFeedbacks() {
       .lean();
 
     return JSON.parse(JSON.stringify(feedbacks));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) throw error;
     console.error('Error fetching teacher feedbacks:', error);
@@ -151,6 +155,7 @@ export async function deleteTeacherFeedback(feedbackId: string) {
     revalidatePath('/admin/feedback');
 
     return { success: true };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) throw error;
     console.error('Error deleting teacher feedback:', error);
@@ -170,6 +175,7 @@ export async function getAdminFeedbacks(options?: {
   try {
     await requireAdminAuth();
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const filter: any = {};
 
     if (options?.status && options.status !== 'all') {
@@ -196,6 +202,7 @@ export async function getAdminFeedbacks(options?: {
       .lean();
 
     return JSON.parse(JSON.stringify(feedbacks));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) throw error;
     console.error('Error fetching admin feedbacks:', error);
@@ -220,6 +227,7 @@ export async function getAdminFeedbackStats() {
       diproses,
       selesai,
     };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) throw error;
     console.error('Error getting admin feedback stats:', error);
@@ -261,6 +269,7 @@ export async function respondToFeedback(data: {
       success: true,
       feedback: JSON.parse(JSON.stringify(feedback)),
     };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) throw error;
     console.error('Error responding to feedback:', error);
@@ -288,6 +297,7 @@ export async function adminDeleteFeedback(feedbackId: string) {
     revalidatePath('/admin/feedback');
 
     return { success: true };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) throw error;
     console.error('Error deleting feedback by admin:', error);

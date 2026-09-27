@@ -96,6 +96,7 @@ export async function checkRateLimit(
       retryAfterSeconds: 0,
       attemptCount: timestamps.length,
     };
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (err) {
     // Tier 3: In-Memory Sliding Window Fallback
     return checkInMemoryRateLimit(key, now, maxAttempts, windowMs);

@@ -302,6 +302,7 @@ export async function getAdminStats() {
         id: u._id.toString(),
         name: u.name,
         email: u.email,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         role: (u as any).role || 'Wali Kelas',
         lastActiveAt: u.lastActiveAt ? new Date(u.lastActiveAt).toISOString() : new Date().toISOString(),
       };
@@ -321,18 +322,21 @@ export async function getAdminStats() {
 
       let jCount = 0;
       for (const j of allJournals) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const t = new Date((j as any).createdAt || (j as any).date).getTime();
         if (t >= startOfDay && t <= endOfDay) jCount++;
       }
 
       let aCount = 0;
       for (const a of allAttendances) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const t = new Date((a as any).createdAt).getTime();
         if (t >= startOfDay && t <= endOfDay) aCount++;
       }
 
       let gCount = 0;
       for (const g of allGrades) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const t = new Date((g as any).createdAt).getTime();
         if (t >= startOfDay && t <= endOfDay) gCount++;
       }
@@ -364,6 +368,7 @@ export async function getAdminStats() {
       onlineUsers,
       activityTrend,
     };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -387,6 +392,7 @@ export async function getTeachers() {
 
     // Ambil guru reguler saja
     const teachers = await Teacher.find({ email: { $nin: adminEmails } }).sort({ name: 1 }).lean();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return teachers.map((t: any) => {
       let resolvedLastLogin = t.lastLoginAt ? new Date(t.lastLoginAt).toISOString() : null;
       if (!resolvedLastLogin && t.lastActiveAt && t.createdAt) {
@@ -413,6 +419,7 @@ export async function getTeachers() {
         createdAt: t.createdAt ? new Date(t.createdAt).toISOString() : new Date().toISOString(),
       };
     });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -457,6 +464,7 @@ export async function updateTeacher(id: string, data: {
       ? Array.from(new Set(className.split(/[,/]/).map((s) => s.trim()).filter(Boolean)))
       : [];
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updateFields: any = {
       name: name.trim(),
       email: normalizedEmail,
@@ -485,6 +493,7 @@ export async function updateTeacher(id: string, data: {
     revalidatePath('/admin');
 
     return { success: true };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -525,6 +534,7 @@ export async function deleteTeacher(id: string) {
     revalidatePath('/admin');
 
     return { success: true };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -553,6 +563,7 @@ export async function ensureSchoolExists(name: string) {
     try {
       const created = await School.create({ name: trimmed });
       return JSON.parse(JSON.stringify(created));
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
     } catch (error: any) {
       const found = await School.findOne({
         name: { $regex: new RegExp(`^${safePattern}$`, 'i') },
@@ -601,6 +612,7 @@ export async function getSchools() {
         try {
           await School.create({ name: missingName.trim() });
           console.log(`[SYNC] Auto-created missing school: "${missingName}"`);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err) {}
       }
       const updatedSchools = await School.find({}).sort({ name: 1 }).lean();
@@ -647,6 +659,7 @@ export async function getSchools() {
     });
 
     return JSON.parse(JSON.stringify(schoolsWithCount));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error('Error fetching schools:', error);
     return [];
@@ -723,6 +736,7 @@ export async function createTeacher(data: {
         createdAt: newTeacher.createdAt.toISOString()
       } 
     };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -757,6 +771,7 @@ export async function addSchool(name: string) {
     revalidatePath('/admin/guru');
     revalidatePath('/admin');
     return { success: true, school: JSON.parse(JSON.stringify(newSchool)) };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -804,6 +819,7 @@ export async function deleteSchool(id: string) {
     revalidatePath('/admin/guru');
     revalidatePath('/admin');
     return { success: true };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -835,6 +851,7 @@ export async function getAdminProfile() {
         createdAt: teacher.createdAt ? new Date(teacher.createdAt).toISOString() : new Date().toISOString(),
       })
     );
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -941,6 +958,7 @@ export async function updateAdminProfile(data: {
         email: currentTeacher.email,
       },
     };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;

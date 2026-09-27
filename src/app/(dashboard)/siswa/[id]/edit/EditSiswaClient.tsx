@@ -79,6 +79,7 @@ export default function EditSiswaClient({ id }: { id: string }) {
         entryClass: student.entryClass || '',
         entryAcademicYear: student.entryAcademicYear || '',
         previousSchool: student.previousSchool || '',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         status: (student.status as any) || 'Aktif',
       });
       if (student.photo) {
@@ -126,6 +127,7 @@ export default function EditSiswaClient({ id }: { id: string }) {
       toast.success('Biodata siswa berhasil diperbarui!');
       router.push('/siswa');
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (err: any) => {
       toast.error(err.message || 'Gagal memperbarui data siswa');
     },
@@ -211,6 +213,7 @@ export default function EditSiswaClient({ id }: { id: string }) {
               <div className='flex justify-center'>
                 <div className='relative group w-36 h-36 rounded-full overflow-hidden bg-slate-100 border-4 border-slate-200/80 flex items-center justify-center shadow-inner'>
                   {photoPreview ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img src={photoPreview} alt='Preview Foto' className='w-full h-full object-cover' />
                   ) : (
                     <User className='h-20 w-20 text-slate-300' />

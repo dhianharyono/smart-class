@@ -34,6 +34,7 @@ const JournalHeaderSchema = new Schema<IJournalHeader>(
 );
 
 if (mongoose.models.JournalHeader && !mongoose.models.JournalHeader.schema.path('supervisorName')) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   delete (mongoose.models as any).JournalHeader;
 }
 

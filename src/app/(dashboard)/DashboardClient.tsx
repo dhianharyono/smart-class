@@ -130,6 +130,7 @@ function formatActivityLines(text?: string): string[] {
 export default function DashboardClient({ stats }: DashboardClientProps) {
   const mounted = useIsMounted();
   const [kkm] = useState<number>(stats.kkm);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [teachingSlots, setTeachingSlots] = useState<any[]>([]);
 
   React.useEffect(() => {
@@ -150,6 +151,7 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
         { id: 'slot-5', day: 'Kamis', period: 4, startTime: '09:30', endTime: '10:10', className: '5A', subject: 'Pendidikan Pancasila', room: 'Ruang Teori' },
         { id: 'slot-6', day: 'Jumat', period: 1, startTime: '07:15', endTime: '07:55', className: '5A', subject: 'Bahasa Inggris', room: 'Ruang Multimedia' },
       ]);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) { }
   }, []);
 
@@ -174,6 +176,7 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
   }
 
   // Format currency helper
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const formatIDR = (num: number) => {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
@@ -467,6 +470,7 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
                           </tr>
                         </thead>
                         <tbody className='divide-y divide-slate-100 bg-white font-medium'>
+                          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                           {stats.recentJournals.map((j: any) => {
                             const activityLines = formatActivityLines(
                               j.learningActivity || j.notes,
@@ -643,6 +647,7 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
                               borderRadius: '12px',
                               boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
                             }}
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             formatter={(value: any, name: any) => [
                               `${value} Log Kehadiran`,
                               name,

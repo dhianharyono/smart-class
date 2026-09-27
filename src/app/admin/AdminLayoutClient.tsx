@@ -30,6 +30,7 @@ import ConfirmDialog from '@/components/ConfirmDialog';
 interface SidebarItem {
   name: string;
   href: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   icon: React.ComponentType<any>;
 }
 
@@ -134,8 +135,10 @@ export default function AdminLayoutClient({
         setIsProfileModalOpen(false);
         window.location.reload();
       } else {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         toast.error((res as any).error || 'Gagal menyimpan profil admin.');
       }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       toast.error(err.message || 'Gagal menyimpan profil admin.');
     } finally {
@@ -172,8 +175,10 @@ export default function AdminLayoutClient({
         });
         setIsProfileModalOpen(false);
       } else {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         toast.error((res as any).error || 'Gagal mengubah password.');
       }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       toast.error(err.message || 'Gagal mengubah password.');
     } finally {

@@ -179,6 +179,7 @@ export default function ManageTeachersClient({
       } else {
         toast.error(res.error || 'Gagal menambahkan wali kelas.');
       }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       toast.error(err.message || 'Terjadi kesalahan.');
     } finally {
@@ -242,6 +243,7 @@ export default function ManageTeachersClient({
       } else {
         toast.error(res.error || 'Gagal mengubah data guru.');
       }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       toast.error(err.message || 'Terjadi kesalahan.');
     } finally {
@@ -265,6 +267,7 @@ export default function ManageTeachersClient({
       } else {
         toast.error(res.error || 'Gagal menghapus data.');
       }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       toast.error(err.message || 'Terjadi kesalahan.');
     } finally {
@@ -539,6 +542,7 @@ export default function ManageTeachersClient({
                 </label>
                 <select
                   value={editRole}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   onChange={(e) => setEditRole(e.target.value as any)}
                   required
                   disabled={loading}
@@ -799,6 +803,7 @@ export default function ManageTeachersClient({
                   </label>
                   <select
                     value={newRole}
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     onChange={(e) => setNewRole(e.target.value as any)}
                     required
                     disabled={loading}

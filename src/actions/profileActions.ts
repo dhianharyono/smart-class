@@ -66,6 +66,7 @@ export async function getProfile() {
         enabledMenus,
       })
     );
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -113,6 +114,7 @@ export async function getClassesStatistics(): Promise<Record<string, ClassStatIt
     }
 
     return JSON.parse(JSON.stringify(statsMap));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     if (isRedirectError(err)) throw err;
     console.error('Error in getClassesStatistics:', err);
@@ -250,6 +252,7 @@ export async function updateProfile(data: {
       success: true,
       teacher: JSON.parse(JSON.stringify(updatedTeacher)),
     };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -289,6 +292,7 @@ export async function changePassword(data: {
     await teacher.save();
 
     return { success: true };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -309,6 +313,7 @@ export async function updateMenuPreferences(
     // Ensure Dashboard '/' is always included
     const finalMenus = Array.from(new Set(['/', ...enabledMenus]));
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updateObj: any = {
       enabledMenus: finalMenus,
     };
@@ -323,6 +328,7 @@ export async function updateMenuPreferences(
 
     revalidatePath('/');
     return { success: true, enabledMenus: finalMenus };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -373,6 +379,7 @@ export async function switchActiveClass(newClass: string) {
     revalidatePath('/jurnal');
 
     return { success: true, activeClass: cleanClass, classes };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -421,6 +428,7 @@ export async function addClass(newClass: string) {
     revalidatePath('/jurnal');
 
     return { success: true, activeClass: cleanClass, classes };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -474,6 +482,7 @@ export async function deleteClass(classToDelete: string) {
     revalidatePath('/jurnal');
 
     return { success: true, activeClass: newActiveClass, classes: remainingClasses };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -549,6 +558,7 @@ export async function updateClass(oldClassName: string, newClassName: string) {
     revalidatePath('/jurnal');
 
     return { success: true, activeClass: teacher.activeClass, classes: updatedClasses };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;

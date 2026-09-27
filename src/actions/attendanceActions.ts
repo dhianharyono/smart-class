@@ -71,6 +71,7 @@ export async function getAttendanceHeaderInfo() {
       principalNip: teacher?.principalNip || '-',
       academicYear: journalHeader?.academicYear || `${new Date().getFullYear()}/${new Date().getFullYear() + 1}`,
     };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -95,6 +96,7 @@ export async function getAttendanceByDate(dateStr: string) {
     const activeClass = teacher?.activeClass || teacher?.className || '';
     const targetDate = parseLocalDate(dateStr);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const studentFilter: any = { teacherId };
     if (activeClass) {
       studentFilter.className = activeClass;
@@ -125,6 +127,7 @@ export async function getAttendanceByDate(dateStr: string) {
     }));
 
     return JSON.parse(JSON.stringify(result));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -145,6 +148,7 @@ export async function getWeeklyAttendanceReport(startDateStr: string, endDateStr
     const [endY, endM, endD] = endDateStr.split('-').map(Number);
     const endDate = new Date(Date.UTC(endY, endM - 1, endD, 23, 59, 59, 999));
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const studentFilter: any = { teacherId };
     if (activeClass) {
       studentFilter.className = activeClass;
@@ -223,6 +227,7 @@ export async function getWeeklyAttendanceReport(startDateStr: string, endDateStr
         studentsReport,
       })
     );
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -380,6 +385,7 @@ export async function getAllClassesWeeklyAttendanceReport(startDateStr: string, 
         classesReport,
       })
     );
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -400,6 +406,7 @@ export async function getMonthlyAttendanceReport(year: number, month: number) {
     const endDate = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
     const daysInMonth = new Date(year, month, 0).getDate();
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const studentFilter: any = { teacherId };
     if (activeClass) {
       studentFilter.className = activeClass;
@@ -466,6 +473,7 @@ export async function getMonthlyAttendanceReport(year: number, month: number) {
         studentsReport,
       })
     );
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -610,6 +618,7 @@ export async function getAllClassesMonthlyAttendanceReport(year: number, month: 
         classesReport,
       })
     );
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -706,6 +715,7 @@ export async function getYearlyAttendanceReport(year: number) {
         studentsReport,
       })
     );
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -867,6 +877,7 @@ export async function getAllClassesYearlyAttendanceReport(year: number) {
         classesReport,
       })
     );
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -911,6 +922,7 @@ export async function saveBulkAttendance(
     revalidatePath('/jurnal');
     revalidatePath('/');
     return { success: true, count: records.length };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;

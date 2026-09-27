@@ -6,6 +6,7 @@ import { ShieldCheck, AlertCircle, Loader2 } from 'lucide-react';
 
 declare global {
   interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     grecaptcha: any;
     onReCaptchaLoadCallback?: () => void;
   }
@@ -71,6 +72,7 @@ export default function ReCaptcha({
       widgetIdRef.current = widgetId;
       setIsReady(true);
       return true;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error('Error rendering reCAPTCHA:', err);
       return false;

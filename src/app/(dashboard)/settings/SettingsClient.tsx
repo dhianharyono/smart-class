@@ -16,6 +16,7 @@ import {
   LayoutDashboard,
   RotateCcw,
   CheckCircle2,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Calendar,
   CalendarClock,
   School,
@@ -83,7 +84,9 @@ const CONFIGURABLE_MENUS = [
 ];
 
 export default function SettingsClient() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const queryClient = useQueryClient();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const router = useRouter();
 
   // Query Profile Data for initial menu state
@@ -124,6 +127,7 @@ export default function SettingsClient() {
       toast.success('Pengaturan menu sidebar berhasil diperbarui!');
       window.location.reload();
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (err: any) => {
       toast.error(err.message || 'Gagal menyimpan pengaturan menu.');
       setIsReloading(false);

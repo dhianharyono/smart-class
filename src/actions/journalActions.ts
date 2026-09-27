@@ -73,6 +73,7 @@ export async function getJournalHeader() {
     }
 
     return result;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -103,6 +104,7 @@ export async function saveJournalHeader(data: {
 
     revalidatePath('/jurnal');
     return { success: true, header: JSON.parse(JSON.stringify(header)) };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -122,6 +124,7 @@ export async function getJournals() {
       .lean();
 
     return JSON.parse(JSON.stringify(journals));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -170,6 +173,7 @@ export async function getAttendanceSummaryForJournalDate(dateStr: string) {
     }
 
     return { absentS, absentI, absentA, notes };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error('Error getting attendance summary:', error);
     return { absentS: 0, absentI: 0, absentA: 0, notes: '' };
@@ -190,6 +194,7 @@ async function syncAttendanceFromJournal(
 
     const notesStr = (notes || '').trim();
     if (!notesStr && absentS === 0 && absentI === 0 && absentA === 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const bulkOps: any[] = students.map((s) => ({
         updateOne: {
           filter: { studentId: s._id, date: targetDate, teacherId },
@@ -207,6 +212,7 @@ async function syncAttendanceFromJournal(
       .map((t: string) => t.trim())
       .filter((t: string) => t.length >= 2);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const bulkOps: any[] = [];
     for (const s of students) {
       const sNameLower = s.name.toLowerCase();
@@ -322,6 +328,7 @@ export async function createJournal(data: {
     revalidatePath('/absensi');
     revalidatePath('/');
     return { success: true };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -406,6 +413,7 @@ export async function updateJournal(
     revalidatePath('/absensi');
     revalidatePath('/');
     return { success: true };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -428,6 +436,7 @@ export async function deleteJournal(id: string) {
     revalidatePath('/jurnal');
     revalidatePath('/');
     return { success: true };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;

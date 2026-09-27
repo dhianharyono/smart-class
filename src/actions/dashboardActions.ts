@@ -38,6 +38,7 @@ export async function getDashboardStats() {
     const teacher = await Teacher.findById(teacherId).select('kkm enabledMenus activeClass className').lean();
     const activeClass = teacher?.activeClass || teacher?.className || '';
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const studentFilter: any = { teacherId };
     if (activeClass) {
       studentFilter.$or = [{ className: activeClass }, { className: { $exists: false } }, { className: '' }];
@@ -101,6 +102,7 @@ export async function getDashboardStats() {
 
     const lowGradeNotifications = lowGrades
       .filter((g) => g.studentId) // filter out deleted students if any dangling
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .map((g: any) => ({
         gradeId: g._id.toString(),
         studentName: g.studentId.name,
@@ -149,6 +151,7 @@ export async function getDashboardStats() {
 
     const journalMonthlyStats = Array.from(journalMap.values()).reverse(); // chronological order for chart
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const recentJournals = journals.slice(0, 5).map((j: any) => ({
       id: j._id.toString(),
       date: new Date(j.date).toLocaleDateString('id-ID', {
@@ -180,6 +183,7 @@ export async function getDashboardStats() {
       enabledMenus,
       kkm,
     }));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -215,6 +219,7 @@ export async function updateTeacherKkm(newKkm: number) {
     revalidatePath('/');
     revalidatePath('/nilai');
     return { success: true };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;

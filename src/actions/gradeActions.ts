@@ -52,6 +52,7 @@ export async function getSubjects() {
     teacher.subjects = initialList;
     await teacher.save();
     return teacher.subjects;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -90,6 +91,7 @@ export async function addSubject(name: string) {
 
     revalidatePath('/nilai');
     return { success: true, subjects: teacher.subjects };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -148,6 +150,7 @@ export async function renameSubject(oldName: string, newName: string) {
 
     revalidatePath('/nilai');
     return { success: true, subjects: updatedSubjects };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -182,6 +185,7 @@ export async function deleteSubject(subjectName: string) {
 
     revalidatePath('/nilai');
     return { success: true, subjects: updatedSubjects };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -198,6 +202,7 @@ export async function getGradesByFilter(subject: string, category: 'Tugas' | 'UH
     const teacher = await Teacher.findById(teacherId).lean();
     const activeClass = teacher?.activeClass || teacher?.className || '';
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const studentFilter: any = { teacherId };
     if (activeClass) {
       studentFilter.className = activeClass;
@@ -226,6 +231,7 @@ export async function getGradesByFilter(subject: string, category: 'Tugas' | 'UH
     }));
 
     return JSON.parse(JSON.stringify(result));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -295,6 +301,7 @@ export async function saveBulkGrades(
     revalidatePath('/nilai');
     revalidatePath('/');
     return { success: true };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -311,6 +318,7 @@ export async function getAllGradesRecap(subject: string) {
     const teacher = await Teacher.findById(teacherId).lean();
     const activeClass = teacher?.activeClass || teacher?.className || '';
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const studentFilter: any = { teacherId };
     if (activeClass) {
       studentFilter.className = activeClass;
@@ -371,6 +379,7 @@ export async function getAllGradesRecap(subject: string) {
     });
 
     return JSON.parse(JSON.stringify(result));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -443,6 +452,7 @@ export async function getAllSubjectsGradesRecap() {
     });
 
     return JSON.parse(JSON.stringify({ subjects, recap: result }));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;

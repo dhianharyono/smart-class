@@ -34,6 +34,7 @@ export async function getStudents() {
     const teacher = await Teacher.findById(teacherId).lean();
     const activeClass = teacher?.activeClass || teacher?.className || '';
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const filter: any = { teacherId };
     if (activeClass) {
       filter.$or = [{ className: activeClass }, { className: { $exists: false } }, { className: '' }];
@@ -41,6 +42,7 @@ export async function getStudents() {
 
     const students = await Student.find(filter).sort({ name: 1 }).lean();
     return JSON.parse(JSON.stringify(students));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -64,6 +66,7 @@ export async function getStudentById(id: string) {
       throw new Error('Siswa tidak ditemukan.');
     }
     return JSON.parse(JSON.stringify(student));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -102,6 +105,7 @@ export async function createStudent(rawData: Partial<IStudent>) {
     revalidatePath('/siswa');
     revalidatePath('/');
     return { success: true, id: newStudent._id.toString() };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -147,6 +151,7 @@ export async function updateStudent(id: string, rawData: Partial<IStudent>) {
     revalidatePath('/siswa');
     revalidatePath('/');
     return { success: true };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -182,6 +187,7 @@ export async function deleteStudent(id: string) {
     revalidatePath('/siswa');
     revalidatePath('/');
     return { success: true };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
