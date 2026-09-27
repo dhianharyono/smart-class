@@ -260,6 +260,15 @@ export async function getAdminStats() {
         className: cls,
         count: gradeCountByClass.get(cls) || 0,
       }));
+
+      let resolvedLastLogin = t.lastLoginAt ? new Date(t.lastLoginAt).toISOString() : null;
+      if (!resolvedLastLogin && t.lastActiveAt && t.createdAt) {
+        const diff = Math.abs(new Date(t.lastActiveAt).getTime() - new Date(t.createdAt).getTime());
+        if (diff > 60 * 1000) {
+          resolvedLastLogin = new Date(t.lastActiveAt).toISOString();
+        }
+      }
+
       return {
         id: teacherIdStr,
         name: t.name,
@@ -276,6 +285,7 @@ export async function getAdminStats() {
         gradeCount,
         attendanceRate,
         totalAttendance,
+        lastLoginAt: resolvedLastLogin,
         createdAt: t.createdAt ? new Date(t.createdAt).toISOString() : new Date().toISOString(),
       };
     });
@@ -377,7 +387,32 @@ export async function getTeachers() {
 
     // Ambil guru reguler saja
     const teachers = await Teacher.find({ email: { $nin: adminEmails } }).sort({ name: 1 }).lean();
-    return JSON.parse(JSON.stringify(teachers));
+    return teachers.map((t: any) => {
+      let resolvedLastLogin = t.lastLoginAt ? new Date(t.lastLoginAt).toISOString() : null;
+      if (!resolvedLastLogin && t.lastActiveAt && t.createdAt) {
+        const diff = Math.abs(new Date(t.lastActiveAt).getTime() - new Date(t.createdAt).getTime());
+        if (diff > 60 * 1000) {
+          resolvedLastLogin = new Date(t.lastActiveAt).toISOString();
+        }
+      }
+
+      const teacherClasses = t.classes && t.classes.length > 0
+        ? t.classes
+        : (t.className ? [t.className] : []);
+
+      return {
+        _id: t._id.toString(),
+        name: t.name,
+        email: t.email,
+        schoolName: t.schoolName || '',
+        className: t.className || (teacherClasses[0] || ''),
+        classes: teacherClasses,
+        role: t.role || 'Wali Kelas',
+        isEmailVerified: Boolean(t.isEmailVerified),
+        lastLoginAt: resolvedLastLogin,
+        createdAt: t.createdAt ? new Date(t.createdAt).toISOString() : new Date().toISOString(),
+      };
+    });
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
@@ -396,12 +431,13 @@ export async function updateTeacher(id: string, data: {
   schoolName?: string;
   className?: string;
   role?: 'Wali Kelas' | 'Kepala Sekolah';
+  isEmailVerified?: boolean;
 }) {
   try {
     await dbConnect();
     await requireAdminAuth();
 
-    const { name, email, schoolName, className, role } = data;
+    const { name, email, schoolName, className, role, isEmailVerified } = data;
     if (!name || !email) {
       throw new Error('Nama dan email wajib diisi.');
     }
@@ -432,6 +468,14 @@ export async function updateTeacher(id: string, data: {
 
     if (parsedClasses.length > 0) {
       updateFields.activeClass = parsedClasses[0];
+    }
+
+    if (typeof isEmailVerified === 'boolean') {
+      updateFields.isEmailVerified = isEmailVerified;
+      if (isEmailVerified) {
+        updateFields.emailVerificationToken = undefined;
+        updateFields.emailVerificationExpires = undefined;
+      }
     }
 
     await Teacher.findByIdAndUpdate(id, updateFields);
@@ -674,6 +718,8 @@ export async function createTeacher(data: {
         className: newTeacher.className,
         classes: newTeacher.classes,
         role: newTeacher.role,
+        isEmailVerified: Boolean(newTeacher.isEmailVerified),
+        lastLoginAt: null,
         createdAt: newTeacher.createdAt.toISOString()
       } 
     };

@@ -39,7 +39,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
 
 export interface ActivityTrendItem {
   date: string;
@@ -88,6 +87,7 @@ interface TeacherStat {
   gradeCount?: number;
   attendanceRate?: number;
   totalAttendance?: number;
+  lastLoginAt?: string | null;
   createdAt: string;
 }
 
@@ -158,7 +158,7 @@ export default function AdminDashboardClient({
     setExpandedTeacherIds((prev) =>
       prev.includes(teacherId)
         ? prev.filter((id) => id !== teacherId)
-        : [...prev, teacherId]
+        : [...prev, teacherId],
     );
   };
 
@@ -179,8 +179,6 @@ export default function AdminDashboardClient({
     );
   }
 
-
-
   const formatDate = (dateStr: string) => {
     try {
       const d = new Date(dateStr);
@@ -195,6 +193,22 @@ export default function AdminDashboardClient({
     }
   };
 
+  const formatLastLogin = (dateStr?: string | null) => {
+    if (!dateStr) return null;
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return null;
+      return new Intl.DateTimeFormat('id-ID', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      }).format(d);
+    } catch {
+      return null;
+    }
+  };
 
   // Filtered teachers list based on search term
   const filteredTeacherStats = stats.teacherStats.filter((teacher) => {
@@ -211,8 +225,6 @@ export default function AdminDashboardClient({
       matchesClass
     );
   });
-
-
 
   // Activity trend metrics
   const trendData = stats.activityTrend || [];
@@ -232,11 +244,10 @@ export default function AdminDashboardClient({
           Dashboard Administrator
         </h1>
         <p className='text-xs sm:text-sm text-slate-500 font-medium mt-1'>
-          Ikhtisar operasional, tren aktivitas wali kelas, presensi, dan
-          sekolah terdaftar di seluruh sistem.
+          Ikhtisar operasional, tren aktivitas wali kelas, presensi, dan sekolah
+          terdaftar di seluruh sistem.
         </p>
       </div>
-
 
       {/* 2-Column Section for Statistik Sekolah & Pengguna Online */}
       <div className='grid gap-6 md:grid-cols-2'>
@@ -558,7 +569,7 @@ export default function AdminDashboardClient({
         <CardHeader className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between p-6 pb-4'>
           <div>
             <CardTitle className='text-md font-bold text-slate-900 flex items-center gap-2'>
-              <span>Statistik & Pemantauan Wali Kelas</span>
+              <span>Statistik & Pemantauan Guru</span>
             </CardTitle>
             <CardDescription className='text-xs text-slate-500 mt-1'>
               Ringkasan aktivitas pembelajaran, tingkat kehadiran siswa, jurnal,
@@ -649,11 +660,12 @@ export default function AdminDashboardClient({
           {/* Tabel Statistik Wali Kelas */}
           {filteredTeacherStats.length > 0 ? (
             <div className='overflow-x-auto min-w-0 max-w-full rounded-xl border border-slate-200'>
-              <table className='w-full min-w-[750px] text-left text-sm text-slate-700 border-collapse'>
+              <table className='w-full min-w-[880px] text-left text-sm text-slate-700 border-collapse'>
                 <thead>
                   <tr className='bg-slate-50 border-b border-slate-200 text-slate-700 text-[11px] font-bold uppercase tracking-wider'>
                     <th className='py-3 px-4'>Nama Guru</th>
                     <th className='py-3 px-4'>Sekolah / Kelas</th>
+                    <th className='py-3 px-4'>Terakhir Login</th>
                     <th className='py-3 px-4 text-center'>Siswa</th>
                     <th className='py-3 px-4 text-center'>Tingkat Kehadiran</th>
                     <th className='py-3 px-4 text-center'>Jurnal</th>
@@ -667,9 +679,10 @@ export default function AdminDashboardClient({
                     const hasAttendance = (teacher.totalAttendance ?? 0) > 0;
                     const isExpanded = expandedTeacherIds.includes(teacher.id);
 
-                    const teacherClasses = teacher.classes && teacher.classes.length > 0
-                      ? teacher.classes
-                      : [teacher.className || '-'];
+                    const teacherClasses =
+                      teacher.classes && teacher.classes.length > 0
+                        ? teacher.classes
+                        : [teacher.className || '-'];
 
                     const isMultiClass = teacherClasses.length > 1;
 
@@ -689,10 +702,21 @@ export default function AdminDashboardClient({
                     }
 
                     const teacherClassesData = teacherClasses.map((clsName) => {
-                      const sCount = teacher.classStudentCounts?.find((c) => c.className === clsName)?.count ?? 0;
-                      const attData = teacher.classAttendanceRates?.find((c) => c.className === clsName);
-                      const jCount = teacher.classJournalCounts?.find((c) => c.className === clsName)?.count ?? 0;
-                      const gCount = teacher.classGradeCounts?.find((c) => c.className === clsName)?.count ?? 0;
+                      const sCount =
+                        teacher.classStudentCounts?.find(
+                          (c) => c.className === clsName,
+                        )?.count ?? 0;
+                      const attData = teacher.classAttendanceRates?.find(
+                        (c) => c.className === clsName,
+                      );
+                      const jCount =
+                        teacher.classJournalCounts?.find(
+                          (c) => c.className === clsName,
+                        )?.count ?? 0;
+                      const gCount =
+                        teacher.classGradeCounts?.find(
+                          (c) => c.className === clsName,
+                        )?.count ?? 0;
 
                       return {
                         className: clsName,
@@ -708,7 +732,7 @@ export default function AdminDashboardClient({
                         <tr
                           className={cn(
                             'hover:bg-slate-50/80 transition-colors group',
-                            isExpanded && 'bg-slate-50/50'
+                            isExpanded && 'bg-slate-50/50',
                           )}
                         >
                           <td className='py-3.5 px-4'>
@@ -729,14 +753,16 @@ export default function AdminDashboardClient({
                               <div className='flex flex-wrap gap-1 items-center'>
                                 {teacherClasses.length > 0 ? (
                                   <>
-                                    {teacherClasses.slice(0, 2).map((cls, idx) => (
-                                      <span
-                                        key={idx}
-                                        className='bg-emerald-50 border border-emerald-200/90 text-emerald-800 px-2 py-0.5 rounded text-[11px] font-mono font-bold'
-                                      >
-                                        Kelas {cls}
-                                      </span>
-                                    ))}
+                                    {teacherClasses
+                                      .slice(0, 2)
+                                      .map((cls, idx) => (
+                                        <span
+                                          key={idx}
+                                          className='bg-emerald-50 border border-emerald-200/90 text-emerald-800 px-2 py-0.5 rounded text-[11px] font-mono font-bold'
+                                        >
+                                          Kelas {cls}
+                                        </span>
+                                      ))}
                                     {teacherClasses.length > 2 && (
                                       <span
                                         className='bg-slate-100 border border-slate-200 text-slate-600 px-1.5 py-0.5 rounded text-[10px] font-medium cursor-help'
@@ -754,6 +780,18 @@ export default function AdminDashboardClient({
                               </div>
                             </div>
                           </td>
+                          <td className='py-3.5 px-4'>
+                            {formatLastLogin(teacher.lastLoginAt) ? (
+                              <div className='flex items-center gap-1.5 text-xs text-slate-700 font-medium whitespace-nowrap'>
+                                <Clock className='h-3.5 w-3.5 text-emerald-600 shrink-0' />
+                                <span>{formatLastLogin(teacher.lastLoginAt)}</span>
+                              </div>
+                            ) : (
+                              <span className='inline-flex items-center text-[11px] text-slate-400 italic bg-slate-50 px-2 py-0.5 rounded border border-slate-200/60 whitespace-nowrap'>
+                                Belum pernah login
+                              </span>
+                            )}
+                          </td>
                           <td className='py-3.5 px-4 text-center'>
                             <div className='inline-flex items-center gap-1.5'>
                               <span className='inline-flex items-center gap-1 text-xs font-extrabold text-slate-900 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200'>
@@ -763,7 +801,12 @@ export default function AdminDashboardClient({
                               {isMultiClass && (
                                 <span
                                   className='bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-bold px-1.5 py-0.5 rounded cursor-help'
-                                  title={teacherClassesData.map(c => `Kelas ${c.className}: ${c.studentCount} siswa`).join('\n')}
+                                  title={teacherClassesData
+                                    .map(
+                                      (c) =>
+                                        `Kelas ${c.className}: ${c.studentCount} siswa`,
+                                    )
+                                    .join('\n')}
                                 >
                                   {teacherClasses.length} Kelas
                                 </span>
@@ -804,14 +847,14 @@ export default function AdminDashboardClient({
                                   'inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold rounded-lg border transition-all cursor-pointer',
                                   isExpanded
                                     ? 'bg-emerald-700 text-white border-emerald-700 shadow-xs'
-                                    : 'bg-emerald-50 text-emerald-700 border-emerald-200/90 hover:bg-emerald-100/90'
+                                    : 'bg-emerald-50 text-emerald-700 border-emerald-200/90 hover:bg-emerald-100/90',
                                 )}
                               >
                                 <span>{isExpanded ? 'Tutup' : 'Rincian'}</span>
                                 <ChevronDown
                                   className={cn(
                                     'h-3.5 w-3.5 transition-transform duration-200',
-                                    isExpanded && 'rotate-180'
+                                    isExpanded && 'rotate-180',
                                   )}
                                 />
                               </button>
@@ -825,7 +868,7 @@ export default function AdminDashboardClient({
 
                         {isExpanded && (
                           <tr className='bg-slate-50/80 border-b border-slate-200'>
-                            <td colSpan={7} className='p-3 sm:p-4 pl-4 sm:pl-8'>
+                            <td colSpan={8} className='p-3 sm:p-4 pl-4 sm:pl-8'>
                               <div className='bg-white border border-slate-200/90 rounded-xl p-3.5 sm:p-4 shadow-sm space-y-3'>
                                 <div className='flex items-center justify-between border-b border-slate-100 pb-2.5'>
                                   <div className='flex items-center gap-2'>
@@ -834,10 +877,12 @@ export default function AdminDashboardClient({
                                     </div>
                                     <div>
                                       <h4 className='text-xs font-bold text-slate-900'>
-                                        Rincian Statistik Per Kelas — {teacher.name}
+                                        Rincian Statistik Per Kelas —{' '}
+                                        {teacher.name}
                                       </h4>
                                       <p className='text-[11px] text-slate-500'>
-                                        {teacher.schoolName} • Total {teacherClasses.length} Kelas
+                                        {teacher.schoolName} • Total{' '}
+                                        {teacherClasses.length} Kelas
                                       </p>
                                     </div>
                                   </div>
@@ -850,16 +895,29 @@ export default function AdminDashboardClient({
                                   <table className='w-full text-left text-xs'>
                                     <thead>
                                       <tr className='bg-slate-50 text-[10px] font-bold text-slate-600 uppercase tracking-wider border-b border-slate-200'>
-                                        <th className='py-2.5 px-3.5'>Nama Kelas</th>
-                                        <th className='py-2.5 px-3.5 text-center'>Jumlah Siswa</th>
-                                        <th className='py-2.5 px-3.5 text-center'>Tingkat Kehadiran</th>
-                                        <th className='py-2.5 px-3.5 text-center'>Jurnal Mengajar</th>
-                                        <th className='py-2.5 px-3.5 text-center'>Input Nilai</th>
+                                        <th className='py-2.5 px-3.5'>
+                                          Nama Kelas
+                                        </th>
+                                        <th className='py-2.5 px-3.5 text-center'>
+                                          Jumlah Siswa
+                                        </th>
+                                        <th className='py-2.5 px-3.5 text-center'>
+                                          Tingkat Kehadiran
+                                        </th>
+                                        <th className='py-2.5 px-3.5 text-center'>
+                                          Jurnal Mengajar
+                                        </th>
+                                        <th className='py-2.5 px-3.5 text-center'>
+                                          Input Nilai
+                                        </th>
                                       </tr>
                                     </thead>
                                     <tbody className='divide-y divide-slate-100 text-slate-700'>
                                       {teacherClassesData.map((clsData) => (
-                                        <tr key={clsData.className} className='hover:bg-slate-50/70 transition-colors'>
+                                        <tr
+                                          key={clsData.className}
+                                          className='hover:bg-slate-50/70 transition-colors'
+                                        >
                                           <td className='py-2.5 px-3.5 font-bold text-slate-900 font-mono'>
                                             <span className='bg-emerald-50 border border-emerald-200 text-emerald-800 px-2 py-0.5 rounded text-[11px] font-bold'>
                                               Kelas {clsData.className}
@@ -877,7 +935,9 @@ export default function AdminDashboardClient({
                                                 {clsData.attendanceRate}% Hadir
                                               </span>
                                             ) : (
-                                              <span className='text-slate-400 italic text-[11px]'>Belum Ada Log</span>
+                                              <span className='text-slate-400 italic text-[11px]'>
+                                                Belum Ada Log
+                                              </span>
                                             )}
                                           </td>
                                           <td className='py-2.5 px-3.5 text-center'>

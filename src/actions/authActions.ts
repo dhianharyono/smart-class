@@ -82,6 +82,13 @@ export async function loginTeacher(rawData: {
       $or: [{ username: teacher.email }, { username: teacher.username || '' }],
     });
 
+    // Update last login timestamp
+    const now = new Date();
+    await Teacher.findByIdAndUpdate(teacher._id, {
+      lastLoginAt: now,
+      lastActiveAt: now,
+    });
+
     // Sign session token including tokenVersion for revocation support
     const token = await signSession({
       userId: teacher._id.toString(),
@@ -289,6 +296,12 @@ export async function verifyEmailOTP(rawData: { email: string; otp: string }) {
       teacher.isEmailVerified = true;
       teacher.emailVerificationToken = undefined;
       teacher.emailVerificationExpires = undefined;
+      teacher.lastLoginAt = new Date();
+      teacher.lastActiveAt = new Date();
+      await teacher.save();
+    } else {
+      teacher.lastLoginAt = new Date();
+      teacher.lastActiveAt = new Date();
       await teacher.save();
     }
 

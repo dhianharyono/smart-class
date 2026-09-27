@@ -20,9 +20,12 @@ import {
   Plus,
   Eye,
   EyeOff,
+  Clock,
+  CheckCircle2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 interface Teacher {
   _id: string;
@@ -32,6 +35,8 @@ interface Teacher {
   className?: string;
   classes?: string[];
   role?: 'Wali Kelas' | 'Kepala Sekolah';
+  isEmailVerified?: boolean;
+  lastLoginAt?: string | null;
   createdAt: string;
 }
 
@@ -62,6 +67,7 @@ export default function ManageTeachersClient({
   const [editRole, setEditRole] = useState<'Wali Kelas' | 'Kepala Sekolah'>(
     'Wali Kelas',
   );
+  const [editIsEmailVerified, setEditIsEmailVerified] = useState(false);
 
   // Create Form states
   const [newName, setNewName] = useState('');
@@ -100,6 +106,23 @@ export default function ManageTeachersClient({
     return matchesSearch && matchesSchool;
   });
 
+  const formatLastLogin = (dateStr?: string | null) => {
+    if (!dateStr) return null;
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return null;
+      return new Intl.DateTimeFormat('id-ID', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      }).format(d);
+    } catch {
+      return null;
+    }
+  };
+
   const openEditModal = (teacher: Teacher) => {
     setSelectedTeacher(teacher);
     setEditName(teacher.name);
@@ -111,6 +134,7 @@ export default function ManageTeachersClient({
         : teacher.className || '',
     );
     setEditRole(teacher.role || 'Wali Kelas');
+    setEditIsEmailVerified(Boolean(teacher.isEmailVerified));
     setIsEditOpen(true);
   };
 
@@ -178,6 +202,7 @@ export default function ManageTeachersClient({
         schoolName: editSchool,
         className: editClass,
         role: editRole,
+        isEmailVerified: editIsEmailVerified,
       });
 
       if (res.success) {
@@ -208,6 +233,7 @@ export default function ManageTeachersClient({
                         ? [editClass]
                         : [],
                   role: editRole,
+                  isEmailVerified: editIsEmailVerified,
                 }
               : t,
           ),
@@ -252,7 +278,7 @@ export default function ManageTeachersClient({
       <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
         <div>
           <h2 className='text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900'>
-            Kelola Wali Kelas
+            Kelola Guru
           </h2>
           <p className='text-slate-600 text-xs sm:text-sm mt-1'>
             Daftar, tambah, edit profil kelas/sekolah, dan hapus akun guru
@@ -264,7 +290,7 @@ export default function ManageTeachersClient({
           className='bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl cursor-pointer text-xs font-semibold py-2.5 px-4 flex items-center justify-center gap-2 w-full sm:w-auto shadow-xs transition-all duration-200'
         >
           <Plus className='h-4 w-4' />
-          <span>Tambah Wali Kelas</span>
+          <span>Tambah Guru</span>
         </Button>
       </div>
 
@@ -318,104 +344,141 @@ export default function ManageTeachersClient({
         <CardContent className='p-0'>
           {filteredTeachers.length > 0 ? (
             <div className='overflow-x-auto min-w-0 max-w-full'>
-              <table className='w-full min-w-[650px] text-left text-sm text-slate-700 border-collapse'>
+              <table className='w-full min-w-[950px] text-left text-sm text-slate-700 border-collapse'>
                 <thead>
                   <tr className='border-b border-slate-200 text-slate-700 text-xs font-bold uppercase tracking-wider bg-slate-50'>
                     <th className='py-3.5 px-6'>Nama Guru / Email</th>
                     <th className='py-3.5 px-6'>Sekolah</th>
                     <th className='py-3.5 px-6'>Kelas</th>
+                    <th className='py-3.5 px-6 text-center'>Status Email</th>
+                    <th className='py-3.5 px-6'>Terakhir Login</th>
                     <th className='py-3.5 px-6'>Tanggal Terdaftar</th>
                     <th className='py-3.5 px-6 text-center'>Aksi</th>
                   </tr>
                 </thead>
                 <tbody className='divide-y divide-slate-100'>
-                  {filteredTeachers.map((teacher) => (
-                    <tr
-                      key={teacher._id}
-                      className='hover:bg-slate-50/80 transition-colors group'
-                    >
-                      <td className='py-4 px-6'>
-                        <div className='flex flex-col'>
-                          <span className='font-bold text-slate-900 group-hover:text-emerald-700 transition-colors'>
-                            {teacher.name}
-                          </span>
-                          <div className='flex items-center gap-2 mt-0.5'>
-                            <span className='text-xs text-slate-500 font-medium'>
-                              {teacher.email}
+                  {filteredTeachers.map((teacher) => {
+                    const teacherClasses =
+                      teacher.classes && teacher.classes.length > 0
+                        ? teacher.classes
+                        : teacher.className
+                          ? [teacher.className]
+                          : [];
+
+                    return (
+                      <tr
+                        key={teacher._id}
+                        className='hover:bg-slate-50/80 transition-colors group'
+                      >
+                        <td className='py-4 px-6'>
+                          <div className='flex flex-col'>
+                            <span className='font-bold text-slate-900 group-hover:text-emerald-700 transition-colors'>
+                              {teacher.name}
                             </span>
-                            <span
-                              className={`px-2 py-0.5 border text-[9px] font-bold rounded-md uppercase tracking-wider ${
-                                teacher.role === 'Kepala Sekolah'
-                                  ? 'bg-violet-50 text-violet-700 border-violet-200'
-                                  : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                              }`}
-                            >
-                              {teacher.role || 'Wali Kelas'}
-                            </span>
-                          </div>
-                        </div>
-                      </td>
-                      <td className='py-4 px-6 text-slate-800 font-medium'>
-                        <div className='flex items-center gap-2'>
-                          <School className='h-4 w-4 text-slate-400' />
-                          <span>{teacher.schoolName || '-'}</span>
-                        </div>
-                      </td>
-                      <td className='py-4 px-6'>
-                        <div className='flex flex-wrap gap-1 items-center'>
-                          {teacher.classes && teacher.classes.length > 0 ? (
-                            teacher.classes.map((cls, idx) => (
-                              <span
-                                key={idx}
-                                className='bg-emerald-50 border border-emerald-200/90 text-emerald-800 px-2 py-0.5 rounded text-[11px] font-mono font-bold'
-                              >
-                                Kelas {cls}
+                            <div className='flex items-center gap-2 mt-0.5'>
+                              <span className='text-xs text-slate-500 font-medium'>
+                                {teacher.email}
                               </span>
-                            ))
+                            </div>
+                          </div>
+                        </td>
+                        <td className='py-4 px-6 text-slate-800 font-medium'>
+                          <div className='flex items-center gap-2'>
+                            <School className='h-4 w-4 text-slate-400' />
+                            <span>{teacher.schoolName || '-'}</span>
+                          </div>
+                        </td>
+                        <td className='py-4 px-6'>
+                          <div className='flex flex-wrap gap-1 items-center'>
+                            {teacherClasses.length > 0 ? (
+                              <>
+                                {teacherClasses.slice(0, 2).map((cls, idx) => (
+                                  <span
+                                    key={idx}
+                                    className='bg-emerald-50 border border-emerald-200/90 text-emerald-800 px-2 py-0.5 rounded text-[11px] font-mono font-bold'
+                                  >
+                                    Kelas {cls}
+                                  </span>
+                                ))}
+                                {teacherClasses.length > 2 && (
+                                  <span
+                                    className='bg-slate-100 border border-slate-200 text-slate-600 px-1.5 py-0.5 rounded text-[10px] font-medium cursor-help'
+                                    title={`Semua Kelas (${teacherClasses.length}): ${teacherClasses.map((c) => `Kelas ${c}`).join(', ')}`}
+                                  >
+                                    +{teacherClasses.length - 2} kelas
+                                  </span>
+                                )}
+                              </>
+                            ) : (
+                              <span className='bg-slate-100 border border-slate-200 text-slate-500 px-2 py-0.5 rounded text-[11px] font-mono font-medium'>
+                                Kelas -
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className='py-4 px-6 text-center whitespace-nowrap'>
+                          {teacher.isEmailVerified ? (
+                            <span className='inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200'>
+                              <CheckCircle2 className='h-3.5 w-3.5 text-emerald-600' />
+                              <span>Terverifikasi</span>
+                            </span>
                           ) : (
-                            <span className='bg-slate-100 border border-slate-200 text-slate-700 px-2.5 py-0.5 rounded-lg text-xs font-bold font-mono'>
-                              Kelas {teacher.className || '-'}
+                            <span className='inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200'>
+                              <AlertCircle className='h-3.5 w-3.5 text-amber-600' />
+                              <span>Belum Verifikasi</span>
                             </span>
                           )}
-                        </div>
-                      </td>
-                      <td className='py-4 px-6 text-slate-500 text-xs font-medium'>
-                        <div className='flex items-center gap-1.5'>
-                          <Calendar className='h-3.5 w-3.5' />
-                          <span>
-                            {new Date(teacher.createdAt).toLocaleDateString(
-                              'id-ID',
-                              {
-                                day: 'numeric',
-                                month: 'short',
-                                year: 'numeric',
-                              },
-                            )}
-                          </span>
-                        </div>
-                      </td>
-                      <td className='py-4 px-6 text-center'>
-                        <div className='flex justify-center items-center gap-2'>
-                          <Button
-                            variant='ghost'
-                            size='icon'
-                            onClick={() => openEditModal(teacher)}
-                            className='h-8 w-8 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-200 rounded-xl cursor-pointer'
-                          >
-                            <Edit2 className='h-3.5 w-3.5' />
-                          </Button>
-                          <Button
-                            variant='ghost'
-                            size='icon'
-                            onClick={() => openDeleteModal(teacher)}
-                            className='h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 rounded-xl cursor-pointer'
-                          >
-                            <Trash2 className='h-3.5 w-3.5' />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className='py-4 px-6 text-slate-600 text-xs font-medium'>
+                          {formatLastLogin(teacher.lastLoginAt) ? (
+                            <div className='flex items-center gap-1.5 whitespace-nowrap'>
+                              <Clock className='h-3.5 w-3.5 text-slate-400 shrink-0' />
+                              <span>{formatLastLogin(teacher.lastLoginAt)}</span>
+                            </div>
+                          ) : (
+                            <span className='text-slate-400 italic text-[11px] whitespace-nowrap'>
+                              Belum pernah login
+                            </span>
+                          )}
+                        </td>
+                        <td className='py-4 px-6 text-slate-500 text-xs font-medium'>
+                          <div className='flex items-center gap-1.5 whitespace-nowrap'>
+                            <Calendar className='h-3.5 w-3.5' />
+                            <span>
+                              {new Date(teacher.createdAt).toLocaleDateString(
+                                'id-ID',
+                                {
+                                  day: 'numeric',
+                                  month: 'short',
+                                  year: 'numeric',
+                                },
+                              )}
+                            </span>
+                          </div>
+                        </td>
+                        <td className='py-4 px-6 text-center'>
+                          <div className='flex justify-center items-center gap-2'>
+                            <Button
+                              variant='ghost'
+                              size='icon'
+                              onClick={() => openEditModal(teacher)}
+                              className='h-8 w-8 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-200 rounded-xl cursor-pointer'
+                            >
+                              <Edit2 className='h-3.5 w-3.5' />
+                            </Button>
+                            <Button
+                              variant='ghost'
+                              size='icon'
+                              onClick={() => openDeleteModal(teacher)}
+                              className='h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 rounded-xl cursor-pointer'
+                            >
+                              <Trash2 className='h-3.5 w-3.5' />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -538,6 +601,34 @@ export default function ManageTeachersClient({
                     />
                   </div>
                 </div>
+              </div>
+
+              <div className='flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-xl'>
+                <div>
+                  <label className='text-xs font-bold text-slate-800 block'>
+                    Status Verifikasi Email
+                  </label>
+                  <p className='text-[11px] text-slate-500'>
+                    {editIsEmailVerified
+                      ? 'Email sudah terverifikasi'
+                      : 'Email belum terverifikasi'}
+                  </p>
+                </div>
+                <button
+                  type='button'
+                  onClick={() => setEditIsEmailVerified((prev) => !prev)}
+                  className={cn(
+                    'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none',
+                    editIsEmailVerified ? 'bg-emerald-600' : 'bg-slate-300',
+                  )}
+                >
+                  <span
+                    className={cn(
+                      'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
+                      editIsEmailVerified ? 'translate-x-5' : 'translate-x-0',
+                    )}
+                  />
+                </button>
               </div>
 
               <div className='pt-2 flex justify-end gap-3'>

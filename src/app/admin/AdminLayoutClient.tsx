@@ -47,8 +47,12 @@ const adminMenuGroups: SidebarGroup[] = [
     category: 'MANAJEMEN MASTER',
     items: [
       { name: 'Kelola Sekolah', href: '/admin/sekolah', icon: School },
-      { name: 'Kelola Wali Kelas', href: '/admin/guru', icon: Users },
-      { name: 'Kelola Kritik & Saran', href: '/admin/feedback', icon: MessageSquareText },
+      { name: 'Kelola Guru', href: '/admin/guru', icon: Users },
+      {
+        name: 'Kelola Kritik & Saran',
+        href: '/admin/feedback',
+        icon: MessageSquareText,
+      },
     ],
   },
 ];
@@ -78,7 +82,9 @@ export default function AdminLayoutClient({
 
   // Admin Profile Modal State
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [profileModalTab, setProfileModalTab] = useState<'profile' | 'security'>('profile');
+  const [profileModalTab, setProfileModalTab] = useState<
+    'profile' | 'security'
+  >('profile');
   const [profileModalForm, setProfileModalForm] = useState({
     name: admin.name || 'Admin Smart Class',
     username: admin.username || '',
@@ -105,7 +111,10 @@ export default function AdminLayoutClient({
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!profileModalForm.name.trim() || profileModalForm.name.trim().length < 3) {
+    if (
+      !profileModalForm.name.trim() ||
+      profileModalForm.name.trim().length < 3
+    ) {
       toast.error('Nama admin minimal 3 karakter.');
       return;
     }
@@ -491,7 +500,8 @@ export default function AdminLayoutClient({
                 <div className='space-y-4'>
                   <div className='space-y-1.5'>
                     <label className='text-xs font-bold text-slate-700 block'>
-                      Nama Lengkap Admin <span className='text-rose-500'>*</span>
+                      Nama Lengkap Admin{' '}
+                      <span className='text-rose-500'>*</span>
                     </label>
                     <input
                       type='text'
@@ -651,7 +661,8 @@ export default function AdminLayoutClient({
 
                   <div className='space-y-1.5'>
                     <label className='text-xs font-bold text-slate-700 block'>
-                      Konfirmasi Password Baru <span className='text-rose-500'>*</span>
+                      Konfirmasi Password Baru{' '}
+                      <span className='text-rose-500'>*</span>
                     </label>
                     <div className='relative'>
                       <input
