@@ -813,7 +813,7 @@ export default function DashboardLayoutClient({
               Smart Class
             </h1>
             <p className='text-[11px] text-slate-500 font-medium mt-1 leading-none truncate'>
-              Dashboard Wali Kelas
+              Dashboard Administrasi Kelas
             </p>
           </div>
         </div>
@@ -1085,7 +1085,7 @@ export default function DashboardLayoutClient({
               {teacher.name || 'Guru Smart Class'}
             </span>
             <span className='text-[10px] text-slate-500 font-medium capitalize'>
-              Wali Kelas
+              Guru {teacher ? teacher.schoolName : 'Smart Class'}
             </span>
           </div>
         )}
@@ -1118,7 +1118,7 @@ export default function DashboardLayoutClient({
                     {teacher.name || 'Guru Smart Class'}
                   </span>
                   <span className='text-[10px] text-emerald-600 font-semibold capitalize'>
-                    Wali Kelas
+                    Guru {teacher.schoolName}
                   </span>
                 </div>
               </div>
@@ -1336,7 +1336,7 @@ export default function DashboardLayoutClient({
                 <Sparkles className='h-3.5 w-3.5 text-emerald-600 shrink-0' />
                 <span className='text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wide truncate sm:whitespace-nowrap'>
                   {teacher.isFirstLogin
-                    ? 'Aktivasi Akun Wali Kelas'
+                    ? 'Aktivasi Akun Guru & Kelas'
                     : 'Lengkapi Data Profil & Sekolah'}
                 </span>
               </div>

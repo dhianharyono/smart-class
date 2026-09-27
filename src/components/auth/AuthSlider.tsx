@@ -409,7 +409,7 @@ export default function AuthSlider({
                 transition={{ type: 'spring', stiffness: 450, damping: 32 }}
               />
             )}
-            <span>SIGN IN</span>
+            <span>Masuk</span>
           </button>
           <button
             type='button'
@@ -427,7 +427,7 @@ export default function AuthSlider({
                 transition={{ type: 'spring', stiffness: 450, damping: 32 }}
               />
             )}
-            <span>SIGN UP</span>
+            <span>DAFTAR</span>
           </button>
         </div>
       </div>
@@ -552,7 +552,7 @@ export default function AuthSlider({
                   <span>MEMVERIFIKASI...</span>
                 </div>
               ) : (
-                <span>SIGN IN</span>
+                <span>Masuk</span>
               )}
             </Button>
           </form>
@@ -868,7 +868,7 @@ export default function AuthSlider({
                   <span>MENDAFTARKAN...</span>
                 </div>
               ) : (
-                <span>SIGN UP</span>
+                <span>DAFTAR</span>
               )}
             </Button>
           </form>
@@ -915,7 +915,7 @@ export default function AuthSlider({
             >
               <h2 className='text-3xl lg:text-5xl font-black tracking-tight leading-tight'>
                 {mode === 'signin'
-                  ? 'Halo, Wali Kelas!'
+                  ? 'Halo, Bapak/Ibu Guru!'
                   : 'Selamat Datang Kembali!'}
               </h2>
               <p className='text-sm lg:text-base text-emerald-100/90 font-medium leading-relaxed max-w-sm mx-auto'>
@@ -935,7 +935,7 @@ export default function AuthSlider({
               }
               className='px-10 py-3.5 rounded-full border-2 border-white text-white font-extrabold text-xs tracking-widest uppercase hover:bg-white hover:text-emerald-700 transition-all duration-300 shadow-lg cursor-pointer transform hover:scale-105 active:scale-95'
             >
-              {mode === 'signin' ? 'SIGN UP' : 'SIGN IN'}
+              {mode === 'signin' ? 'DAFTAR' : 'MASUK'}
             </button>
           </div>
         </div>

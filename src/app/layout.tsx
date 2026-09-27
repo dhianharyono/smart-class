@@ -12,21 +12,31 @@ const outfit = Outfit({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Smart Class - Dashboard Wali Kelas',
+    default: 'Smart Class - Sistem Administrasi Guru',
     template: '%s | Smart Class',
   },
   description:
-    'Aplikasi produktivitas dan pengelolaan kelas terpadu untuk wali kelas: absensi siswa, jurnal harian guru, jadwal mengajar, dan rekap nilai.',
+    'Aplikasi produktivitas dan administrasi guru terpadu: absensi siswa, jurnal KBM harian, jadwal mengajar tatap muka (JJM), dan rekapitulasi nilai akademik.',
   keywords: [
     'Smart Class',
+    'Administrasi Guru',
+    'Sistem Administrasi Guru',
+    'Aplikasi Administrasi Guru',
+    'Dashboard Guru',
     'Dashboard Wali Kelas',
     'Jadwal Mengajar Guru',
-    'Jurnal Guru Harian',
+    'Jadwal Tatap Muka 24 Jam',
+    'Beban Mengajar JJM',
+    'Jurnal KBM Harian',
+    'Jurnal Mengajar Guru',
     'Absensi Siswa Online',
     'Rekap Nilai Siswa',
+    'Leger Nilai KKM',
     'Multi Kelas Guru',
     'Aplikasi Sekolah',
     'Manajemen Kelas',
+    'Perangkat Pembelajaran Guru',
+    'Kurikulum Merdeka',
   ],
   authors: [{ name: 'Smart Class Team' }],
   creator: 'Smart Class',
@@ -49,9 +59,9 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: 'Smart Class - Dashboard Wali Kelas',
+    title: 'Smart Class - Sistem Administrasi Guru',
     description:
-      'Aplikasi produktivitas dan pengelolaan kelas terpadu untuk wali kelas: absensi siswa, jurnal harian guru, dan rekap nilai.',
+      'Aplikasi produktivitas dan administrasi guru terpadu: absensi siswa, jurnal KBM harian, jadwal mengajar tatap muka (JJM), dan rekapitulasi nilai akademik.',
     url: '/',
     siteName: 'Smart Class',
     locale: 'id_ID',
@@ -61,15 +71,15 @@ export const metadata: Metadata = {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Smart Class - Dashboard Wali Kelas',
+        alt: 'Smart Class - Sistem Administrasi Guru',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Smart Class - Dashboard Wali Kelas',
+    title: 'Smart Class - Sistem Administrasi Guru',
     description:
-      'Aplikasi produktivitas dan pengelolaan kelas terpadu untuk wali kelas: absensi siswa, jurnal harian guru, dan rekap nilai.',
+      'Aplikasi produktivitas dan administrasi guru terpadu: absensi siswa, jurnal KBM harian, jadwal mengajar tatap muka (JJM), dan rekapitulasi nilai akademik.',
     images: ['/og-image.png'],
   },
   icons: {

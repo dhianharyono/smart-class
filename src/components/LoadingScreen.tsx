@@ -20,7 +20,7 @@ export default function LoadingScreen({
           'Memuat data sistem...',
         ]
       : [
-          'Memverifikasi sesi wali kelas...',
+          'Memverifikasi sesi guru & kelas...',
           'Menghubungkan ke kelas...',
           'Mempersiapkan Dashboard Anda...',
         ];
@@ -72,7 +72,7 @@ export default function LoadingScreen({
             Smart Class
           </h2>
           <p className='text-slate-500 text-xs tracking-wider uppercase font-semibold'>
-            {variant === 'admin' ? 'Admin Portal' : 'Wali Kelas'}
+            {variant === 'admin' ? 'Admin Portal' : 'Portal Guru & Kelas'}
           </p>
         </div>
 

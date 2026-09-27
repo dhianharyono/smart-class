@@ -6,14 +6,20 @@ interface SendVerificationEmailParams {
   otp: string;
 }
 
-export async function sendVerificationEmail({ to, name, otp }: SendVerificationEmailParams) {
+export async function sendVerificationEmail({
+  to,
+  name,
+  otp,
+}: SendVerificationEmailParams) {
   try {
     const smtpHost = process.env.SMTP_HOST;
     const smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
     const smtpUser = process.env.SMTP_USER?.trim();
     // Trim spaces from App Password
     const smtpPass = process.env.SMTP_PASS?.replace(/\s+/g, '');
-    let smtpFrom = process.env.SMTP_FROM?.trim() || '"Smart Class" <mysmartclassindonesia@gmail.com>';
+    let smtpFrom =
+      process.env.SMTP_FROM?.trim() ||
+      '"Smart Class" <mysmartclassindonesia@gmail.com>';
 
     // Clean up outer quotes if present from Vercel UI
     if (smtpFrom.startsWith('"') && smtpFrom.endsWith('"')) {
@@ -59,18 +65,28 @@ export async function sendVerificationEmail({ to, name, otp }: SendVerificationE
               Kode verifikasi ini berlaku selama 15 menit. Jika Anda tidak merasa mendaftar di Smart Class, silakan abaikan email ini.
             </p>
             <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
-            <p style="color: #94a3b8; font-size: 11px; text-align: center;">&copy; ${new Date().getFullYear()} Smart Class Dashboard Wali Kelas</p>
+            <p style="color: #94a3b8; font-size: 11px; text-align: center;">&copy; ${new Date().getFullYear()} Smart Class - Sistem Administrasi Guru</p>
           </div>
         `,
       });
-      console.log(`[EMAIL SENT] Kode OTP ${otp} berhasil dikirim via SMTP ke ${to}`);
+      console.log(
+        `[EMAIL SENT] Kode OTP ${otp} berhasil dikirim via SMTP ke ${to}`,
+      );
       return { success: true };
     } else {
-      console.warn(`[EMAIL SIMULATION] SMTP tidak lengkap (Host: ${!!smtpHost}, User: ${!!smtpUser}, Pass: ${!!smtpPass}). Kode OTP untuk ${to}: ${otp}`);
-      return { success: false, error: 'SMTP Environment Variables tidak lengkap di Server.' };
+      console.warn(
+        `[EMAIL SIMULATION] SMTP tidak lengkap (Host: ${!!smtpHost}, User: ${!!smtpUser}, Pass: ${!!smtpPass}). Kode OTP untuk ${to}: ${otp}`,
+      );
+      return {
+        success: false,
+        error: 'SMTP Environment Variables tidak lengkap di Server.',
+      };
     }
   } catch (error: any) {
     console.error('Error sending verification email:', error);
-    return { success: false, error: error?.message || 'Gagal mengirim email verifikasi via SMTP.' };
+    return {
+      success: false,
+      error: error?.message || 'Gagal mengirim email verifikasi via SMTP.',
+    };
   }
 }

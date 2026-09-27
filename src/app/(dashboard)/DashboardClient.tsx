@@ -2,7 +2,7 @@
 
 import React, { useState, useSyncExternalStore } from 'react';
 
-const emptySubscribe = () => () => {};
+const emptySubscribe = () => () => { };
 const getSnapshot = () => true;
 const getServerSnapshot = () => false;
 
@@ -21,6 +21,9 @@ import {
   Sparkles,
   LayoutGrid,
   Plus,
+  CalendarClock,
+  Clock,
+  ArrowRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -31,8 +34,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import {
-  AreaChart,
-  Area,
   XAxis,
   YAxis,
   Tooltip,
@@ -129,6 +130,28 @@ function formatActivityLines(text?: string): string[] {
 export default function DashboardClient({ stats }: DashboardClientProps) {
   const mounted = useIsMounted();
   const [kkm] = useState<number>(stats.kkm);
+  const [teachingSlots, setTeachingSlots] = useState<any[]>([]);
+
+  React.useEffect(() => {
+    try {
+      const saved = localStorage.getItem('smart_class_jadwal_mengajar');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setTeachingSlots(parsed);
+          return;
+        }
+      }
+      setTeachingSlots([
+        { id: 'slot-1', day: 'Senin', period: 1, startTime: '07:15', endTime: '07:55', className: '5A', subject: 'Matematika', room: 'Ruang Teori' },
+        { id: 'slot-2', day: 'Senin', period: 2, startTime: '07:55', endTime: '08:35', className: '5A', subject: 'Matematika', room: 'Ruang Teori' },
+        { id: 'slot-3', day: 'Selasa', period: 3, startTime: '08:35', endTime: '09:15', className: '5A', subject: 'IPA', room: 'Laboratorium' },
+        { id: 'slot-4', day: 'Rabu', period: 2, startTime: '07:55', endTime: '08:35', className: '5A', subject: 'Bahasa Indonesia', room: 'Ruang Teori' },
+        { id: 'slot-5', day: 'Kamis', period: 4, startTime: '09:30', endTime: '10:10', className: '5A', subject: 'Pendidikan Pancasila', room: 'Ruang Teori' },
+        { id: 'slot-6', day: 'Jumat', period: 1, startTime: '07:15', endTime: '07:55', className: '5A', subject: 'Bahasa Inggris', room: 'Ruang Multimedia' },
+      ]);
+    } catch (e) { }
+  }, []);
 
   if (!mounted) {
     return (
@@ -174,6 +197,14 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
     enabled.includes('/siswa') || enabled.includes('/absensi');
   const isNilaiEnabled = enabled.includes('/nilai');
   const isJurnalEnabled = enabled.includes('/jurnal');
+  const isJadwalEnabled = enabled.includes('/jadwal-mengajar');
+
+  const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+  const currentDayIndex = new Date().getDay();
+  const currentDayName = dayNames[currentDayIndex];
+  const todaySlots = teachingSlots
+    .filter((s) => s.day === currentDayName)
+    .sort((a, b) => a.period - b.period);
 
   const statCards = [
     {
@@ -194,6 +225,14 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
       visible: isAbsensiEnabled,
     },
     {
+      title: 'Jadwal Hari Ini',
+      value: `${todaySlots.length} Sesi`,
+      description: `${teachingSlots.length} JP Beban Mingguan (JJM)`,
+      icon: CalendarClock,
+      color: 'from-sky-50 to-cyan-50/30 text-sky-700 border-sky-200/70',
+      visible: isJadwalEnabled,
+    },
+    {
       title: 'Evaluasi Nilai',
       value: stats.lowGradeCount,
       description: `Siswa di bawah KKM < ${kkm}`,
@@ -204,7 +243,7 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
     {
       title: 'Rekap Jurnal',
       value: `${stats.totalJournalEntries || 0} Sesi`,
-      description: 'Agenda mengajar tercatat',
+      description: 'Agenda KBM tercatat',
       icon: BookMarked,
       color:
         'from-purple-50 to-indigo-50/30 text-purple-700 border-purple-200/70',
@@ -230,8 +269,7 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
             Dashboard Utama
           </h2>
           <p className='text-slate-600 text-sm mt-1'>
-            Ringkasan performa akademik, jadwal mengajar, presensi, dan tabungan
-            kelas Anda.
+            Ringkasan performa akademik, jadwal mengajar tatap muka, presensi harian, dan jurnal KBM Anda.
           </p>
         </div>
         <Link href='/'>
@@ -305,10 +343,95 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
         </div>
       )}
 
+      {/* Jadwal Mengajar Hari Ini Card */}
+      {isJadwalEnabled && (
+        <Card className='bg-white border-slate-200/80 rounded-2xl shadow-xs overflow-hidden'>
+          <CardHeader className='flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 sm:p-5 border-b border-slate-100'>
+            <div className='flex items-center gap-3'>
+              <div className='p-2.5 rounded-xl bg-sky-50 border border-sky-100 text-sky-600 shrink-0'>
+                <CalendarClock className='h-5 w-5' />
+              </div>
+              <div>
+                <CardTitle className='text-base font-bold text-slate-900 flex items-center gap-2'>
+                  <span>Jadwal Mengajar Hari Ini</span>
+                  <span className='px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-sky-100 text-sky-800'>
+                    {currentDayName}
+                  </span>
+                </CardTitle>
+                <CardDescription className='text-xs text-slate-500 mt-0.5'>
+                  {todaySlots.length > 0
+                    ? `${todaySlots.length} sesi tatap muka dijadwalkan hari ini`
+                    : `Tidak ada sesi mengajar tatap muka terjadwal untuk hari ${currentDayName}`}
+                </CardDescription>
+              </div>
+            </div>
+            <Link href='/jadwal-mengajar'>
+              <Button
+                variant='outline'
+                size='sm'
+                className='text-xs font-semibold rounded-xl border-slate-200 hover:bg-slate-50 gap-1.5 h-9 cursor-pointer'
+              >
+                <span>Kelola Jadwal (JJM)</span>
+                <ArrowRight className='h-3.5 w-3.5 text-slate-400' />
+              </Button>
+            </Link>
+          </CardHeader>
+          <CardContent className='p-4 sm:p-5'>
+            {todaySlots.length > 0 ? (
+              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3'>
+                {todaySlots.map((slot) => (
+                  <div
+                    key={slot.id}
+                    className='flex items-center justify-between p-3.5 rounded-xl bg-slate-50/80 border border-slate-200/80 hover:bg-white hover:shadow-xs transition-all'
+                  >
+                    <div className='min-w-0 flex-1 pr-2'>
+                      <div className='flex items-center gap-2 mb-1'>
+                        <span className='px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-[10px] font-black'>
+                          Jam Ke-{slot.period}
+                        </span>
+                        <span className='text-[11px] text-slate-500 font-semibold flex items-center gap-1'>
+                          <Clock className='h-3 w-3 text-slate-400' />
+                          {slot.startTime} - {slot.endTime}
+                        </span>
+                      </div>
+                      <p className='text-xs font-bold text-slate-900 truncate'>
+                        {slot.subject}
+                      </p>
+                      <p className='text-[11px] text-slate-500 truncate mt-0.5'>
+                        Kelas {slot.className} {slot.room ? `• ${slot.room}` : ''}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className='flex flex-col sm:flex-row items-center justify-between gap-3 py-3 px-4 rounded-xl bg-slate-50 border border-dashed border-slate-200 text-center sm:text-left'>
+                <div className='flex items-center gap-3'>
+                  <div className='p-2 rounded-lg bg-white border border-slate-200 text-slate-400 shrink-0 hidden sm:block'>
+                    <Clock className='h-4 w-4' />
+                  </div>
+                  <p className='text-xs text-slate-600 font-medium'>
+                    Tidak ada agenda jam mengajar tatap muka untuk hari ini ({currentDayName}). Anda dapat memeriksa atau mengatur jadwal mingguan Anda.
+                  </p>
+                </div>
+                <Link href='/jadwal-mengajar' className='shrink-0'>
+                  <Button
+                    size='sm'
+                    className='bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl h-8 px-3 cursor-pointer shadow-xs'
+                  >
+                    Buka Jadwal Mingguan
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Top Section Grid: Rekap Jurnal Mengajar (2 col) & Distribusi Kehadiran (1 col) */}
       {(isJurnalEnabled || isAbsensiEnabled) && (
         <div className='grid gap-6 md:grid-cols-3 items-stretch'>
-          {/* Rekap Jurnal Mengajar Wali Kelas */}
+          {/* Rekap Jurnal Mengajar Guru */}
           {isJurnalEnabled && (
             <Card
               className={`bg-white border-slate-200/80 rounded-2xl shadow-xs overflow-hidden flex flex-col justify-between ${isAbsensiEnabled ? 'md:col-span-2' : 'md:col-span-3'}`}
@@ -317,11 +440,10 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
                 <div className='flex items-center gap-3'>
                   <div>
                     <CardTitle className='text-base font-bold text-slate-900'>
-                      Rekap Jurnal Mengajar Wali Kelas
+                      Agenda KBM & Jurnal Pembelajaran Terkini
                     </CardTitle>
                     <CardDescription className='text-xs text-slate-500 mt-0.5'>
-                      Daftar riwayat agenda harian mengajar dan absensi siswa
-                      terbaru
+                      Daftar riwayat agenda mengajar tatap muka dan rekapitulasi absensi siswa terbaru
                     </CardDescription>
                   </div>
                 </div>
@@ -399,7 +521,7 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
                                 </td>
                                 <td className='py-3.5 px-4 align-top min-w-[200px] max-w-sm'>
                                   {activityLines.length === 0 &&
-                                  notesLines.length === 0 ? (
+                                    notesLines.length === 0 ? (
                                     <span className='text-slate-400 text-[11px]'>
                                       -
                                     </span>
@@ -452,7 +574,7 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
                       Belum Ada Catatan Jurnal Mengajar
                     </p>
                     <p className='text-[11px] text-slate-400 max-w-xs leading-relaxed'>
-                      Catatan jurnal kegiatan mengajar harian wali kelas akan
+                      Catatan jurnal kegiatan mengajar dan KBM guru akan
                       tersusun rapi di tabel rekap ini.
                     </p>
                     <Link href='/jurnal' className='mt-2'>
@@ -494,7 +616,7 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
                   stats.attendanceBreakdown.Sakit +
                   stats.attendanceBreakdown.Izin +
                   stats.attendanceBreakdown.Alfa >
-                0 ? (
+                  0 ? (
                   <>
                     <div className='h-44 sm:h-48 relative flex items-center justify-center my-auto'>
                       <ResponsiveContainer width='100%' height='100%'>
@@ -619,7 +741,7 @@ export default function DashboardClient({ stats }: DashboardClientProps) {
                   </span>
                 </CardTitle>
                 <CardDescription className='text-xs text-slate-500 mt-1'>
-                  Grafik intensitas agenda harian mengajar wali kelas dan
+                  Grafik intensitas agenda harian mengajar guru dan
                   rekapitulasi absensi per bulan
                 </CardDescription>
               </div>

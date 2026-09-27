@@ -126,6 +126,94 @@ export default function LandingPage() {
 
   return (
     <div className='min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-emerald-500 selection:text-white relative overflow-x-hidden'>
+      {/* Schema.org JSON-LD Structured Data for Google SEO */}
+      <script
+        type='application/ld+json'
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([
+            {
+              '@context': 'https://schema.org',
+              '@type': 'WebApplication',
+              name: 'Smart Class',
+              alternateName: 'Smart Class - Sistem Administrasi Guru',
+              applicationCategory: 'EducationalApplication',
+              operatingSystem: 'All (Web Browser)',
+              browserRequirements: 'Requires JavaScript. Requires HTML5.',
+              url: 'https://smart-class.vercel.app',
+              description:
+                'Aplikasi produktivitas dan administrasi guru terpadu: absensi siswa, jurnal KBM harian, jadwal mengajar tatap muka (JJM), dan rekapitulasi nilai akademik.',
+              offers: {
+                '@type': 'Offer',
+                price: '0',
+                priceCurrency: 'IDR',
+              },
+              featureList: [
+                'Pencatatan Presensi Siswa Online',
+                'Jurnal Harian Mengajar & KBM',
+                'Jadwal Mengajar Tatap Muka & Monitoring JJM 24 Jam',
+                'Pengelolaan Nilai Akademik & KKM',
+                'Manajemen Multi-Kelas Guru',
+                'Cetak Rekapitulasi Laporan PDF & Excel',
+              ],
+            },
+            {
+              '@context': 'https://schema.org',
+              '@type': 'FAQPage',
+              mainEntity: [
+                {
+                  '@type': 'Question',
+                  name: 'Bagaimana cara mendaftar dan mulai menggunakan aplikasi?',
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: 'Cukup klik tombol "Daftar Sekarang", isi nama lengkap & gelar, username, email, dan kata sandi. Akun Anda akan langsung aktif dan siap digunakan.',
+                  },
+                },
+                {
+                  '@type': 'Question',
+                  name: 'Apakah Smart Class bisa diakses langsung melalui Smartphone/HP?',
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: 'Ya, Smart Class dirancang dengan antarmuka yang fully responsive. Anda dapat menginput presensi, nilai, maupun jurnal harian dengan nyaman dari layar Smartphone, Tablet, maupun PC.',
+                  },
+                },
+                {
+                  '@type': 'Question',
+                  name: 'Bagaimana keamanan akun dan data sekolah di Smart Class?',
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: 'Smart Class dilindungi oleh teknologi keamanan tingkat tinggi, termasuk enkripsi data, proteksi kata sandi, dan backup rutin. Data sekolah Anda aman dan hanya dapat diakses oleh akun yang terdaftar.',
+                  },
+                },
+                {
+                  '@type': 'Question',
+                  name: 'Apakah saya bisa menyesuaikan modul apa saja yang tampil di sidebar?',
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: 'Sangat bisa! Smart Class dilengkapi fitur Custom Menu Preferences. Anda dapat memilih modul mana saja yang aktif (misalnya Absensi, Nilai, Jurnal, atau Jadwal Mengajar) sesuai kebutuhan kelas Anda.',
+                  },
+                },
+                {
+                  '@type': 'Question',
+                  name: 'Apakah identitas Guru / Wali Kelas dan Kepala Sekolah bisa disesuaikan untuk dokumen cetak?',
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: 'Bisa. Di menu Pengaturan, Anda dapat mengatur Kop Surat Resmi Sekolah (Letterhead), nama resmi, serta nomor NIP atau NUPTK Kepala Sekolah dan Guru yang akan otomatis tersemat rapi pada lembar cetak laporan.',
+                  },
+                },
+                {
+                  '@type': 'Question',
+                  name: 'Apakah seorang guru / wali kelas dapat mengampu lebih dari 1 kelas?',
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: 'Sangat bisa! Fitur Multi-Kelas memungkinkan Anda mengampu beberapa kelas sekaligus (seperti Kelas 5A, 5B, 6A, dll.) dalam 1 akun terpadu. Pengalihan kelas dapat dilakukan dalam 1-klik via Active Class Switcher di header topbar dengan isolasi data mandiri.',
+                  },
+                },
+              ],
+            },
+          ]),
+        }}
+      />
+
       {/* Background Ambient Glow Effects */}
       <div className='fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[600px] bg-gradient-to-b from-emerald-500/10 via-teal-500/5 to-transparent blur-[140px] pointer-events-none z-0' />
       <div className='fixed top-1/3 -right-48 w-[500px] h-[500px] bg-teal-500/10 rounded-full blur-[160px] pointer-events-none z-0' />
@@ -395,7 +483,7 @@ export default function LandingPage() {
           >
             Smart Class
             <span className='block mt-2 sm:mt-2.5 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 bg-clip-text text-transparent'>
-              Dashboard Wali Kelas
+              Sistem Administrasi Kelas
             </span>
           </motion.h1>
 
@@ -407,8 +495,8 @@ export default function LandingPage() {
             className='mt-5 sm:mt-6 text-base sm:text-lg md:text-xl text-slate-600 max-w-2xl sm:max-w-3xl mx-auto leading-relaxed font-normal px-2'
           >
             Satu sistem terpadu untuk pencatatan presensi siswa, penilaian
-            akademik, jurnal KBM, jadwal mengajar guru, dan laporan cetak siap
-            pakai.
+            akademik, jurnal KBM harian, jadwal mengajar tatap muka (JJM), dan
+            administrasi kelas siap pakai.
           </motion.p>
 
           {/* CTA Buttons */}
@@ -481,7 +569,7 @@ export default function LandingPage() {
                     variant='outline'
                     className='w-full sm:w-auto h-11 sm:h-12 border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-sm sm:text-base px-7 sm:px-8 rounded-full transition-all flex items-center justify-center cursor-pointer shadow-xs'
                   >
-                    <span>Lihat Modul Wali Kelas</span>
+                    <span>Lihat Modul</span>
                   </Button>
                 </a>
               </>
@@ -560,7 +648,7 @@ export default function LandingPage() {
             className='text-center space-y-4 max-w-3xl mx-auto mb-16'
           >
             <h2 className='text-xs uppercase font-bold tracking-widest text-emerald-700'>
-              Modul Utama Wali Kelas
+              Modul Administrasi Kelas
             </h2>
             <p className='text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight'>
               Simulasi Antarmuka & Fitur
@@ -715,8 +803,8 @@ export default function LandingPage() {
                     <p className='text-slate-600 text-sm leading-relaxed font-medium'>
                       Input nilai per mata pelajaran, set nilai KKM standar,
                       tambah atau sesuaikan mata pelajaran baru, dan biarkan
-                      Smart Class mengalkulasi rata-rata serta menyediakan lembar
-                      pratinjau cetak laporan nilai lengkap tanda tangan.
+                      Smart Class mengalkulasi rata-rata serta menyediakan
+                      lembar pratinjau cetak laporan nilai lengkap tanda tangan.
                     </p>
                     <ul className='space-y-3 text-sm text-slate-700 font-medium'>
                       <li className='flex items-center gap-3'>
@@ -726,7 +814,8 @@ export default function LandingPage() {
                       <li className='flex items-center gap-3'>
                         <Check className='h-4 w-4 text-teal-600' />
                         <span>
-                          Indikator otomatis & peringatan batas KKM mata pelajaran
+                          Indikator otomatis & peringatan batas KKM mata
+                          pelajaran
                         </span>
                       </li>
                       <li className='flex items-center gap-3'>
@@ -780,7 +869,7 @@ export default function LandingPage() {
                   <div className='space-y-6'>
                     <div className='inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200'>
                       <BookMarked className='h-3.5 w-3.5' />
-                      <span>Jurnal Harian Wali Kelas</span>
+                      <span>Jurnal Mengajar & KBM</span>
                     </div>
                     <h3 className='text-2xl sm:text-3xl font-extrabold text-slate-900'>
                       Agenda KBM Harian Terintegrasi Presensi
@@ -803,7 +892,10 @@ export default function LandingPage() {
                       </li>
                       <li className='flex items-center gap-3'>
                         <Check className='h-4 w-4 text-emerald-600' />
-                        <span>Arsip agenda harian wali kelas terorganisir</span>
+                        <span>
+                          Arsip agenda kegiatan belajar mengajar (KBM)
+                          terorganisir
+                        </span>
                       </li>
                     </ul>
                   </div>
@@ -841,31 +933,39 @@ export default function LandingPage() {
                       Penyusunan Jadwal Tatap Muka & Beban Mengajar Interaktif
                     </h3>
                     <p className='text-slate-600 text-sm leading-relaxed font-medium'>
-                      Kelola plotting jadwal mengajar tatap muka mingguan secara praktis dengan antarmuka drag-and-drop antar jam dan hari. Pantau pemenuhan target Jam Mengajar Mingguan (JJM) secara real-time dan cetak jadwal resmi lengkap ber-kop surat sekolah.
+                      Kelola plotting jadwal mengajar tatap muka mingguan secara
+                      praktis dengan antarmuka drag-and-drop antar jam dan hari.
+                      Pantau pemenuhan target Jam Mengajar Mingguan (JJM) secara
+                      real-time dan cetak jadwal resmi lengkap ber-kop surat
+                      sekolah.
                     </p>
                     <ul className='space-y-3 text-sm text-slate-700 font-medium'>
                       <li className='flex items-center gap-3'>
                         <Check className='h-4 w-4 text-emerald-600' />
                         <span>
-                          Penyusunan jadwal interaktif dengan drag & drop antar hari & jam
+                          Penyusunan jadwal interaktif dengan drag & drop antar
+                          hari & jam
                         </span>
                       </li>
                       <li className='flex items-center gap-3'>
                         <Check className='h-4 w-4 text-emerald-600' />
                         <span>
-                          Monitoring beban Jam Mengajar Mingguan (target 24+ Jam Tatap Muka)
+                          Monitoring beban Jam Mengajar Mingguan (target 24+ Jam
+                          Tatap Muka)
                         </span>
                       </li>
                       <li className='flex items-center gap-3'>
                         <Check className='h-4 w-4 text-emerald-600' />
                         <span>
-                          Pengelompokan kelas pengampuan & mata pelajaran dengan kode warna
+                          Pengelompokan kelas pengampuan & mata pelajaran dengan
+                          kode warna
                         </span>
                       </li>
                       <li className='flex items-center gap-3'>
                         <Check className='h-4 w-4 text-emerald-600' />
                         <span>
-                          Pratinjau cetak Jadwal Mengajar Guru ber-Kop Surat resmi & tanda tangan
+                          Pratinjau cetak Jadwal Mengajar Guru ber-Kop Surat
+                          resmi & tanda tangan
                         </span>
                       </li>
                     </ul>
@@ -888,7 +988,9 @@ export default function LandingPage() {
                     <div className='bg-white border border-slate-200 p-3 rounded-xl space-y-1.5 shadow-2xs'>
                       <div className='flex items-center justify-between text-[11px] font-bold text-slate-700'>
                         <span>Target Beban Mengajar Mingguan</span>
-                        <span className='text-emerald-700 font-extrabold'>100%</span>
+                        <span className='text-emerald-700 font-extrabold'>
+                          100%
+                        </span>
                       </div>
                       <div className='w-full h-2 bg-slate-100 rounded-full overflow-hidden'>
                         <div className='h-full bg-emerald-500 rounded-full w-full' />
@@ -901,8 +1003,12 @@ export default function LandingPage() {
                         <div className='flex items-center gap-2'>
                           <GripVertical className='h-3.5 w-3.5 text-slate-400' />
                           <div>
-                            <div className='font-bold text-slate-900'>Senin • Jam 1-2 (07.15 - 08.35)</div>
-                            <div className='text-[11px] text-slate-500 font-medium'>Matematika</div>
+                            <div className='font-bold text-slate-900'>
+                              Senin • Jam 1-2 (07.15 - 08.35)
+                            </div>
+                            <div className='text-[11px] text-slate-500 font-medium'>
+                              Matematika
+                            </div>
                           </div>
                         </div>
                         <span className='text-[10px] font-extrabold px-2 py-0.5 rounded bg-blue-100 text-blue-800'>
@@ -914,8 +1020,12 @@ export default function LandingPage() {
                         <div className='flex items-center gap-2'>
                           <GripVertical className='h-3.5 w-3.5 text-slate-400' />
                           <div>
-                            <div className='font-bold text-slate-900'>Senin • Jam 3-4 (08.35 - 10.10)</div>
-                            <div className='text-[11px] text-slate-500 font-medium'>Matematika</div>
+                            <div className='font-bold text-slate-900'>
+                              Senin • Jam 3-4 (08.35 - 10.10)
+                            </div>
+                            <div className='text-[11px] text-slate-500 font-medium'>
+                              Matematika
+                            </div>
                           </div>
                         </div>
                         <span className='text-[10px] font-extrabold px-2 py-0.5 rounded bg-purple-100 text-purple-800'>
@@ -927,8 +1037,12 @@ export default function LandingPage() {
                         <div className='flex items-center gap-2'>
                           <GripVertical className='h-3.5 w-3.5 text-slate-400' />
                           <div>
-                            <div className='font-bold text-slate-900'>Selasa • Jam 1-2 (07.15 - 08.35)</div>
-                            <div className='text-[11px] text-slate-500 font-medium'>IPAS & Eksperimen</div>
+                            <div className='font-bold text-slate-900'>
+                              Selasa • Jam 1-2 (07.15 - 08.35)
+                            </div>
+                            <div className='text-[11px] text-slate-500 font-medium'>
+                              IPAS & Eksperimen
+                            </div>
                           </div>
                         </div>
                         <span className='text-[10px] font-extrabold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800'>
@@ -1033,8 +1147,8 @@ export default function LandingPage() {
                 <strong className='text-slate-900 font-bold'>
                   Modul Lengkap Lainnya:
                 </strong>{' '}
-                Rekap Presensi Multi-Kelas, Database Profil Siswa, Pengaturan Kop
-                Surat Resmi, Pusat Kritik & Saran, serta Ekspor PDF & Excel.
+                Rekap Presensi Multi-Kelas, Database Profil Siswa, Pengaturan
+                Kop Surat Resmi, Pusat Kritik & Saran, serta Ekspor PDF & Excel.
               </span>
             </div>
             <div className='flex items-center gap-1.5 shrink-0 font-extrabold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200'>
@@ -1060,7 +1174,7 @@ export default function LandingPage() {
                 Mengapa Memilih Smart Class
               </h2>
               <p className='text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight'>
-                Memudahkan Tugas Guru & Wali Kelas
+                Memudahkan Administrasi Kelas
               </p>
             </motion.div>
 
@@ -1159,11 +1273,11 @@ export default function LandingPage() {
                 a: 'Sangat bisa! Smart Class dilengkapi fitur Custom Menu Preferences. Anda dapat memilih modul mana saja yang aktif (misalnya Absensi, Nilai, Jurnal, atau Jadwal Mengajar) sesuai kebutuhan kelas Anda.',
               },
               {
-                q: 'Apakah identitas Wali Kelas dan Kepala Sekolah bisa disesuaikan untuk dokumen cetak?',
+                q: 'Apakah identitas Guru dan Kepala Sekolah bisa disesuaikan untuk dokumen cetak?',
                 a: 'Bisa. Di menu Pengaturan, Anda dapat mengatur Kop Surat Resmi Sekolah (Letterhead), nama resmi, serta nomor NIP atau NUPTK Kepala Sekolah dan Guru yang akan otomatis tersemat rapi pada lembar cetak laporan.',
               },
               {
-                q: 'Apakah seorang guru / wali kelas dapat mengampu lebih dari 1 kelas?',
+                q: 'Apakah seorang guru dapat mengampu lebih dari 1 kelas?',
                 a: 'Sangat bisa! Fitur Multi-Kelas memungkinkan Anda mengampu beberapa kelas sekaligus (seperti Kelas 5A, 5B, 6A, dll.) dalam 1 akun terpadu. Pengalihan kelas dapat dilakukan dalam 1-klik via Active Class Switcher di header topbar dengan isolasi data mandiri.',
               },
             ].map((item, idx) => (
